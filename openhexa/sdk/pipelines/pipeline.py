@@ -7,8 +7,7 @@ import string
 import time
 import typing
 from logging import getLogger
-
-import multiprocess as mp
+from multiprocessing import get_context
 
 from .arguments import Argument, FunctionWithArgument
 from .task import TaskFactory
@@ -65,7 +64,7 @@ class Pipeline:
 
         # managing variables
         result_list = []
-        context = mp.get_context("spawn")
+        context = get_context("spawn")
         pool = context.Pool()  # FIXME: set max size of pool
 
         while True:
@@ -92,10 +91,10 @@ class Pipeline:
                         continue
                     now = datetime.datetime.utcnow().replace(microsecond=0).isoformat()
                     print(f'{now} Finished task "{task.compute.__name__}"')
-                    taskComResult = result.get()
-                    task.result = taskComResult.result
-                    task.start_time = taskComResult.start_time
-                    task.end_time = taskComResult.end_time
+                    task_com_result = result.get()
+                    task.result = task_com_result.result
+                    task.start_time = task_com_result.start_time
+                    task.end_time = task_com_result.end_time
                     dag_step = True
 
                 if dag_step:
