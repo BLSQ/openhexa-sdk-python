@@ -1,7 +1,7 @@
 import typing
 
 
-class Type:
+class ArgumentType:
     def __str__(self):
         raise NotImplementedError
 
@@ -16,7 +16,7 @@ class Type:
         return value
 
 
-class String(Type):
+class String(ArgumentType):
     def __str__(self):
         return "string"
 
@@ -25,7 +25,7 @@ class String(Type):
         return str
 
 
-class Boolean(Type):
+class Boolean(ArgumentType):
     def __str__(self):
         return "boolean"
 
@@ -34,7 +34,7 @@ class Boolean(Type):
         return bool
 
 
-class Integer(Type):
+class Integer(ArgumentType):
     def __str__(self):
         return "integer"
 
