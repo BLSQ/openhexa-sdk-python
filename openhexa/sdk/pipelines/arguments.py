@@ -284,7 +284,7 @@ def argument(
     help: typing.Optional[str] = None,
     default: typing.Optional[typing.Any] = None,
     required: bool = True,
-    multiple: bool = True,
+    multiple: bool = False,
 ):
     """Argument decorator."""
 
@@ -308,16 +308,15 @@ def argument(
 class FunctionWithArgument:
     """This class serves as a wrapper for functions decorated with the @argument decorator."""
 
-    def __init__(self, fun, added_argument: Argument):
-        self.fun = fun
+    def __init__(self, function, added_argument: Argument):
+        self.function = function
         self.argument = added_argument
 
     def __call__(self, *args, **kwargs):
-        return self.fun(*args, **kwargs)
+        return self.function(*args, **kwargs)
 
-    @property
-    def all_arguments(self):
-        if isinstance(self.fun, FunctionWithArgument):
-            return [self.argument, *self.fun.all_arguments]
+    def get_all_arguments(self):
+        if isinstance(self.function, FunctionWithArgument):
+            return [self.argument, *self.function.get_all_arguments()]
 
         return [self.argument]

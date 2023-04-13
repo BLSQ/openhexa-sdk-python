@@ -25,7 +25,7 @@ def pipeline(
 
     def decorator(fun):
         if isinstance(fun, FunctionWithArgument):
-            arguments = fun.all_arguments
+            arguments = fun.get_all_arguments()
         else:
             arguments = []
 

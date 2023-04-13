@@ -177,9 +177,28 @@ def test_argument_decorator():
         help="Help 2",
         default="yo",
         required=False,
-        multiple=False,
+        multiple=True,
     )
     def a_function():
         pass
 
     assert isinstance(a_function, FunctionWithArgument)
+    function_arguments = a_function.get_all_arguments()
+    assert len(function_arguments) == 2
+    assert all(isinstance(a, Argument) for a in function_arguments)
+
+    assert function_arguments[0].code == "arg1"
+    assert isinstance(function_arguments[0].type, Integer)
+    assert function_arguments[0].name is None
+    assert function_arguments[0].help is None
+    assert function_arguments[0].default is None
+    assert function_arguments[0].required is True
+    assert function_arguments[0].multiple is False
+
+    assert function_arguments[1].code == "arg2"
+    assert isinstance(function_arguments[1].type, String)
+    assert function_arguments[1].name == "Arg 2"
+    assert function_arguments[1].help == "Help 2"
+    assert function_arguments[1].default == "yo"
+    assert function_arguments[1].required is False
+    assert function_arguments[1].multiple is True
