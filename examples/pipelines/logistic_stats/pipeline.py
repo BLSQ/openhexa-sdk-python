@@ -39,9 +39,14 @@ def logistic_stats(deg: str, periods: str, oul: int):
 def dhis2_download(
     data_element_group: str, periods: str, org_unit_level: int
 ) -> typing.Dict[str, typing.Any]:
-    base_url = f"{os.environ['DHIS2_API_URL']}/api"
+    base_url = (
+        f"{os.environ.get('DHIS2_API_URL', 'https://play.dhis2.org/2.39.1.1')}/api"
+    )
     session = requests.Session()
-    session.auth = (os.environ["DHIS2_USERNAME"], os.environ["DHIS2_PASSWORD"])
+    session.auth = (
+        os.environ.get("DHIS2_USERNAME", "admin"),
+        os.environ.get("DHIS2_PASSWORD", "district"),
+    )
 
     # Store config in a static file
     dx = [f"DE_GROUP-{data_element_group}"]
@@ -147,7 +152,7 @@ def model(dhis2_data: typing.Dict[str, typing.Any], gadm_data, worldpop_data):
     date = datetime.now(timezone.utc)
 
     # TODO: variable path / helper for workspace path
-    combined_df.to_csv(f"{os.path.dirname(os.path.realpath(__file__))}stats.csv")
+    combined_df.to_csv(f"{os.path.dirname(os.path.realpath(__file__))}/stats.csv")
 
 
 if __name__ == "__main__":
