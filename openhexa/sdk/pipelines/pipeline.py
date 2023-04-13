@@ -7,7 +7,8 @@ import string
 import time
 import typing
 from logging import getLogger
-from multiprocessing import get_context
+
+from multiprocess import get_context
 
 from .arguments import Argument, ArgumentValueError, FunctionWithArgument
 from .task import PipelineWithTask
@@ -32,6 +33,10 @@ def pipeline(
         return Pipeline(code, fun, arguments)
 
     return decorator
+
+
+class PipelineRunError(Exception):
+    pass
 
 
 class Pipeline:
@@ -93,13 +98,20 @@ class Pipeline:
                 for result, task in result_list:
                     if not result.ready():
                         continue
-                    now = datetime.datetime.utcnow().replace(microsecond=0).isoformat()
+                    now = (
+                        datetime.datetime.now(tz=datetime.timezone.utc)
+                        .replace(microsecond=0)
+                        .isoformat()
+                    )
                     print(f'{now} Finished task "{task.compute.__name__}"')
-                    task_com_result = result.get()
-                    task.result = task_com_result.result
-                    task.start_time = task_com_result.start_time
-                    task.end_time = task_com_result.end_time
-                    dag_step = True
+                    try:
+                        task_com_result = result.get()
+                        task.result = task_com_result.result
+                        task.start_time = task_com_result.start_time
+                        task.end_time = task_com_result.end_time
+                        dag_step = True
+                    except Exception as e:  # NOQA
+                        raise PipelineRunError(f"Pipeline failed: {e}")
 
                 if dag_step:
                     # remove finished tasks
