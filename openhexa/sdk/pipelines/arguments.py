@@ -78,8 +78,11 @@ class Argument:
         """Validates the provided value against the argument, taking required / default options into account."""
 
         candidate_value = value if value is not None else self.default
-        if candidate_value is None and self.required:
-            raise ValueError(f"{self.code} is required")
+        if candidate_value is None:
+            if self.required:
+                raise ValueError(f"{self.code} is required")
+
+            return None
 
         return self.type.validate(candidate_value)
 
@@ -99,7 +102,7 @@ class Argument:
 def argument(
     code: str,
     *,
-    type: typing.Type,
+    type: typing.Union[typing.Type[str], typing.Type[int], typing.Type[bool]],
     name: typing.Optional[str] = None,
     help: typing.Optional[str] = None,
     default: typing.Optional[typing.Any] = None,

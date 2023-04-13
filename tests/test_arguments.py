@@ -34,3 +34,7 @@ def test_argument_validate():
     # still required, but a default is provided
     argument_2 = Argument("arg2", type=int, default=3)
     assert argument_2.validate(None) == 3
+
+    # not required, no default
+    argument_3 = Argument("arg3", type=bool, required=False)
+    assert argument_3.validate(None) is None
