@@ -1,15 +1,16 @@
 import datetime
+
 from pytz import UTC
 
 
-class TaskCom():
+class TaskCom:
     def __init__(self, task):
         self.result = task.result
         self.start_time = task.start_time
         self.end_time = task.end_time
 
 
-class Task():
+class Task:
     def __init__(self, compute):
         self.name = compute.__name__
         self.compute = compute
@@ -110,7 +111,7 @@ class Task():
         return self.run()
 
 
-class TaskFactory():
+class TaskFactory:
     def __init__(self, compute, pipeline):
         self.compute = compute
         self.pipeline = pipeline

@@ -1,6 +1,6 @@
 import pytest
 
-from openhexa.sdk.pipelines.arguments import String, Integer, Boolean, Argument
+from openhexa.sdk.pipelines.arguments import Argument, Boolean, Integer, String
 
 
 def test_argument_types_validate():
@@ -34,4 +34,3 @@ def test_argument_validate():
     # still required, but a default is provided
     argument_2 = Argument("arg2", type=int, default=3)
     assert argument_2.validate(None) == 3
-

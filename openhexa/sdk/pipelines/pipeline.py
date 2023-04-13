@@ -1,30 +1,31 @@
 from __future__ import annotations
+
 import argparse
 import datetime
 import json
 import string
-import typing
 import time
+import typing
 from logging import getLogger
 
 import multiprocess as mp
 
+from .arguments import Argument, FunctionWithArgument
 from .task import TaskFactory
 
 logger = getLogger(__name__)
 
 
-
-
-
-def pipeline(code: str, *, name: str = None) -> typing.Callable[[typing.Callable[..., typing.Any]], "Pipeline"]:
+def pipeline(
+    code: str, *, name: str = None
+) -> typing.Callable[[typing.Callable[..., typing.Any]], "Pipeline"]:
     if any(c not in string.ascii_lowercase + string.digits + "_-" for c in code):
         raise Exception(
             "Pipeline name should contains only lower case letters, digits, '_' and '-'"
         )
 
     def decorator(fun):
-        if isinstance(fun, FunWithArgument):
+        if isinstance(fun, FunctionWithArgument):
             arguments = fun.all_arguments
         else:
             arguments = []
@@ -35,8 +36,9 @@ def pipeline(code: str, *, name: str = None) -> typing.Callable[[typing.Callable
 
 
 class Pipeline:
-    def __init__(self, code: str, fun: typing.Callable,
-                 arguments: typing.Sequence[Argument]):
+    def __init__(
+        self, code: str, fun: typing.Callable, arguments: typing.Sequence[Argument]
+    ):
         self.code = code
         self.fun = fun
         self.arguments = arguments
@@ -52,7 +54,9 @@ class Pipeline:
         # Validate / default arguments
         validated_config = {}
         for single_argument in self.arguments:
-            validated_value = single_argument.validate(config.pop(single_argument.code, None))
+            validated_value = single_argument.validate(
+                config.pop(single_argument.code, None)
+            )
             validated_config[single_argument.code] = validated_value
 
         # TODO: reject extra config
@@ -114,26 +118,28 @@ class Pipeline:
     def __call__(self, config: typing.Optional[typing.Dict[str, typing.Any]] = None):
         if config is None:  # Called without arguments, in the pipeline file itself
             parser = argparse.ArgumentParser(exit_on_error=False)
-            parser.add_argument('-c', '--config')
-            parser.add_argument('-f', '--config-file')
+            parser.add_argument("-c", "--config")
+            parser.add_argument("-f", "--config-file")
             # We can't use parse_args, as it will call sys.exit() if there are unrecognized arguments
             args, argv = parser.parse_known_args()
             if argv or (args.config_file is not None and args.config is not None):
-                raise ValueError(f"Unrecognized arguments: {' '.join(argv)}. Running a pipeline requires a single "
-                                 "argument: either an inline JSON config with the --values/-v argument, or a JSON "
-                                 "config file with the --values-file/-f argument.")
+                raise ValueError(
+                    f"Unrecognized arguments: {' '.join(argv)}. Running a pipeline requires a single "
+                    "argument: either an inline JSON config with the --values/-v argument, or a JSON "
+                    "config file with the --values-file/-f argument."
+                )
             if args.config_file is not None:
                 with open(args.config_file, "r") as cf:
                     try:
                         config = json.load(cf)
                     except json.JSONDecodeError:
-                        raise ValueError(f"The provided config is not valid JSON")
+                        raise ValueError("The provided config is not valid JSON")
 
             elif args.config is not None:
                 try:
                     config = json.loads(args.config)
                 except json.JSONDecodeError:
-                    raise ValueError(f"The provided config is not valid JSON")
+                    raise ValueError("The provided config is not valid JSON")
             else:
                 config = {}
 

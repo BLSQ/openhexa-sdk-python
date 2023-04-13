@@ -15,7 +15,7 @@ class ArgumentType:
         """Validate the provided value for this type."""
 
         if not isinstance(value, self.expected_type):
-            raise ValueError(f"Invalid type")
+            raise ValueError("Invalid type")
 
         return value
 
@@ -47,20 +47,24 @@ class Integer(ArgumentType):
         return int
 
 
-TYPES_BY_PYTHON_TYPE = {
-    str: String,
-    bool: Boolean,
-    int: Integer
-}
+TYPES_BY_PYTHON_TYPE = {str: String, bool: Boolean, int: Integer}
 
 
 class Argument:
     """Pipeline argument class. Contains validation logic specs generation logic."""
 
-    def __init__(self, code: str, *, type: typing.Union[typing.Type[str], typing.Type[int], typing.Type[bool]],
-                 name: typing.Optional[str] = None,
-                 choices: typing.Optional[typing.Sequence] = None, help: typing.Optional[str] = None,
-                 default: typing.Optional[typing.Any] = None, required: bool = True, multiple: bool = True):
+    def __init__(
+        self,
+        code: str,
+        *,
+        type: typing.Union[typing.Type[str], typing.Type[int], typing.Type[bool]],
+        name: typing.Optional[str] = None,
+        choices: typing.Optional[typing.Sequence] = None,
+        help: typing.Optional[str] = None,
+        default: typing.Optional[typing.Any] = None,
+        required: bool = True,
+        multiple: bool = True,
+    ):
         self.code = code
         self.type = TYPES_BY_PYTHON_TYPE[type]()
         self.choices = choices
@@ -92,14 +96,31 @@ class Argument:
         }
 
 
-def argument(code: str, *, type: typing.Type, name: typing.Optional[str] = None,
-             help: typing.Optional[str] = None,
-             default: typing.Optional[typing.Any] = None, required: bool = True, multiple: bool = True):
-    """Argument decorator. """
+def argument(
+    code: str,
+    *,
+    type: typing.Type,
+    name: typing.Optional[str] = None,
+    help: typing.Optional[str] = None,
+    default: typing.Optional[typing.Any] = None,
+    required: bool = True,
+    multiple: bool = True,
+):
+    """Argument decorator."""
 
     def decorator(fun):
-        return FunctionWithArgument(fun, Argument(code, type=type, name=name, help=help, default=default,
-                                                  required=required, multiple=multiple))
+        return FunctionWithArgument(
+            fun,
+            Argument(
+                code,
+                type=type,
+                name=name,
+                help=help,
+                default=default,
+                required=required,
+                multiple=multiple,
+            ),
+        )
 
     return decorator
 
