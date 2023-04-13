@@ -9,8 +9,8 @@ import typing
 from logging import getLogger
 from multiprocessing import get_context
 
-from .arguments import Argument, FunctionWithArgument
-from .task import TaskFactory
+from .arguments import Argument, ArgumentValueError, FunctionWithArgument
+from .task import PipelineWithTask
 
 logger = getLogger(__name__)
 
@@ -36,15 +36,17 @@ def pipeline(
 
 class Pipeline:
     def __init__(
-        self, code: str, fun: typing.Callable, arguments: typing.Sequence[Argument]
+        self, code: str, function: typing.Callable, arguments: typing.Sequence[Argument]
     ):
         self.code = code
-        self.fun = fun
+        self.function = function
         self.arguments = arguments
         self.tasks = []
 
-    def task(self, fun):
-        return TaskFactory(fun, self)
+    def task(self, function):
+        """task decorator"""
+
+        return PipelineWithTask(function, self)
 
     def run(self, config: typing.Dict[str, typing.Any]):
         now = datetime.datetime.utcnow().replace(microsecond=0).isoformat()
@@ -54,12 +56,15 @@ class Pipeline:
         validated_config = {}
         for single_argument in self.arguments:
             value = config.pop(single_argument.code, None)
-            single_argument.validate(value)
-            validated_config[single_argument.code] = value
+            validated_value = single_argument.validate(value)
+            validated_config[single_argument.code] = validated_value
 
-        # TODO: reject extra config
+        if len(config) > 0:
+            raise ArgumentValueError(
+                f"The provided config contains invalid key(s): {', '.join(list(config.keys()))}"
+            )
 
-        self.fun(**validated_config)
+        self.function(**validated_config)
 
         # managing variables
         result_list = []

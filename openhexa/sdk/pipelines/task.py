@@ -1,6 +1,9 @@
-import datetime
+from __future__ import annotations
 
-from pytz import UTC
+import datetime
+import typing
+
+import openhexa.sdk.pipelines.pipeline
 
 
 class TaskCom:
@@ -11,12 +14,13 @@ class TaskCom:
 
 
 class Task:
-    def __init__(self, compute):
-        self.name = compute.__name__
-        self.compute = compute
+    def __init__(self, function: typing.Callable):
+        self.name = function.__name__
+        self.compute = function
         self.inputs = []
         self.result = None
-        self.start_time, self.end_time = None, None
+        self.start_time = None
+        self.end_time = None
         self.task_args = {}
         self.task_kwargs = {}
         self.active = False
@@ -30,10 +34,7 @@ class Task:
         return self
 
     def __repr__(self):
-        return self.get_name()
-
-    def get_name(self):
-        return self.compute.__name__
+        return self.name
 
     def get_node_inputs(self):
         inputs = []
@@ -98,9 +99,9 @@ class Task:
                 r_task_kwargs[k] = a
 
         # execute the task
-        self.start_time = datetime.datetime.utcnow().replace(tzinfo=UTC)
+        self.start_time = datetime.datetime.now(datetime.timezone.utc)
         self.result = self.compute(*r_task_args, **r_task_kwargs)
-        self.end_time = datetime.datetime.utcnow().replace(tzinfo=UTC)
+        self.end_time = datetime.datetime.now(datetime.timezone.utc)
 
         # done!
         return TaskCom(self)
@@ -111,12 +112,16 @@ class Task:
         return self.run()
 
 
-class TaskFactory:
-    def __init__(self, compute, pipeline):
-        self.compute = compute
+class PipelineWithTask:
+    def __init__(
+        self,
+        function: typing.Callable,
+        pipeline: openhexa.sdk.pipelines.pipeline.Pipeline,
+    ):
+        self.function = function
         self.pipeline = pipeline
 
     def __call__(self, *task_args, **task_kwargs):
-        task = Task(self.compute)(*task_args, **task_kwargs)
+        task = Task(self.function)(**task_kwargs)
         self.pipeline.tasks.append(task)
         return task
