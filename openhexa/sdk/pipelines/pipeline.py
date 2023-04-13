@@ -5,71 +5,16 @@ import json
 import string
 import typing
 import time
-
 from logging import getLogger
+
 import multiprocess as mp
 
-from .types import Type
 from .task import TaskFactory
 
 logger = getLogger(__name__)
 
 
-class Argument:
-    def __init__(self, code: str, *, type: Type, name: typing.Optional[str] = None,
-                 choices: typing.Optional[typing.Sequence] = None, help_text: typing.Optional[str] = None,
-                 default: typing.Optional[typing.Any] = None, required: bool = True, multiple: bool = True):
-        self.code = code
-        self.type = type()
-        self.choices = choices
-        self.name = name
-        self.help_text = help_text
-        self.default = default
-        self.required = required
-        self.multiple = multiple
 
-    def validate(self, value: typing.Any) -> typing.Any:
-        candidate_value = value if value is not None else self.default
-        if candidate_value is None and self.required:
-            raise ValueError(f"{self.code} is required")
-
-        return self.type.validate(candidate_value)
-
-    def parameter_specs(self):
-        return {
-            "type": str(self.type),
-            "required": self.required,
-            "choices": self.choices,
-            "code": self.code,
-            "name": self.name,
-            "help_text": self.help_text,
-        }
-
-
-def argument(code: str, *, type: typing.Type, name: typing.Optional[str] = None,
-             help_text: typing.Optional[str] = None,
-             default: typing.Optional[typing.Any] = None, required: bool = True, multiple: bool = True):
-    def decorator(fun):
-        return FunWithArgument(fun, Argument(code, type=type, name=name, help_text=help_text, default=default,
-                                             required=required, multiple=multiple))
-
-    return decorator
-
-
-class FunWithArgument:
-    def __init__(self, fun, added_argument: Argument):
-        self.fun = fun
-        self.argument = added_argument
-
-    def __call__(self, *args, **kwargs):
-        return self.fun(*args, **kwargs)
-
-    @property
-    def all_arguments(self):
-        if isinstance(self.fun, FunWithArgument):
-            return [self.argument, *self.fun.all_arguments]
-
-        return [self.argument]
 
 
 def pipeline(code: str, *, name: str = None) -> typing.Callable[[typing.Callable[..., typing.Any]], "Pipeline"]:

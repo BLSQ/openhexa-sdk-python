@@ -1,0 +1,3 @@
+pytest~=7.3.0
+multiprocess~=0.70.14
+setuptools~=67.6.1
