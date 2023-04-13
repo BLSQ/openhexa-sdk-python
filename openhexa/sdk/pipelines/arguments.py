@@ -4,11 +4,15 @@ import typing
 class ArgumentType:
     """Base class for argument types. Those argument types are used when using the @argument decorator"""
 
-    def __str__(self):
+    def spec_type(self) -> str:
+        """Returns a type string for the specs that are sent to the backend."""
+
         raise NotImplementedError
 
     @property
     def expected_type(self) -> typing.Type:
+        """Returns the python type expected for values."""
+
         raise NotImplementedError
 
     def validate(self, value: typing.Any) -> typing.Any:
@@ -21,8 +25,8 @@ class ArgumentType:
 
 
 class String(ArgumentType):
-    def __str__(self):
-        return "string"
+    def spec_type(self) -> str:
+        return "str"
 
     @property
     def expected_type(self) -> typing.Type:
@@ -30,8 +34,8 @@ class String(ArgumentType):
 
 
 class Boolean(ArgumentType):
-    def __str__(self):
-        return "boolean"
+    def spec_type(self) -> str:
+        return "bool"
 
     @property
     def expected_type(self) -> typing.Type:
@@ -39,12 +43,27 @@ class Boolean(ArgumentType):
 
 
 class Integer(ArgumentType):
-    def __str__(self):
-        return "integer"
+    def spec_type(self) -> str:
+        return "int"
 
     @property
     def expected_type(self) -> typing.Type:
         return int
+
+
+class Float(ArgumentType):
+    def spec_type(self) -> str:
+        return "float"
+
+    @property
+    def expected_type(self) -> typing.Type:
+        return float
+
+    def validate(self, value: typing.Any) -> typing.Any:
+        if isinstance(value, int):
+            value = float(value)
+
+        return super().validate(value)
 
 
 TYPES_BY_PYTHON_TYPE = {str: String, bool: Boolean, int: Integer}

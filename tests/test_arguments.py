@@ -1,6 +1,6 @@
 import pytest
 
-from openhexa.sdk.pipelines.arguments import Argument, Boolean, Integer, String
+from openhexa.sdk.pipelines.arguments import Argument, Boolean, Float, Integer, String
 
 
 def test_argument_types_validate():
@@ -11,17 +11,24 @@ def test_argument_types_validate():
         string_argument_type.validate(86)
 
     # Integer
-    string_argument_type = Integer()
-    assert string_argument_type.validate(99) == 99
+    integer_argument_type = Integer()
+    assert integer_argument_type.validate(99) == 99
     with pytest.raises(ValueError):
-        string_argument_type.validate("not an int")
+        integer_argument_type.validate("not an int")
+
+    # Float
+    float_argument_type = Float()
+    assert float_argument_type.validate(3.14) == 3.14
+    assert float_argument_type.validate(3) == 3.0
+    with pytest.raises(ValueError):
+        float_argument_type.validate("3.14")
 
     # Boolean
-    string_argument_type = Boolean()
-    assert string_argument_type.validate(True) is True
-    assert string_argument_type.validate(False) is False
+    boolean_argument_type = Boolean()
+    assert boolean_argument_type.validate(True) is True
+    assert boolean_argument_type.validate(False) is False
     with pytest.raises(ValueError):
-        string_argument_type.validate(86)
+        boolean_argument_type.validate(86)
 
 
 def test_argument_validate():
@@ -38,3 +45,17 @@ def test_argument_validate():
     # not required, no default
     argument_3 = Argument("arg3", type=bool, required=False)
     assert argument_3.validate(None) is None
+
+
+def test_argument_parameters_specs():
+    # required is True by default
+    argument = Argument("arg", type=str)
+
+    assert argument.parameter_specs() == {
+        "code": "arg",
+        "name": "arg",
+        "type": "str",
+        "required": True,
+        "choices": [],
+        "help": None,
+    }

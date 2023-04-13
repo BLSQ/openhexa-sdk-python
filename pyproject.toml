@@ -1,3 +1,18 @@
 [build-system]
 build-backend = "setuptools.build_meta"
 requires = ["setuptools", "wheel"]
+
+[tool.black]
+exclude = '''
+(
+  /(
+      \.eggs         # exclude a few common directories in the
+    | \.git          # root of the project
+  )/
+  | node_modules
+)
+'''
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
