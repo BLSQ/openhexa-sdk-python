@@ -122,6 +122,6 @@ class PipelineWithTask:
         self.pipeline = pipeline
 
     def __call__(self, *task_args, **task_kwargs):
-        task = Task(self.function)(**task_kwargs)
+        task = Task(self.function)(*task_args, **task_kwargs)
         self.pipeline.tasks.append(task)
         return task

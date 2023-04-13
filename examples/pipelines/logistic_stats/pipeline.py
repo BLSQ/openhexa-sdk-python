@@ -135,18 +135,19 @@ def model(dhis2_data: typing.Dict[str, typing.Any], gadm_data, worldpop_data):
         right_index=True,
     )
     combined_df = combined_df.set_index(["Period", "Organisation unit"])
-    combined_df["Oral Rehydration Salts by 100000 inh."] = combined_df[
-        "Commodities - Oral Rehydration Salts"
-    ] / (combined_df["Population"] / 100000)
-    combined_df["Oxytocin by 100000 inh."] = combined_df["Commodities - Oxytocin"] / (
-        combined_df["Population"] / 100000
-    )
+    # TODO: replace by something dynamic
+    # combined_df["Oral Rehydration Salts by 100000 inh."] = combined_df[
+    #     "Commodities - Oral Rehydration Salts"
+    # ] / (combined_df["Population"] / 100000)
+    # combined_df["Oxytocin by 100000 inh."] = combined_df["Commodities - Oxytocin"] / (
+    #     combined_df["Population"] / 100000
+    # )
 
     # Save to CSV
     date = datetime.now(timezone.utc)
-    combined_df.to_csv(
-        f"/home/hexa/workspace/logistic_stats/{date.isoformat()}/stats.csv"
-    )
+
+    # TODO: variable path / helper for workspace path
+    combined_df.to_csv(f"{os.path.dirname(os.path.realpath(__file__))}stats.csv")
 
 
 if __name__ == "__main__":
