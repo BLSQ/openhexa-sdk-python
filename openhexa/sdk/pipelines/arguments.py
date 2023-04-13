@@ -47,14 +47,22 @@ class Integer(ArgumentType):
         return int
 
 
+TYPES_BY_PYTHON_TYPE = {
+    str: String,
+    bool: Boolean,
+    int: Integer
+}
+
+
 class Argument:
     """Pipeline argument class. Contains validation logic specs generation logic."""
 
-    def __init__(self, code: str, *, type: type(ArgumentType), name: typing.Optional[str] = None,
+    def __init__(self, code: str, *, type: typing.Union[typing.Type[str], typing.Type[int], typing.Type[bool]],
+                 name: typing.Optional[str] = None,
                  choices: typing.Optional[typing.Sequence] = None, help: typing.Optional[str] = None,
                  default: typing.Optional[typing.Any] = None, required: bool = True, multiple: bool = True):
         self.code = code
-        self.type = type()
+        self.type = TYPES_BY_PYTHON_TYPE[type]()
         self.choices = choices
         self.name = name
         self.help = help

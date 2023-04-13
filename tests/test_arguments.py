@@ -1,9 +1,9 @@
 import pytest
 
-from openhexa.sdk.pipelines.arguments import String, Integer, Boolean
+from openhexa.sdk.pipelines.arguments import String, Integer, Boolean, Argument
 
 
-def test_argument_type_validation():
+def test_argument_types_validate():
     # String
     string_argument_type = String()
     assert string_argument_type.validate("a string") == "a string"
@@ -22,3 +22,16 @@ def test_argument_type_validation():
     assert string_argument_type.validate(False) is False
     with pytest.raises(ValueError):
         string_argument_type.validate(86)
+
+
+def test_argument_validate():
+    # required is True by default
+    argument_1 = Argument("arg1", type=str)
+    assert argument_1.validate("a valid string") == "a valid string"
+    with pytest.raises(ValueError):
+        argument_1.validate(None)
+
+    # still required, but a default is provided
+    argument_2 = Argument("arg2", type=int, default=3)
+    assert argument_2.validate(None) == 3
+
