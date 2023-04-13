@@ -1,6 +1,10 @@
 import typing
 
 
+class ArgumentValueError(Exception):
+    pass
+
+
 class ArgumentType:
     """Base class for argument types. Those argument types are used when using the @argument decorator"""
 
@@ -19,12 +23,15 @@ class ArgumentType:
         """Validate the provided value for this type."""
 
         if not isinstance(value, self.expected_type):
-            raise ValueError("Invalid type")
+            raise ArgumentValueError(
+                f"Invalid type for value {value} (expected {self.expected_type}, got {type(value)})"
+            )
 
         return value
 
 
 class String(ArgumentType):
+    @property
     def spec_type(self) -> str:
         return "str"
 
@@ -34,6 +41,7 @@ class String(ArgumentType):
 
 
 class Boolean(ArgumentType):
+    @property
     def spec_type(self) -> str:
         return "bool"
 
@@ -43,6 +51,7 @@ class Boolean(ArgumentType):
 
 
 class Integer(ArgumentType):
+    @property
     def spec_type(self) -> str:
         return "int"
 
@@ -52,6 +61,7 @@ class Integer(ArgumentType):
 
 
 class Float(ArgumentType):
+    @property
     def spec_type(self) -> str:
         return "float"
 
@@ -67,6 +77,10 @@ class Float(ArgumentType):
 
 
 TYPES_BY_PYTHON_TYPE = {str: String, bool: Boolean, int: Integer}
+
+
+class InvalidArgumentError(Exception):
+    pass
 
 
 class Argument:
@@ -85,8 +99,25 @@ class Argument:
         multiple: bool = True,
     ):
         self.code = code
-        self.type = TYPES_BY_PYTHON_TYPE[type]()
+
+        try:
+            self.type = TYPES_BY_PYTHON_TYPE[type]()
+        except KeyError:
+            valid_argument_types = [str(k) for k in TYPES_BY_PYTHON_TYPE.keys()]
+            raise InvalidArgumentError(
+                f"Invalid argument type provided ({type}). Valid argument types are {', '.join(valid_argument_types)}"
+            )
+
+        if choices is not None:
+            try:
+                for choice in choices:
+                    self.type.validate(choice)
+            except ArgumentValueError:
+                raise InvalidArgumentError(
+                    f"The provided choices are not valid for the {self.type} argument type."
+                )
         self.choices = choices
+
         self.name = name
         self.help = help
         self.default = default
@@ -109,7 +140,7 @@ class Argument:
         """Generates specs for this argument, to be provided to the OpenHexa backend."""
 
         return {
-            "type": str(self.type),
+            "type": self.type.spec_type,
             "required": self.required,
             "choices": self.choices,
             "code": self.code,
