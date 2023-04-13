@@ -11,6 +11,31 @@ from openhexa.sdk.pipelines.arguments import (
 )
 
 
+def test_argument_types_normalize():
+    # String
+    string_argument_type = String()
+    assert string_argument_type.normalize("a string") == "a string"
+    assert string_argument_type.normalize(" a string ") == "a string"
+    assert string_argument_type.normalize("") is None
+    assert string_argument_type.normalize(" ") is None
+
+    # Integer
+    integer_argument_type = Integer()
+    assert integer_argument_type.normalize(99) == 99
+    assert integer_argument_type.normalize("abc") == "abc"
+
+    # Float
+    float_argument_type = Float()
+    assert float_argument_type.normalize(3.14) == 3.14
+    assert float_argument_type.normalize(3) == 3.0
+
+    # Boolean
+    boolean_argument_type = Boolean()
+    assert boolean_argument_type.normalize(True) is True
+    assert boolean_argument_type.normalize(False) is False
+    assert boolean_argument_type.normalize(3) == 3
+
+
 def test_argument_types_validate():
     # String
     string_argument_type = String()
@@ -27,7 +52,6 @@ def test_argument_types_validate():
     # Float
     float_argument_type = Float()
     assert float_argument_type.validate(3.14) == 3.14
-    assert float_argument_type.validate(3) == 3.0
     with pytest.raises(ArgumentValueError):
         float_argument_type.validate("3.14")
 
@@ -52,21 +76,65 @@ def test_argument_init():
     with pytest.raises(InvalidArgumentError):
         Argument("arg", type=str, choices=[1, 2, 3])
 
+    # Boolean can't have choices
+    with pytest.raises(InvalidArgumentError):
+        Argument("arg", type=bool, choices=[True, False])
 
-def test_argument_validate():
+    # Boolean can't be multiple
+    with pytest.raises(InvalidArgumentError):
+        Argument("arg", type=bool, multiple=True)
+
+    # Invalid defaults
+    with pytest.raises(InvalidArgumentError):
+        Argument("arg", type=bool, default=3)
+    with pytest.raises(InvalidArgumentError):
+        Argument("arg", type=str, default=[1, 2], multiple=True)
+    with pytest.raises(InvalidArgumentError):
+        Argument("arg", type=str, default="")
+    with pytest.raises(InvalidArgumentError):
+        Argument("arg", type=str, default=[""], multiple=True)
+
+
+def test_argument_validate_single():
     # required is True by default
     argument_1 = Argument("arg1", type=str)
-    assert argument_1.validate("a valid string") == "a valid string"
-    with pytest.raises(ValueError):
+    argument_1.validate("a valid string")
+    with pytest.raises(ArgumentValueError):
         argument_1.validate(None)
+    with pytest.raises(ArgumentValueError):
+        argument_1.validate("")
 
     # still required, but a default is provided
     argument_2 = Argument("arg2", type=int, default=3)
-    assert argument_2.validate(None) == 3
+    argument_2.validate(None)
 
     # not required, no default
     argument_3 = Argument("arg3", type=bool, required=False)
-    assert argument_3.validate(None) is None
+    argument_3.validate(None)
+
+
+def test_argument_validate_multiple():
+    # required is True by default
+    argument_1 = Argument("arg1", type=str, multiple=True)
+    assert argument_1.validate(["Valid string", "Another valid string"]) == [
+        "Valid string",
+        "Another valid string",
+    ]
+    with pytest.raises(ArgumentValueError):
+        argument_1.validate(None)
+    with pytest.raises(ArgumentValueError):
+        argument_1.validate([])
+    with pytest.raises(ArgumentValueError):
+        argument_1.validate(["", ""])
+
+    # still required, but a default is provided
+    argument_2 = Argument("arg2", type=int, multiple=True, default=[2, 3])
+    assert argument_2.validate(None) == [2, 3]
+
+    # not required, no default
+    argument_3 = Argument("arg3", type=int, required=False, multiple=True)
+    assert argument_3.validate(None) == []
+    assert argument_3.validate([]) == []
 
 
 def test_argument_parameters_specs():

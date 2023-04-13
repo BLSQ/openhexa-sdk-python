@@ -53,10 +53,9 @@ class Pipeline:
         # Validate / default arguments
         validated_config = {}
         for single_argument in self.arguments:
-            validated_value = single_argument.validate(
-                config.pop(single_argument.code, None)
-            )
-            validated_config[single_argument.code] = validated_value
+            value = config.pop(single_argument.code, None)
+            single_argument.validate(value)
+            validated_config[single_argument.code] = value
 
         # TODO: reject extra config
 

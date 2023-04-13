@@ -19,7 +19,26 @@ class ArgumentType:
 
         raise NotImplementedError
 
-    def validate(self, value: typing.Any) -> typing.Any:
+    @property
+    def accepts_choice(self) -> bool:
+        return True
+
+    @property
+    def accepts_multiple(self) -> bool:
+        return True
+
+    @staticmethod
+    def normalize(value: typing.Any) -> typing.Any:
+        """If appropriate, subclasses can override this method to normalize empty values to None.
+
+        This can be used to handle empty values and normalize them to None, or to perform type conversions, allowing us
+        to allow multiple input types but still normalize everything to a single type."""
+
+        return value
+
+    def validate(
+        self, value: typing.Optional[typing.Any], allow_empty: bool = True
+    ) -> typing.Optional[typing.Any]:
         """Validate the provided value for this type."""
 
         if not isinstance(value, self.expected_type):
@@ -28,6 +47,9 @@ class ArgumentType:
             )
 
         return value
+
+    def __str__(self) -> str:
+        return str(self.expected_type)
 
 
 class String(ArgumentType):
@@ -39,6 +61,26 @@ class String(ArgumentType):
     def expected_type(self) -> typing.Type:
         return str
 
+    @staticmethod
+    def normalize(value: typing.Any) -> typing.Optional[str]:
+        if isinstance(value, str):
+            normalized_value = value.strip()
+        else:
+            normalized_value = value
+
+        if normalized_value == "":
+            return None
+
+        return normalized_value
+
+    def validate(
+        self, value: typing.Optional[typing.Any], *, allow_empty: bool = True
+    ) -> typing.Optional[str]:
+        if not allow_empty and value == "":
+            raise ArgumentValueError("Empty values are not accepted.")
+
+        return super().validate(value, allow_empty)
+
 
 class Boolean(ArgumentType):
     @property
@@ -48,6 +90,14 @@ class Boolean(ArgumentType):
     @property
     def expected_type(self) -> typing.Type:
         return bool
+
+    @property
+    def accepts_choice(self) -> bool:
+        return False
+
+    @property
+    def accepts_multiple(self) -> bool:
+        return False
 
 
 class Integer(ArgumentType):
@@ -69,11 +119,12 @@ class Float(ArgumentType):
     def expected_type(self) -> typing.Type:
         return float
 
-    def validate(self, value: typing.Any) -> typing.Any:
+    @staticmethod
+    def normalize(value: typing.Any) -> typing.Any:
         if isinstance(value, int):
-            value = float(value)
+            return float(value)
 
-        return super().validate(value)
+        return value
 
 
 TYPES_BY_PYTHON_TYPE = {str: String, bool: Boolean, int: Integer}
@@ -109,7 +160,11 @@ class Argument:
             )
 
         if choices is not None:
-            if len(choices) == 0:
+            if not self.type.accepts_choice:
+                raise InvalidArgumentError(
+                    f"Arguments of type {self.type} don't accept choices."
+                )
+            elif len(choices) == 0:
                 raise InvalidArgumentError("Choices, if provided, cannot be empty.")
 
             try:
@@ -123,21 +178,74 @@ class Argument:
 
         self.name = name
         self.help = help
-        self.default = default
         self.required = required
+
+        if multiple is True and not self.type.accepts_multiple:
+            raise InvalidArgumentError(
+                f"Arguments of type {self.type} can't have multiple values."
+            )
         self.multiple = multiple
+
+        self._validate_default(default, multiple)
+        self.default = default
 
     def validate(self, value: typing.Any) -> typing.Any:
         """Validates the provided value against the argument, taking required / default options into account."""
 
-        candidate_value = value if value is not None else self.default
-        if candidate_value is None:
+        if self.multiple:
+            return self._validate_multiple(value)
+        else:
+            return self._validate_single(value)
+
+    def _validate_single(self, value: typing.Any):
+        # Normalize empty values to None and handles default
+        normalized_value = self.type.normalize(value)
+        if normalized_value is None and self.default is not None:
+            normalized_value = self.default
+
+        if normalized_value is None:
             if self.required:
-                raise ValueError(f"{self.code} is required")
+                raise ArgumentValueError(f"{self.code} is required")
 
             return None
 
-        return self.type.validate(candidate_value)
+        return self.type.validate(normalized_value)
+
+    def _validate_multiple(self, value: typing.Any):
+        # Reject values that are not lists
+        if value is not None and not isinstance(value, list):
+            raise InvalidArgumentError(
+                "If provided, value should be a list when argument is multiple."
+            )
+
+        # Normalize empty values to an empty list
+        if value is None:
+            normalized_value = []
+        else:
+            normalized_value = [self.type.normalize(v) for v in value]
+            normalized_value = list(filter(lambda v: v is not None, normalized_value))
+        if len(normalized_value) == 0 and self.default is not None:
+            normalized_value = self.default
+
+        if len(normalized_value) == 0 and self.required:
+            raise ArgumentValueError(f"{self.code} is required")
+
+        return [self.type.validate(single_value) for single_value in normalized_value]
+
+    def _validate_default(self, default: typing.Any, multiple: bool):
+        if default is None:
+            return
+
+        try:
+            if multiple:
+                for default_value in default:
+                    self.type.validate(default_value, allow_empty=False)
+            else:
+                self.type.validate(default, allow_empty=False)
+        except ArgumentValueError:
+            raise InvalidArgumentError(
+                f"The default value for {self.code} is not valid."
+            )
 
     def parameter_specs(self):
         """Generates specs for this argument, to be provided to the OpenHexa backend."""
