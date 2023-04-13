@@ -92,6 +92,8 @@ def test_argument_init():
     with pytest.raises(InvalidArgumentError):
         Argument("arg", type=str, default=[1, 2], multiple=True)
     with pytest.raises(InvalidArgumentError):
+        Argument("arg", type=str, default="yolo", multiple=True)
+    with pytest.raises(InvalidArgumentError):
         Argument("arg", type=str, default="")
     with pytest.raises(InvalidArgumentError):
         Argument("arg", type=str, default=[""], multiple=True)
@@ -156,15 +158,37 @@ def test_argument_validate_multiple():
 
 def test_argument_parameters_specs():
     # required is True by default
-    an_argument = Argument("arg", type=str)
+    an_argument = Argument("arg1", type=str, default="yep")
+    another_argument = Argument(
+        "arg2",
+        type=str,
+        name="Arg 2",
+        help="Help 2",
+        choices=["ab", "cd"],
+        required=False,
+        multiple=True,
+    )
 
     assert an_argument.parameter_specs() == {
-        "code": "arg",
+        "code": "arg1",
         "name": None,
         "type": "str",
         "required": True,
         "choices": None,
         "help": None,
+        "multiple": False,
+        "default": "yep",
+    }
+
+    assert another_argument.parameter_specs() == {
+        "code": "arg2",
+        "name": "Arg 2",
+        "type": "str",
+        "required": False,
+        "choices": ["ab", "cd"],
+        "help": "Help 2",
+        "multiple": True,
+        "default": None,
     }
 
 
@@ -175,7 +199,7 @@ def test_argument_decorator():
         type=str,
         name="Arg 2",
         help="Help 2",
-        default="yo",
+        default=["yo"],
         required=False,
         multiple=True,
     )
@@ -199,6 +223,6 @@ def test_argument_decorator():
     assert isinstance(function_arguments[1].type, String)
     assert function_arguments[1].name == "Arg 2"
     assert function_arguments[1].help == "Help 2"
-    assert function_arguments[1].default == "yo"
+    assert function_arguments[1].default == ["yo"]
     assert function_arguments[1].required is False
     assert function_arguments[1].multiple is True

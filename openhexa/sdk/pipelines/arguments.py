@@ -254,6 +254,10 @@ class Argument:
 
         try:
             if multiple:
+                if not isinstance(default, list):
+                    raise InvalidArgumentError(
+                        "Default values should be lists when using multiple=True"
+                    )
                 for default_value in default:
                     self.type.validate(default_value, allow_empty=False)
             else:
@@ -273,6 +277,8 @@ class Argument:
             "code": self.code,
             "name": self.name,
             "help": self.help,
+            "multiple": self.multiple,
+            "default": self.default,
         }
 
 

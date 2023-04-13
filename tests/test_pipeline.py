@@ -31,3 +31,33 @@ def test_pipeline_run_extra_config():
     pipeline = Pipeline("code", pipeline_func, [argument_1])
     with pytest.raises(ArgumentValueError):
         pipeline.run({"arg1": "ok", "arg2": "extra"})
+
+
+def test_pipeline_parameters_specs():
+    pipeline_func = Mock()
+    argument_1 = Argument("arg1", type=str)
+    argument_2 = Argument("arg2", type=str, multiple=True)
+    pipeline = Pipeline("code", pipeline_func, [argument_1, argument_2, argument_2])
+
+    assert pipeline.parameters_specs() == {
+        "arg1": {
+            "code": "arg1",
+            "name": None,
+            "type": "str",
+            "required": True,
+            "choices": None,
+            "help": None,
+            "multiple": False,
+            "default": None,
+        },
+        "arg2": {
+            "code": "arg2",
+            "name": None,
+            "type": "str",
+            "required": True,
+            "choices": None,
+            "help": None,
+            "multiple": True,
+            "default": None,
+        },
+    }
