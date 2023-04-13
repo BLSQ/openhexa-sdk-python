@@ -5,9 +5,11 @@ from openhexa.sdk.pipelines.arguments import (
     ArgumentValueError,
     Boolean,
     Float,
+    FunctionWithArgument,
     Integer,
     InvalidArgumentError,
     String,
+    argument,
 )
 
 
@@ -98,7 +100,7 @@ def test_argument_init():
 def test_argument_validate_single():
     # required is True by default
     argument_1 = Argument("arg1", type=str)
-    argument_1.validate("a valid string")
+    assert argument_1.validate("a valid string") == "a valid string"
     with pytest.raises(ArgumentValueError):
         argument_1.validate(None)
     with pytest.raises(ArgumentValueError):
@@ -106,11 +108,17 @@ def test_argument_validate_single():
 
     # still required, but a default is provided
     argument_2 = Argument("arg2", type=int, default=3)
-    argument_2.validate(None)
+    assert argument_2.validate(None) == 3
 
     # not required, no default
     argument_3 = Argument("arg3", type=bool, required=False)
-    argument_3.validate(None)
+    assert argument_3.validate(None) is None
+
+    # choices
+    argument_4 = Argument("arg4", type=str, choices=["ab", "cd"])
+    assert argument_4.validate("ab") == "ab"
+    with pytest.raises(ArgumentValueError):
+        argument_4.validate("xy")
 
 
 def test_argument_validate_multiple():
@@ -136,12 +144,21 @@ def test_argument_validate_multiple():
     assert argument_3.validate(None) == []
     assert argument_3.validate([]) == []
 
+    # choices
+    argument_4 = Argument("arg4", type=str, choices=["ab", "cd"], multiple=True)
+    assert argument_4.validate(["ab"]) == ["ab"]
+    assert argument_4.validate(["ab", "cd"]) == ["ab", "cd"]
+    with pytest.raises(ArgumentValueError):
+        argument_4.validate(["xy"])
+    with pytest.raises(ArgumentValueError):
+        argument_4.validate(["ab", "xy"])
+
 
 def test_argument_parameters_specs():
     # required is True by default
-    argument = Argument("arg", type=str)
+    an_argument = Argument("arg", type=str)
 
-    assert argument.parameter_specs() == {
+    assert an_argument.parameter_specs() == {
         "code": "arg",
         "name": None,
         "type": "str",
@@ -149,3 +166,20 @@ def test_argument_parameters_specs():
         "choices": None,
         "help": None,
     }
+
+
+def test_argument_decorator():
+    @argument("arg1", type=int)
+    @argument(
+        "arg2",
+        type=str,
+        name="Arg 2",
+        help="Help 2",
+        default="yo",
+        required=False,
+        multiple=False,
+    )
+    def a_function():
+        pass
+
+    assert isinstance(a_function, FunctionWithArgument)

@@ -209,7 +209,13 @@ class Argument:
 
             return None
 
-        return self.type.validate(normalized_value)
+        pre_validated = self.type.validate(normalized_value)
+        if self.choices is not None and pre_validated not in self.choices:
+            raise ArgumentValueError(
+                f"The provided value for {self.code} is not included in the provided choices."
+            )
+
+        return pre_validated
 
     def _validate_multiple(self, value: typing.Any):
         # Reject values that are not lists
@@ -230,7 +236,17 @@ class Argument:
         if len(normalized_value) == 0 and self.required:
             raise ArgumentValueError(f"{self.code} is required")
 
-        return [self.type.validate(single_value) for single_value in normalized_value]
+        pre_validated = [
+            self.type.validate(single_value) for single_value in normalized_value
+        ]
+        if self.choices is not None and any(
+            v not in self.choices for v in pre_validated
+        ):
+            raise ArgumentValueError(
+                f"One of the provided values for {self.code} is not included in the provided choices."
+            )
+
+        return pre_validated
 
     def _validate_default(self, default: typing.Any, multiple: bool):
         if default is None:
