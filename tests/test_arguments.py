@@ -46,6 +46,10 @@ def test_argument_init():
 
     # Empty choices
     with pytest.raises(InvalidArgumentError):
+        Argument("arg", type=str, choices=[])
+
+    # Invalid choices
+    with pytest.raises(InvalidArgumentError):
         Argument("arg", type=str, choices=[1, 2, 3])
 
 

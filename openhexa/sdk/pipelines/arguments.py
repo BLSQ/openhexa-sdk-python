@@ -96,7 +96,7 @@ class Argument:
         help: typing.Optional[str] = None,
         default: typing.Optional[typing.Any] = None,
         required: bool = True,
-        multiple: bool = True,
+        multiple: bool = False,
     ):
         self.code = code
 
@@ -109,6 +109,9 @@ class Argument:
             )
 
         if choices is not None:
+            if len(choices) == 0:
+                raise InvalidArgumentError("Choices, if provided, cannot be empty.")
+
             try:
                 for choice in choices:
                     self.type.validate(choice)
