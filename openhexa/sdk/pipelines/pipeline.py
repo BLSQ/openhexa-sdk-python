@@ -30,7 +30,7 @@ def pipeline(
         else:
             arguments = []
 
-        return Pipeline(code, fun, arguments)
+        return Pipeline(code, name, fun, arguments)
 
     return decorator
 
@@ -41,9 +41,14 @@ class PipelineRunError(Exception):
 
 class Pipeline:
     def __init__(
-        self, code: str, function: typing.Callable, arguments: typing.Sequence[Argument]
+        self,
+        code: str,
+        name: str,
+        function: typing.Callable,
+        arguments: typing.Sequence[Argument],
     ):
         self.code = code
+        self.name = name
         self.function = function
         self.arguments = arguments
         self.tasks = []
