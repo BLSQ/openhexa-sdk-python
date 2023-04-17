@@ -169,7 +169,7 @@ def test_argument_parameters_specs():
         multiple=True,
     )
 
-    assert an_argument.parameter_specs() == {
+    assert an_argument.parameter_spec() == {
         "code": "arg1",
         "name": None,
         "type": "str",
@@ -180,7 +180,7 @@ def test_argument_parameters_specs():
         "default": "yep",
     }
 
-    assert another_argument.parameter_specs() == {
+    assert another_argument.parameter_spec() == {
         "code": "arg2",
         "name": "Arg 2",
         "type": "str",

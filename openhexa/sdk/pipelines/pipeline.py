@@ -127,8 +127,8 @@ class Pipeline:
     def get_available_tasks(self):
         return [task for task in self.tasks if task.is_ready()]
 
-    def parameters_specs(self):
-        return {arg.code: arg.parameter_specs() for arg in self.arguments}
+    def parameters_spec(self):
+        return {arg.code: arg.parameter_spec() for arg in self.arguments}
 
     def __call__(self, config: typing.Optional[typing.Dict[str, typing.Any]] = None):
         if config is None:  # Called without arguments, in the pipeline file itself

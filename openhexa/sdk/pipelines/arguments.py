@@ -267,8 +267,8 @@ class Argument:
                 f"The default value for {self.code} is not valid."
             )
 
-    def parameter_specs(self):
-        """Generates specs for this argument, to be provided to the OpenHexa backend."""
+    def parameter_spec(self):
+        """Generates specification for this argument, to be provided to the OpenHexa backend."""
 
         return {
             "type": self.type.spec_type,
