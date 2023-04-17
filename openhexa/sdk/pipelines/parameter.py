@@ -1,12 +1,12 @@
 import typing
 
 
-class ArgumentValueError(Exception):
+class ParameterValueError(Exception):
     pass
 
 
-class ArgumentType:
-    """Base class for argument types. Those argument types are used when using the @argument decorator"""
+class ParameterType:
+    """Base class for parameter types. Those parameter types are used when using the @parameter decorator"""
 
     def spec_type(self) -> str:
         """Returns a type string for the specs that are sent to the backend."""
@@ -42,7 +42,7 @@ class ArgumentType:
         """Validate the provided value for this type."""
 
         if not isinstance(value, self.expected_type):
-            raise ArgumentValueError(
+            raise ParameterValueError(
                 f"Invalid type for value {value} (expected {self.expected_type}, got {type(value)})"
             )
 
@@ -52,7 +52,7 @@ class ArgumentType:
         return str(self.expected_type)
 
 
-class String(ArgumentType):
+class String(ParameterType):
     @property
     def spec_type(self) -> str:
         return "str"
@@ -77,12 +77,12 @@ class String(ArgumentType):
         self, value: typing.Optional[typing.Any], *, allow_empty: bool = True
     ) -> typing.Optional[str]:
         if not allow_empty and value == "":
-            raise ArgumentValueError("Empty values are not accepted.")
+            raise ParameterValueError("Empty values are not accepted.")
 
         return super().validate(value, allow_empty)
 
 
-class Boolean(ArgumentType):
+class Boolean(ParameterType):
     @property
     def spec_type(self) -> str:
         return "bool"
@@ -100,7 +100,7 @@ class Boolean(ArgumentType):
         return False
 
 
-class Integer(ArgumentType):
+class Integer(ParameterType):
     @property
     def spec_type(self) -> str:
         return "int"
@@ -110,7 +110,7 @@ class Integer(ArgumentType):
         return int
 
 
-class Float(ArgumentType):
+class Float(ParameterType):
     @property
     def spec_type(self) -> str:
         return "float"
@@ -130,12 +130,12 @@ class Float(ArgumentType):
 TYPES_BY_PYTHON_TYPE = {str: String, bool: Boolean, int: Integer}
 
 
-class InvalidArgumentError(Exception):
+class InvalidParameterError(Exception):
     pass
 
 
-class Argument:
-    """Pipeline argument class. Contains validation logic specs generation logic."""
+class Parameter:
+    """Pipeline parameter class. Contains validation logic specs generation logic."""
 
     def __init__(
         self,
@@ -154,25 +154,25 @@ class Argument:
         try:
             self.type = TYPES_BY_PYTHON_TYPE[type]()
         except KeyError:
-            valid_argument_types = [str(k) for k in TYPES_BY_PYTHON_TYPE.keys()]
-            raise InvalidArgumentError(
-                f"Invalid argument type provided ({type}). Valid argument types are {', '.join(valid_argument_types)}"
+            valid_parameter_types = [str(k) for k in TYPES_BY_PYTHON_TYPE.keys()]
+            raise InvalidParameterError(
+                f"Invalid parameter type provided ({type}). Valid parameter types are {', '.join(valid_parameter_types)}"
             )
 
         if choices is not None:
             if not self.type.accepts_choice:
-                raise InvalidArgumentError(
-                    f"Arguments of type {self.type} don't accept choices."
+                raise InvalidParameterError(
+                    f"Parameters of type {self.type} don't accept choices."
                 )
             elif len(choices) == 0:
-                raise InvalidArgumentError("Choices, if provided, cannot be empty.")
+                raise InvalidParameterError("Choices, if provided, cannot be empty.")
 
             try:
                 for choice in choices:
                     self.type.validate(choice)
-            except ArgumentValueError:
-                raise InvalidArgumentError(
-                    f"The provided choices are not valid for the {self.type} argument type."
+            except ParameterValueError:
+                raise InvalidParameterError(
+                    f"The provided choices are not valid for the {self.type} parameter type."
                 )
         self.choices = choices
 
@@ -181,8 +181,8 @@ class Argument:
         self.required = required
 
         if multiple is True and not self.type.accepts_multiple:
-            raise InvalidArgumentError(
-                f"Arguments of type {self.type} can't have multiple values."
+            raise InvalidParameterError(
+                f"Parameters of type {self.type} can't have multiple values."
             )
         self.multiple = multiple
 
@@ -190,7 +190,7 @@ class Argument:
         self.default = default
 
     def validate(self, value: typing.Any) -> typing.Any:
-        """Validates the provided value against the argument, taking required / default options into account."""
+        """Validates the provided value against the parameter, taking required / default options into account."""
 
         if self.multiple:
             return self._validate_multiple(value)
@@ -205,13 +205,13 @@ class Argument:
 
         if normalized_value is None:
             if self.required:
-                raise ArgumentValueError(f"{self.code} is required")
+                raise ParameterValueError(f"{self.code} is required")
 
             return None
 
         pre_validated = self.type.validate(normalized_value)
         if self.choices is not None and pre_validated not in self.choices:
-            raise ArgumentValueError(
+            raise ParameterValueError(
                 f"The provided value for {self.code} is not included in the provided choices."
             )
 
@@ -220,8 +220,8 @@ class Argument:
     def _validate_multiple(self, value: typing.Any):
         # Reject values that are not lists
         if value is not None and not isinstance(value, list):
-            raise InvalidArgumentError(
-                "If provided, value should be a list when argument is multiple."
+            raise InvalidParameterError(
+                "If provided, value should be a list when parameter is multiple."
             )
 
         # Normalize empty values to an empty list
@@ -234,7 +234,7 @@ class Argument:
             normalized_value = self.default
 
         if len(normalized_value) == 0 and self.required:
-            raise ArgumentValueError(f"{self.code} is required")
+            raise ParameterValueError(f"{self.code} is required")
 
         pre_validated = [
             self.type.validate(single_value) for single_value in normalized_value
@@ -242,7 +242,7 @@ class Argument:
         if self.choices is not None and any(
             v not in self.choices for v in pre_validated
         ):
-            raise ArgumentValueError(
+            raise ParameterValueError(
                 f"One of the provided values for {self.code} is not included in the provided choices."
             )
 
@@ -255,20 +255,20 @@ class Argument:
         try:
             if multiple:
                 if not isinstance(default, list):
-                    raise InvalidArgumentError(
+                    raise InvalidParameterError(
                         "Default values should be lists when using multiple=True"
                     )
                 for default_value in default:
                     self.type.validate(default_value, allow_empty=False)
             else:
                 self.type.validate(default, allow_empty=False)
-        except ArgumentValueError:
-            raise InvalidArgumentError(
+        except ParameterValueError:
+            raise InvalidParameterError(
                 f"The default value for {self.code} is not valid."
             )
 
     def parameter_spec(self):
-        """Generates specification for this argument, to be provided to the OpenHexa backend."""
+        """Generates specification for this parameter, to be provided to the OpenHexa backend."""
 
         return {
             "type": self.type.spec_type,
@@ -282,7 +282,7 @@ class Argument:
         }
 
 
-def argument(
+def parameter(
     code: str,
     *,
     type: typing.Union[typing.Type[str], typing.Type[int], typing.Type[bool]],
@@ -292,12 +292,12 @@ def argument(
     required: bool = True,
     multiple: bool = False,
 ):
-    """Argument decorator."""
+    """parameter decorator."""
 
     def decorator(fun):
-        return FunctionWithArgument(
+        return FunctionWithParameter(
             fun,
-            Argument(
+            Parameter(
                 code,
                 type=type,
                 name=name,
@@ -311,18 +311,18 @@ def argument(
     return decorator
 
 
-class FunctionWithArgument:
-    """This class serves as a wrapper for functions decorated with the @argument decorator."""
+class FunctionWithParameter:
+    """This class serves as a wrapper for functions decorated with the @parameter decorator."""
 
-    def __init__(self, function, added_argument: Argument):
+    def __init__(self, function, added_parameter: Parameter):
         self.function = function
-        self.argument = added_argument
+        self.parameter = added_parameter
 
     def __call__(self, *args, **kwargs):
         return self.function(*args, **kwargs)
 
-    def get_all_arguments(self):
-        if isinstance(self.function, FunctionWithArgument):
-            return [self.argument, *self.function.get_all_arguments()]
+    def get_all_parameters(self):
+        if isinstance(self.function, FunctionWithParameter):
+            return [self.parameter, *self.function.get_all_parameters()]
 
-        return [self.argument]
+        return [self.parameter]

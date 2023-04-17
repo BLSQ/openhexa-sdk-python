@@ -10,23 +10,23 @@ import rasterio
 import requests
 from rasterstats import zonal_stats
 
-from openhexa.sdk.pipelines import argument, pipeline
+from openhexa.sdk.pipelines import parameter, pipeline
 
 
 @pipeline("logistic-stats", name="Logistic stats")
-@argument(
+@parameter(
     "deg",
     name="Data element group",
     type=str,
     help="The ID of the data element group in DHIS2.",
 )
-@argument(
+@parameter(
     "periods",
     type=str,
     multiple=True,
     help="A list of DHIS2 periods, separated by a newline.",
 )
-@argument("oul", name="Organisation unit level", type=int, default=2)
+@parameter("oul", name="Organisation unit level", type=int, default=2)
 def logistic_stats(deg: str, periods: str, oul: int):
     dhis2_data = dhis2_download(deg, periods, oul)
     gadm_data = gadm_download()

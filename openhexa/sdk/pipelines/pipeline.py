@@ -10,7 +10,7 @@ from logging import getLogger
 
 from multiprocess import get_context
 
-from .arguments import Argument, ArgumentValueError, FunctionWithArgument
+from .parameter import FunctionWithParameter, Parameter, ParameterValueError
 from .task import PipelineWithTask
 
 logger = getLogger(__name__)
@@ -25,12 +25,12 @@ def pipeline(
         )
 
     def decorator(fun):
-        if isinstance(fun, FunctionWithArgument):
-            arguments = fun.get_all_arguments()
+        if isinstance(fun, FunctionWithParameter):
+            parameters = fun.get_all_parameters()
         else:
-            arguments = []
+            parameters = []
 
-        return Pipeline(code, name, fun, arguments)
+        return Pipeline(code, name, fun, parameters)
 
     return decorator
 
@@ -45,12 +45,12 @@ class Pipeline:
         code: str,
         name: str,
         function: typing.Callable,
-        arguments: typing.Sequence[Argument],
+        parameters: typing.Sequence[Parameter],
     ):
         self.code = code
         self.name = name
         self.function = function
-        self.arguments = arguments
+        self.parameters = parameters
         self.tasks = []
 
     def task(self, function):
@@ -62,15 +62,15 @@ class Pipeline:
         now = datetime.datetime.utcnow().replace(microsecond=0).isoformat()
         print(f'{now} Evaluating "{self.code}"')
 
-        # Validate / default arguments
+        # Validate / default parameters
         validated_config = {}
-        for single_argument in self.arguments:
-            value = config.pop(single_argument.code, None)
-            validated_value = single_argument.validate(value)
-            validated_config[single_argument.code] = validated_value
+        for parameter in self.parameters:
+            value = config.pop(parameter.code, None)
+            validated_value = parameter.validate(value)
+            validated_config[parameter.code] = validated_value
 
         if len(config) > 0:
-            raise ArgumentValueError(
+            raise ParameterValueError(
                 f"The provided config contains invalid key(s): {', '.join(list(config.keys()))}"
             )
 
@@ -133,7 +133,7 @@ class Pipeline:
         return [task for task in self.tasks if task.is_ready()]
 
     def parameters_spec(self):
-        return {arg.code: arg.parameter_spec() for arg in self.arguments}
+        return {arg.code: arg.parameter_spec() for arg in self.parameters}
 
     def __call__(self, config: typing.Optional[typing.Dict[str, typing.Any]] = None):
         if config is None:  # Called without arguments, in the pipeline file itself
