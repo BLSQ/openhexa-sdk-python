@@ -156,7 +156,7 @@ def test_argument_validate_multiple():
         argument_4.validate(["ab", "xy"])
 
 
-def test_argument_parameters_specs():
+def test_argument_parameters_spec():
     # required is True by default
     an_argument = Argument("arg1", type=str, default="yep")
     another_argument = Argument(
