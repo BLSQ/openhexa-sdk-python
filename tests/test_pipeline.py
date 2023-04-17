@@ -33,13 +33,13 @@ def test_pipeline_run_extra_config():
         pipeline.run({"arg1": "ok", "arg2": "extra"})
 
 
-def test_pipeline_parameters_specs():
+def test_pipeline_parameters_spec():
     pipeline_func = Mock()
     argument_1 = Argument("arg1", type=str)
     argument_2 = Argument("arg2", type=str, multiple=True)
     pipeline = Pipeline("code", pipeline_func, [argument_1, argument_2, argument_2])
 
-    assert pipeline.parameters_specs() == {
+    assert pipeline.parameters_spec() == {
         "arg1": {
             "code": "arg1",
             "name": None,
