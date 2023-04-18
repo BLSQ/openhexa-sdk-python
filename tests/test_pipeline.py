@@ -40,12 +40,10 @@ def test_pipeline_parameters_spec():
     pipeline_func = Mock()
     parameter_1 = Parameter("arg1", type=str)
     parameter_2 = Parameter("arg2", type=str, multiple=True)
-    pipeline = Pipeline(
-        "code", "pipeline", pipeline_func, [parameter_1, parameter_2, parameter_2]
-    )
+    pipeline = Pipeline("code", "pipeline", pipeline_func, [parameter_1, parameter_2])
 
-    assert pipeline.parameters_spec() == {
-        "arg1": {
+    assert pipeline.parameters_spec() == [
+        {
             "code": "arg1",
             "name": None,
             "type": "str",
@@ -55,7 +53,7 @@ def test_pipeline_parameters_spec():
             "multiple": False,
             "default": None,
         },
-        "arg2": {
+        {
             "code": "arg2",
             "name": None,
             "type": "str",
@@ -65,4 +63,4 @@ def test_pipeline_parameters_spec():
             "multiple": True,
             "default": None,
         },
-    }
+    ]

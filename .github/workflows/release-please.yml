@@ -21,4 +21,4 @@ jobs:
           bump-minor-pre-major: true
           bump-patch-for-minor-pre-major: true
           include-v-in-tag: false
-          extra-files: openhexa/sdk/__init__.py
+          extra-files: openhexa/__init__.py
