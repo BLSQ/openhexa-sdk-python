@@ -6,7 +6,7 @@ from pathlib import Path
 import yaml
 
 
-class WorkspaceDataHelper:
+class Workspace:
     def __init__(self, connected: bool = False):
         self.connected = connected
         if connected:
@@ -25,7 +25,7 @@ class WorkspaceDataHelper:
             return os.environ["WORKSPACE_DATABASE_HOST"]
         else:
             return self._dev_config(
-                lambda c: c["development"]["workspace_database"]["host"]
+                lambda c: c["development"]["workspace"]["database"]["host"]
             )
 
     @property
@@ -34,7 +34,7 @@ class WorkspaceDataHelper:
             return os.environ["WORKSPACE_DATABASE_USERNAME"]
         else:
             return self._dev_config(
-                lambda c: c["development"]["workspace_database"]["username"]
+                lambda c: c["development"]["workspace"]["database"]["username"]
             )
 
     @property
@@ -43,7 +43,7 @@ class WorkspaceDataHelper:
             return os.environ["WORKSPACE_DATABASE_PASSWORD"]
         else:
             return self._dev_config(
-                lambda c: c["development"]["workspace_database"]["password"]
+                lambda c: c["development"]["workspace"]["database"]["password"]
             )
 
     @property
@@ -52,7 +52,7 @@ class WorkspaceDataHelper:
             return os.environ["WORKSPACE_DATABASE_DB_NAME"]
         else:
             return self._dev_config(
-                lambda c: c["development"]["workspace_database"]["db_name"]
+                lambda c: c["development"]["workspace"]["database"]["db_name"]
             )
 
     @property
@@ -61,7 +61,7 @@ class WorkspaceDataHelper:
             return os.environ["WORKSPACE_DATABASE_PORT"]
         else:
             return self._dev_config(
-                lambda c: c["development"]["workspace_database"]["port"]
+                lambda c: c["development"]["workspace"]["database"]["port"]
             )
 
     @property
@@ -71,15 +71,15 @@ class WorkspaceDataHelper:
         else:
             return f"postgresql://{self.database_username}:{self.database_password}@{self.database_host}:{self.database_port}/{self.database_name}"
 
-    def files_path(self, path: str) -> str:
+    @property
+    def files_path(self) -> str:
         if self.connected:
-            return f"/home/hexa/{path}"
+            return "/home/hexa/"
         elif len(sys.argv) > 0:
             base_path = Path(sys.argv[0]).parent.resolve()
             local_workspace_path = base_path / Path("workspace")
             if local_workspace_path.exists():
-                full_path = local_workspace_path / Path(path)
-                return str(full_path.resolve())
+                return str(local_workspace_path.resolve())
             else:
                 exception_message = (
                     'Your pipeline directory does not contain a "workspace directory". '
@@ -97,6 +97,4 @@ class WorkspaceDataHelper:
             raise ValueError("Could not find config")
 
 
-workspace_data = WorkspaceDataHelper()
-
-__all__ = ["workspace_data"]
+workspace = Workspace()

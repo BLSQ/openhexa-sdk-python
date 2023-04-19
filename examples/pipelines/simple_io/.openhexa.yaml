@@ -1,9 +1,10 @@
 development:
-  workspace_database:
-    host: localhost
-    username: pierre
-    password:
-    db_name: simple_io
-    port: 5432
-  workspace_files:
-    path: ./workspace
+  workspace:
+    database:
+      host: localhost
+      username: pierre
+      password:
+      db_name: simple_io
+      port: 5432
+    files:
+      path: ./workspace
