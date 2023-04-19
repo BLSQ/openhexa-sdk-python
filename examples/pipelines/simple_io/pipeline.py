@@ -24,11 +24,15 @@ def simple_io():
 
 @simple_io.task
 def load_files_data():
+    current_run.info("Loading files data...")
+
     return pd.read_csv(f"{workspace.files_path}/raw.csv")
 
 
 @simple_io.task
 def transform_and_write_files_data(raw_data: pd.DataFrame):
+    current_run.info("Transforming files data...")
+
     transformed_data = raw_data.copy()
     transformed_data["foo"] = transformed_data["foo"].multiply(2)
     transformed_path = f"{workspace.files_path}/transformed.csv"
@@ -38,6 +42,8 @@ def transform_and_write_files_data(raw_data: pd.DataFrame):
 
 @simple_io.task
 def load_data_from_postgresql() -> pd.DataFrame:
+    current_run.info("Loading Postgres data...")
+
     engine = create_engine(workspace.database_url)
 
     return pd.read_sql("SELECT * FROM foo", con=engine)
@@ -45,6 +51,8 @@ def load_data_from_postgresql() -> pd.DataFrame:
 
 @simple_io.task
 def transform_and_write_sql_data(raw_data: pd.DataFrame):
+    current_run.info("Transforming postgres data...")
+
     engine = create_engine(workspace.database_url)
     transformed_data = raw_data.copy()
     transformed_data["bar"] = transformed_data["bar"].multiply(3)
@@ -54,6 +62,8 @@ def transform_and_write_sql_data(raw_data: pd.DataFrame):
 
 @simple_io.task
 def load_dhis2_data():
+    current_run.info("Loading DHIS2 data...")
+
     connection = workspace.dhis2_connection("dhis2-play")
     base_url = f"{connection.api_url}/api"
     session = requests.Session()
@@ -69,6 +79,7 @@ def load_dhis2_data():
             ],
         },
     )
+    current_run.debug(f"Got {analytics_response.status_code} response from DHIS2")
 
     return json.loads(analytics_response.text)
 
