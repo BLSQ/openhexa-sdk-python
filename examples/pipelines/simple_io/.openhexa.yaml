@@ -8,3 +8,8 @@ development:
       port: 5432
     files:
       path: ./workspace
+    connections:
+      dhis2-play:
+        api_url: https://play.dhis2.org/2.39.1.1
+        username: admin
+        password: district

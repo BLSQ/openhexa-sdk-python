@@ -1,4 +1,7 @@
+import json
+
 import pandas as pd
+import requests
 from sqlalchemy import create_engine
 
 from openhexa.sdk.pipelines import current_run, pipeline
@@ -6,7 +9,6 @@ from openhexa.sdk.workspace import workspace
 
 
 @pipeline("simple-io", name="Simple IO")
-# @connection("dhis2_server", type=DHIS2Connection, name="DHIS2 server")
 def simple_io():
     # Read and write from/to workspace files
     raw_files_data = load_files_data()
@@ -17,7 +19,7 @@ def simple_io():
     transform_and_write_sql_data(raw_sql_data)
 
     # Use connection
-    # dhis2_data = read_data_from_dhis2(dhis2_server)
+    load_dhis2_data()
 
 
 @simple_io.task
@@ -50,12 +52,25 @@ def transform_and_write_sql_data(raw_data: pd.DataFrame):
     current_run.add_database_output("baz", name="Baz table")
 
 
-# @simple_io.task
-# def read_data_from_dhis2(dhis2_server: DHIS2Connection):
-#     with dhis2_server.simulate() as something:  # what is DHIS2 server is not usable?
-#         data = requests.get(f"{dhis2_server.api_url}/some-endpoint")
-#
-#     return data
+@simple_io.task
+def load_dhis2_data():
+    connection = workspace.dhis2_connection("dhis2-play")
+    base_url = f"{connection.api_url}/api"
+    session = requests.Session()
+    session.auth = (connection.username, connection.password)
+    analytics_response = session.get(
+        f"{base_url}/analytics",
+        params={
+            "aggregationType": "SUM",
+            "dimension": [
+                "dx:DE_GROUP-qfxEYY9xAl6",
+                "pe:2021;2022",
+                "ou:LEVEL-2",
+            ],
+        },
+    )
+
+    return json.loads(analytics_response.text)
 
 
 if __name__ == "__main__":

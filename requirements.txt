@@ -9,3 +9,5 @@ rasterstats~=0.18.0
 multiprocess~=0.70.14
 setuptools~=67.6.1
 SQLAlchemy~=2.0.9
+PyYAML~=6.0
+stringcase~=1.2.0
