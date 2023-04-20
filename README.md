@@ -28,11 +28,28 @@ python pipeline.py -f example_conf.json
 Install the SDK in editable mode:
 
 ```shell
-pip install -e ".[dev]"
+python -m venv venv # Create a virtual environment for this project
+source venv/bin/activate # Activate the venv
+pip install -r requirements.txt
 ```
 
 Run the tests using pytest:
 
 ```shell
 pytest
+```
+
+
+## Publishing the pipelines image
+
+The docker image `openhexa-pipelines` is still build and published manually. Follow the steps below to publish a new docker image.
+
+```shell
+cd openhexa-sdk-python
+python -m build .
+mv dist/*.whl docker/
+cd docker
+docker build -t openhexa-pipelines .
+docker tag openhexa-pipelines blsq/openhexa-pipelines:latest
+docker push blsq/openhexa-pipelines:latest
 ```
