@@ -1,6 +1,8 @@
 import sys
+from pathlib import Path
 
 import click
+import stringcase
 
 from openhexa import __version__
 from openhexa.cli.api import (
@@ -170,10 +172,60 @@ def config_set_url(url):
 @click.pass_context
 def pipelines(ctx):
     """
-    Manage pipelines (list workspace's pipelines, push a pipeline to the backend)
+    Manage pipelines (list pipelines, push a pipeline to the backend)
     """
     if ctx.invoked_subcommand is None:
         ctx.forward(pipelines_list)
+
+
+@pipelines.command("init")
+@click.argument("name", type=str)
+def pipelines_init(name: str):
+    new_pipeline_directory_name = stringcase.snakecase(name)
+    new_pipeline_path = Path.cwd() / Path(stringcase.snakecase(name))
+    if new_pipeline_path.exists():
+        click.echo(
+            f"There is already a {name} directory in the current directory. Please choose a new name "
+            f"for your pipeline.",
+            err=True,
+        )
+        sys.exit(1)
+
+    # Load samples
+    sample_directory_path = Path(__file__).parent / Path("skeleton")
+    with open(sample_directory_path / Path(".gitignore"), "r") as sample_ignore_file:
+        sample_ignore_content = sample_ignore_file.read()
+    with open(sample_directory_path / Path("pipeline.py"), "r") as sample_pipeline_file:
+        sample_pipeline_content = (
+            sample_pipeline_file.read()
+            .replace("skeletton-pipeline-code", stringcase.spinalcase(name))
+            .replace("skeleton_pipeline_name", stringcase.snakecase(name))
+            .replace("Skeleton pipeline name", name)
+        )
+    with open(
+        sample_directory_path / Path("workspace.yaml"), "r"
+    ) as sample_workspace_file:
+        sample_workspace_content = sample_workspace_file.read()
+
+    # Create directory
+    new_pipeline_path.mkdir(exist_ok=False)
+    (new_pipeline_path / Path("workspace")).mkdir(exist_ok=False)
+    with open(new_pipeline_path / Path(".gitignore"), "w") as ignore_file:
+        ignore_file.write(sample_ignore_content)
+    with open(new_pipeline_path / Path("pipeline.py"), "w") as pipeline_file:
+        pipeline_file.write(sample_pipeline_content)
+    with open(new_pipeline_path / Path("workspace.yaml"), "w") as workspace_file:
+        workspace_file.write(sample_workspace_content)
+
+    # Success
+    click.echo(
+        f"{click.style('Success!', fg='green')} Your pipeline has been created in "
+        f"the {new_pipeline_directory_name}/ directory"
+    )
+    click.echo(
+        f"Run it using {click.style(f'cd {new_pipeline_directory_name}', fg='cyan')} && "
+        f"{click.style('python pipeline.py', fg='cyan')}"
+    )
 
 
 @pipelines.command("push")

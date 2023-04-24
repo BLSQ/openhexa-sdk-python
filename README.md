@@ -1,5 +1,17 @@
 # OpenHexa Python SDK
 
+The OpenHexa Python SDK is a tool that helps you write code for the OpenHexa platform.
+
+It is particularly useful to write OpenHexa data pipelines, but can also be used in the OpenHexa notebooks environment.
+
+## Writing data pipelines
+
+TBC
+
+## Using the SDK in the notebooks environment
+
+TBC
+
 ## Running the examples
 
 Clone the repo and install the dependencies, including the ones required to run the examples:
