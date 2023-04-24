@@ -47,7 +47,7 @@ class CurrentWorkspace:
     @property
     def database_name(self):
         try:
-            return os.environ["WORKSPACE_DATABASE_DBNAME"]
+            return os.environ["WORKSPACE_DATABASE_DB_NAME"]
         except KeyError:
             raise WorkspaceConfigError(
                 "No database has been configured. Did you forget to provide a database entry"
@@ -101,7 +101,7 @@ class CurrentWorkspace:
             port = int(os.environ[f"{env_variable_prefix}_PORT"])
             username = os.environ[f"{env_variable_prefix}_USERNAME"]
             password = os.environ[f"{env_variable_prefix}_PASSWORD"]
-            dbname = os.environ[f"{env_variable_prefix}_DBNAME"]
+            dbname = os.environ[f"{env_variable_prefix}_DB_NAME"]
         except KeyError:
             raise ConnectionDoesNotExist(f'No PostgreSQL connection for "{slug}"')
 

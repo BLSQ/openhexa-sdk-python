@@ -46,7 +46,7 @@ def load_local_workspace_config():
                 os.environ["WORKSPACE_DATABASE_PORT"] = str(
                     local_workspace_config["database"]["port"]
                 )
-                os.environ["WORKSPACE_DATABASE_DBNAME"] = local_workspace_config[
+                os.environ["WORKSPACE_DATABASE_DB_NAME"] = local_workspace_config[
                     "database"
                 ]["dbname"]
             except KeyError:
