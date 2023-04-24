@@ -3,17 +3,23 @@ from __future__ import annotations
 import argparse
 import datetime
 import json
+import os
 import string
 import time
 import typing
 from logging import getLogger
 
-from multiprocess import get_context
+from multiprocess import get_context  # NOQA
 
 from .parameter import FunctionWithParameter, Parameter, ParameterValueError
 from .task import PipelineWithTask
+from .utils import load_local_workspace_config
 
 logger = getLogger(__name__)
+
+
+class PipelineConfigError(Exception):
+    pass
 
 
 def pipeline(
@@ -136,6 +142,7 @@ class Pipeline:
         return {arg.code: arg.parameter_spec() for arg in self.parameters}
 
     def __call__(self, config: typing.Optional[typing.Dict[str, typing.Any]] = None):
+        # Handle config
         if config is None:  # Called without arguments, in the pipeline file itself
             parser = argparse.ArgumentParser(exit_on_error=False)
             parser.add_argument("-c", "--config")
@@ -153,14 +160,20 @@ class Pipeline:
                     try:
                         config = json.load(cf)
                     except json.JSONDecodeError:
-                        raise ValueError("The provided config is not valid JSON")
+                        raise PipelineConfigError(
+                            "The provided config is not valid JSON"
+                        )
 
             elif args.config is not None:
                 try:
                     config = json.loads(args.config)
                 except json.JSONDecodeError:
-                    raise ValueError("The provided config is not valid JSON")
+                    raise PipelineConfigError("The provided config is not valid JSON")
             else:
                 config = {}
+
+        # Handle local workspace config for dev / testing, if appropriate
+        if "HEXA_SERVER_URL" not in os.environ:
+            load_local_workspace_config()
 
         self.run(config)

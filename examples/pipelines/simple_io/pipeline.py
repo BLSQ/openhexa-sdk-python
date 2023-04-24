@@ -65,7 +65,7 @@ def load_dhis2_data():
     current_run.info("Loading DHIS2 data...")
 
     connection = workspace.dhis2_connection("dhis2-play")
-    base_url = f"{connection.api_url}/api"
+    base_url = f"{connection.url}/api"
     session = requests.Session()
     session.auth = (connection.username, connection.password)
     analytics_response = session.get(
