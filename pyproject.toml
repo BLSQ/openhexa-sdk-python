@@ -4,6 +4,7 @@ requires = ["setuptools", "wheel"]
 
 [tool.autoflake]
 check = true
+imports = ["django", "requests", "urllib3"]
 
 [tool.black]
 exclude = '''
