@@ -133,22 +133,29 @@ def workspaces_rm(slug):
 
 
 @app.group(invoke_without_command=True)
-def config():
+@click.pass_context
+def config(ctx):
     """
     Manage configuration of the CLI.
     """
-    user_config = open_config()
-    click.echo("Debug: " + ("True" if is_debug(user_config) else "False"))
-    click.echo(f"Backend URL: {user_config['openhexa']['url']}")
-    click.echo(f"Current workspace: {user_config['openhexa']['current_workspace']}")
-    click.echo("\nWorkspaces:")
-    click.echo("\n".join(user_config["workspaces"].keys()))
+
+    if ctx.invoked_subcommand is None:
+        user_config = open_config()
+        click.echo("Debug: " + ("True" if is_debug(user_config) else "False"))
+        click.echo(f"Backend URL: {user_config['openhexa']['url']}")
+        try:
+            click.echo(
+                f"Current workspace: {user_config['openhexa']['current_workspace']}"
+            )
+        except KeyError:
+            click.echo("No current workspace")
+        click.echo("\nWorkspaces:")
+        click.echo("\n".join(user_config["workspaces"].keys()))
 
 
 @config.command(name="set_url")
 @click.argument("url")
-@click.pass_context
-def config_set_url(ctx, url):
+def config_set_url(url):
     """
     Set the URL of the backend.
 
@@ -156,6 +163,7 @@ def config_set_url(ctx, url):
     user_config = open_config()
     user_config["openhexa"].update({"url": url})
     save_config(user_config)
+    click.echo(f"Set backend URL to {user_config['openhexa']['url']}")
 
 
 @app.group(invoke_without_command=True)
@@ -178,10 +186,10 @@ def pipelines_push(path: str):
     """
 
     user_config = open_config()
-    workspace = user_config["openhexa"]["current_workspace"]
-
-    if workspace == "":
-        click.echo("No workspace activated", err=True)
+    try:
+        workspace = user_config["openhexa"]["current_workspace"]
+    except KeyError:
+        click.echo("No workspace activated. Use ", err=True)
         sys.exit(1)
 
     ensure_is_pipeline_dir(path)
