@@ -4,8 +4,7 @@ import pandas as pd
 import requests
 from sqlalchemy import create_engine
 
-from openhexa.sdk.pipelines import current_run, pipeline
-from openhexa.sdk.workspace import workspace
+from openhexa.sdk import current_run, pipeline, workspace
 
 
 @pipeline("simple-io", name="Simple IO")

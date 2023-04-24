@@ -5,7 +5,7 @@ import stringcase
 from openhexa.sdk.workspace.connection import DHIS2Connection, PostgreSQLConnection
 
 
-class ConfigError(Exception):
+class WorkspaceConfigError(Exception):
     pass
 
 
@@ -13,30 +13,56 @@ class ConnectionDoesNotExist(Exception):
     pass
 
 
-class InvalidConnection(Exception):
-    pass
-
-
 class CurrentWorkspace:
     @property
     def database_host(self):
-        return os.environ["WORKSPACE_DATABASE_HOST"]
+        try:
+            return os.environ["WORKSPACE_DATABASE_HOST"]
+        except KeyError:
+            raise WorkspaceConfigError(
+                "No database has been configured. Did you forget to provide a database entry"
+                " in your workspace.yaml file?"
+            )
 
     @property
     def database_username(self):
-        return os.environ["WORKSPACE_DATABASE_USERNAME"]
+        try:
+            return os.environ["WORKSPACE_DATABASE_USERNAME"]
+        except KeyError:
+            raise WorkspaceConfigError(
+                "No database has been configured. Did you forget to provide a database entry"
+                " in your workspace.yaml file?"
+            )
 
     @property
     def database_password(self):
-        return os.environ.get("WORKSPACE_DATABASE_PASSWORD")
+        try:
+            return os.environ.get("WORKSPACE_DATABASE_PASSWORD")
+        except KeyError:
+            raise WorkspaceConfigError(
+                "No database has been configured. Did you forget to provide a database entry"
+                " in your workspace.yaml file?"
+            )
 
     @property
     def database_name(self):
-        return os.environ["WORKSPACE_DATABASE_DBNAME"]
+        try:
+            return os.environ["WORKSPACE_DATABASE_DBNAME"]
+        except KeyError:
+            raise WorkspaceConfigError(
+                "No database has been configured. Did you forget to provide a database entry"
+                " in your workspace.yaml file?"
+            )
 
     @property
     def database_port(self):
-        return int(os.environ["WORKSPACE_DATABASE_PORT"])
+        try:
+            return int(os.environ["WORKSPACE_DATABASE_PORT"])
+        except KeyError:
+            raise WorkspaceConfigError(
+                "No database has been configured. Did you forget to provide a database entry"
+                " in your workspace.yaml file?"
+            )
 
     @property
     def database_url(self):
@@ -49,7 +75,13 @@ class CurrentWorkspace:
     def files_path(self) -> str:
         if "WORKSPACE_FILES_PATH" in os.environ:
             return os.environ["WORKSPACE_FILES_PATH"]
-        return "/home/hexa/workspace"
+        elif "HEXA_SERVER_URL" in os.environ:
+            return "/home/hexa/workspace"
+
+        raise WorkspaceConfigError(
+            "No filesystem has been configured. Did you forget to provide a files.path"
+            "key in your workspace.yaml file?"
+        )
 
     def dhis2_connection(self, slug: str) -> DHIS2Connection:
         try:

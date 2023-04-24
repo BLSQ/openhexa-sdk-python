@@ -1,0 +1,8 @@
+files:
+  path: ./workspace
+connections:
+  dhis2-play:
+    type: dhis2
+    url: https://play.dhis2.org/2.39.1.1
+    username: admin
+    password: district

@@ -14,4 +14,11 @@ class PostgreSQLConnection:
     port: int
     username: str
     password: str
-    dbname: str
+    database_name: str
+
+    @property
+    def url(self):
+        return (
+            f"postgresql://{self.username}:{self.password}"
+            f"@{self.host}:{self.port}/{self.database_name}"
+        )
