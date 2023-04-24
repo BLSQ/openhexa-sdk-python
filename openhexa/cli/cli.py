@@ -189,7 +189,11 @@ def pipelines_push(path: str):
     try:
         workspace = user_config["openhexa"]["current_workspace"]
     except KeyError:
-        click.echo("No workspace activated. Use ", err=True)
+        click.echo(
+            "No workspace activated. Use openhexa workspaces add or openhexa workspaces activate to "
+            "activate a workspace.",
+            err=True,
+        )
         sys.exit(1)
 
     ensure_is_pipeline_dir(path)

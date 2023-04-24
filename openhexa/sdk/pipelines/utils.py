@@ -114,13 +114,13 @@ def load_local_workspace_config():
                             connection_config["port"]
                         )
                         os.environ[f"{stringcase.constcase(slug)}_USERNAME"] = str(
-                            connection_config["port"]
+                            connection_config["username"]
                         )
                         os.environ[
                             f"{stringcase.constcase(slug)}_PASSWORD"
                         ] = connection_config["password"]
                         os.environ[
-                            f"{stringcase.constcase(slug)}_DATABASE_NAME"
+                            f"{stringcase.constcase(slug)}_DB_NAME"
                         ] = connection_config["database_name"]
                     except KeyError:
                         exception_message = (
