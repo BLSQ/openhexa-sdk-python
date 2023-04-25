@@ -9,6 +9,7 @@ import time
 import typing
 from logging import getLogger
 
+import requests
 from multiprocess import get_context  # NOQA
 
 from .parameter import FunctionWithParameter, Parameter, ParameterValueError
@@ -86,6 +87,8 @@ class Pipeline:
         result_list = []
         context = get_context("spawn")
         pool = context.Pool()  # FIXME: set max size of pool
+        total = len(self.tasks)
+        completed = 0
 
         while True:
             tasks = self.get_available_tasks()
@@ -114,7 +117,12 @@ class Pipeline:
                         .replace(microsecond=0)
                         .isoformat()
                     )
+
+                    completed += 1
+                    progress = int(completed / total * 100)
                     print(f'{now} Finished task "{task.compute.__name__}"')
+                    self._update_progress(progress)
+
                     try:
                         task_com_result = result.get()
                         task.result = task_com_result.result
@@ -140,6 +148,30 @@ class Pipeline:
 
     def parameters_spec(self):
         return [arg.parameter_spec() for arg in self.parameters]
+
+    def _update_progress(self, progress: int):
+        if self.connected:
+            token = os.environ["HEXA_TOKEN"]
+            headers = {"Authorization": "Bearer %s" % token}
+            query = """
+                            mutation updatePipelineProgress ($input: UpdatePipelineProgressInput!) {
+                                updatePipelineProgress(input: $input) { success errors }
+                            }"""
+            r = requests.post(
+                f'{os.environ["HEXA_SERVER_URL"]}/graphql/',
+                headers=headers,
+                json={
+                    "query": query,
+                    "variables": {"input": {"percent": progress}},
+                },
+            )
+            r.raise_for_status()
+        else:
+            print(f"Progress update: {progress}%")
+
+    @property
+    def connected(self):
+        return "HEXA_SERVER_URL" in os.environ
 
     def __call__(self, config: typing.Optional[typing.Dict[str, typing.Any]] = None):
         # Handle config

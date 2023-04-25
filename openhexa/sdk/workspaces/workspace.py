@@ -2,7 +2,7 @@ import os
 
 import stringcase
 
-from openhexa.sdk.workspace.connection import DHIS2Connection, PostgreSQLConnection
+from .connection import DHIS2Connection, PostgreSQLConnection
 
 
 class WorkspaceConfigError(Exception):
@@ -106,7 +106,11 @@ class CurrentWorkspace:
             raise ConnectionDoesNotExist(f'No PostgreSQL connection for "{slug}"')
 
         return PostgreSQLConnection(
-            host=host, port=port, username=username, password=password, dbname=dbname
+            host=host,
+            port=port,
+            username=username,
+            password=password,
+            database_name=dbname,
         )
 
 

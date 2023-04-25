@@ -36,7 +36,7 @@ def transform_and_write_files_data(raw_data: pd.DataFrame):
     transformed_data["foo"] = transformed_data["foo"].multiply(2)
     transformed_path = f"{workspace.files_path}/transformed.csv"
     transformed_data.to_csv(transformed_path, index=False)
-    current_run.add_file_output(transformed_path, name="Transformed data")
+    current_run.add_file_output(transformed_path)
 
 
 @simple_io.task
@@ -56,7 +56,7 @@ def transform_and_write_sql_data(raw_data: pd.DataFrame):
     transformed_data = raw_data.copy()
     transformed_data["bar"] = transformed_data["bar"].multiply(3)
     transformed_data.to_sql("baz", con=engine, index=False, if_exists="replace")
-    current_run.add_database_output("baz", name="Baz table")
+    current_run.add_database_output("baz")
 
 
 @simple_io.task
