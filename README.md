@@ -4,60 +4,76 @@ The OpenHexa Python SDK is a tool that helps you write code for the OpenHexa pla
 
 It is particularly useful to write OpenHexa data pipelines, but can also be used in the OpenHexa notebooks environment.
 
-## Writing data pipelines
+## Quickstart
+
+### Writing and deploying pipelines
+
+Here's a super minimal example to get you started. First, create a new directory and a virtual environment:
+
+```shell
+mkdir openhexa-pipelines-quickstart
+cd openhexa-pipelines-quickstart
+virtualenv venv
+source venv/bin/activate
+```
+
+You can then install the OpenHexa SDK:
+
+```shell
+pip install openhexa.sdk
+```
+
+Now that the SDK is installed withing your virtual environmentYou can now use the `openhexa` CLI utility to create 
+a new pipeline:
+
+```shell
+openhexa pipelines init "My awesome pipeline"
+```
+
+Great! As you can see in the console output, the OpenHexa CLI has created a new directory, which contains the basic 
+structure required for an OpenHexa pipeline. You can now `cd` in the new pipeline directory and run the pipeline:
+
+```shell
+cd my_awesome_pipeline
+python pipeline.py
+```
+
+Congratulations! You have successfully run your first pipeline locally.
+
+If you inspect the actual pipeline code, you will see that it doesn't do a lot of things, but it is still a perfectly 
+valid OpenHexa pipeline.
+
+Let's publish to an actual OpenHexa workspace so that it can run online.
+
+Using the OpenHexa web interface, within a workspace, navigate to the Pipelines tab and click on "Create".
+
+Copy the command displayed in the popup in your terminal:
+
+```shell
+openhexa workspaces add <workspace>
+```
+
+You will be prompted for an authentication token, you can find it in the popup as well.
+
+After adding the workspace using the CLI, you can now push your pipeline:
+
+```shell
+openhexa pipelines push 
+```
+
+As it is the first time, the CLI will ask you to confirm the creation operation. After confirmation the console will 
+output the link to the pipeline screen in the OpenHexa interface.
+
+You can now open the link and run the pipeline using the OpenHexa web interface.
+
+### Using the SDK in the notebooks environment
 
 TBC
 
-## Using the SDK in the notebooks environment
+## Contributing
 
-TBC
-
-## Running the examples
-
-Clone the repo and install the dependencies, including the ones required to run the examples:
-
-```shell
-git checkout https://github.com/BLSQ/openhexa-sdk-python.git
-pip install ".[examples]"
-```
-
-Run a pipeline:
-
-```shell
-cd examples/pipelines/logistic_stats
-python pipeline.py -c '{"deg":"qfxEYY9xAl6","periods":["2022Q1","2022Q2"]}'
-```
-
-Or using a config file:
-
-```shell
-cd examples/pipelines/logistic_stats
-python pipeline.py -f example_conf.json
-```
-
-## Using the CLI
-
-Now that your pipeline is functional, you can push it to the OpenHexa backend so that it can run online.
-
-As code and data are organized with workspaces, the first think to do is to activate a workspace using the CLI.
-
-Using the OpenHexa interface, chose a workspace, click on the "Pipelines" section and then on the "Create" 
-call-to-action at the top-right of the header. You will find ready-to use instructions on how to activate 
-the workspace, as well as the API token you need to use.
-
-The command looks as follows:
-
-```shell
-openhexa workspaces add <workspace_slug>
-```
-
-You can then push your pipeline:
-
-```shell
-openhexa pipelines push <pipeline_directory>
-```
-
-## Development & testing
+The following sections explain how you can setup a local development environment if you want to participate to the 
+development of the SDK
 
 ### Development setup
 
@@ -86,8 +102,7 @@ Run the tests using pytest:
 pytest
 ```
 
-
-## Publishing the pipelines image
+### Publishing the pipelines image
 
 The docker image `openhexa-pipelines` is still build and published manually. Follow the steps below to publish a new docker image.
 
