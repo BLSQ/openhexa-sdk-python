@@ -181,6 +181,10 @@ def pipelines(ctx):
 @pipelines.command("init")
 @click.argument("name", type=str)
 def pipelines_init(name: str):
+    """
+    Initialize a new pipeline in a fresh directory.
+    """
+
     new_pipeline_directory_name = stringcase.snakecase(name)
     new_pipeline_path = Path.cwd() / Path(stringcase.snakecase(name))
     if new_pipeline_path.exists():
