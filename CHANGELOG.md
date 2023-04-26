@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.5](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.4...0.1.5) (2023-04-26)
+
+
+### Bug Fixes
+
+* default args & pipeline URL ([#13](https://github.com/BLSQ/openhexa-sdk-python/issues/13)) ([8c99c85](https://github.com/BLSQ/openhexa-sdk-python/commit/8c99c85c59d501ff55db9591dd28564195ace996))
+
 ## [0.1.4](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.3...0.1.4) (2023-04-26)
 
 
