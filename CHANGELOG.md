@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.2...0.1.3) (2023-04-26)
+
+
+### Bug Fixes
+
+* add requests dep ([#9](https://github.com/BLSQ/openhexa-sdk-python/issues/9)) ([209bee1](https://github.com/BLSQ/openhexa-sdk-python/commit/209bee187ea07561e931da76fcd2b52a539b2c71))
+
 ## [0.1.2](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.1...0.1.2) (2023-04-26)
 
 
