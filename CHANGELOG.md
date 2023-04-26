@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.3...0.1.4) (2023-04-26)
+
+
+### Bug Fixes
+
+* add missing MANIFEST.in for assets ([#11](https://github.com/BLSQ/openhexa-sdk-python/issues/11)) ([5b280bd](https://github.com/BLSQ/openhexa-sdk-python/commit/5b280bd76cbf418ac42cac0d8d447c72d4939a5f))
+
 ## [0.1.3](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.2...0.1.3) (2023-04-26)
 
 
