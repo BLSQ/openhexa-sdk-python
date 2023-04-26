@@ -1,6 +1,8 @@
 import sys
+from pathlib import Path
 
 import click
+import stringcase
 
 from openhexa import __version__
 from openhexa.cli.api import (
@@ -133,22 +135,29 @@ def workspaces_rm(slug):
 
 
 @app.group(invoke_without_command=True)
-def config():
+@click.pass_context
+def config(ctx):
     """
     Manage configuration of the CLI.
     """
-    user_config = open_config()
-    click.echo("Debug: " + ("True" if is_debug(user_config) else "False"))
-    click.echo(f"Backend URL: {user_config['openhexa']['url']}")
-    click.echo(f"Current workspace: {user_config['openhexa']['current_workspace']}")
-    click.echo("\nWorkspaces:")
-    click.echo("\n".join(user_config["workspaces"].keys()))
+
+    if ctx.invoked_subcommand is None:
+        user_config = open_config()
+        click.echo("Debug: " + ("True" if is_debug(user_config) else "False"))
+        click.echo(f"Backend URL: {user_config['openhexa']['url']}")
+        try:
+            click.echo(
+                f"Current workspace: {user_config['openhexa']['current_workspace']}"
+            )
+        except KeyError:
+            click.echo("No current workspace")
+        click.echo("\nWorkspaces:")
+        click.echo("\n".join(user_config["workspaces"].keys()))
 
 
 @config.command(name="set_url")
 @click.argument("url")
-@click.pass_context
-def config_set_url(ctx, url):
+def config_set_url(url):
     """
     Set the URL of the backend.
 
@@ -156,16 +165,67 @@ def config_set_url(ctx, url):
     user_config = open_config()
     user_config["openhexa"].update({"url": url})
     save_config(user_config)
+    click.echo(f"Set backend URL to {user_config['openhexa']['url']}")
 
 
 @app.group(invoke_without_command=True)
 @click.pass_context
 def pipelines(ctx):
     """
-    Manage pipelines (list workspace's pipelines, push a pipeline to the backend)
+    Manage pipelines (list pipelines, push a pipeline to the backend)
     """
     if ctx.invoked_subcommand is None:
         ctx.forward(pipelines_list)
+
+
+@pipelines.command("init")
+@click.argument("name", type=str)
+def pipelines_init(name: str):
+    new_pipeline_directory_name = stringcase.snakecase(name)
+    new_pipeline_path = Path.cwd() / Path(stringcase.snakecase(name))
+    if new_pipeline_path.exists():
+        click.echo(
+            f"There is already a {name} directory in the current directory. Please choose a new name "
+            f"for your pipeline.",
+            err=True,
+        )
+        sys.exit(1)
+
+    # Load samples
+    sample_directory_path = Path(__file__).parent / Path("skeleton")
+    with open(sample_directory_path / Path(".gitignore"), "r") as sample_ignore_file:
+        sample_ignore_content = sample_ignore_file.read()
+    with open(sample_directory_path / Path("pipeline.py"), "r") as sample_pipeline_file:
+        sample_pipeline_content = (
+            sample_pipeline_file.read()
+            .replace("skeletton-pipeline-code", stringcase.spinalcase(name))
+            .replace("skeleton_pipeline_name", stringcase.snakecase(name))
+            .replace("Skeleton pipeline name", name)
+        )
+    with open(
+        sample_directory_path / Path("workspace.yaml"), "r"
+    ) as sample_workspace_file:
+        sample_workspace_content = sample_workspace_file.read()
+
+    # Create directory
+    new_pipeline_path.mkdir(exist_ok=False)
+    (new_pipeline_path / Path("workspace")).mkdir(exist_ok=False)
+    with open(new_pipeline_path / Path(".gitignore"), "w") as ignore_file:
+        ignore_file.write(sample_ignore_content)
+    with open(new_pipeline_path / Path("pipeline.py"), "w") as pipeline_file:
+        pipeline_file.write(sample_pipeline_content)
+    with open(new_pipeline_path / Path("workspace.yaml"), "w") as workspace_file:
+        workspace_file.write(sample_workspace_content)
+
+    # Success
+    click.echo(
+        f"{click.style('Success!', fg='green')} Your pipeline has been created in "
+        f"the {new_pipeline_directory_name}/ directory"
+    )
+    click.echo(
+        f"Run it using {click.style(f'cd {new_pipeline_directory_name}', fg='cyan')} && "
+        f"{click.style('python pipeline.py', fg='cyan')}"
+    )
 
 
 @pipelines.command("push")
@@ -178,10 +238,14 @@ def pipelines_push(path: str):
     """
 
     user_config = open_config()
-    workspace = user_config["openhexa"]["current_workspace"]
-
-    if workspace == "":
-        click.echo("No workspace activated", err=True)
+    try:
+        workspace = user_config["openhexa"]["current_workspace"]
+    except KeyError:
+        click.echo(
+            "No workspace activated. Use openhexa workspaces add or openhexa workspaces activate to "
+            "activate a workspace.",
+            err=True,
+        )
         sys.exit(1)
 
     ensure_is_pipeline_dir(path)
