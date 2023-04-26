@@ -233,7 +233,9 @@ def pipelines_init(name: str):
 
 
 @pipelines.command("push")
-@click.argument("path", type=click.Path(exists=True, file_okay=False, dir_okay=True))
+@click.argument(
+    "path", default=".", type=click.Path(exists=True, file_okay=False, dir_okay=True)
+)
 def pipelines_push(path: str):
     """
     Push a pipeline to the backend. If the pipeline already exists, it will be updated otherwise it will be created.
@@ -284,7 +286,9 @@ def pipelines_push(path: str):
         new_version = upload_pipeline(user_config, path)
         click.echo(f"New version created: {new_version}")
 
-        url = f"{user_config['openhexa']['url']}/workspaces/{workspace}/pipelines/{pipeline.code}"
+        url = f"{user_config['openhexa']['url']}/workspaces/{workspace}/pipelines/{pipeline.code}".replace(
+            "api", "app"
+        )
         click.echo(
             f"Done! You can view the pipeline in OpenHexa on {click.style(url, fg='bright_blue', underline=True)}"
         )

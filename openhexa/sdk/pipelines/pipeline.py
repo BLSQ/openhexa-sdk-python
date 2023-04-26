@@ -67,7 +67,7 @@ class Pipeline:
 
     def run(self, config: typing.Dict[str, typing.Any]):
         now = datetime.datetime.utcnow().replace(microsecond=0).isoformat()
-        print(f'{now} Evaluating "{self.code}"')
+        print(f'{now} Starting pipeline "{self.code}"')
 
         # Validate / default parameters
         validated_config = {}
@@ -130,7 +130,7 @@ class Pipeline:
                         task.end_time = task_com_result.end_time
                         dag_step = True
                     except Exception as e:  # NOQA
-                        raise PipelineRunError(f"Pipeline failed: {e}")
+                        raise PipelineRunError(f"Pipeline {self.code} failed: {e}")
 
                 if dag_step:
                     # remove finished tasks
@@ -142,6 +142,8 @@ class Pipeline:
 
         pool.close()
         pool.join()
+
+        print(f'{now} Successfully completed pipeline "{self.code}"')
 
     def get_available_tasks(self):
         return [task for task in self.tasks if task.is_ready()]
