@@ -73,6 +73,8 @@ class CurrentWorkspace:
 
     @property
     def files_path(self) -> str:
+        """Return the base path to the filesystem, without trailing slash"""
+
         if "WORKSPACE_FILES_PATH" in os.environ:
             return os.environ["WORKSPACE_FILES_PATH"]
         elif "HEXA_SERVER_URL" in os.environ:

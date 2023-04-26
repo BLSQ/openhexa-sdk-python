@@ -14,7 +14,7 @@ class CurrentRun:
 
     def add_file_output(self, path: str):
         stripped_path = path.replace(workspace.files_path, "")
-        filename = stripped_path.split("/")[-1]  # TODO
+        name = stripped_path.strip("/")
         if self.connected:
             query = """
                     mutation addPipelineOutput ($input: AddPipelineOutputInput!) {
@@ -24,12 +24,12 @@ class CurrentRun:
                 "input": {
                     "uri": f"gs://{os.environ['WORKSPACE_BUCKET_NAME']}{stripped_path}",
                     "type": "file",
-                    "name": filename,
+                    "name": name,
                 }
             }
             self._graphql_query(query, variables)
         else:
-            print(f"Sending output with path {path} and name: {filename}")
+            print(f"Sending output with path {path} and name: {name}")
 
     def add_database_output(self, table_name: str):
         if self.connected:
