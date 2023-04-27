@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.6](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.5...0.1.6) (2023-04-27)
+
+
+### Bug Fixes
+
+* apply lower() to pipeline name to avoid weird snakecase strings ([#15](https://github.com/BLSQ/openhexa-sdk-python/issues/15)) ([6dd7333](https://github.com/BLSQ/openhexa-sdk-python/commit/6dd73337478e8f77d21ad299d3184ab94312fe04))
+
 ## [0.1.5](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.4...0.1.5) (2023-04-26)
 
 
