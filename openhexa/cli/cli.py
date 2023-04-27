@@ -185,8 +185,8 @@ def pipelines_init(name: str):
     Initialize a new pipeline in a fresh directory.
     """
 
-    new_pipeline_directory_name = stringcase.snakecase(name)
-    new_pipeline_path = Path.cwd() / Path(stringcase.snakecase(name))
+    new_pipeline_directory_name = stringcase.snakecase(name.lower())
+    new_pipeline_path = Path.cwd() / Path(new_pipeline_directory_name)
     if new_pipeline_path.exists():
         click.echo(
             f"There is already a {name} directory in the current directory. Please choose a new name "
@@ -202,8 +202,8 @@ def pipelines_init(name: str):
     with open(sample_directory_path / Path("pipeline.py"), "r") as sample_pipeline_file:
         sample_pipeline_content = (
             sample_pipeline_file.read()
-            .replace("skeletton-pipeline-code", stringcase.spinalcase(name))
-            .replace("skeleton_pipeline_name", stringcase.snakecase(name))
+            .replace("skeleton-pipeline-code", stringcase.spinalcase(name.lower()))
+            .replace("skeleton_pipeline_name", stringcase.snakecase(name.lower()))
             .replace("Skeleton pipeline name", name)
         )
     with open(

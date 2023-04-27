@@ -1,7 +1,7 @@
 from openhexa.sdk import current_run, pipeline
 
 
-@pipeline("skeletton-pipeline-code", name="Skeleton pipeline name")
+@pipeline("skeleton-pipeline-code", name="Skeleton pipeline name")
 def skeleton_pipeline_name():
     count = task_1()
     task_2(count)
