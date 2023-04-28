@@ -29,7 +29,7 @@ class CurrentRun:
             }
             self._graphql_query(query, variables)
         else:
-            print(f"Sending output with path {path} and name: {name}")
+            print(f"Sending output with path {stripped_path}")
 
     def add_database_output(self, table_name: str):
         if self.connected:
