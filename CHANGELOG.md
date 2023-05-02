@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.8](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.7...0.1.8) (2023-05-02)
+
+
+### Bug Fixes
+
+* Update readme.md to upgrade the lib on install ([51a7fb7](https://github.com/BLSQ/openhexa-sdk-python/commit/51a7fb7860d434f897e84652aeffa86e1c2a8c79))
+
 ## [0.1.7](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.6...0.1.7) (2023-05-02)
 
 
