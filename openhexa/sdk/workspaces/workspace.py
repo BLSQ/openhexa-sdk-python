@@ -1,12 +1,14 @@
 import os
+import re
 
 import stringcase
 
 from .connection import (
+    CustomConnection,
     DHIS2Connection,
+    GCSConnection,
     PostgreSQLConnection,
     S3Connection,
-    GCSConnection,
 )
 
 
@@ -149,6 +151,17 @@ class CurrentWorkspace:
             service_account_key=service_account_key,
             bucket_name=bucket_name,
         )
+
+    def custom_connection(slef, slug: str) -> CustomConnection:
+        try:
+            env_variable_prefix = stringcase.constcase(slug)
+            fields = {}
+            for key, value in os.environ.items():
+                if re.match(rf"^{env_variable_prefix}_", key):
+                    fields[key] = value
+        except KeyError:
+            raise ConnectionDoesNotExist(f'No Custom connection for "{slug}"')
+        return CustomConnection(fields=fields)
 
 
 workspace = CurrentWorkspace()

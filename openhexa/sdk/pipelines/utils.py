@@ -128,7 +128,7 @@ def load_local_workspace_config():
                             "the following keys: url, username, password."
                         )
                         raise LocalWorkspaceConfigError(exception_message)
-                # S3 Connections
+                # S3 connections
                 elif connection_config["type"] == "s3":
                     try:
                         os.environ[
@@ -146,6 +146,7 @@ def load_local_workspace_config():
                             "the following keys: secret_key, access_key_id, bucket_name."
                         )
                         raise LocalWorkspaceConfigError(exception_message)
+                # GCS connections
                 elif connection_config["type"] == "gcs":
                     try:
                         os.environ[
@@ -160,3 +161,10 @@ def load_local_workspace_config():
                             "the following keys: service_account_key, bucket_name."
                         )
                         raise LocalWorkspaceConfigError(exception_message)
+                # Custom connection
+                else:
+                    for key, value in connection_config.items():
+                        if key != "type":
+                            os.environ[stringcase.constcase(f"{slug}_{key}")] = str(
+                                value
+                            )
