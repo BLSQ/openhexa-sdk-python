@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.7](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.6...0.1.7) (2023-05-02)
+
+
+### Bug Fixes
+
+* print something understandable when using add_file_output locally ([fddbbbd](https://github.com/BLSQ/openhexa-sdk-python/commit/fddbbbdb1f3aa2676d4f0ee25c142efb15cec27f))
+* print something understandable when using add_file_output locally ([ce77c1c](https://github.com/BLSQ/openhexa-sdk-python/commit/ce77c1c79e1a558bf3d352c32d5603ee559a0f91))
+
 ## [0.1.6](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.5...0.1.6) (2023-04-27)
 
 
