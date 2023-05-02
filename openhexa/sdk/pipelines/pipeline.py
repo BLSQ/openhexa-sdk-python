@@ -12,6 +12,8 @@ from logging import getLogger
 import requests
 from multiprocess import get_context  # NOQA
 
+from openhexa.sdk.utils import Environments, get_environment
+
 from .parameter import FunctionWithParameter, Parameter, ParameterValueError
 from .task import PipelineWithTask
 from .utils import load_local_workspace_config
@@ -173,7 +175,8 @@ class Pipeline:
 
     @property
     def connected(self):
-        return "HEXA_SERVER_URL" in os.environ
+        env = get_environment()
+        return env == Environments.PIPELINE and "HEXA_SERVER_URL" in os.environ
 
     def __call__(self, config: typing.Optional[typing.Dict[str, typing.Any]] = None):
         # Handle config
@@ -207,7 +210,7 @@ class Pipeline:
                 config = {}
 
         # Handle local workspace config for dev / testing, if appropriate
-        if "HEXA_SERVER_URL" not in os.environ:
+        if not self.connected:
             load_local_workspace_config()
 
         self.run(config)

@@ -13,7 +13,7 @@ Here's a super minimal example to get you started. First, create a new directory
 ```shell
 mkdir openhexa-pipelines-quickstart
 cd openhexa-pipelines-quickstart
-virtualenv venv
+python -m venv venv
 source venv/bin/activate
 ```
 

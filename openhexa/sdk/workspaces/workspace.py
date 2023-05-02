@@ -3,6 +3,8 @@ import re
 
 import stringcase
 
+from openhexa.sdk.utils import Environments, get_environment
+
 from .connection import (
     CustomConnection,
     DHIS2Connection,
@@ -81,16 +83,16 @@ class CurrentWorkspace:
     @property
     def files_path(self) -> str:
         """Return the base path to the filesystem, without trailing slash"""
-
-        if "WORKSPACE_FILES_PATH" in os.environ:
+        env = get_environment()
+        if env == Environments.LOCAL:
+            if "WORKSPACE_FILES_PATH" not in os.environ:
+                raise WorkspaceConfigError(
+                    "No filesystem has been configured. Did you forget to provide a files.path"
+                    "key in your workspace.yaml file?"
+                )
             return os.environ["WORKSPACE_FILES_PATH"]
-        elif "HEXA_SERVER_URL" in os.environ:
+        else:
             return "/home/hexa/workspace"
-
-        raise WorkspaceConfigError(
-            "No filesystem has been configured. Did you forget to provide a files.path"
-            "key in your workspace.yaml file?"
-        )
 
     def dhis2_connection(self, slug: str) -> DHIS2Connection:
         try:
