@@ -146,3 +146,17 @@ def load_local_workspace_config():
                             "the following keys: secret_key, access_key_id, bucket_name."
                         )
                         raise LocalWorkspaceConfigError(exception_message)
+                elif connection_config["type"] == "gcs":
+                    try:
+                        os.environ[
+                            f"{stringcase.constcase(slug)}_SERVICE_ACCOUNT_KEY"
+                        ] = connection_config["service_account_key"]
+                        os.environ[f"{stringcase.constcase(slug)}_BUCKET_NAME"] = str(
+                            connection_config["bucket_name"]
+                        )
+                    except KeyError:
+                        exception_message = (
+                            "Invalid local workspace GCS connection config. Please make sure you provide "
+                            "the following keys: service_account_key, bucket_name."
+                        )
+                        raise LocalWorkspaceConfigError(exception_message)

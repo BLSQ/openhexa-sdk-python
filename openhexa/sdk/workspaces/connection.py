@@ -29,3 +29,9 @@ class S3Connection:
     access_key_id: str
     secret_access_key: str
     bucket_name: str
+
+
+@dataclasses.dataclass
+class GCSConnection:
+    service_account_key: str
+    bucket_name: str

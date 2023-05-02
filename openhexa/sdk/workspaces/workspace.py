@@ -2,7 +2,12 @@ import os
 
 import stringcase
 
-from .connection import DHIS2Connection, PostgreSQLConnection, S3Connection
+from .connection import (
+    DHIS2Connection,
+    PostgreSQLConnection,
+    S3Connection,
+    GCSConnection,
+)
 
 
 class WorkspaceConfigError(Exception):
@@ -127,6 +132,21 @@ class CurrentWorkspace:
         return S3Connection(
             access_key_id=access_key_id,
             secret_access_key=secret_access_key,
+            bucket_name=bucket_name,
+        )
+
+    def gcs_connection(self, slug: str) -> GCSConnection:
+        try:
+            env_variable_prefix = stringcase.constcase(slug)
+            service_account_key = os.environ[
+                f"{env_variable_prefix}_SERVICE_ACCOUNT_KEY"
+            ]
+            bucket_name = os.environ[f"{env_variable_prefix}_BUCKET_NAME"]
+        except KeyError:
+            raise ConnectionDoesNotExist(f'No GCS connection for "{slug}"')
+
+        return GCSConnection(
+            service_account_key=service_account_key,
             bucket_name=bucket_name,
         )
 
