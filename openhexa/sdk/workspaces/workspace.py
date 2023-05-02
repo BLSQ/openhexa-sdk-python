@@ -2,7 +2,7 @@ import os
 
 import stringcase
 
-from .connection import DHIS2Connection, PostgreSQLConnection
+from .connection import DHIS2Connection, PostgreSQLConnection, S3Connection
 
 
 class WorkspaceConfigError(Exception):
@@ -113,6 +113,21 @@ class CurrentWorkspace:
             username=username,
             password=password,
             database_name=dbname,
+        )
+
+    def s3_connection(self, slug: str) -> S3Connection:
+        try:
+            env_variable_prefix = stringcase.constcase(slug)
+            secret_access_key = os.environ[f"{env_variable_prefix}_SECRET_KEY"]
+            access_key_id = int(os.environ[f"{env_variable_prefix}_ACCESS_KEY_ID"])
+            bucket_name = os.environ[f"{env_variable_prefix}_BUCKET_NAME"]
+        except KeyError:
+            raise ConnectionDoesNotExist(f'No S3 connection for "{slug}"')
+
+        return S3Connection(
+            access_key_id=access_key_id,
+            secret_access_key=secret_access_key,
+            bucket_name=bucket_name,
         )
 
 

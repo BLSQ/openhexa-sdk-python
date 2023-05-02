@@ -22,3 +22,10 @@ class PostgreSQLConnection:
             f"postgresql://{self.username}:{self.password}"
             f"@{self.host}:{self.port}/{self.database_name}"
         )
+
+
+@dataclasses.dataclass
+class S3Connection:
+    access_key_id: str
+    secret_access_key: str
+    bucket_name: str

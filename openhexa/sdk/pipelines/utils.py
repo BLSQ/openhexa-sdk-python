@@ -128,3 +128,21 @@ def load_local_workspace_config():
                             "the following keys: url, username, password."
                         )
                         raise LocalWorkspaceConfigError(exception_message)
+                # S3 Connections
+                elif connection_config["type"] == "s3":
+                    try:
+                        os.environ[
+                            f"{stringcase.constcase(slug)}_SECRET_ACCESS_KEY"
+                        ] = connection_config["secret_access_key"]
+                        os.environ[f"{stringcase.constcase(slug)}_ACCESS_KEY_ID"] = str(
+                            connection_config["access_key_id"]
+                        )
+                        os.environ[f"{stringcase.constcase(slug)}_BUCKET_NAME"] = str(
+                            connection_config["bucket_name"]
+                        )
+                    except KeyError:
+                        exception_message = (
+                            "Invalid local workspace S3 connection config. Please make sure you provide "
+                            "the following keys: secret_key, access_key_id, bucket_name."
+                        )
+                        raise LocalWorkspaceConfigError(exception_message)
