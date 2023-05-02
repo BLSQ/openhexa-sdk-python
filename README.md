@@ -20,7 +20,7 @@ source venv/bin/activate
 You can then install the OpenHexa SDK:
 
 ```shell
-pip install openhexa.sdk
+pip install --upgrade openhexa.sdk
 ```
 
 Now that the SDK is installed withing your virtual environmentYou can now use the `openhexa` CLI utility to create 
