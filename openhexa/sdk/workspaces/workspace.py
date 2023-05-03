@@ -125,8 +125,8 @@ class CurrentWorkspace:
     def s3_connection(self, slug: str) -> S3Connection:
         try:
             env_variable_prefix = stringcase.constcase(slug)
-            secret_access_key = os.environ[f"{env_variable_prefix}_SECRET_KEY"]
-            access_key_id = int(os.environ[f"{env_variable_prefix}_ACCESS_KEY_ID"])
+            secret_access_key = os.environ[f"{env_variable_prefix}_SECRET_ACCESS_KEY"]
+            access_key_id = os.environ[f"{env_variable_prefix}_ACCESS_KEY_ID"]
             bucket_name = os.environ[f"{env_variable_prefix}_BUCKET_NAME"]
         except KeyError:
             raise ConnectionDoesNotExist(f'No S3 connection for "{slug}"')
@@ -153,14 +153,11 @@ class CurrentWorkspace:
         )
 
     def custom_connection(slef, slug: str) -> CustomConnection:
-        try:
-            env_variable_prefix = stringcase.constcase(slug)
-            fields = {}
-            for key, value in os.environ.items():
-                if re.match(rf"^{env_variable_prefix}_", key):
-                    fields[key] = value
-        except KeyError:
-            raise ConnectionDoesNotExist(f'No Custom connection for "{slug}"')
+        env_variable_prefix = stringcase.constcase(slug)
+        fields = {}
+        for key, value in os.environ.items():
+            if re.match(rf"^{env_variable_prefix}_", key):
+                fields[key] = os.environ[key]
         return CustomConnection(fields=fields)
 
 
