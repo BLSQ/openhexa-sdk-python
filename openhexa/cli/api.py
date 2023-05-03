@@ -189,13 +189,17 @@ def upload_pipeline(config, pipeline_directory_path: str):
 
     zipFile = io.BytesIO(b"")
 
+    if is_debug(config):
+        click.echo("Generating ZIP file:")
+
     with ZipFile(zipFile, "w") as zipObj:
         for path in directory.glob("**/*"):
             if not path.is_file():
                 continue
-            if not path.name.endswith(".py"):
+            if not path.name.endswith(".py") and not path.name == "requirements.txt":
                 continue
-
+            if is_debug(config):
+                click.echo(f"\t{path.name}")
             zipObj.write(path, path.relative_to(directory))
 
     zipFile.seek(0)
