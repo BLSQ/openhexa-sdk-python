@@ -8,6 +8,7 @@ import string
 import time
 import typing
 from logging import getLogger
+from pathlib import Path
 
 import requests
 from multiprocess import get_context  # NOQA
@@ -16,7 +17,7 @@ from openhexa.sdk.utils import Environments, get_environment
 
 from .parameter import FunctionWithParameter, Parameter, ParameterValueError
 from .task import PipelineWithTask
-from .utils import load_local_workspace_config
+from .utils import get_local_workspace_config
 
 logger = getLogger(__name__)
 
@@ -179,6 +180,10 @@ class Pipeline:
         return env == Environments.PIPELINE and "HEXA_SERVER_URL" in os.environ
 
     def __call__(self, config: typing.Optional[typing.Dict[str, typing.Any]] = None):
+        # Handle local workspace config for dev / testing, if appropriate
+        if get_environment() == Environments.LOCAL:
+            os.environ.update(get_local_workspace_config(Path(__file__)))
+
         # Handle config
         if config is None:  # Called without arguments, in the pipeline file itself
             parser = argparse.ArgumentParser(exit_on_error=False)
@@ -208,9 +213,5 @@ class Pipeline:
                     raise PipelineConfigError("The provided config is not valid JSON")
             else:
                 config = {}
-
-        # Handle local workspace config for dev / testing, if appropriate
-        if not self.connected:
-            load_local_workspace_config()
 
         self.run(config)

@@ -11,7 +11,6 @@ from .connection import (
     PostgreSQLConnection,
     S3Connection,
 )
-from openhexa.sdk.utils import Environments, get_environment
 
 
 class WorkspaceConfigError(Exception):
