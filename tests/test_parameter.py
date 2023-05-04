@@ -70,6 +70,14 @@ def test_parameter_init():
     with pytest.raises(InvalidParameterError):
         Parameter("arg", type="string")
 
+    # Wrong code
+    with pytest.raises(InvalidParameterError):
+        Parameter("-123", type=str)
+    with pytest.raises(InvalidParameterError):
+        Parameter("Abc", type=str)
+    with pytest.raises(InvalidParameterError):
+        Parameter("0_z", type=str)
+
     # Empty choices
     with pytest.raises(InvalidParameterError):
         Parameter("arg", type=str, choices=[])
