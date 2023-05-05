@@ -1,3 +1,4 @@
+import re
 import typing
 
 
@@ -32,7 +33,8 @@ class ParameterType:
         """If appropriate, subclasses can override this method to normalize empty values to None.
 
         This can be used to handle empty values and normalize them to None, or to perform type conversions, allowing us
-        to allow multiple input types but still normalize everything to a single type."""
+        to allow multiple input types but still normalize everything to a single type.
+        """
 
         return value
 
@@ -149,6 +151,11 @@ class Parameter:
         required: bool = True,
         multiple: bool = False,
     ):
+        if re.match("^[a-z_][a-z_0-9]+$", code) is None:
+            raise InvalidParameterError(
+                f"Invalid parameter code provided ({code}). Parameter must start with a letter or an underscore, and can only contain lower case letters, numbers and underscores."
+            )
+
         self.code = code
 
         try:
