@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.1.9](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.8...0.1.9) (2023-05-05)
+
+
+### Features
+
+* **Connections:** add custom connection ([7ea7739](https://github.com/BLSQ/openhexa-sdk-python/commit/7ea7739e04657d7b04bee2ff4b4ef4ae3837a1f8))
+* **Connections:** add gcs connection ([b8715ea](https://github.com/BLSQ/openhexa-sdk-python/commit/b8715eabc124f1f04c83bd4da345bd962a9deeab))
+* **Connections:** add S3 connection function ([e6664fa](https://github.com/BLSQ/openhexa-sdk-python/commit/e6664fa06b0d7adf561f605357ca12808d2d7e2b))
+* **Connections:** add tests and small improvement ([5499897](https://github.com/BLSQ/openhexa-sdk-python/commit/5499897537a1a1acf884d9c71bf563adcd7976cb))
+
+
+### Bug Fixes
+
+* **Parameter:** Validate parameter's code ([4d7d666](https://github.com/BLSQ/openhexa-sdk-python/commit/4d7d66674ad78d93cc67386e15097d118ddb9950))
+
 ## [0.1.8](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.7...0.1.8) (2023-05-02)
 
 
