@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.10](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.9...0.1.10) (2023-05-08)
+
+
+### Features
+
+* **dependencies:** Install extra dependencies if provided in pipeline ([#23](https://github.com/BLSQ/openhexa-sdk-python/issues/23)) ([426bae4](https://github.com/BLSQ/openhexa-sdk-python/commit/426bae438f5aac566e613285f4a9449ec46a4b40))
+
+
+### Bug Fixes
+
+* **CLI:** Do not add a workspace that cannot be found online ([#27](https://github.com/BLSQ/openhexa-sdk-python/issues/27)) ([8190a34](https://github.com/BLSQ/openhexa-sdk-python/commit/8190a34b332080cd3ac54e6b9446a4c09ce5a1a9))
+
 ## [0.1.9](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.8...0.1.9) (2023-05-05)
 
 
