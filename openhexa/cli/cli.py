@@ -62,11 +62,12 @@ def workspaces_add(slug, token):
         get_workspace(user_config, slug, token)
     except Exception as e:
         click.echo(
-            "Error while getting workspace. Check the slug of the workspace and the access token.",
+            f"Error while getting workspace '{slug}' on {user_config['openhexa']['url']}. Check the slug of the workspace and the access token.",
             err=True,
         )
         if is_debug(user_config):
             raise e
+        return click.Abort()
 
     user_config["workspaces"].update({slug: token})
     user_config["openhexa"].update({"current_workspace": slug})
@@ -83,9 +84,11 @@ def workspaces_activate(slug):
 
     user_config = open_config()
     if slug not in user_config["workspaces"]:
-        click.echo(f"Workspace {slug} does not exist. Available workspaces:")
+        click.echo(
+            f"Workspace {slug} does not exist on {user_config['openhexa']['url']}. Available workspaces:"
+        )
         click.echo(", ".join(user_config["workspaces"].keys()))
-        return
+        return click.Abort()
     click.echo(f"Activating workspace {slug}")
     user_config["openhexa"].update({"current_workspace": slug})
 
