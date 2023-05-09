@@ -87,7 +87,7 @@ def launch_local_run(config):
 if __name__ == "__main__":
     command = sys.argv[1] if len(sys.argv) > 2 else "cloudrun"
     raw_config = sys.argv[2] if len(sys.argv) > 2 else sys.argv[1]
-    config = json.loads(raw_config)
+    config = json.loads(raw_config) if raw_config else {}
     if command == "cloudrun":
         launch_cloud_run(config)
     elif command == "run":

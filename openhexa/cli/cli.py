@@ -301,7 +301,7 @@ def pipelines_push(path: str):
 @click.argument(
     "path", default=".", type=click.Path(exists=True, file_okay=False, dir_okay=True)
 )
-@click.option("-c", "--config", type=str)
+@click.option("-c", "--config", type=str, default="")
 def pipelines_run(path: str, config: str):
     """
     Run a pipeline locally.
