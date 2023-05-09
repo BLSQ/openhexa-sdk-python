@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.11](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.10...0.1.11) (2023-05-09)
+
+
+### Features
+
+* **Environment:** Add a Environment env variable to be able to differientate the different running environments ([#20](https://github.com/BLSQ/openhexa-sdk-python/issues/20)) ([0e5c878](https://github.com/BLSQ/openhexa-sdk-python/commit/0e5c8781ffa62775f025883e0721d1bbde23c958))
+
+
+### Bug Fixes
+
+* **Connections:** constcase needs to have a lowercase slug to avoid _ ([#30](https://github.com/BLSQ/openhexa-sdk-python/issues/30)) ([ac809c1](https://github.com/BLSQ/openhexa-sdk-python/commit/ac809c14a9e4766b3c9f3ee2887b7802f706432c))
+
 ## [0.1.10](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.9...0.1.10) (2023-05-08)
 
 
