@@ -1,12 +1,11 @@
 import os
-import re
+from dataclasses import make_dataclass
 
 import stringcase
 
 from openhexa.sdk.utils import Environments, get_environment
 
 from .connection import (
-    CustomConnection,
     DHIS2Connection,
     GCSConnection,
     PostgreSQLConnection,
@@ -154,13 +153,16 @@ class CurrentWorkspace:
             bucket_name=bucket_name,
         )
 
-    def custom_connection(slef, slug: str) -> CustomConnection:
-        env_variable_prefix = stringcase.constcase(slug.lower())
+    def custom_connection(self, slug: str):
+        slug = slug.lower()
+        env_variable_prefix = stringcase.constcase(slug)
         fields = {}
         for key, value in os.environ.items():
-            if re.match(rf"^{env_variable_prefix}_", key):
-                fields[key] = os.environ[key]
-        return CustomConnection(fields=fields)
+            if key.startswith(env_variable_prefix):
+                field_key = key[len(f"{env_variable_prefix}_") :].lower()
+                fields[field_key] = value
+        CustomConnection = make_dataclass(slug, fields.keys())
+        return CustomConnection(**fields)
 
 
 workspace = CurrentWorkspace()

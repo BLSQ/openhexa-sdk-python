@@ -35,8 +35,3 @@ class S3Connection:
 class GCSConnection:
     service_account_key: str
     bucket_name: str
-
-
-@dataclasses.dataclass
-class CustomConnection:
-    fields: dict

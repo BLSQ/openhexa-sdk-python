@@ -119,7 +119,7 @@ def test_workspace_gcs_connection():
 
 
 def test_workspace_custom_connection():
-    slug = "polio-ff3a0d"
+    slug = "my_connection"
     env_variable_prefix = stringcase.constcase(slug)
     username = "kaggle_username"
     password = "root"
@@ -132,6 +132,5 @@ def test_workspace_custom_connection():
         },
     ):
         custom_connection = workspace.custom_connection(slug=slug)
-        assert len(custom_connection.fields) == 2
-        assert f"{env_variable_prefix}_USERNAME" in custom_connection.fields
-        assert f"{env_variable_prefix}_PASSWORD" in custom_connection.fields
+        assert custom_connection.username == username
+        assert custom_connection.password == password
