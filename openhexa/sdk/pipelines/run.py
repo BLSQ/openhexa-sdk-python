@@ -4,22 +4,24 @@ import typing
 
 import requests
 
+from openhexa.sdk.utils import Environments, get_environment
 from openhexa.sdk.workspaces import workspace
 
 
 class CurrentRun:
     @property
     def connected(self):
-        return "HEXA_SERVER_URL" in os.environ
+        env = get_environment()
+        return env == Environments.PIPELINE and "HEXA_SERVER_URL" in os.environ
 
     def add_file_output(self, path: str):
         stripped_path = path.replace(workspace.files_path, "")
         name = stripped_path.strip("/")
         if self.connected:
             query = """
-                    mutation addPipelineOutput ($input: AddPipelineOutputInput!) {
-                        addPipelineOutput(input: $input) { success errors }
-                    }"""
+                mutation addPipelineOutput ($input: AddPipelineOutputInput!) {
+                    addPipelineOutput(input: $input) { success errors }
+                }"""
             variables = {
                 "input": {
                     "uri": f"gs://{os.environ['WORKSPACE_BUCKET_NAME']}{stripped_path}",
@@ -34,9 +36,9 @@ class CurrentRun:
     def add_database_output(self, table_name: str):
         if self.connected:
             query = """
-                                mutation addPipelineOutput ($input: AddPipelineOutputInput!) {
-                                    addPipelineOutput(input: $input) { success errors }
-                                }"""
+                mutation addPipelineOutput ($input: AddPipelineOutputInput!) {
+                    addPipelineOutput(input: $input) { success errors }
+                }"""
             variables = {
                 "input": {
                     "uri": f"postgresql://{workspace.database_host}/{workspace.database_name}/{table_name}",
@@ -102,6 +104,7 @@ class CurrentRun:
             },
         )
         r.raise_for_status()
+        return r.json()
 
 
 current_run = CurrentRun()
