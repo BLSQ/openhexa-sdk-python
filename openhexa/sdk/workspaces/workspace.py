@@ -94,7 +94,7 @@ class CurrentWorkspace:
 
     def dhis2_connection(self, slug: str) -> DHIS2Connection:
         try:
-            env_variable_prefix = stringcase.constcase(slug)
+            env_variable_prefix = stringcase.constcase(slug.lower())
             url = os.environ[f"{env_variable_prefix}_URL"]
             username = os.environ[f"{env_variable_prefix}_USERNAME"]
             password = os.environ[f"{env_variable_prefix}_PASSWORD"]
@@ -105,7 +105,7 @@ class CurrentWorkspace:
 
     def postgresql_connection(self, slug: str) -> PostgreSQLConnection:
         try:
-            env_variable_prefix = stringcase.constcase(slug)
+            env_variable_prefix = stringcase.constcase(slug.lower())
             host = os.environ[f"{env_variable_prefix}_HOST"]
             port = int(os.environ[f"{env_variable_prefix}_PORT"])
             username = os.environ[f"{env_variable_prefix}_USERNAME"]
@@ -124,7 +124,7 @@ class CurrentWorkspace:
 
     def s3_connection(self, slug: str) -> S3Connection:
         try:
-            env_variable_prefix = stringcase.constcase(slug)
+            env_variable_prefix = stringcase.constcase(slug.lower())
             secret_access_key = os.environ[f"{env_variable_prefix}_SECRET_ACCESS_KEY"]
             access_key_id = os.environ[f"{env_variable_prefix}_ACCESS_KEY_ID"]
             bucket_name = os.environ[f"{env_variable_prefix}_BUCKET_NAME"]
@@ -139,7 +139,7 @@ class CurrentWorkspace:
 
     def gcs_connection(self, slug: str) -> GCSConnection:
         try:
-            env_variable_prefix = stringcase.constcase(slug)
+            env_variable_prefix = stringcase.constcase(slug.lower())
             service_account_key = os.environ[
                 f"{env_variable_prefix}_SERVICE_ACCOUNT_KEY"
             ]
@@ -153,7 +153,7 @@ class CurrentWorkspace:
         )
 
     def custom_connection(slef, slug: str) -> CustomConnection:
-        env_variable_prefix = stringcase.constcase(slug)
+        env_variable_prefix = stringcase.constcase(slug.lower())
         fields = {}
         for key, value in os.environ.items():
             if re.match(rf"^{env_variable_prefix}_", key):
