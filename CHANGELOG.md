@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.14](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.13...0.1.14) (2023-05-10)
+
+
+### Bug Fixes
+
+* **connection:** Create a dataclass on the fly for custom connection ([d10b689](https://github.com/BLSQ/openhexa-sdk-python/commit/d10b689e8779a52e7a352ede5c3c32ab535a7b71))
+
 ## [0.1.13](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.12...0.1.13) (2023-05-10)
 
 
