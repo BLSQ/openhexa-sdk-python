@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.12](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.11...0.1.12) (2023-05-10)
+
+
+### Bug Fixes
+
+* **bootstrap:** Wrong path to check if there is a requirements.txt file ([#33](https://github.com/BLSQ/openhexa-sdk-python/issues/33)) ([9791133](https://github.com/BLSQ/openhexa-sdk-python/commit/9791133917e4cb717c9960012958d412d2938b55))
+* **CLI:** Exclude venv/.venv from the zip file ([#31](https://github.com/BLSQ/openhexa-sdk-python/issues/31)) ([088ea01](https://github.com/BLSQ/openhexa-sdk-python/commit/088ea01e46411c6114097b80e7b83fadf57564d7))
+
 ## [0.1.11](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.10...0.1.11) (2023-05-09)
 
 
