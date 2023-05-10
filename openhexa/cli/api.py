@@ -191,22 +191,34 @@ def upload_pipeline(config, pipeline_directory_path: str):
 
     if is_debug(config):
         click.echo("Generating ZIP file:")
-
+    files = []
+    venv_path = None
     with ZipFile(zipFile, "w") as zipObj:
         for path in directory.glob("**/*"):
-            if not path.is_file():
+            if path.name == "python":
+                # We are in a virtual environment
+                venv_path = path.parent.parent  # ./<venv>/bin/python -> ./<venv>
+
+            if not path.suffix == ".py" and not path.name == "requirements.txt":
                 continue
-            if not path.name.endswith(".py") and not path.name == "requirements.txt":
+
+            files.append(path)
+        if is_debug(config):
+            click.echo(f"Venv path: {venv_path}")
+
+        for file_path in files:
+            # Do not include files from the virtual environment if we found one
+            if venv_path and file_path.is_relative_to(venv_path):
                 continue
             if is_debug(config):
-                click.echo(f"\t{path.name}")
-            zipObj.write(path, path.relative_to(directory))
-
+                click.echo(f"\t{file_path.name}")
+            zipObj.write(file_path, file_path.relative_to(directory))
     zipFile.seek(0)
 
     if is_debug(config):
         # Write zipFile to disk for debugging
-        open("pipeline.zip", "wb").write(zipFile.read())
+        with open("pipeline.zip", "wb") as debug_file:
+            debug_file.write(zipFile.read())
         zipFile.seek(0)
 
     base64_content = base64.b64encode(zipFile.read()).decode("ascii")
