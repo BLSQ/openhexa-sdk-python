@@ -54,9 +54,9 @@ def main():
         # setup sample files, et co...
         os.environ["OPENHEXA_LEGACY"] = "false"
 
-    if os.path.exists("pipeline/requirements.txt"):
+    if os.path.exists("./requirements.txt"):
         print("Installing requirements...")
-        os.system("pip install -r pipeline/requirements.txt")
+        os.system("pip install -r requirements.txt")
 
     print("Running pipeline...")
     pipeline = import_pipeline(".")
