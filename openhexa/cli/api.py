@@ -41,8 +41,8 @@ def save_config(config):
 
 def graphql(config, query: str, variables=None, token=None):
     url = config["openhexa"]["url"] + "/graphql/"
-    current_workspace = config["openhexa"]["current_workspace"]
     if token is None:
+        current_workspace = config["openhexa"]["current_workspace"]
         token = config["workspaces"].get(current_workspace)
 
     if not token:
