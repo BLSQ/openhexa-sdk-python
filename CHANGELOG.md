@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.13](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.12...0.1.13) (2023-05-10)
+
+
+### Bug Fixes
+
+* **CLI:** current_workspace does not exist the first time ([54c779e](https://github.com/BLSQ/openhexa-sdk-python/commit/54c779ee5ac12f6161a6da60bc6c3d38273a4c16))
+* **CLI:** Set the minimum version of Python to 3.9 (is_relative_to requirement) ([b0bb113](https://github.com/BLSQ/openhexa-sdk-python/commit/b0bb11397bc33673467cb198d28a9b8e3542bf35))
+
 ## [0.1.12](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.11...0.1.12) (2023-05-10)
 
 
