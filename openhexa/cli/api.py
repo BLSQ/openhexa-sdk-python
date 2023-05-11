@@ -199,7 +199,7 @@ def upload_pipeline(config, pipeline_directory_path: str):
                 # We are in a virtual environment
                 venv_path = path.parent.parent  # ./<venv>/bin/python -> ./<venv>
 
-            if not path.suffix == ".py" and not path.name == "requirements.txt":
+            if path.suffix not in (".py", ".ipynb", ".txt"):
                 continue
 
             files.append(path)
