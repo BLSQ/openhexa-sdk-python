@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.15](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.14...0.1.15) (2023-05-11)
+
+
+### Bug Fixes
+
+* **CLI:** Include python notebooks in pipelines ([#36](https://github.com/BLSQ/openhexa-sdk-python/issues/36)) ([a2ac723](https://github.com/BLSQ/openhexa-sdk-python/commit/a2ac7234099c18526b7fc0869e73d9d117a67338))
+
 ## [0.1.14](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.13...0.1.14) (2023-05-10)
 
 
