@@ -134,7 +134,7 @@ class Pipeline:
 
                 if dag_step:
                     # remove finished tasks
-                    result_list = [(r, t) for r, t in result_list if not r.ready()]
+                    result_list = [(r, t) for r, t in result_list if t.end_time is None]
                     break
                 else:
                     # busy loop
