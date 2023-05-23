@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.16](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.15...0.1.16) (2023-05-23)
+
+
+### Bug Fixes
+
+* more robust task status check when stepping DAG  ([#38](https://github.com/BLSQ/openhexa-sdk-python/issues/38)) ([63cfeaf](https://github.com/BLSQ/openhexa-sdk-python/commit/63cfeaf5e3d4db2167894ef6f6d8f48f4142967e))
+
 ## [0.1.15](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.14...0.1.15) (2023-05-11)
 
 
