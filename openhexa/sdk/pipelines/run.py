@@ -79,7 +79,7 @@ class CurrentRun:
                     mutation logPipelineMessage ($input: LogPipelineMessageInput!) {
                         logPipelineMessage(input: $input) { success errors }
                     }"""
-            variables = {"input": {"priority": priority, "message": message}}
+            variables = {"input": {"priority": priority, "message": str(message)}}
             self._graphql_query(query, variables)
         else:
             now = (
