@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.1.17](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.16...0.1.17) (2023-06-01)
+
+
+### Bug Fixes
+
+* **Logs:** convert log message to str ([#40](https://github.com/BLSQ/openhexa-sdk-python/issues/40)) ([bc31dfb](https://github.com/BLSQ/openhexa-sdk-python/commit/bc31dfbfcbc474bfcd0af51007e121ffece2b2a2))
+
+
+### Miscellaneous
+
+* **Envs:** Add DOCKER environment ([1f2f19e](https://github.com/BLSQ/openhexa-sdk-python/commit/1f2f19e339337b123162351850f12556571e64ae))
+* **Release:** Add chore commits to the changelog ([993efda](https://github.com/BLSQ/openhexa-sdk-python/commit/993efda0d1630eadeeda82e94cf3169422737217))
+* Update Docker image ([492b6b4](https://github.com/BLSQ/openhexa-sdk-python/commit/492b6b4a5649c993cffd5625014967778d55285c))
+
 ## [0.1.16](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.15...0.1.16) (2023-05-23)
 
 
