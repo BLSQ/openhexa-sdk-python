@@ -1,3 +1,4 @@
+import json
 import sys
 from pathlib import Path
 
@@ -301,8 +302,22 @@ def pipelines_push(path: str):
 @click.argument(
     "path", default=".", type=click.Path(exists=True, file_okay=False, dir_okay=True)
 )
-@click.option("-c", "--config", type=str, default="")
-def pipelines_run(path: str, config: str):
+@click.option(
+    "-c", "config_str", type=str, default="", help="Configuration JSON as a string"
+)
+@click.option(
+    "-f",
+    "config_file",
+    type=click.File("r"),
+    default=None,
+    help="Configuration JSON file",
+)
+@click.option(
+    "--force-pull", is_flag=True, help="Force pull of the docker image", default=False
+)
+def pipelines_run(
+    path: str, config_str: str, config_file: click.File, force_pull=False
+):
     """
     Run a pipeline locally.
     """
@@ -333,13 +348,20 @@ def pipelines_run(path: str, config: str):
     for key, value in env_vars.items():
         cmd.extend(["--env", f"{key}={value}"])
 
+    if force_pull:
+        cmd.extend(["--pull", "always"])
+
     cmd.extend(
         [
-            "openhexa-pipelines",
+            "blsq/openhexa-pipelines",
             "run",
-            config,
         ]
     )
+
+    if config_str:
+        cmd.extend([config_str])
+    elif config_file:
+        cmd.extend([json.dumps(json.loads(config_file.read(), strict=False))])
 
     if is_debug(user_config):
         print(" ".join(cmd))
