@@ -5,6 +5,7 @@ import os
 class Environments(enum.Enum):
     LOCAL = "LOCAL"
     PIPELINE = "PIPELINE"
+    DOCKER = "DOCKER"
     JUPYTER = "JUPYTER"
 
 
