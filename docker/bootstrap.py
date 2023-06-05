@@ -13,7 +13,7 @@ def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
 
-def main():
+def launch_cloud_run(config):
     # cloud run -> need to download the code from cloud
     if "HEXA_TOKEN" not in os.environ or "HEXA_SERVER_URL" not in os.environ:
         eprint("Need token and url to download the code")
@@ -58,9 +58,8 @@ def main():
         print("Installing requirements...")
         os.system("pip install -r requirements.txt")
 
-    print("Running pipeline...")
+    print("Running cloud pipeline...")
     pipeline = import_pipeline(".")
-    config = json.loads(sys.argv[1])
 
     pipeline(config=config)
 
@@ -70,5 +69,29 @@ def main():
         import fuse_umount  # noqa: F401, E402
 
 
+def launch_local_run(config):
+    if not os.path.exists("pipeline/pipeline.py"):
+        eprint("No pipeline.py found")
+        sys.exit(1)
+
+    if os.path.exists("pipeline/requirements.txt"):
+        print("Installing requirements...")
+        os.system("pip install -r pipeline/requirements.txt")
+
+    print("Running local pipeline...")
+    pipeline = import_pipeline("pipeline")
+
+    pipeline(config=config)
+
+
 if __name__ == "__main__":
-    main()
+    command = sys.argv[1] if len(sys.argv) > 2 else "cloudrun"
+    raw_config = sys.argv[2] if len(sys.argv) > 2 else sys.argv[1]
+    config = json.loads(raw_config) if raw_config else {}
+    if command == "cloudrun":
+        launch_cloud_run(config)
+    elif command == "run":
+        launch_local_run(config)
+    else:
+        eprint(f"Unknown command {command}")
+        sys.exit(1)

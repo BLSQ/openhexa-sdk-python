@@ -1,5 +1,3 @@
-import os
-import sys
 from pathlib import Path
 
 import stringcase
@@ -10,8 +8,8 @@ class LocalWorkspaceConfigError(Exception):
     pass
 
 
-def load_local_workspace_config():
-    """Load local workspace config for development/testing purposes.
+def get_local_workspace_config(path: Path):
+    """Get local workspace config for development/testing purposes.
 
     As of now, this function attempts to make the local run context looks like an online run context by
     filling environment variables.
@@ -20,11 +18,12 @@ def load_local_workspace_config():
     be reflected here.
     """
 
+    env_vars = {}
     # This will only work when running the pipeline using "python pipeline.py"
     # (We will have to find another approach for tests or running the pipeline using the CLI)
-    pipeline_directory_path = Path(sys.argv[0]).parent
-    local_workspace_config_path = Path(sys.argv[0]).parent / Path("workspace.yaml")
+    local_workspace_config_path = path / Path("workspace.yaml")
     if not local_workspace_config_path.exists():
+        print("Does not exist")
         return
 
     with open(
@@ -34,19 +33,19 @@ def load_local_workspace_config():
         # Database config
         if "database" in local_workspace_config:
             try:
-                os.environ["WORKSPACE_DATABASE_USERNAME"] = local_workspace_config[
+                env_vars["WORKSPACE_DATABASE_USERNAME"] = local_workspace_config[
                     "database"
                 ]["username"]
                 password = local_workspace_config["database"].get("password")
                 if password is not None:
-                    os.environ["WORKSPACE_DATABASE_PASSWORD"] = password
-                os.environ["WORKSPACE_DATABASE_HOST"] = local_workspace_config[
+                    env_vars["WORKSPACE_DATABASE_PASSWORD"] = password
+                env_vars["WORKSPACE_DATABASE_HOST"] = local_workspace_config[
                     "database"
                 ]["host"]
-                os.environ["WORKSPACE_DATABASE_PORT"] = str(
+                env_vars["WORKSPACE_DATABASE_PORT"] = str(
                     local_workspace_config["database"]["port"]
                 )
-                os.environ["WORKSPACE_DATABASE_DB_NAME"] = local_workspace_config[
+                env_vars["WORKSPACE_DATABASE_DB_NAME"] = local_workspace_config[
                     "database"
                 ]["dbname"]
             except KeyError:
@@ -60,15 +59,13 @@ def load_local_workspace_config():
         # Files config
         if "files" in local_workspace_config:
             try:
-                files_path = pipeline_directory_path / Path(
-                    local_workspace_config["files"]["path"]
-                )
+                files_path = path / Path(local_workspace_config["files"]["path"])
                 if not files_path.exists():
                     raise LocalWorkspaceConfigError(
                         f"The {files_path} files path does not exist. "
                         f"Did you forget to create it?"
                     )
-                os.environ["WORKSPACE_FILES_PATH"] = str(files_path.resolve())
+                env_vars["WORKSPACE_FILES_PATH"] = str(files_path.resolve())
             except KeyError:
                 exception_message = (
                     "Invalid local workspace database config. Please make sure you provide the following "
@@ -89,13 +86,13 @@ def load_local_workspace_config():
                 # DHIS2 connections
                 if connection_config["type"] == "dhis2":
                     try:
-                        os.environ[
+                        env_vars[
                             f"{stringcase.constcase(slug)}_URL"
                         ] = connection_config["url"]
-                        os.environ[
+                        env_vars[
                             f"{stringcase.constcase(slug)}_USERNAME"
                         ] = connection_config["username"]
-                        os.environ[
+                        env_vars[
                             f"{stringcase.constcase(slug)}_PASSWORD"
                         ] = connection_config["password"]
                     except KeyError:
@@ -107,19 +104,19 @@ def load_local_workspace_config():
                 # PostgreSQL connections
                 elif connection_config["type"] == "postgresql":
                     try:
-                        os.environ[
+                        env_vars[
                             f"{stringcase.constcase(slug)}_HOST"
                         ] = connection_config["host"]
-                        os.environ[f"{stringcase.constcase(slug)}_PORT"] = str(
+                        env_vars[f"{stringcase.constcase(slug)}_PORT"] = str(
                             connection_config["port"]
                         )
-                        os.environ[f"{stringcase.constcase(slug)}_USERNAME"] = str(
+                        env_vars[f"{stringcase.constcase(slug)}_USERNAME"] = str(
                             connection_config["username"]
                         )
-                        os.environ[
+                        env_vars[
                             f"{stringcase.constcase(slug)}_PASSWORD"
                         ] = connection_config["password"]
-                        os.environ[
+                        env_vars[
                             f"{stringcase.constcase(slug)}_DB_NAME"
                         ] = connection_config["database_name"]
                     except KeyError:
@@ -131,13 +128,13 @@ def load_local_workspace_config():
                 # S3 connections
                 elif connection_config["type"] == "s3":
                     try:
-                        os.environ[
+                        env_vars[
                             f"{stringcase.constcase(slug)}_SECRET_ACCESS_KEY"
                         ] = connection_config["secret_access_key"]
-                        os.environ[f"{stringcase.constcase(slug)}_ACCESS_KEY_ID"] = str(
+                        env_vars[f"{stringcase.constcase(slug)}_ACCESS_KEY_ID"] = str(
                             connection_config["access_key_id"]
                         )
-                        os.environ[f"{stringcase.constcase(slug)}_BUCKET_NAME"] = str(
+                        env_vars[f"{stringcase.constcase(slug)}_BUCKET_NAME"] = str(
                             connection_config["bucket_name"]
                         )
                     except KeyError:
@@ -149,10 +146,10 @@ def load_local_workspace_config():
                 # GCS connections
                 elif connection_config["type"] == "gcs":
                     try:
-                        os.environ[
+                        env_vars[
                             f"{stringcase.constcase(slug)}_SERVICE_ACCOUNT_KEY"
                         ] = connection_config["service_account_key"]
-                        os.environ[f"{stringcase.constcase(slug)}_BUCKET_NAME"] = str(
+                        env_vars[f"{stringcase.constcase(slug)}_BUCKET_NAME"] = str(
                             connection_config["bucket_name"]
                         )
                     except KeyError:
@@ -165,6 +162,5 @@ def load_local_workspace_config():
                 else:
                     for key, value in connection_config.items():
                         if key != "type":
-                            os.environ[stringcase.constcase(f"{slug}_{key}")] = str(
-                                value
-                            )
+                            env_vars[stringcase.constcase(f"{slug}_{key}")] = str(value)
+    return env_vars

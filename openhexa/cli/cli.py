@@ -1,3 +1,4 @@
+import json
 import sys
 from pathlib import Path
 
@@ -16,7 +17,7 @@ from openhexa.cli.api import (
     save_config,
     upload_pipeline,
 )
-from openhexa.sdk.pipelines import import_pipeline
+from openhexa.sdk.pipelines import get_local_workspace_config, import_pipeline
 
 
 @click.group()
@@ -295,6 +296,82 @@ def pipelines_push(path: str):
         click.echo(
             f"Done! You can view the pipeline in OpenHexa on {click.style(url, fg='bright_blue', underline=True)}"
         )
+
+
+@pipelines.command("run")
+@click.argument(
+    "path", default=".", type=click.Path(exists=True, file_okay=False, dir_okay=True)
+)
+@click.option(
+    "-c", "config_str", type=str, default="", help="Configuration JSON as a string"
+)
+@click.option(
+    "-f",
+    "config_file",
+    type=click.File("r"),
+    default=None,
+    help="Configuration JSON file",
+)
+@click.option(
+    "--force-pull", is_flag=True, help="Force pull of the docker image", default=False
+)
+def pipelines_run(
+    path: str, config_str: str, config_file: click.File, force_pull=False
+):
+    """
+    Run a pipeline locally.
+    """
+    from subprocess import Popen
+
+    user_config = open_config()
+    ensure_is_pipeline_dir(path)
+
+    env_vars = get_local_workspace_config(Path(path))
+
+    # Prepare the mount for the workspace's files
+    mount_files_path = Path(env_vars["WORKSPACE_FILES_PATH"]).absolute()
+    env_vars["WORKSPACE_FILES_PATH"] = "/home/hexa/workspace"
+
+    cmd = [
+        "docker",
+        "run",
+        "--mount",
+        f"type=bind,source={mount_files_path},target=/home/hexa/workspace",
+        "--mount",
+        f"type=bind,source={Path(path).absolute()},target=/home/hexa/pipeline,readonly",
+        "--env",
+        "HEXA_ENVIRONMENT=docker",
+        "--platform",
+        "linux/amd64",
+    ]
+
+    for key, value in env_vars.items():
+        cmd.extend(["--env", f"{key}={value}"])
+
+    if force_pull:
+        cmd.extend(["--pull", "always"])
+
+    cmd.extend(
+        [
+            "blsq/openhexa-pipelines",
+            "run",
+        ]
+    )
+
+    if config_str:
+        cmd.extend([config_str])
+    elif config_file:
+        cmd.extend([json.dumps(json.loads(config_file.read(), strict=False))])
+
+    if is_debug(user_config):
+        print(" ".join(cmd))
+
+    proc = Popen(
+        cmd,
+        close_fds=True,
+    )
+
+    return proc.wait()
 
 
 @pipelines.command("list")
