@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.18](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.17...0.1.18) (2023-06-05)
+
+
+### Features
+
+* **cli:** Run pipeline using 'openhexa pipelines run -c {}' ([ab29c06](https://github.com/BLSQ/openhexa-sdk-python/commit/ab29c06e8743000ede860a3fc72b01d3886b0991))
+* **Parameter:** add float to supported types ([#43](https://github.com/BLSQ/openhexa-sdk-python/issues/43)) ([3b6f709](https://github.com/BLSQ/openhexa-sdk-python/commit/3b6f7098bff9f37b8a790a50c90216c9b79b618c))
+
 ## [0.1.17](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.16...0.1.17) (2023-06-01)
 
 
