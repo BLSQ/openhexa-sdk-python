@@ -129,7 +129,7 @@ class Float(ParameterType):
         return value
 
 
-TYPES_BY_PYTHON_TYPE = {str: String, bool: Boolean, int: Integer}
+TYPES_BY_PYTHON_TYPE = {str: String, bool: Boolean, int: Integer, float: Float}
 
 
 class InvalidParameterError(Exception):
