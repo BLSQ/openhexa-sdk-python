@@ -5,6 +5,7 @@ import datetime
 import json
 import os
 import string
+import sys
 import time
 import typing
 from logging import getLogger
@@ -182,7 +183,7 @@ class Pipeline:
     def __call__(self, config: typing.Optional[typing.Dict[str, typing.Any]] = None):
         # Handle local workspace config for dev / testing, if appropriate
         if get_environment() == Environments.LOCAL:
-            os.environ.update(get_local_workspace_config(Path(__file__)))
+            os.environ.update(get_local_workspace_config(Path(sys.argv[0]).parent))
 
         # Handle config
         if config is None:  # Called without arguments, in the pipeline file itself
