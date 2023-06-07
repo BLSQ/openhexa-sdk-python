@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.1.19](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.18...0.1.19) (2023-06-07)
+
+
+### Bug Fixes
+
+* Adapt type parameter typing to accept floats in [@parameter](https://github.com/parameter) decorator ([#45](https://github.com/BLSQ/openhexa-sdk-python/issues/45)) ([4c51414](https://github.com/BLSQ/openhexa-sdk-python/commit/4c5141473d66f5fa0f0c4d4823ed242ad820d151))
+* Fix local workspace.yaml path ([#46](https://github.com/BLSQ/openhexa-sdk-python/issues/46)) ([b625d69](https://github.com/BLSQ/openhexa-sdk-python/commit/b625d6994c97b2ae464f565ba4a6c5926ba715fc))
+
+
+### Miscellaneous
+
+* Update Docker image and adapted docs ([8c42c8f](https://github.com/BLSQ/openhexa-sdk-python/commit/8c42c8fa86765c9c8399f175e0c154966084f87b))
+* Update Dockerfile ([41e21d1](https://github.com/BLSQ/openhexa-sdk-python/commit/41e21d134493ea644594488638f704fccc9b0b87))
+
 ## [0.1.18](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.17...0.1.18) (2023-06-05)
 
 
