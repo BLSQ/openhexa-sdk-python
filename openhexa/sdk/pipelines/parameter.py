@@ -292,7 +292,9 @@ class Parameter:
 def parameter(
     code: str,
     *,
-    type: typing.Union[typing.Type[str], typing.Type[int], typing.Type[bool]],
+    type: typing.Union[
+        typing.Type[str], typing.Type[int], typing.Type[bool], typing.Type[float]
+    ],
     name: typing.Optional[str] = None,
     choices: typing.Optional[typing.Sequence] = None,
     help: typing.Optional[str] = None,
