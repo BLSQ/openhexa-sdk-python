@@ -22,6 +22,7 @@ def launch_cloud_run(config):
     access_token = os.environ["HEXA_TOKEN"]
     server_url = os.environ["HEXA_SERVER_URL"]
     run_id = os.environ["HEXA_RUN_ID"]
+    workspace_slug = os.environ["HEXA_WORKSPACE"]
 
     print("Downloading pipeline...")
     download_pipeline(
@@ -34,8 +35,9 @@ def launch_cloud_run(config):
 
     print("Injecting credentials...")
     r = requests.post(
-        server_url + "/pipelines/credentials2/",
+        f"{server_url}/workspaces/credentials/",
         headers={"Authorization": f"Bearer {access_token}"},
+        data={"workspace": workspace_slug},
         timeout=30,
     )
     r.raise_for_status()
