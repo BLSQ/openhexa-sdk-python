@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.20](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.19...0.1.20) (2023-06-19)
+
+
+### Features
+
+* **Credentials:** Use the new endpoint to get the env vars from the backend ([#47](https://github.com/BLSQ/openhexa-sdk-python/issues/47)) ([6277926](https://github.com/BLSQ/openhexa-sdk-python/commit/62779262d632146020697156cf410ae5deee60fc))
+
 ## [0.1.19](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.18...0.1.19) (2023-06-07)
 
 
