@@ -1,7 +1,7 @@
 FROM blsq/openhexa-base-notebook:0.13.0
 WORKDIR /home/jovyan/
 
-RUN pip install openhexa.sdk==0.1.19
+RUN pip install openhexa.sdk==0.1.20
 
 COPY bootstrap.py /home/jovyan/bootstrap.py
 RUN find /home/jovyan/
