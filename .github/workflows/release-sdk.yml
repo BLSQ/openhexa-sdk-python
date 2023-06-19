@@ -1,4 +1,4 @@
-name: Publish on PyPI
+name: Publish SDK on PyPI
 
 on: 
   release:
