@@ -1,4 +1,4 @@
-FROM blsq/openhexa-base-notebook:0.13.0
+FROM blsq/openhexa-base-notebook:0.14.0
 WORKDIR /home/jovyan/
 
 RUN pip install openhexa.sdk==0.1.20
