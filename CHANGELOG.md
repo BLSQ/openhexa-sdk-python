@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.21](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.20...0.1.21) (2023-06-21)
+
+
+### Bug Fixes
+
+* **CLI:** Do not require a config even if it's empty ([#50](https://github.com/BLSQ/openhexa-sdk-python/issues/50)) ([8e1098f](https://github.com/BLSQ/openhexa-sdk-python/commit/8e1098fc544918aaf78e1eb821e2b5540ba6c42e))
+
+
+### Miscellaneous
+
+* **docker:** Use openhexa-base-notebook 0.14.0 ([81fca98](https://github.com/BLSQ/openhexa-sdk-python/commit/81fca98c1693dd56b2c7e8c5443e1a1fbe5ee37d))
+* **image:** Upgrade openehxa.sdk in pipelines image to 0.1.20 ([8f9a33a](https://github.com/BLSQ/openhexa-sdk-python/commit/8f9a33ac3436e415a8d334c456096a89c05a0dab))
+
 ## [0.1.20](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.19...0.1.20) (2023-06-19)
 
 
