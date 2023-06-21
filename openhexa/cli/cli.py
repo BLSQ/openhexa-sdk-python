@@ -303,7 +303,7 @@ def pipelines_push(path: str):
     "path", default=".", type=click.Path(exists=True, file_okay=False, dir_okay=True)
 )
 @click.option(
-    "-c", "config_str", type=str, default="", help="Configuration JSON as a string"
+    "-c", "config_str", type=str, default="{}", help="Configuration JSON as a string"
 )
 @click.option(
     "-f",
@@ -316,7 +316,7 @@ def pipelines_push(path: str):
     "--force-pull", is_flag=True, help="Force pull of the docker image", default=False
 )
 def pipelines_run(
-    path: str, config_str: str, config_file: click.File, force_pull=False
+    path: str, config_str: str = "{}", config_file: click.File = None, force_pull=False
 ):
     """
     Run a pipeline locally.
@@ -358,10 +358,10 @@ def pipelines_run(
         ]
     )
 
-    if config_str:
-        cmd.extend([config_str])
-    elif config_file:
+    if config_file:
         cmd.extend([json.dumps(json.loads(config_file.read(), strict=False))])
+    elif config_str:
+        cmd.extend([config_str])
 
     if is_debug(user_config):
         print(" ".join(cmd))
