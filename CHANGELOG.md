@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.22](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.21...0.1.22) (2023-07-10)
+
+
+### Bug Fixes
+
+* Proper error messages for arguments and missing config file ([#51](https://github.com/BLSQ/openhexa-sdk-python/issues/51)) ([07a5027](https://github.com/BLSQ/openhexa-sdk-python/commit/07a5027fb6be317d6f3e666dd6b0d145b8573358))
+
 ## [0.1.21](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.20...0.1.21) (2023-06-21)
 
 
