@@ -195,8 +195,8 @@ class Pipeline:
             if argv or (args.config_file is not None and args.config is not None):
                 raise ValueError(
                     f"Unrecognized arguments: {' '.join(argv)}. Running a pipeline requires a single "
-                    "argument: either an inline JSON config with the --values/-v argument, or a JSON "
-                    "config file with the --values-file/-f argument."
+                    "argument: either an inline JSON config with the --config/-c argument, or a JSON "
+                    "config file with the --config-file/-f argument."
                 )
             if args.config_file is not None:
                 with open(args.config_file, "r") as cf:

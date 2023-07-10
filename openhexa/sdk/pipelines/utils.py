@@ -23,8 +23,9 @@ def get_local_workspace_config(path: Path):
     # (We will have to find another approach for tests or running the pipeline using the CLI)
     local_workspace_config_path = path / Path("workspace.yaml")
     if not local_workspace_config_path.exists():
-        print("Does not exist")
-        return
+        raise ValueError(
+            "To work with pipelines locally, you need a workspace.yaml file in the same directory as your pipeline file"
+        )
 
     with open(
         local_workspace_config_path.resolve(), "r"
