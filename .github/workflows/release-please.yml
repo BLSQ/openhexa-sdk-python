@@ -21,5 +21,5 @@ jobs:
           bump-minor-pre-major: true
           bump-patch-for-minor-pre-major: true
           include-v-in-tag: false
-          extra-files: openhexa/__init__.py
+          extra-files: openhexa/sdk/__init__.py
           changelog-types: '[{"type":"feat","section":"Features","hidden":false},{"type":"fix","section":"Bug Fixes","hidden":false},{"type":"chore","section":"Miscellaneous","hidden":false}]'
