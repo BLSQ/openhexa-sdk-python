@@ -5,7 +5,6 @@ from pathlib import Path
 import click
 import stringcase
 
-from openhexa import __version__
 from openhexa.cli.api import (
     create_pipeline,
     ensure_is_pipeline_dir,
@@ -17,6 +16,7 @@ from openhexa.cli.api import (
     save_config,
     upload_pipeline,
 )
+from openhexa.sdk import __version__
 from openhexa.sdk.pipelines import get_local_workspace_config, import_pipeline
 
 

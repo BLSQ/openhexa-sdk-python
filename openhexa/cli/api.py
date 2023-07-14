@@ -8,7 +8,7 @@ from zipfile import ZipFile
 import click
 import requests
 
-from openhexa import __version__
+from openhexa.sdk import __version__
 from openhexa.sdk.pipelines import import_pipeline
 
 CONFIGFILE_PATH = os.path.expanduser("~") + "/.openhexa.ini"
