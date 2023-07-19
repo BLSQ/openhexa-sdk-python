@@ -6,6 +6,7 @@ import click
 import stringcase
 
 from openhexa.cli.api import (
+    InvalidDefinition,
     create_pipeline,
     ensure_is_pipeline_dir,
     get_pipeline,
@@ -287,15 +288,26 @@ def pipelines_push(path: str):
             f"Pushing pipeline {click.style(pipeline.code, bold=True)} to workspace {click.style(workspace, bold=True)}"
         )
 
-        new_version = upload_pipeline(user_config, path)
-        click.echo(f"New version created: {new_version}")
+        try:
+            new_version = upload_pipeline(user_config, path)
+            click.echo(f"New version created: {new_version}")
 
-        url = f"{user_config['openhexa']['url']}/workspaces/{workspace}/pipelines/{pipeline.code}".replace(
-            "api", "app"
-        )
-        click.echo(
-            f"Done! You can view the pipeline in OpenHexa on {click.style(url, fg='bright_blue', underline=True)}"
-        )
+            url = f"{user_config['openhexa']['url']}/workspaces/{workspace}/pipelines/{pipeline.code}".replace(
+                "api", "app"
+            )
+            click.echo(
+                f"Done! You can view the pipeline in OpenHexa on {click.style(url, fg='bright_blue', underline=True)}"
+            )
+        except InvalidDefinition as e:
+            click.echo(f'Pipeline definition is invalid: "{e}"', err=True)
+            if is_debug(user_config):
+                raise e
+            sys.exit(1)
+        except Exception as e:
+            click.echo(f'Error while importing pipeline: "{e}"', err=True)
+            if is_debug(user_config):
+                raise e
+            sys.exit(1)
 
 
 @pipelines.command("run")
