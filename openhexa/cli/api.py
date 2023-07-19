@@ -15,7 +15,7 @@ from openhexa.sdk.pipelines import import_pipeline
 CONFIGFILE_PATH = os.path.expanduser("~") + "/.openhexa.ini"
 
 
-class InvalidDefinition(Exception):
+class InvalidDefinitionError(Exception):
     pass
 
 
@@ -254,10 +254,13 @@ def upload_pipeline(config, pipeline_directory_path: str):
     )
 
     if not data["uploadPipeline"]["success"]:
-        if data["uploadPipeline"]["errors"] == [
+        if (
             PipelineErrorEnum.PIPELINE_DOES_NOT_SUPPORT_PARAMETERS.value
-        ]:
-            raise InvalidDefinition("A pipeline with a schedule can't have parameters")
+            in data["uploadPipeline"]["errors"]
+        ):
+            raise InvalidDefinitionError(
+                "A pipeline with a schedule can't have parameters"
+            )
         else:
             raise Exception(data["uploadPipeline"]["errors"])
 
