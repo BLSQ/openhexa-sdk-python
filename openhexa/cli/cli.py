@@ -6,6 +6,7 @@ import click
 import stringcase
 
 from openhexa.cli.api import (
+    InvalidDefinitionError,
     create_pipeline,
     ensure_is_pipeline_dir,
     get_pipeline,
@@ -16,6 +17,7 @@ from openhexa.cli.api import (
     save_config,
     upload_pipeline,
 )
+from openhexa.cli.utils import terminate
 from openhexa.sdk import __version__
 from openhexa.sdk.pipelines import get_local_workspace_config, import_pipeline
 
@@ -287,15 +289,30 @@ def pipelines_push(path: str):
             f"Pushing pipeline {click.style(pipeline.code, bold=True)} to workspace {click.style(workspace, bold=True)}"
         )
 
-        new_version = upload_pipeline(user_config, path)
-        click.echo(f"New version created: {new_version}")
+        try:
+            new_version = upload_pipeline(user_config, path)
+            click.echo(f"New version created: {new_version}")
 
-        url = f"{user_config['openhexa']['url']}/workspaces/{workspace}/pipelines/{pipeline.code}".replace(
-            "api", "app"
-        )
-        click.echo(
-            f"Done! You can view the pipeline in OpenHexa on {click.style(url, fg='bright_blue', underline=True)}"
-        )
+            url = f"{user_config['openhexa']['url']}/workspaces/{workspace}/pipelines/{pipeline.code}".replace(
+                "api", "app"
+            )
+            click.echo(
+                f"Done! You can view the pipeline in OpenHexa on {click.style(url, fg='bright_blue', underline=True)}"
+            )
+        except InvalidDefinitionError as e:
+            terminate(
+                f'Pipeline definition is invalid: "{e}"',
+                err=True,
+                exception=e,
+                debug=is_debug(user_config),
+            )
+        except Exception as e:
+            terminate(
+                f'Error while importing pipeline: "{e}"',
+                err=True,
+                exception=e,
+                debug=is_debug(user_config),
+            )
 
 
 @pipelines.command("run")

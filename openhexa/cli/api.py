@@ -1,5 +1,6 @@
 import base64
 import configparser
+import enum
 import io
 import os
 from pathlib import Path
@@ -12,6 +13,14 @@ from openhexa.sdk import __version__
 from openhexa.sdk.pipelines import import_pipeline
 
 CONFIGFILE_PATH = os.path.expanduser("~") + "/.openhexa.ini"
+
+
+class InvalidDefinitionError(Exception):
+    pass
+
+
+class PipelineErrorEnum(enum.Enum):
+    PIPELINE_DOES_NOT_SUPPORT_PARAMETERS = "PIPELINE_DOES_NOT_SUPPORT_PARAMETERS"
 
 
 def is_debug(config: configparser.ConfigParser):
@@ -245,6 +254,14 @@ def upload_pipeline(config, pipeline_directory_path: str):
     )
 
     if not data["uploadPipeline"]["success"]:
-        raise Exception(data["uploadPipeline"]["errors"])
+        if (
+            PipelineErrorEnum.PIPELINE_DOES_NOT_SUPPORT_PARAMETERS.value
+            in data["uploadPipeline"]["errors"]
+        ):
+            raise InvalidDefinitionError(
+                "A pipeline with a schedule can't have parameters"
+            )
+        else:
+            raise Exception(data["uploadPipeline"]["errors"])
 
     return data["uploadPipeline"]["version"]
