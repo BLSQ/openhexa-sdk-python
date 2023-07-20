@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.23](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.22...0.1.23) (2023-07-20)
+
+
+### Features
+
+* **Pipelines:** prevent push of version  with params for scheduled pipeline. ([#55](https://github.com/BLSQ/openhexa-sdk-python/issues/55)) ([b9de756](https://github.com/BLSQ/openhexa-sdk-python/commit/b9de756f4dc94296bc427b2dd3337740909399ed))
+
 ## [0.1.22](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.21...0.1.22) (2023-07-14)
 
 
