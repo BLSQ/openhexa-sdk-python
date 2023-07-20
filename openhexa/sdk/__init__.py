@@ -1,6 +1,6 @@
 from .pipelines import current_run, parameter, pipeline
 from .workspaces import workspace
 
-__version__ = "0.1.23"  # {x-release-please-version}
+__version__ = "0.1.24"  # {x-release-please-version}
 
 __all__ = ["workspace", "pipeline", "parameter", "current_run"]
