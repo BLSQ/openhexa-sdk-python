@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.24](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.23...0.1.24) (2023-07-20)
+
+
+### Features
+
+* Update SDK version in Dockerfile ([#57](https://github.com/BLSQ/openhexa-sdk-python/issues/57)) ([208d7ea](https://github.com/BLSQ/openhexa-sdk-python/commit/208d7ea561417bf9dc106d3b545254ecbde863db))
+
 ## [0.1.23](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.22...0.1.23) (2023-07-20)
 
 
