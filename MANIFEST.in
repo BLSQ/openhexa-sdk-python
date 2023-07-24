@@ -1,0 +1,2 @@
+include openhexa/cli/skeleton/*
+include openhexa/cli/skeleton/.gitignore
