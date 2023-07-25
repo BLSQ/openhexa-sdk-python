@@ -38,9 +38,7 @@ class ParameterType:
 
         return value
 
-    def validate(
-        self, value: typing.Optional[typing.Any], allow_empty: bool = True
-    ) -> typing.Optional[typing.Any]:
+    def validate(self, value: typing.Optional[typing.Any], allow_empty: bool = True) -> typing.Optional[typing.Any]:
         """Validate the provided value for this type."""
 
         if not isinstance(value, self.expected_type):
@@ -75,9 +73,7 @@ class String(ParameterType):
 
         return normalized_value
 
-    def validate(
-        self, value: typing.Optional[typing.Any], *, allow_empty: bool = True
-    ) -> typing.Optional[str]:
+    def validate(self, value: typing.Optional[typing.Any], *, allow_empty: bool = True) -> typing.Optional[str]:
         if not allow_empty and value == "":
             raise ParameterValueError("Empty values are not accepted.")
 
@@ -168,9 +164,7 @@ class Parameter:
 
         if choices is not None:
             if not self.type.accepts_choice:
-                raise InvalidParameterError(
-                    f"Parameters of type {self.type} don't accept choices."
-                )
+                raise InvalidParameterError(f"Parameters of type {self.type} don't accept choices.")
             elif len(choices) == 0:
                 raise InvalidParameterError("Choices, if provided, cannot be empty.")
 
@@ -178,9 +172,7 @@ class Parameter:
                 for choice in choices:
                     self.type.validate(choice)
             except ParameterValueError:
-                raise InvalidParameterError(
-                    f"The provided choices are not valid for the {self.type} parameter type."
-                )
+                raise InvalidParameterError(f"The provided choices are not valid for the {self.type} parameter type.")
         self.choices = choices
 
         self.name = name
@@ -188,9 +180,7 @@ class Parameter:
         self.required = required
 
         if multiple is True and not self.type.accepts_multiple:
-            raise InvalidParameterError(
-                f"Parameters of type {self.type} can't have multiple values."
-            )
+            raise InvalidParameterError(f"Parameters of type {self.type} can't have multiple values.")
         self.multiple = multiple
 
         self._validate_default(default, multiple)
@@ -218,18 +208,14 @@ class Parameter:
 
         pre_validated = self.type.validate(normalized_value)
         if self.choices is not None and pre_validated not in self.choices:
-            raise ParameterValueError(
-                f"The provided value for {self.code} is not included in the provided choices."
-            )
+            raise ParameterValueError(f"The provided value for {self.code} is not included in the provided choices.")
 
         return pre_validated
 
     def _validate_multiple(self, value: typing.Any):
         # Reject values that are not lists
         if value is not None and not isinstance(value, list):
-            raise InvalidParameterError(
-                "If provided, value should be a list when parameter is multiple."
-            )
+            raise InvalidParameterError("If provided, value should be a list when parameter is multiple.")
 
         # Normalize empty values to an empty list
         if value is None:
@@ -243,12 +229,8 @@ class Parameter:
         if len(normalized_value) == 0 and self.required:
             raise ParameterValueError(f"{self.code} is required")
 
-        pre_validated = [
-            self.type.validate(single_value) for single_value in normalized_value
-        ]
-        if self.choices is not None and any(
-            v not in self.choices for v in pre_validated
-        ):
+        pre_validated = [self.type.validate(single_value) for single_value in normalized_value]
+        if self.choices is not None and any(v not in self.choices for v in pre_validated):
             raise ParameterValueError(
                 f"One of the provided values for {self.code} is not included in the provided choices."
             )
@@ -262,17 +244,13 @@ class Parameter:
         try:
             if multiple:
                 if not isinstance(default, list):
-                    raise InvalidParameterError(
-                        "Default values should be lists when using multiple=True"
-                    )
+                    raise InvalidParameterError("Default values should be lists when using multiple=True")
                 for default_value in default:
                     self.type.validate(default_value, allow_empty=False)
             else:
                 self.type.validate(default, allow_empty=False)
         except ParameterValueError:
-            raise InvalidParameterError(
-                f"The default value for {self.code} is not valid."
-            )
+            raise InvalidParameterError(f"The default value for {self.code} is not valid.")
 
     def parameter_spec(self):
         """Generates specification for this parameter, to be provided to the OpenHexa backend."""
@@ -292,9 +270,7 @@ class Parameter:
 def parameter(
     code: str,
     *,
-    type: typing.Union[
-        typing.Type[str], typing.Type[int], typing.Type[bool], typing.Type[float]
-    ],
+    type: typing.Union[typing.Type[str], typing.Type[int], typing.Type[bool], typing.Type[float]],
     name: typing.Optional[str] = None,
     choices: typing.Optional[typing.Sequence] = None,
     help: typing.Optional[str] = None,

@@ -1,5 +1,6 @@
 import json
 import sys
+from importlib.metadata import version
 from pathlib import Path
 
 import click
@@ -18,13 +19,12 @@ from openhexa.cli.api import (
     upload_pipeline,
 )
 from openhexa.cli.utils import terminate
-from openhexa.sdk import __version__
 from openhexa.sdk.pipelines import get_local_workspace_config, import_pipeline
 
 
 @click.group()
 @click.option("--debug/--no-debug", default=False, envvar="DEBUG")
-@click.version_option(__version__)
+@click.version_option(version("openhexa.sdk"))
 @click.pass_context
 def app(ctx, debug):
     """
@@ -87,9 +87,7 @@ def workspaces_activate(slug):
 
     user_config = open_config()
     if slug not in user_config["workspaces"]:
-        click.echo(
-            f"Workspace {slug} does not exist on {user_config['openhexa']['url']}. Available workspaces:"
-        )
+        click.echo(f"Workspace {slug} does not exist on {user_config['openhexa']['url']}. Available workspaces:")
         click.echo(", ".join(user_config["workspaces"].keys()))
         return click.Abort()
     click.echo(f"Activating workspace {slug}")
@@ -152,9 +150,7 @@ def config(ctx):
         click.echo("Debug: " + ("True" if is_debug(user_config) else "False"))
         click.echo(f"Backend URL: {user_config['openhexa']['url']}")
         try:
-            click.echo(
-                f"Current workspace: {user_config['openhexa']['current_workspace']}"
-            )
+            click.echo(f"Current workspace: {user_config['openhexa']['current_workspace']}")
         except KeyError:
             click.echo("No current workspace")
         click.echo("\nWorkspaces:")
@@ -212,9 +208,7 @@ def pipelines_init(name: str):
             .replace("skeleton_pipeline_name", stringcase.snakecase(name.lower()))
             .replace("Skeleton pipeline name", name)
         )
-    with open(
-        sample_directory_path / Path("workspace.yaml"), "r"
-    ) as sample_workspace_file:
+    with open(sample_directory_path / Path("workspace.yaml"), "r") as sample_workspace_file:
         sample_workspace_content = sample_workspace_file.read()
 
     # Create directory
@@ -239,9 +233,7 @@ def pipelines_init(name: str):
 
 
 @pipelines.command("push")
-@click.argument(
-    "path", default=".", type=click.Path(exists=True, file_okay=False, dir_okay=True)
-)
+@click.argument("path", default=".", type=click.Path(exists=True, file_okay=False, dir_okay=True))
 def pipelines_push(path: str):
     """
     Push a pipeline to the backend. If the pipeline already exists, it will be updated otherwise it will be created.
@@ -316,12 +308,8 @@ def pipelines_push(path: str):
 
 
 @pipelines.command("run")
-@click.argument(
-    "path", default=".", type=click.Path(exists=True, file_okay=False, dir_okay=True)
-)
-@click.option(
-    "-c", "config_str", type=str, default="{}", help="Configuration JSON as a string"
-)
+@click.argument("path", default=".", type=click.Path(exists=True, file_okay=False, dir_okay=True))
+@click.option("-c", "config_str", type=str, default="{}", help="Configuration JSON as a string")
 @click.option(
     "-f",
     "config_file",
@@ -329,12 +317,8 @@ def pipelines_push(path: str):
     default=None,
     help="Configuration JSON file",
 )
-@click.option(
-    "--force-pull", is_flag=True, help="Force pull of the docker image", default=False
-)
-def pipelines_run(
-    path: str, config_str: str = "{}", config_file: click.File = None, force_pull=False
-):
+@click.option("--force-pull", is_flag=True, help="Force pull of the docker image", default=False)
+def pipelines_run(path: str, config_str: str = "{}", config_file: click.File = None, force_pull=False):
     """
     Run a pipeline locally.
     """

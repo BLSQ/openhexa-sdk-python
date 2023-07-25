@@ -27,13 +27,9 @@ class PipelineConfigError(Exception):
     pass
 
 
-def pipeline(
-    code: str, *, name: str = None
-) -> typing.Callable[[typing.Callable[..., typing.Any]], "Pipeline"]:
+def pipeline(code: str, *, name: str = None) -> typing.Callable[[typing.Callable[..., typing.Any]], "Pipeline"]:
     if any(c not in string.ascii_lowercase + string.digits + "_-" for c in code):
-        raise Exception(
-            "Pipeline name should contains only lower case letters, digits, '_' and '-'"
-        )
+        raise Exception("Pipeline name should contains only lower case letters, digits, '_' and '-'")
 
     def decorator(fun):
         if isinstance(fun, FunctionWithParameter):
@@ -81,9 +77,7 @@ class Pipeline:
             validated_config[parameter.code] = validated_value
 
         if len(config) > 0:
-            raise ParameterValueError(
-                f"The provided config contains invalid key(s): {', '.join(list(config.keys()))}"
-            )
+            raise ParameterValueError(f"The provided config contains invalid key(s): {', '.join(list(config.keys()))}")
 
         self.function(**validated_config)
 
@@ -116,11 +110,7 @@ class Pipeline:
                 for result, task in result_list:
                     if not result.ready():
                         continue
-                    now = (
-                        datetime.datetime.now(tz=datetime.timezone.utc)
-                        .replace(microsecond=0)
-                        .isoformat()
-                    )
+                    now = datetime.datetime.now(tz=datetime.timezone.utc).replace(microsecond=0).isoformat()
 
                     completed += 1
                     progress = int(completed / total * 100)
@@ -203,9 +193,7 @@ class Pipeline:
                     try:
                         config = json.load(cf)
                     except json.JSONDecodeError:
-                        raise PipelineConfigError(
-                            "The provided config is not valid JSON"
-                        )
+                        raise PipelineConfigError("The provided config is not valid JSON")
 
             elif args.config is not None:
                 try:

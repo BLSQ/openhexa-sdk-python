@@ -82,7 +82,6 @@ Install the SDK in editable mode:
 ```shell
 python -m venv venv # Create a virtual environment for this project
 source venv/bin/activate # Activate the venv
-pip install -r requirements.txt
 pip install -e ".[dev]"  # Necessary to be able to run the openhexa CLI
 ```
 

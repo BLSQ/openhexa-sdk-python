@@ -141,9 +141,7 @@ class CurrentWorkspace:
     def gcs_connection(self, slug: str) -> GCSConnection:
         try:
             env_variable_prefix = stringcase.constcase(slug.lower())
-            service_account_key = os.environ[
-                f"{env_variable_prefix}_SERVICE_ACCOUNT_KEY"
-            ]
+            service_account_key = os.environ[f"{env_variable_prefix}_SERVICE_ACCOUNT_KEY"]
             bucket_name = os.environ[f"{env_variable_prefix}_BUCKET_NAME"]
         except KeyError:
             raise ConnectionDoesNotExist(f'No GCS connection for "{slug}"')

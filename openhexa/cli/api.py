@@ -3,13 +3,13 @@ import configparser
 import enum
 import io
 import os
+from importlib.metadata import version
 from pathlib import Path
 from zipfile import ZipFile
 
 import click
 import requests
 
-from openhexa.sdk import __version__
 from openhexa.sdk.pipelines import import_pipeline
 
 CONFIGFILE_PATH = os.path.expanduser("~") + "/.openhexa.ini"
@@ -67,7 +67,7 @@ def graphql(config, query: str, variables=None, token=None):
     response = requests.post(
         url,
         headers={
-            "User-Agent": f"openhexa-cli/{__version__}",
+            "User-Agent": f"openhexa-cli/{version('openhexa.sdk')}",
             "Authorization": f"Bearer {token}",
         },
         json={"query": query, "variables": variables},
@@ -185,9 +185,7 @@ def ensure_is_pipeline_dir(pipeline_path: str):
     if not os.path.exists(pipeline_path):
         raise Exception(f"Directory {pipeline_path} does not exist")
     if not os.path.exists(os.path.join(pipeline_path, "pipeline.py")):
-        raise Exception(
-            f"Directory {pipeline_path} does not contain a pipeline.py file"
-        )
+        raise Exception(f"Directory {pipeline_path} does not contain a pipeline.py file")
 
     return True
 
@@ -254,13 +252,8 @@ def upload_pipeline(config, pipeline_directory_path: str):
     )
 
     if not data["uploadPipeline"]["success"]:
-        if (
-            PipelineErrorEnum.PIPELINE_DOES_NOT_SUPPORT_PARAMETERS.value
-            in data["uploadPipeline"]["errors"]
-        ):
-            raise InvalidDefinitionError(
-                "A pipeline with a schedule can't have parameters"
-            )
+        if PipelineErrorEnum.PIPELINE_DOES_NOT_SUPPORT_PARAMETERS.value in data["uploadPipeline"]["errors"]:
+            raise InvalidDefinitionError("A pipeline with a schedule can't have parameters")
         else:
             raise Exception(data["uploadPipeline"]["errors"])
 

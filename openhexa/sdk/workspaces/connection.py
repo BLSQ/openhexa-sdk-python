@@ -18,10 +18,7 @@ class PostgreSQLConnection:
 
     @property
     def url(self):
-        return (
-            f"postgresql://{self.username}:{self.password}"
-            f"@{self.host}:{self.port}/{self.database_name}"
-        )
+        return f"postgresql://{self.username}:{self.password}" f"@{self.host}:{self.port}/{self.database_name}"
 
 
 @dataclasses.dataclass
