@@ -268,7 +268,7 @@ def pipelines_push(path: str):
 
         if get_pipeline(user_config, pipeline.code) is None:
             click.echo(
-                f"Pipeline {click.style(pipeline.code, bold=True)} found in {path} does not exist in workspace {click.style(workspace, bold=True)}"
+                f"Pipeline {click.style(pipeline.code, bold=True)} does not exist in workspace {click.style(workspace, bold=True)}"
             )
             click.confirm(
                 f"Create pipeline {click.style(pipeline.code, bold=True)} in workspace {click.style(workspace, bold=True)}?",
