@@ -1,3 +1,4 @@
+import base64
 import json
 import sys
 from importlib.metadata import version
@@ -309,7 +310,7 @@ def pipelines_push(path: str):
 
 @pipelines.command("run")
 @click.argument("path", default=".", type=click.Path(exists=True, file_okay=False, dir_okay=True))
-@click.option("-c", "config_str", type=str, default="{}", help="Configuration JSON as a string")
+@click.option("-c", "config_str", type=str, help="Configuration JSON as a string")
 @click.option(
     "-f",
     "config_file",
@@ -317,8 +318,15 @@ def pipelines_push(path: str):
     default=None,
     help="Configuration JSON file",
 )
+@click.option("--image", type=str, help="Docker image to use", default="blsq/openhexa-base-notebook:latest")
 @click.option("--force-pull", is_flag=True, help="Force pull of the docker image", default=False)
-def pipelines_run(path: str, config_str: str = "{}", config_file: click.File = None, force_pull=False):
+def pipelines_run(
+    path: str,
+    image: str,
+    config_str: str = "{}",
+    config_file: click.File = None,
+    force_pull=False,
+):
     """
     Run a pipeline locally.
     """
@@ -331,38 +339,42 @@ def pipelines_run(path: str, config_str: str = "{}", config_file: click.File = N
 
     # Prepare the mount for the workspace's files
     mount_files_path = Path(env_vars["WORKSPACE_FILES_PATH"]).absolute()
-    env_vars["WORKSPACE_FILES_PATH"] = "/home/hexa/workspace"
 
     cmd = [
         "docker",
         "run",
         "--mount",
-        f"type=bind,source={mount_files_path},target=/home/hexa/workspace",
+        f"type=bind,source={Path(path).absolute()},target=/home/hexa/pipeline",
         "--mount",
-        f"type=bind,source={Path(path).absolute()},target=/home/hexa/pipeline,readonly",
+        f"type=bind,source={mount_files_path},target=/home/hexa/workspace",
         "--env",
-        "HEXA_ENVIRONMENT=docker",
+        "HEXA_ENVIRONMENT=local_pipeline",
+        "--env",
+        f"HEXA_WORKSPACE={user_config['openhexa']['current_workspace']}",
         "--platform",
         "linux/amd64",
     ]
-
-    for key, value in env_vars.items():
-        cmd.extend(["--env", f"{key}={value}"])
 
     if force_pull:
         cmd.extend(["--pull", "always"])
 
     cmd.extend(
         [
-            "blsq/openhexa-pipelines",
+            image,
+            "pipeline",
             "run",
         ]
     )
 
+    if config_str and config_file:
+        click.echo("You can't specify both -c and -f", err=True)
+        return click.Abort()
+
+    config = config_str or "{}"
     if config_file:
-        cmd.extend([json.dumps(json.loads(config_file.read(), strict=False))])
-    elif config_str:
-        cmd.extend([config_str])
+        config = json.dumps(json.loads(config_file.read(), strict=False))
+
+    cmd.extend(["--config", base64.b64encode(config.encode("utf-8")).decode("utf-8")])
 
     if is_debug(user_config):
         print(" ".join(cmd))

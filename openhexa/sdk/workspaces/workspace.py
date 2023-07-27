@@ -3,8 +3,6 @@ from dataclasses import make_dataclass
 
 import stringcase
 
-from openhexa.sdk.utils import Environments, get_environment
-
 from .connection import (
     DHIS2Connection,
     GCSConnection,
@@ -22,6 +20,13 @@ class ConnectionDoesNotExist(Exception):
 
 
 class CurrentWorkspace:
+    @property
+    def slug(self):
+        try:
+            return os.environ["HEXA_WORKSPACE"]
+        except KeyError:
+            raise WorkspaceConfigError("Workspace's slug is not available in this environment.")
+
     @property
     def database_host(self):
         try:
@@ -82,13 +87,10 @@ class CurrentWorkspace:
     @property
     def files_path(self) -> str:
         """Return the base path to the filesystem, without trailing slash"""
-        env = get_environment()
-        if env == Environments.LOCAL:
-            if "WORKSPACE_FILES_PATH" not in os.environ:
-                raise WorkspaceConfigError(
-                    "No filesystem has been configured. Did you forget to provide a files.path"
-                    "key in your workspace.yaml file?"
-                )
+
+        # FIXME: This is a hack to make the SDK work in the context of the `python pipeline.py` command.
+        # We can remove this once we deprecate this way of running pipelines
+        if "WORKSPACE_FILES_PATH" in os.environ:
             return os.environ["WORKSPACE_FILES_PATH"]
         else:
             return "/home/hexa/workspace"
@@ -163,4 +165,6 @@ class CurrentWorkspace:
         return CustomConnection(**fields)
 
 
+# Once we deprecate the `python pipeline.py` command, we can enhance this to only load the workspace
+# if we're in a pipeline/jupyter context
 workspace = CurrentWorkspace()
