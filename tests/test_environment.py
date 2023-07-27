@@ -25,7 +25,7 @@ def test_connected():
 
 @patch.dict(
     os.environ,
-    {"HEXA_ENVIRONMENT": "LOCAL", "HEXA_SERVER_URL": "https://test.openhexa.org"},
+    {"HEXA_ENVIRONMENT": "LOCAL_PIPELINE", "HEXA_SERVER_URL": "https://test.openhexa.org"},
 )
 def test_not_connected():
     assert current_run.connected is False
@@ -34,7 +34,7 @@ def test_not_connected():
 @patch.dict(
     os.environ,
     {
-        "HEXA_ENVIRONMENT": "LOCAL",
+        "HEXA_ENVIRONMENT": "LOCAL_PIPELINE",
     },
 )
 def test_not_connected_missing_url():
@@ -44,7 +44,7 @@ def test_not_connected_missing_url():
 @patch.dict(
     os.environ,
     {
-        "HEXA_ENVIRONMENT": "LOCAL",
+        "HEXA_ENVIRONMENT": "LOCAL_PIPELINE",
     },
 )
 def test_pipeline_local():
@@ -57,7 +57,7 @@ def test_pipeline_local():
 @patch.dict(
     os.environ,
     {
-        "HEXA_ENVIRONMENT": "PIPELINE",
+        "HEXA_ENVIRONMENT": "CLOUD_PIPELINE",
         "HEXA_SERVER_URL": "https://test.openhexa.org",
     },
 )
@@ -65,4 +65,4 @@ def test_pipeline_pipeline():
     pipeline_func = Mock()
 
     pipeline = Pipeline("code", "pipeline", pipeline_func, [])
-    assert pipeline.connected is True
+    assert pipeline._connected is True

@@ -146,7 +146,7 @@ class Pipeline:
         return [arg.parameter_spec() for arg in self.parameters]
 
     def _update_progress(self, progress: int):
-        if self.connected:
+        if self._connected:
             token = os.environ["HEXA_TOKEN"]
             headers = {"Authorization": "Bearer %s" % token}
             query = """
@@ -166,9 +166,9 @@ class Pipeline:
             print(f"Progress update: {progress}%")
 
     @property
-    def connected(self):
+    def _connected(self):
         env = get_environment()
-        return env == Environments.PIPELINE and "HEXA_SERVER_URL" in os.environ
+        return env == Environments.CLOUD_PIPELINE and "HEXA_SERVER_URL" in os.environ
 
     def __call__(self, config: typing.Optional[typing.Dict[str, typing.Any]] = None):
         # Handle local workspace config for dev / testing, if appropriate

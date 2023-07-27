@@ -23,6 +23,13 @@ class ConnectionDoesNotExist(Exception):
 
 class CurrentWorkspace:
     @property
+    def slug(self):
+        try:
+            return os.environ["HEXA_WORKSPACE"]
+        except KeyError:
+            raise WorkspaceConfigError("Workspace's slug is not available in this environment.")
+
+    @property
     def database_host(self):
         try:
             return os.environ["WORKSPACE_DATABASE_HOST"]
@@ -83,13 +90,15 @@ class CurrentWorkspace:
     def files_path(self) -> str:
         """Return the base path to the filesystem, without trailing slash"""
         env = get_environment()
-        if env == Environments.LOCAL:
+        if env == Environments.LOCAL_PIPELINE:
             if "WORKSPACE_FILES_PATH" not in os.environ:
                 raise WorkspaceConfigError(
                     "No filesystem has been configured. Did you forget to provide a files.path"
                     "key in your workspace.yaml file?"
                 )
             return os.environ["WORKSPACE_FILES_PATH"]
+        elif env == Environments.STANDALONE:
+            raise WorkspaceConfigError("No filesystem has been configured.")
         else:
             return "/home/hexa/workspace"
 
@@ -163,4 +172,7 @@ class CurrentWorkspace:
         return CustomConnection(**fields)
 
 
-workspace = CurrentWorkspace()
+if get_environment() == Environments.STANDALONE:
+    workspace = None
+else:
+    workspace = CurrentWorkspace()

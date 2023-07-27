@@ -10,14 +10,13 @@ from openhexa.sdk.workspaces import workspace
 
 class CurrentRun:
     @property
-    def connected(self):
-        env = get_environment()
-        return env == Environments.PIPELINE and "HEXA_SERVER_URL" in os.environ
+    def _is_online(self):
+        return "HEXA_SERVER_URL" in os.environ
 
     def add_file_output(self, path: str):
         stripped_path = path.replace(workspace.files_path, "")
         name = stripped_path.strip("/")
-        if self.connected:
+        if self._is_online:
             query = """
                 mutation addPipelineOutput ($input: AddPipelineOutputInput!) {
                     addPipelineOutput(input: $input) { success errors }
@@ -34,7 +33,7 @@ class CurrentRun:
             print(f"Sending output with path {stripped_path}")
 
     def add_database_output(self, table_name: str):
-        if self.connected:
+        if self._is_online:
             query = """
                 mutation addPipelineOutput ($input: AddPipelineOutputInput!) {
                     addPipelineOutput(input: $input) { success errors }
@@ -74,7 +73,7 @@ class CurrentRun:
         if priority not in valid_priorities:
             raise ValueError(f"priority must be one of {', '.join(valid_priorities)}")
 
-        if self.connected:
+        if self._is_online:
             query = """
                     mutation logPipelineMessage ($input: LogPipelineMessageInput!) {
                         logPipelineMessage(input: $input) { success errors }
@@ -101,4 +100,7 @@ class CurrentRun:
         return r.json()
 
 
-current_run = CurrentRun()
+if get_environment() in [Environments.CLOUD_PIPELINE, Environments.LOCAL_PIPELINE]:
+    current_run = CurrentRun()
+else:
+    current_run = None

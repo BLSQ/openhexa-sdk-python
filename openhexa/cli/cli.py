@@ -317,8 +317,15 @@ def pipelines_push(path: str):
     default=None,
     help="Configuration JSON file",
 )
+@click.option("--image", type=str, help="Docker image to use", default="blsq/openhexa-base-notebook:latest")
 @click.option("--force-pull", is_flag=True, help="Force pull of the docker image", default=False)
-def pipelines_run(path: str, config_str: str = "{}", config_file: click.File = None, force_pull=False):
+def pipelines_run(
+    path: str,
+    image: str,
+    config_str: str = "{}",
+    config_file: click.File = None,
+    force_pull=False,
+):
     """
     Run a pipeline locally.
     """
@@ -341,7 +348,9 @@ def pipelines_run(path: str, config_str: str = "{}", config_file: click.File = N
         "--mount",
         f"type=bind,source={Path(path).absolute()},target=/home/hexa/pipeline,readonly",
         "--env",
-        "HEXA_ENVIRONMENT=docker",
+        "HEXA_ENVIRONMENT=local_pipeline",
+        "--env",
+        f"HEXA_WORKSPACE={user_config['openhexa']['current_workspace']}",
         "--platform",
         "linux/amd64",
     ]
@@ -354,7 +363,8 @@ def pipelines_run(path: str, config_str: str = "{}", config_file: click.File = N
 
     cmd.extend(
         [
-            "blsq/openhexa-pipelines",
+            image,
+            "pipeline",
             "run",
         ]
     )
