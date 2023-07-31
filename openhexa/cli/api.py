@@ -138,7 +138,9 @@ def get_pipeline(config, pipeline_code: str):
     return data["pipelineByCode"]
 
 
-def create_pipeline(config, pipeline_code: str, pipeline_name: str):
+def create_pipeline(
+    config, pipeline_code: str, pipeline_name: str, timeout: int = None
+):
     data = graphql(
         config,
         """
@@ -159,6 +161,7 @@ def create_pipeline(config, pipeline_code: str, pipeline_name: str):
                 "workspaceSlug": config["openhexa"]["current_workspace"],
                 "code": pipeline_code,
                 "name": pipeline_name,
+                "timeout": timeout,
             }
         },
     )
