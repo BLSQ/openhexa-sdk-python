@@ -15,9 +15,7 @@ def import_pipeline(pipeline_dir_path: str):
     sys.path.append(pipeline_dir)
     pipeline_package = importlib.import_module("pipeline")
 
-    pipeline = next(
-        v for _, v in pipeline_package.__dict__.items() if v and type(v) == Pipeline
-    )
+    pipeline = next(v for _, v in pipeline_package.__dict__.items() if v and type(v) == Pipeline)
     return pipeline
 
 

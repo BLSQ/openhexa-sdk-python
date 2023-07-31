@@ -1,6 +1,5 @@
 import json
 import typing
-from datetime import datetime, timezone
 from io import BytesIO
 
 import geopandas as gpd
@@ -35,9 +34,7 @@ def logistic_stats(deg: str, periods: str, oul: int):
 
 
 @logistic_stats.task
-def dhis2_download(
-    data_element_group: str, periods: str, org_unit_level: int
-) -> typing.Dict[str, typing.Any]:
+def dhis2_download(data_element_group: str, periods: str, org_unit_level: int) -> typing.Dict[str, typing.Any]:
     connection = workspace.dhis2_connection("dhis2-play")
     base_url = f"{connection.url}/api"
     session = requests.Session()
@@ -82,12 +79,8 @@ def worldpop_download():
 @logistic_stats.task
 def model(dhis2_data: typing.Dict[str, typing.Any], gadm_data, worldpop_data):
     # Load DHIS2 data
-    dhis2_df = pd.DataFrame(
-        dhis2_data["rows"], columns=[h["column"] for h in dhis2_data["headers"]]
-    )
-    dhis2_df = dhis2_df.rename(
-        columns={"Data": "Data element id", "Organisation unit": "Organisation unit id"}
-    )
+    dhis2_df = pd.DataFrame(dhis2_data["rows"], columns=[h["column"] for h in dhis2_data["headers"]])
+    dhis2_df = dhis2_df.rename(columns={"Data": "Data element id", "Organisation unit": "Organisation unit id"})
     dhis2_df["Value"] = pd.to_numeric(dhis2_df["Value"], downcast="integer")
     dhis2_df["Period"] = pd.PeriodIndex(dhis2_df["Period"], freq="Q")
     dhis2_df["Organisation unit"] = dhis2_df["Organisation unit id"].map(
@@ -110,12 +103,8 @@ def model(dhis2_data: typing.Dict[str, typing.Any], gadm_data, worldpop_data):
             nodata=src.meta["nodata"],  # nodata value in the source raster
         )
 
-    population_df = pd.Series(
-        data=[stat["sum"] for stat in stats], index=administrative_areas.index
-    )
-    population_df = pd.DataFrame(
-        {"District": administrative_areas["NAME_2"], "Population": population_df}
-    )
+    population_df = pd.Series(data=[stat["sum"] for stat in stats], index=administrative_areas.index)
+    population_df = pd.DataFrame({"District": administrative_areas["NAME_2"], "Population": population_df})
     corrected_population_df = population_df.copy()
     corrected_population_df.loc[
         corrected_population_df["District"].str.startswith("Western"), "District"
@@ -125,9 +114,7 @@ def model(dhis2_data: typing.Dict[str, typing.Any], gadm_data, worldpop_data):
     print(f"Built population DF - {len(population_df)} rows")
 
     # Compute stats
-    pivot_df = dhis2_df.pivot(
-        index=["Period", "Organisation unit"], columns="Data element", values="Value"
-    )
+    pivot_df = dhis2_df.pivot(index=["Period", "Organisation unit"], columns="Data element", values="Value")
     combined_df = pivot_df.reset_index().merge(
         corrected_population_df,
         how="left",
@@ -144,7 +131,6 @@ def model(dhis2_data: typing.Dict[str, typing.Any], gadm_data, worldpop_data):
     # )
 
     # Save to CSV
-    date = datetime.now(timezone.utc)
 
     # TODO: variable path / helper for workspace path
     combined_df.to_csv(f"{workspace.files_path}/stats.csv")

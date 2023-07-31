@@ -82,17 +82,11 @@ class CurrentRun:
             variables = {"input": {"priority": priority, "message": str(message)}}
             self._graphql_query(query, variables)
         else:
-            now = (
-                datetime.datetime.now(tz=datetime.timezone.utc)
-                .replace(microsecond=0)
-                .isoformat()
-            )
+            now = datetime.datetime.now(tz=datetime.timezone.utc).replace(microsecond=0).isoformat()
             print(now, priority, message)
 
     @staticmethod
-    def _graphql_query(
-        query: str, variables: typing.Optional[typing.Dict[str, typing.Any]] = None
-    ):
+    def _graphql_query(query: str, variables: typing.Optional[typing.Dict[str, typing.Any]] = None):
         token = os.environ["HEXA_TOKEN"]
         headers = {"Authorization": "Bearer %s" % token}
         r = requests.post(

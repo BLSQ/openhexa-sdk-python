@@ -1,11 +1,13 @@
 import json
 import sys
+from importlib.metadata import version
 from pathlib import Path
 
 import click
 import stringcase
 
 from openhexa.cli.api import (
+    InvalidDefinitionError,
     create_pipeline,
     ensure_is_pipeline_dir,
     get_pipeline,
@@ -16,13 +18,13 @@ from openhexa.cli.api import (
     save_config,
     upload_pipeline,
 )
-from openhexa.sdk import __version__
+from openhexa.cli.utils import terminate
 from openhexa.sdk.pipelines import get_local_workspace_config, import_pipeline
 
 
 @click.group()
 @click.option("--debug/--no-debug", default=False, envvar="DEBUG")
-@click.version_option(__version__)
+@click.version_option(version("openhexa.sdk"))
 @click.pass_context
 def app(ctx, debug):
     """
@@ -85,9 +87,7 @@ def workspaces_activate(slug):
 
     user_config = open_config()
     if slug not in user_config["workspaces"]:
-        click.echo(
-            f"Workspace {slug} does not exist on {user_config['openhexa']['url']}. Available workspaces:"
-        )
+        click.echo(f"Workspace {slug} does not exist on {user_config['openhexa']['url']}. Available workspaces:")
         click.echo(", ".join(user_config["workspaces"].keys()))
         return click.Abort()
     click.echo(f"Activating workspace {slug}")
@@ -150,9 +150,7 @@ def config(ctx):
         click.echo("Debug: " + ("True" if is_debug(user_config) else "False"))
         click.echo(f"Backend URL: {user_config['openhexa']['url']}")
         try:
-            click.echo(
-                f"Current workspace: {user_config['openhexa']['current_workspace']}"
-            )
+            click.echo(f"Current workspace: {user_config['openhexa']['current_workspace']}")
         except KeyError:
             click.echo("No current workspace")
         click.echo("\nWorkspaces:")
@@ -210,9 +208,7 @@ def pipelines_init(name: str):
             .replace("skeleton_pipeline_name", stringcase.snakecase(name.lower()))
             .replace("Skeleton pipeline name", name)
         )
-    with open(
-        sample_directory_path / Path("workspace.yaml"), "r"
-    ) as sample_workspace_file:
+    with open(sample_directory_path / Path("workspace.yaml"), "r") as sample_workspace_file:
         sample_workspace_content = sample_workspace_file.read()
 
     # Create directory
@@ -237,9 +233,7 @@ def pipelines_init(name: str):
 
 
 @pipelines.command("push")
-@click.argument(
-    "path", default=".", type=click.Path(exists=True, file_okay=False, dir_okay=True)
-)
+@click.argument("path", default=".", type=click.Path(exists=True, file_okay=False, dir_okay=True))
 def pipelines_push(path: str):
     """
     Push a pipeline to the backend. If the pipeline already exists, it will be updated otherwise it will be created.
@@ -274,7 +268,7 @@ def pipelines_push(path: str):
 
         if get_pipeline(user_config, pipeline.code) is None:
             click.echo(
-                f"Pipeline {click.style(pipeline.code, bold=True)} found in {path} does not exist in workspace {click.style(workspace, bold=True)}"
+                f"Pipeline {click.style(pipeline.code, bold=True)} does not exist in workspace {click.style(workspace, bold=True)}"
             )
             click.confirm(
                 f"Create pipeline {click.style(pipeline.code, bold=True)} in workspace {click.style(workspace, bold=True)}?",
@@ -287,24 +281,35 @@ def pipelines_push(path: str):
             f"Pushing pipeline {click.style(pipeline.code, bold=True)} to workspace {click.style(workspace, bold=True)}"
         )
 
-        new_version = upload_pipeline(user_config, path)
-        click.echo(f"New version created: {new_version}")
+        try:
+            new_version = upload_pipeline(user_config, path)
+            click.echo(f"New version created: {new_version}")
 
-        url = f"{user_config['openhexa']['url']}/workspaces/{workspace}/pipelines/{pipeline.code}".replace(
-            "api", "app"
-        )
-        click.echo(
-            f"Done! You can view the pipeline in OpenHexa on {click.style(url, fg='bright_blue', underline=True)}"
-        )
+            url = f"{user_config['openhexa']['url']}/workspaces/{workspace}/pipelines/{pipeline.code}".replace(
+                "api", "app"
+            )
+            click.echo(
+                f"Done! You can view the pipeline in OpenHexa on {click.style(url, fg='bright_blue', underline=True)}"
+            )
+        except InvalidDefinitionError as e:
+            terminate(
+                f'Pipeline definition is invalid: "{e}"',
+                err=True,
+                exception=e,
+                debug=is_debug(user_config),
+            )
+        except Exception as e:
+            terminate(
+                f'Error while importing pipeline: "{e}"',
+                err=True,
+                exception=e,
+                debug=is_debug(user_config),
+            )
 
 
 @pipelines.command("run")
-@click.argument(
-    "path", default=".", type=click.Path(exists=True, file_okay=False, dir_okay=True)
-)
-@click.option(
-    "-c", "config_str", type=str, default="{}", help="Configuration JSON as a string"
-)
+@click.argument("path", default=".", type=click.Path(exists=True, file_okay=False, dir_okay=True))
+@click.option("-c", "config_str", type=str, default="{}", help="Configuration JSON as a string")
 @click.option(
     "-f",
     "config_file",
@@ -312,12 +317,8 @@ def pipelines_push(path: str):
     default=None,
     help="Configuration JSON file",
 )
-@click.option(
-    "--force-pull", is_flag=True, help="Force pull of the docker image", default=False
-)
-def pipelines_run(
-    path: str, config_str: str = "{}", config_file: click.File = None, force_pull=False
-):
+@click.option("--force-pull", is_flag=True, help="Force pull of the docker image", default=False)
+def pipelines_run(path: str, config_str: str = "{}", config_file: click.File = None, force_pull=False):
     """
     Run a pipeline locally.
     """

@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.1.24](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.23...0.1.24) (2023-07-20)
+
+
+### Features
+
+* Update SDK version in Dockerfile ([#57](https://github.com/BLSQ/openhexa-sdk-python/issues/57)) ([208d7ea](https://github.com/BLSQ/openhexa-sdk-python/commit/208d7ea561417bf9dc106d3b545254ecbde863db))
+
+## [0.1.23](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.22...0.1.23) (2023-07-20)
+
+
+### Features
+
+* **Pipelines:** prevent push of version  with params for scheduled pipeline. ([#55](https://github.com/BLSQ/openhexa-sdk-python/issues/55)) ([b9de756](https://github.com/BLSQ/openhexa-sdk-python/commit/b9de756f4dc94296bc427b2dd3337740909399ed))
+
+## [0.1.22](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.21...0.1.22) (2023-07-14)
+
+
+### Bug Fixes
+
+* Proper error messages for arguments and missing config file ([#51](https://github.com/BLSQ/openhexa-sdk-python/issues/51)) ([07a5027](https://github.com/BLSQ/openhexa-sdk-python/commit/07a5027fb6be317d6f3e666dd6b0d145b8573358))
+* use proper namespace package setup ([#53](https://github.com/BLSQ/openhexa-sdk-python/issues/53)) ([81fc51e](https://github.com/BLSQ/openhexa-sdk-python/commit/81fc51e9256d55ac68274c204432582490c37a3a))
+
+
+### Miscellaneous
+
+* Update SDK version in Dockerfile ([#54](https://github.com/BLSQ/openhexa-sdk-python/issues/54)) ([c6125c0](https://github.com/BLSQ/openhexa-sdk-python/commit/c6125c0ac29a82b19c55bffae435e798113e94db))
+
 ## [0.1.21](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.20...0.1.21) (2023-06-21)
 
 

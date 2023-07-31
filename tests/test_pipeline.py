@@ -11,9 +11,7 @@ def test_pipeline_run_valid_config():
     parameter_1 = Parameter("arg1", type=str)
     parameter_2 = Parameter("arg2", type=str, multiple=True)
     parameter_3 = Parameter("arg3", type=int, default=33)
-    pipeline = Pipeline(
-        "code", "pipeline", pipeline_func, [parameter_1, parameter_2, parameter_3]
-    )
+    pipeline = Pipeline("code", "pipeline", pipeline_func, [parameter_1, parameter_2, parameter_3])
     pipeline.run({"arg1": "ab", "arg2": ["cd", "ef"]})
 
     assert pipeline.name == "pipeline"

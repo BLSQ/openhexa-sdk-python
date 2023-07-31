@@ -27,28 +27,18 @@ def get_local_workspace_config(path: Path):
             "To work with pipelines locally, you need a workspace.yaml file in the same directory as your pipeline file"
         )
 
-    with open(
-        local_workspace_config_path.resolve(), "r"
-    ) as local_workspace_config_file:
+    with open(local_workspace_config_path.resolve(), "r") as local_workspace_config_file:
         local_workspace_config = yaml.safe_load(local_workspace_config_file)
         # Database config
         if "database" in local_workspace_config:
             try:
-                env_vars["WORKSPACE_DATABASE_USERNAME"] = local_workspace_config[
-                    "database"
-                ]["username"]
+                env_vars["WORKSPACE_DATABASE_USERNAME"] = local_workspace_config["database"]["username"]
                 password = local_workspace_config["database"].get("password")
                 if password is not None:
                     env_vars["WORKSPACE_DATABASE_PASSWORD"] = password
-                env_vars["WORKSPACE_DATABASE_HOST"] = local_workspace_config[
-                    "database"
-                ]["host"]
-                env_vars["WORKSPACE_DATABASE_PORT"] = str(
-                    local_workspace_config["database"]["port"]
-                )
-                env_vars["WORKSPACE_DATABASE_DB_NAME"] = local_workspace_config[
-                    "database"
-                ]["dbname"]
+                env_vars["WORKSPACE_DATABASE_HOST"] = local_workspace_config["database"]["host"]
+                env_vars["WORKSPACE_DATABASE_PORT"] = str(local_workspace_config["database"]["port"])
+                env_vars["WORKSPACE_DATABASE_DB_NAME"] = local_workspace_config["database"]["dbname"]
             except KeyError:
                 exception_message = (
                     "Invalid local workspace database config. Please make sure you provide the following "
@@ -63,8 +53,7 @@ def get_local_workspace_config(path: Path):
                 files_path = path / Path(local_workspace_config["files"]["path"])
                 if not files_path.exists():
                     raise LocalWorkspaceConfigError(
-                        f"The {files_path} files path does not exist. "
-                        f"Did you forget to create it?"
+                        f"The {files_path} files path does not exist. " f"Did you forget to create it?"
                     )
                 env_vars["WORKSPACE_FILES_PATH"] = str(files_path.resolve())
             except KeyError:
@@ -76,26 +65,16 @@ def get_local_workspace_config(path: Path):
 
         # Connections
         if "connections" in local_workspace_config:
-            for slug, connection_config in local_workspace_config[
-                "connections"
-            ].items():
+            for slug, connection_config in local_workspace_config["connections"].items():
                 if "type" not in connection_config:
-                    raise LocalWorkspaceConfigError(
-                        "Each connection must have a type key."
-                    )
+                    raise LocalWorkspaceConfigError("Each connection must have a type key.")
 
                 # DHIS2 connections
                 if connection_config["type"] == "dhis2":
                     try:
-                        env_vars[
-                            f"{stringcase.constcase(slug)}_URL"
-                        ] = connection_config["url"]
-                        env_vars[
-                            f"{stringcase.constcase(slug)}_USERNAME"
-                        ] = connection_config["username"]
-                        env_vars[
-                            f"{stringcase.constcase(slug)}_PASSWORD"
-                        ] = connection_config["password"]
+                        env_vars[f"{stringcase.constcase(slug)}_URL"] = connection_config["url"]
+                        env_vars[f"{stringcase.constcase(slug)}_USERNAME"] = connection_config["username"]
+                        env_vars[f"{stringcase.constcase(slug)}_PASSWORD"] = connection_config["password"]
                     except KeyError:
                         exception_message = (
                             "Invalid local workspace dhis2 connection config. Please make sure you provide "
@@ -105,21 +84,11 @@ def get_local_workspace_config(path: Path):
                 # PostgreSQL connections
                 elif connection_config["type"] == "postgresql":
                     try:
-                        env_vars[
-                            f"{stringcase.constcase(slug)}_HOST"
-                        ] = connection_config["host"]
-                        env_vars[f"{stringcase.constcase(slug)}_PORT"] = str(
-                            connection_config["port"]
-                        )
-                        env_vars[f"{stringcase.constcase(slug)}_USERNAME"] = str(
-                            connection_config["username"]
-                        )
-                        env_vars[
-                            f"{stringcase.constcase(slug)}_PASSWORD"
-                        ] = connection_config["password"]
-                        env_vars[
-                            f"{stringcase.constcase(slug)}_DB_NAME"
-                        ] = connection_config["database_name"]
+                        env_vars[f"{stringcase.constcase(slug)}_HOST"] = connection_config["host"]
+                        env_vars[f"{stringcase.constcase(slug)}_PORT"] = str(connection_config["port"])
+                        env_vars[f"{stringcase.constcase(slug)}_USERNAME"] = str(connection_config["username"])
+                        env_vars[f"{stringcase.constcase(slug)}_PASSWORD"] = connection_config["password"]
+                        env_vars[f"{stringcase.constcase(slug)}_DB_NAME"] = connection_config["database_name"]
                     except KeyError:
                         exception_message = (
                             "Invalid local workspace PostgreSQL connection config. Please make sure you provide "
@@ -129,15 +98,13 @@ def get_local_workspace_config(path: Path):
                 # S3 connections
                 elif connection_config["type"] == "s3":
                     try:
-                        env_vars[
-                            f"{stringcase.constcase(slug)}_SECRET_ACCESS_KEY"
-                        ] = connection_config["secret_access_key"]
+                        env_vars[f"{stringcase.constcase(slug)}_SECRET_ACCESS_KEY"] = connection_config[
+                            "secret_access_key"
+                        ]
                         env_vars[f"{stringcase.constcase(slug)}_ACCESS_KEY_ID"] = str(
                             connection_config["access_key_id"]
                         )
-                        env_vars[f"{stringcase.constcase(slug)}_BUCKET_NAME"] = str(
-                            connection_config["bucket_name"]
-                        )
+                        env_vars[f"{stringcase.constcase(slug)}_BUCKET_NAME"] = str(connection_config["bucket_name"])
                     except KeyError:
                         exception_message = (
                             "Invalid local workspace S3 connection config. Please make sure you provide "
@@ -147,12 +114,10 @@ def get_local_workspace_config(path: Path):
                 # GCS connections
                 elif connection_config["type"] == "gcs":
                     try:
-                        env_vars[
-                            f"{stringcase.constcase(slug)}_SERVICE_ACCOUNT_KEY"
-                        ] = connection_config["service_account_key"]
-                        env_vars[f"{stringcase.constcase(slug)}_BUCKET_NAME"] = str(
-                            connection_config["bucket_name"]
-                        )
+                        env_vars[f"{stringcase.constcase(slug)}_SERVICE_ACCOUNT_KEY"] = connection_config[
+                            "service_account_key"
+                        ]
+                        env_vars[f"{stringcase.constcase(slug)}_BUCKET_NAME"] = str(connection_config["bucket_name"])
                     except KeyError:
                         exception_message = (
                             "Invalid local workspace GCS connection config. Please make sure you provide "
