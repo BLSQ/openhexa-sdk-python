@@ -58,7 +58,7 @@ class Pipeline:
         name: str,
         function: typing.Callable,
         parameters: typing.Sequence[Parameter],
-        timeout: int,
+        timeout: int = PIPELINE_MAX_TIMEOUT,
     ):
         self.code = code
         self.name = name
