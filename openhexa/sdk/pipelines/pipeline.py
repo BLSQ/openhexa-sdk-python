@@ -32,14 +32,9 @@ def pipeline(
     code: str, *, name: str = None, timeout: int = PIPELINE_MAX_TIMEOUT
 ) -> typing.Callable[[typing.Callable[..., typing.Any]], "Pipeline"]:
     if any(c not in string.ascii_lowercase + string.digits + "_-" for c in code):
-        raise Exception(
-            "Pipeline name should contains only lower case letters, digits, '_' and '-'"
-        )
+        raise Exception("Pipeline name should contains only lower case letters, digits, '_' and '-'")
     if timeout > PIPELINE_MAX_TIMEOUT:
-        raise Exception(
-            f"Pipeline timeout cannot be more than {PIPELINE_MAX_TIMEOUT}s (12 hours)"
-        )
-
+        raise Exception(f"Pipeline timeout cannot be more than {PIPELINE_MAX_TIMEOUT}s (12 hours)")
 
     def decorator(fun):
         if isinstance(fun, FunctionWithParameter):

@@ -147,9 +147,7 @@ def get_pipeline(config, pipeline_code: str):
     return data["pipelineByCode"]
 
 
-def create_pipeline(
-    config, pipeline_code: str, pipeline_name: str, timeout: int = None
-):
+def create_pipeline(config, pipeline_code: str, pipeline_name: str, timeout: int = None):
     data = graphql(
         config,
         """
