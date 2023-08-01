@@ -21,6 +21,7 @@ class InvalidDefinitionError(Exception):
 
 class PipelineErrorEnum(enum.Enum):
     PIPELINE_DOES_NOT_SUPPORT_PARAMETERS = "PIPELINE_DOES_NOT_SUPPORT_PARAMETERS"
+    INVALID_TIMEOUT_VALUE = "INVALID_TIMEOUT_VALUE"
 
 
 def is_debug(config: configparser.ConfigParser):
@@ -174,7 +175,12 @@ def create_pipeline(config, pipeline_code: str, pipeline_name: str, timeout: int
     )
 
     if not data["createPipeline"]["success"]:
-        raise Exception(data["createPipeline"]["errors"])
+        if PipelineErrorEnum.INVALID_TIMEOUT_VALUE.value in data["createPipeline"]["errors"]:
+            raise InvalidDefinitionError(
+                "Timeout value is invalid : ensure that it's no negative and inferior to 12 hours."
+            )
+        else:
+            raise Exception(data["createPipeline"]["errors"])
 
     return data["createPipeline"]["pipeline"]
 

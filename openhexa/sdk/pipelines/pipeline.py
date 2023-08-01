@@ -21,7 +21,6 @@ from .task import PipelineWithTask
 from .utils import get_local_workspace_config
 
 logger = getLogger(__name__)
-PIPELINE_MAX_TIMEOUT = 43200
 
 
 class PipelineConfigError(Exception):
@@ -29,12 +28,10 @@ class PipelineConfigError(Exception):
 
 
 def pipeline(
-    code: str, *, name: str = None, timeout: int = PIPELINE_MAX_TIMEOUT
+    code: str, *, name: str = None, timeout: int = None
 ) -> typing.Callable[[typing.Callable[..., typing.Any]], "Pipeline"]:
     if any(c not in string.ascii_lowercase + string.digits + "_-" for c in code):
         raise Exception("Pipeline name should contains only lower case letters, digits, '_' and '-'")
-    if timeout > PIPELINE_MAX_TIMEOUT:
-        raise Exception(f"Pipeline timeout cannot be more than {PIPELINE_MAX_TIMEOUT}s (12 hours)")
 
     def decorator(fun):
         if isinstance(fun, FunctionWithParameter):
@@ -58,7 +55,7 @@ class Pipeline:
         name: str,
         function: typing.Callable,
         parameters: typing.Sequence[Parameter],
-        timeout: int = PIPELINE_MAX_TIMEOUT,
+        timeout: int = None,
     ):
         self.code = code
         self.name = name
