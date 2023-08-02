@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.25](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.24...0.1.25) (2023-07-28)
+
+
+### Miscellaneous
+
+* Simplify messages displayed in CLI for new pipelines ([#61](https://github.com/BLSQ/openhexa-sdk-python/issues/61)) ([16e0cbd](https://github.com/BLSQ/openhexa-sdk-python/commit/16e0cbd94b9b8d5a1420698e897d6a48546f7c4f))
+* Update SDK to match project configuration of openhexa-toolbox ([#59](https://github.com/BLSQ/openhexa-sdk-python/issues/59)) ([83a2700](https://github.com/BLSQ/openhexa-sdk-python/commit/83a27004ecfbbe259514bf81ab73123f95f3cfb1))
+
 ## [0.1.24](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.23...0.1.24) (2023-07-20)
 
 
