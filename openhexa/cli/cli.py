@@ -353,6 +353,7 @@ def pipelines_run(
         f"HEXA_WORKSPACE={user_config['openhexa']['current_workspace']}",
         "--platform",
         "linux/amd64",
+        "--rm",
     ]
 
     if force_pull:
