@@ -208,7 +208,9 @@ def upload_pipeline(config, pipeline_directory_path: str):
     files = []
     venv_path = None
     with ZipFile(zipFile, "w") as zipObj:
-        for path in directory.glob("**/*"):
+        # we need to exclude workspace folder and all its content
+        dirs = [path for path in directory.glob("**/*") if not (path.match("workspace/*") or path.name == "workspace")]
+        for path in dirs:
             if path.name == "python":
                 # We are in a virtual environment
                 venv_path = path.parent.parent  # ./<venv>/bin/python -> ./<venv>
