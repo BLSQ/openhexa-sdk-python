@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.1.26](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.25...0.1.26) (2023-08-08)
+
+
+### Features
+
+* **Pipelines:** allow user to define a timeout for pipelines ([0eeab40](https://github.com/BLSQ/openhexa-sdk-python/commit/0eeab4064d38422b38f31a4cf70d3d8b823d2702))
+
+
+### Bug Fixes
+
+* **Connections:** Rename 'slug' to 'identifier' ([7f52ce4](https://github.com/BLSQ/openhexa-sdk-python/commit/7f52ce43309546a614bb71041146d42aa3c0e92a))
+* **Connections:** Set the slug to lowercase before building the env var ([7f52ce4](https://github.com/BLSQ/openhexa-sdk-python/commit/7f52ce43309546a614bb71041146d42aa3c0e92a))
+
+
+### Miscellaneous
+
+* add tests on how to get connections ([7f52ce4](https://github.com/BLSQ/openhexa-sdk-python/commit/7f52ce43309546a614bb71041146d42aa3c0e92a))
+* do not keep the container once finished ([6a079b3](https://github.com/BLSQ/openhexa-sdk-python/commit/6a079b369db7ede98f2e86c5464e2662037ae05d))
+* Expose "current_run" only in pipeline environments ([6a079b3](https://github.com/BLSQ/openhexa-sdk-python/commit/6a079b369db7ede98f2e86c5464e2662037ae05d))
+* Move the openhexa-pipelines dockerfile to openhexa-notebooks ([6a079b3](https://github.com/BLSQ/openhexa-sdk-python/commit/6a079b369db7ede98f2e86c5464e2662037ae05d))
+
 ## [0.1.25](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.24...0.1.25) (2023-07-28)
 
 
