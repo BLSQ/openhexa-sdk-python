@@ -150,7 +150,7 @@ class Pipeline:
         return [arg.parameter_spec() for arg in self.parameters]
 
     def _update_progress(self, progress: int):
-        if self.connected:
+        if self._connected:
             token = os.environ["HEXA_TOKEN"]
             headers = {"Authorization": "Bearer %s" % token}
             query = """
@@ -170,16 +170,20 @@ class Pipeline:
             print(f"Progress update: {progress}%")
 
     @property
-    def connected(self):
+    def _connected(self):
         env = get_environment()
-        return env == Environments.PIPELINE and "HEXA_SERVER_URL" in os.environ
+        return env == Environments.CLOUD_PIPELINE and "HEXA_SERVER_URL" in os.environ
 
     def __call__(self, config: typing.Optional[typing.Dict[str, typing.Any]] = None):
         # Handle local workspace config for dev / testing, if appropriate
-        if get_environment() == Environments.LOCAL:
+        if get_environment() == Environments.LOCAL_PIPELINE:
+            os.environ.update(get_local_workspace_config(Path("/home/hexa/pipeline")))
+
+        # User can run their pipeline using `python pipeline.py`. It's considered as a standalone usage of the library.
+        # Since we still support this use case for the moment, we'll try to load the workspace.yaml at the path of the file
+        elif get_environment() == Environments.STANDALONE:
             os.environ.update(get_local_workspace_config(Path(sys.argv[0]).parent))
 
-        # Handle config
         if config is None:  # Called without arguments, in the pipeline file itself
             parser = argparse.ArgumentParser(exit_on_error=False)
             parser.add_argument("-c", "--config")
