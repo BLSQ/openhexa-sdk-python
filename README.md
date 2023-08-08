@@ -100,18 +100,3 @@ Run the tests using pytest:
 ```shell
 pytest
 ```
-
-### Publishing the pipelines image
-
-The docker image `openhexa-pipelines` is still build and published manually. Follow the steps below to publish a new docker image.
-
-```shell
-cd docker
-docker build -t openhexa-pipelines .
-# For demo
-docker tag openhexa-pipelines blsq/openhexa-pipelines:demo
-docker push blsq/openhexa-pipelines:demo
-# For production
-docker tag openhexa-pipelines blsq/openhexa-pipelines:latest
-docker push blsq/openhexa-pipelines:latest
-```
