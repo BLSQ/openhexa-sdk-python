@@ -134,3 +134,41 @@ def test_workspace_custom_connection():
         custom_connection = workspace.custom_connection(identifier=identifier)
         assert custom_connection.username == username
         assert custom_connection.password == password
+
+
+def test_connection_by_slug_warning():
+    identifier = "polio-ff3a0d"
+    env_variable_prefix = stringcase.constcase(identifier)
+    url = "https://test.dhis2.org/"
+    username = "dhis2"
+    password = "dhis2_pwd"
+    with mock.patch.dict(
+        os.environ,
+        {
+            f"{env_variable_prefix}_URL": url,
+            f"{env_variable_prefix}_USERNAME": username,
+            f"{env_variable_prefix}_PASSWORD": password,
+        },
+    ):
+        assert workspace.dhis2_connection(identifier).url == url
+        with pytest.warns(DeprecationWarning):
+            assert workspace.dhis2_connection(slug=identifier).url == url
+        assert workspace.dhis2_connection(identifier=identifier).url == url
+
+
+def test_connection_various_case():
+    env_variable_prefix = stringcase.constcase("polio-123")
+    url = "https://test.dhis2.org/"
+    username = "dhis2"
+    password = "dhis2_pwd"
+    with mock.patch.dict(
+        os.environ,
+        {
+            f"{env_variable_prefix}_URL": url,
+            f"{env_variable_prefix}_USERNAME": username,
+            f"{env_variable_prefix}_PASSWORD": password,
+        },
+    ):
+        assert workspace.dhis2_connection("polio-123").url == url
+        assert workspace.dhis2_connection("Polio-123").url == url
+        assert workspace.dhis2_connection("POLIO-123").url == url
