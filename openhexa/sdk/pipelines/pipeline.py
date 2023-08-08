@@ -27,7 +27,9 @@ class PipelineConfigError(Exception):
     pass
 
 
-def pipeline(code: str, *, name: str = None) -> typing.Callable[[typing.Callable[..., typing.Any]], "Pipeline"]:
+def pipeline(
+    code: str, *, name: str = None, timeout: int = None
+) -> typing.Callable[[typing.Callable[..., typing.Any]], "Pipeline"]:
     if any(c not in string.ascii_lowercase + string.digits + "_-" for c in code):
         raise Exception("Pipeline name should contains only lower case letters, digits, '_' and '-'")
 
@@ -37,7 +39,7 @@ def pipeline(code: str, *, name: str = None) -> typing.Callable[[typing.Callable
         else:
             parameters = []
 
-        return Pipeline(code, name, fun, parameters)
+        return Pipeline(code, name, fun, parameters, timeout)
 
     return decorator
 
@@ -53,11 +55,13 @@ class Pipeline:
         name: str,
         function: typing.Callable,
         parameters: typing.Sequence[Parameter],
+        timeout: int = None,
     ):
         self.code = code
         self.name = name
         self.function = function
         self.parameters = parameters
+        self.timeout = timeout
         self.tasks = []
 
     def task(self, function):
