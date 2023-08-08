@@ -1,5 +1,6 @@
 import os
 from dataclasses import make_dataclass
+from warnings import warn
 
 import stringcase
 
@@ -93,27 +94,33 @@ class CurrentWorkspace:
         else:
             return "/home/hexa/workspace"
 
-    def dhis2_connection(self, slug: str) -> DHIS2Connection:
+    def dhis2_connection(self, identifier: str = None, slug: str = None) -> DHIS2Connection:
+        identifier = identifier or slug
+        if slug is not None:
+            warn("'slug' is deprecated. Use 'identifier' instead.", DeprecationWarning, stacklevel=2)
         try:
-            env_variable_prefix = stringcase.constcase(slug.lower())
+            env_variable_prefix = stringcase.constcase(identifier.lower())
             url = os.environ[f"{env_variable_prefix}_URL"]
             username = os.environ[f"{env_variable_prefix}_USERNAME"]
             password = os.environ[f"{env_variable_prefix}_PASSWORD"]
         except KeyError:
-            raise ConnectionDoesNotExist(f'No DHIS2 connection for "{slug}"')
+            raise ConnectionDoesNotExist(f'No DHIS2 connection for "{identifier}"')
 
         return DHIS2Connection(url=url, username=username, password=password)
 
-    def postgresql_connection(self, slug: str) -> PostgreSQLConnection:
+    def postgresql_connection(self, identifier: str = None, slug: str = None) -> PostgreSQLConnection:
+        identifier = identifier or slug
+        if slug is not None:
+            warn("'slug' is deprecated. Use 'identifier' instead.", DeprecationWarning, stacklevel=2)
         try:
-            env_variable_prefix = stringcase.constcase(slug.lower())
+            env_variable_prefix = stringcase.constcase(identifier.lower())
             host = os.environ[f"{env_variable_prefix}_HOST"]
             port = int(os.environ[f"{env_variable_prefix}_PORT"])
             username = os.environ[f"{env_variable_prefix}_USERNAME"]
             password = os.environ[f"{env_variable_prefix}_PASSWORD"]
             dbname = os.environ[f"{env_variable_prefix}_DB_NAME"]
         except KeyError:
-            raise ConnectionDoesNotExist(f'No PostgreSQL connection for "{slug}"')
+            raise ConnectionDoesNotExist(f'No PostgreSQL connection for "{identifier}"')
 
         return PostgreSQLConnection(
             host=host,
@@ -123,14 +130,17 @@ class CurrentWorkspace:
             database_name=dbname,
         )
 
-    def s3_connection(self, slug: str) -> S3Connection:
+    def s3_connection(self, identifier: str = None, slug: str = None) -> S3Connection:
+        identifier = identifier or slug
+        if slug is not None:
+            warn("'slug' is deprecated. Use 'identifier' instead.", DeprecationWarning, stacklevel=2)
         try:
-            env_variable_prefix = stringcase.constcase(slug.lower())
+            env_variable_prefix = stringcase.constcase(identifier.lower())
             secret_access_key = os.environ[f"{env_variable_prefix}_SECRET_ACCESS_KEY"]
             access_key_id = os.environ[f"{env_variable_prefix}_ACCESS_KEY_ID"]
             bucket_name = os.environ[f"{env_variable_prefix}_BUCKET_NAME"]
         except KeyError:
-            raise ConnectionDoesNotExist(f'No S3 connection for "{slug}"')
+            raise ConnectionDoesNotExist(f'No S3 connection for "{identifier}"')
 
         return S3Connection(
             access_key_id=access_key_id,
@@ -138,28 +148,34 @@ class CurrentWorkspace:
             bucket_name=bucket_name,
         )
 
-    def gcs_connection(self, slug: str) -> GCSConnection:
+    def gcs_connection(self, identifier: str = None, slug: str = None) -> GCSConnection:
+        identifier = identifier or slug
+        if slug is not None:
+            warn("'slug' is deprecated. Use 'identifier' instead.", DeprecationWarning, stacklevel=2)
         try:
-            env_variable_prefix = stringcase.constcase(slug.lower())
+            env_variable_prefix = stringcase.constcase(identifier.lower())
             service_account_key = os.environ[f"{env_variable_prefix}_SERVICE_ACCOUNT_KEY"]
             bucket_name = os.environ[f"{env_variable_prefix}_BUCKET_NAME"]
         except KeyError:
-            raise ConnectionDoesNotExist(f'No GCS connection for "{slug}"')
+            raise ConnectionDoesNotExist(f'No GCS connection for "{identifier}"')
 
         return GCSConnection(
             service_account_key=service_account_key,
             bucket_name=bucket_name,
         )
 
-    def custom_connection(self, slug: str):
-        slug = slug.lower()
-        env_variable_prefix = stringcase.constcase(slug)
+    def custom_connection(self, identifier: str = None, slug: str = None):
+        identifier = identifier or slug
+        if slug is not None:
+            warn("'slug' is deprecated. Use 'identifier' instead.", DeprecationWarning, stacklevel=2)
+        identifier = identifier.lower()
+        env_variable_prefix = stringcase.constcase(identifier)
         fields = {}
         for key, value in os.environ.items():
             if key.startswith(env_variable_prefix):
                 field_key = key[len(f"{env_variable_prefix}_") :].lower()
                 fields[field_key] = value
-        CustomConnection = make_dataclass(slug, fields.keys())
+        CustomConnection = make_dataclass(identifier, fields.keys())
         return CustomConnection(**fields)
 
 

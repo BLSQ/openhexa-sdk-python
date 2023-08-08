@@ -66,6 +66,7 @@ def get_local_workspace_config(path: Path):
         # Connections
         if "connections" in local_workspace_config:
             for slug, connection_config in local_workspace_config["connections"].items():
+                slug = slug.lower()
                 if "type" not in connection_config:
                     raise LocalWorkspaceConfigError("Each connection must have a type key.")
 
@@ -128,5 +129,5 @@ def get_local_workspace_config(path: Path):
                 else:
                     for key, value in connection_config.items():
                         if key != "type":
-                            env_vars[stringcase.constcase(f"{slug}_{key}")] = str(value)
+                            env_vars[stringcase.constcase(f"{slug}_{key.lower()}")] = str(value)
     return env_vars

@@ -8,14 +8,14 @@ from openhexa.sdk.workspaces.workspace import ConnectionDoesNotExist, workspace
 
 
 def test_workspace_dhis2_connection_not_exist():
-    slug = "polio-ff3a0d"
+    identifier = "polio-ff3a0d"
     with pytest.raises(ConnectionDoesNotExist):
-        workspace.dhis2_connection(slug=slug)
+        workspace.dhis2_connection(identifier=identifier)
 
 
 def test_workspace_dhis2_connection():
-    slug = "polio-ff3a0d"
-    env_variable_prefix = stringcase.constcase(slug)
+    identifier = "polio-ff3a0d"
+    env_variable_prefix = stringcase.constcase(identifier)
     url = "https://test.dhis2.org/"
     username = "dhis2"
     password = "dhis2_pwd"
@@ -27,21 +27,21 @@ def test_workspace_dhis2_connection():
             f"{env_variable_prefix}_PASSWORD": password,
         },
     ):
-        dhis2_connection = workspace.dhis2_connection(slug=slug)
+        dhis2_connection = workspace.dhis2_connection(identifier=identifier)
         assert dhis2_connection.url == url
         assert dhis2_connection.username == username
         assert dhis2_connection.password == password
 
 
 def test_workspace_postgresql_connection_not_exist():
-    slug = "polio-ff3a0d"
+    identifier = "polio-ff3a0d"
     with pytest.raises(ConnectionDoesNotExist):
-        workspace.postgresql_connection(slug=slug)
+        workspace.postgresql_connection(identifier=identifier)
 
 
 def test_workspace_postgresql_connection():
-    slug = "polio-ff3a0d"
-    env_variable_prefix = stringcase.constcase(slug)
+    identifier = "polio-ff3a0d"
+    env_variable_prefix = stringcase.constcase(identifier)
     host = "https://172.17.0.1"
     port = "5432"
     username = "dhis2"
@@ -58,7 +58,7 @@ def test_workspace_postgresql_connection():
             f"{env_variable_prefix}_DB_NAME": database_name,
         },
     ):
-        postgres_connection = workspace.postgresql_connection(slug=slug)
+        postgres_connection = workspace.postgresql_connection(identifier=identifier)
         assert postgres_connection.username == username
         assert postgres_connection.password == password
         assert postgres_connection.host == host
@@ -68,14 +68,14 @@ def test_workspace_postgresql_connection():
 
 
 def test_workspace_S3_connection_not_exist():
-    slug = "polio-ff3a0d"
+    identifier = "polio-ff3a0d"
     with pytest.raises(ConnectionDoesNotExist):
-        workspace.s3_connection(slug=slug)
+        workspace.s3_connection(identifier=identifier)
 
 
 def test_workspace_s3_connection():
-    slug = "polio-ff3a0d"
-    env_variable_prefix = stringcase.constcase(slug)
+    identifier = "polio-ff3a0d"
+    env_variable_prefix = stringcase.constcase(identifier)
     secret_access_key = "HqQBxH0BAI3zF7kANUNlGg"
     access_key_id = "84hVntMaMSYP/RSW9ex04w"
     bucket_name = "test"
@@ -88,21 +88,21 @@ def test_workspace_s3_connection():
             f"{env_variable_prefix}_BUCKET_NAME": bucket_name,
         },
     ):
-        s3_connection = workspace.s3_connection(slug=slug)
+        s3_connection = workspace.s3_connection(identifier=identifier)
         assert s3_connection.secret_access_key == secret_access_key
         assert s3_connection.access_key_id == access_key_id
         assert s3_connection.bucket_name == bucket_name
 
 
 def test_workspace_gcs_connection_not_exist():
-    slug = "polio-ff3a0d"
+    identifier = "polio-ff3a0d"
     with pytest.raises(ConnectionDoesNotExist):
-        workspace.gcs_connection(slug=slug)
+        workspace.gcs_connection(identifier=identifier)
 
 
 def test_workspace_gcs_connection():
-    slug = "polio-ff3a0d"
-    env_variable_prefix = stringcase.constcase(slug)
+    identifier = "polio-ff3a0d"
+    env_variable_prefix = stringcase.constcase(identifier)
     service_account_key = "HqQBxH0BAI3zF7kANUNlGg"
     bucket_name = "test"
 
@@ -113,14 +113,14 @@ def test_workspace_gcs_connection():
             f"{env_variable_prefix}_BUCKET_NAME": bucket_name,
         },
     ):
-        s3_connection = workspace.gcs_connection(slug=slug)
+        s3_connection = workspace.gcs_connection(identifier=identifier)
         assert s3_connection.service_account_key == service_account_key
         assert s3_connection.bucket_name == bucket_name
 
 
 def test_workspace_custom_connection():
-    slug = "my_connection"
-    env_variable_prefix = stringcase.constcase(slug)
+    identifier = "my_connection"
+    env_variable_prefix = stringcase.constcase(identifier)
     username = "kaggle_username"
     password = "root"
 
@@ -131,6 +131,44 @@ def test_workspace_custom_connection():
             f"{env_variable_prefix}_PASSWORD": password,
         },
     ):
-        custom_connection = workspace.custom_connection(slug=slug)
+        custom_connection = workspace.custom_connection(identifier=identifier)
         assert custom_connection.username == username
         assert custom_connection.password == password
+
+
+def test_connection_by_slug_warning():
+    identifier = "polio-ff3a0d"
+    env_variable_prefix = stringcase.constcase(identifier)
+    url = "https://test.dhis2.org/"
+    username = "dhis2"
+    password = "dhis2_pwd"
+    with mock.patch.dict(
+        os.environ,
+        {
+            f"{env_variable_prefix}_URL": url,
+            f"{env_variable_prefix}_USERNAME": username,
+            f"{env_variable_prefix}_PASSWORD": password,
+        },
+    ):
+        assert workspace.dhis2_connection(identifier).url == url
+        with pytest.warns(DeprecationWarning):
+            assert workspace.dhis2_connection(slug=identifier).url == url
+        assert workspace.dhis2_connection(identifier=identifier).url == url
+
+
+def test_connection_various_case():
+    env_variable_prefix = stringcase.constcase("polio-123")
+    url = "https://test.dhis2.org/"
+    username = "dhis2"
+    password = "dhis2_pwd"
+    with mock.patch.dict(
+        os.environ,
+        {
+            f"{env_variable_prefix}_URL": url,
+            f"{env_variable_prefix}_USERNAME": username,
+            f"{env_variable_prefix}_PASSWORD": password,
+        },
+    ):
+        assert workspace.dhis2_connection("polio-123").url == url
+        assert workspace.dhis2_connection("Polio-123").url == url
+        assert workspace.dhis2_connection("POLIO-123").url == url
