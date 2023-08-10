@@ -10,7 +10,7 @@ from zipfile import ZipFile
 import click
 import requests
 
-from openhexa.sdk.pipelines import import_pipeline, get_local_workspace_config
+from openhexa.sdk.pipelines import get_local_workspace_config, import_pipeline
 
 CONFIGFILE_PATH = os.path.expanduser("~") + "/.openhexa.ini"
 
@@ -206,35 +206,38 @@ def upload_pipeline(config, pipeline_directory_path: str):
     if is_debug(config):
         click.echo("Generating ZIP file:")
     files = []
-    venv_path = None
     env_vars = get_local_workspace_config(Path(pipeline_directory_path))
-    # default value for files path in workspace.yaml
-    excluded_dirs = ["workspace"]
-    if env_vars.get("WORKSPACE_FILES_PATH"):
-        excluded_dirs.append(Path(env_vars["WORKSPACE_FILES_PATH"]).name)
+
+    # We exclude the workspace directory since it can break the mount of the bucket on /home/hexa/workspace
+    # This is also the default value of the WORKSPACE_FILES_PATH env var
+    excluded_paths = [directory / "workspace"]
+    if env_vars.get("WORKSPACE_FILES_PATH") and Path(env_vars["WORKSPACE_FILES_PATH"]) not in excluded_paths:
+        excluded_paths.append(Path(env_vars["WORKSPACE_FILES_PATH"]))
 
     with ZipFile(zipFile, "w") as zipObj:
         for path in directory.glob("**/*"):
-            if any([path.match(f"{excluded_dir}/*") for excluded_dir in excluded_dirs]) or path.name in excluded_dirs:
-                continue
             if path.name == "python":
                 # We are in a virtual environment
-                venv_path = path.parent.parent  # ./<venv>/bin/python -> ./<venv>
+                excluded_paths.append(path.parent.parent)  # ./<venv>/bin/python -> ./<venv>
 
-            if path.suffix not in (".py", ".ipynb", ".txt"):
+            if path.suffix not in (".py", ".ipynb", ".txt", ".md"):
                 continue
 
             files.append(path)
+
         if is_debug(config):
-            click.echo(f"Venv path: {venv_path}")
+            click.echo(f"Excluded dirs: {[p.absolute() for p in excluded_paths]}")
 
         for file_path in files:
-            # Do not include files from the virtual environment if we found one
-            if venv_path and file_path.is_relative_to(venv_path):
+            # Do not include files from the excluded paths
+            if any([file_path.is_relative_to(excluded_dir) for excluded_dir in excluded_paths]):
+                if is_debug(config):
+                    click.echo(f"\t{file_path.name} (excluded)")
                 continue
             if is_debug(config):
                 click.echo(f"\t{file_path.name}")
             zipObj.write(file_path, file_path.relative_to(directory))
+
     zipFile.seek(0)
 
     if is_debug(config):
