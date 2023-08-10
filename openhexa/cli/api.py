@@ -10,7 +10,7 @@ from zipfile import ZipFile
 import click
 import requests
 
-from openhexa.sdk.pipelines import import_pipeline
+from openhexa.sdk.pipelines import import_pipeline, get_local_workspace_config
 
 CONFIGFILE_PATH = os.path.expanduser("~") + "/.openhexa.ini"
 
@@ -207,8 +207,16 @@ def upload_pipeline(config, pipeline_directory_path: str):
         click.echo("Generating ZIP file:")
     files = []
     venv_path = None
+    env_vars = get_local_workspace_config(Path(pipeline_directory_path))
+    # default value for files path in workspace.yaml
+    excluded_dirs = ["workspace"]
+    if env_vars.get("WORKSPACE_FILES_PATH"):
+        excluded_dirs.append(Path(env_vars["WORKSPACE_FILES_PATH"]).name)
+
     with ZipFile(zipFile, "w") as zipObj:
         for path in directory.glob("**/*"):
+            if any([path.match(f"{excluded_dir}/*") for excluded_dir in excluded_dirs]) or path.name in excluded_dirs:
+                continue
             if path.name == "python":
                 # We are in a virtual environment
                 venv_path = path.parent.parent  # ./<venv>/bin/python -> ./<venv>
