@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.27](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.26...0.1.27) (2023-08-10)
+
+
+### Bug Fixes
+
+* **Pipelines:** prevent upload of workspace folder content ([#68](https://github.com/BLSQ/openhexa-sdk-python/issues/68)) ([957c277](https://github.com/BLSQ/openhexa-sdk-python/commit/957c277b5348ac07dd7594879703ce0b0b3b09c0))
+
+
+### Miscellaneous
+
+* Remove pipelines image doc in readme.md ([62725a7](https://github.com/BLSQ/openhexa-sdk-python/commit/62725a7807615859230e15f3b7d318c77c3fcd88))
+
 ## [0.1.26](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.25...0.1.26) (2023-08-08)
 
 
