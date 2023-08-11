@@ -278,7 +278,37 @@ def parameter(
     required: bool = True,
     multiple: bool = False,
 ):
-    """parameter decorator."""
+    """Decorator that attaches a parameter to an OpenHexa pipeline.
+
+    This decorator must be used on a function decorated by the @pipeline decorator.
+
+    Parameters
+    ----------
+    code : str
+        The parameter identifier (must be unique for a given pipeline)
+    type : {str, int, bool, float}
+        The parameter Python type
+    name : str, optional
+        A name for the parameter (will be used instead of the code in the web interface)
+    choices : list, optional
+        An optional list or tuple of choices for the parameter (will be used to build a choice widget in the web
+        interface)
+    help : str, optional
+        An optional help text to be displayed in the web interface
+    default : any, optional
+        An optional default value for the parameter (should be of the type defined by the type parameter)
+    required : bool, default=True
+        Whether the parameter is mandatory
+    multiple : bool, default=True
+        Whether this parameter should be provided multiple values (if True, the value must be provided as a list of
+        values of the chosen type)
+
+    Returns
+    -------
+    typing.Callable
+        A decorator that returns the Pipeline with the paramter attached
+
+    """
 
     def decorator(fun):
         return FunctionWithParameter(
