@@ -30,6 +30,25 @@ class PipelineConfigError(Exception):
 def pipeline(
     code: str, *, name: str = None, timeout: int = None
 ) -> typing.Callable[[typing.Callable[..., typing.Any]], "Pipeline"]:
+    """Decorator that turns a Python function into an OpenHexa pipeline.
+
+    Parameters
+    ----------
+    code : str
+        An identifier for the pipeline (should be unique within the workspace where the pipeline is deployed)
+    name : str, optional
+        An optional name for the pipeline (will be used instead of the code in the web interface)
+    timeout : int, optional
+        An optional timeout, in seconds, after which the pipeline run will be terminated (if not provided, a default
+        timeout will be applied by the OpenHexa backend)
+
+    Returns
+    -------
+    typing.Callable
+        A decorator that returns a Pipeline
+
+    """
+
     if any(c not in string.ascii_lowercase + string.digits + "_-" for c in code):
         raise Exception("Pipeline name should contains only lower case letters, digits, '_' and '-'")
 
@@ -180,7 +199,8 @@ class Pipeline:
             os.environ.update(get_local_workspace_config(Path("/home/hexa/pipeline")))
 
         # User can run their pipeline using `python pipeline.py`. It's considered as a standalone usage of the library.
-        # Since we still support this use case for the moment, we'll try to load the workspace.yaml at the path of the file
+        # Since we still support this use case for the moment, we'll try to load the workspace.yaml
+        # at the path of the file
         elif get_environment() == Environments.STANDALONE:
             os.environ.update(get_local_workspace_config(Path(sys.argv[0]).parent))
 
