@@ -96,7 +96,7 @@ class CurrentWorkspace:
         else:
             return "/home/hexa/workspace"
 
-    def dhis2_connection(self, identifier: str = None, slug: str = None) -> DHIS2Connection:
+    def dhis2_connection(self, identifier: str = None, *, slug: str = None) -> DHIS2Connection:
         identifier = identifier or slug
         if slug is not None:
             warn("'slug' is deprecated. Use 'identifier' instead.", DeprecationWarning, stacklevel=2)
@@ -110,7 +110,7 @@ class CurrentWorkspace:
 
         return DHIS2Connection(url=url, username=username, password=password)
 
-    def postgresql_connection(self, identifier: str = None, slug: str = None) -> PostgreSQLConnection:
+    def postgresql_connection(self, identifier: str = None, *, slug: str = None) -> PostgreSQLConnection:
         identifier = identifier or slug
         if slug is not None:
             warn("'slug' is deprecated. Use 'identifier' instead.", DeprecationWarning, stacklevel=2)
@@ -132,7 +132,7 @@ class CurrentWorkspace:
             database_name=dbname,
         )
 
-    def s3_connection(self, identifier: str = None, slug: str = None) -> S3Connection:
+    def s3_connection(self, identifier: str = None, *, slug: str = None) -> S3Connection:
         identifier = identifier or slug
         if slug is not None:
             warn("'slug' is deprecated. Use 'identifier' instead.", DeprecationWarning, stacklevel=2)
@@ -150,7 +150,7 @@ class CurrentWorkspace:
             bucket_name=bucket_name,
         )
 
-    def gcs_connection(self, identifier: str = None, slug: str = None) -> GCSConnection:
+    def gcs_connection(self, identifier: str = None, *, slug: str = None) -> GCSConnection:
         identifier = identifier or slug
         if slug is not None:
             warn("'slug' is deprecated. Use 'identifier' instead.", DeprecationWarning, stacklevel=2)
@@ -166,7 +166,7 @@ class CurrentWorkspace:
             bucket_name=bucket_name,
         )
 
-    def custom_connection(self, identifier: str = None, slug: str = None):
+    def custom_connection(self, identifier: str = None, *, slug: str = None):
         identifier = identifier or slug
         if slug is not None:
             warn("'slug' is deprecated. Use 'identifier' instead.", DeprecationWarning, stacklevel=2)
