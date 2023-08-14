@@ -276,7 +276,7 @@ def pipelines_push(path: str):
                 True,
                 abort=True,
             )
-            create_pipeline(user_config, pipeline.code, pipeline.name, pipeline.timeout)
+            create_pipeline(user_config, pipeline.code, pipeline.name)
 
         click.echo(
             f"Pushing pipeline {click.style(pipeline.code, bold=True)} to workspace {click.style(workspace, bold=True)}"
