@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.28](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.27...0.1.28) (2023-08-14)
+
+
+### Bug Fixes
+
+* **Pipelines:** set timeout when uploading a version ([#72](https://github.com/BLSQ/openhexa-sdk-python/issues/72)) ([7703794](https://github.com/BLSQ/openhexa-sdk-python/commit/77037943405406673ab5e2612fb1287fa3e19742))
+
 ## [0.1.27](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.26...0.1.27) (2023-08-10)
 
 
