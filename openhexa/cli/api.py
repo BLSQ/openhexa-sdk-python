@@ -148,7 +148,7 @@ def get_pipeline(config, pipeline_code: str):
     return data["pipelineByCode"]
 
 
-def create_pipeline(config, pipeline_code: str, pipeline_name: str, timeout: int = None):
+def create_pipeline(config, pipeline_code: str, pipeline_name: str):
     data = graphql(
         config,
         """
@@ -169,18 +169,12 @@ def create_pipeline(config, pipeline_code: str, pipeline_name: str, timeout: int
                 "workspaceSlug": config["openhexa"]["current_workspace"],
                 "code": pipeline_code,
                 "name": pipeline_name,
-                "timeout": timeout,
             }
         },
     )
 
     if not data["createPipeline"]["success"]:
-        if PipelineErrorEnum.INVALID_TIMEOUT_VALUE.value in data["createPipeline"]["errors"]:
-            raise InvalidDefinitionError(
-                "Timeout value is invalid : ensure that it's no negative and inferior to 12 hours."
-            )
-        else:
-            raise Exception(data["createPipeline"]["errors"])
+        raise Exception(data["createPipeline"]["errors"])
 
     return data["createPipeline"]["pipeline"]
 
@@ -265,6 +259,7 @@ def upload_pipeline(config, pipeline_directory_path: str):
                 "code": pipeline.code,
                 "zipfile": base64_content,
                 "parameters": pipeline.parameters_spec(),
+                "timeout": pipeline.timeout,
             }
         },
     )
@@ -272,6 +267,10 @@ def upload_pipeline(config, pipeline_directory_path: str):
     if not data["uploadPipeline"]["success"]:
         if PipelineErrorEnum.PIPELINE_DOES_NOT_SUPPORT_PARAMETERS.value in data["uploadPipeline"]["errors"]:
             raise InvalidDefinitionError("A pipeline with a schedule can't have parameters")
+        elif PipelineErrorEnum.INVALID_TIMEOUT_VALUE.value in data["uploadPipeline"]["errors"]:
+            raise InvalidDefinitionError(
+                "Timeout value is invalid : ensure that it's no negative and inferior to 12 hours."
+            )
         else:
             raise Exception(data["uploadPipeline"]["errors"])
 
