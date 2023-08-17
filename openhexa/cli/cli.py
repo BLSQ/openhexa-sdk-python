@@ -20,7 +20,7 @@ from openhexa.cli.api import (
     upload_pipeline,
 )
 from openhexa.cli.utils import terminate
-from openhexa.sdk.pipelines import get_local_workspace_config, import_pipeline
+from openhexa.sdk.pipelines import get_local_workspace_config, get_pipeline_specs
 
 
 @click.group()
@@ -256,7 +256,7 @@ def pipelines_push(path: str):
     ensure_is_pipeline_dir(path)
 
     try:
-        pipeline = import_pipeline(path)
+        pipeline, _ = get_pipeline_specs(path)
     except Exception as e:
         click.echo(f'Error while importing pipeline: "{e}"', err=True)
         if is_debug(user_config):

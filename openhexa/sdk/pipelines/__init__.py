@@ -1,7 +1,7 @@
 from .parameter import parameter
 from .pipeline import pipeline
 from .run import current_run
-from .runtime import download_pipeline, import_pipeline
+from .runtime import download_pipeline, import_pipeline, get_pipeline_specs
 from .utils import get_local_workspace_config
 
 __all__ = [
@@ -11,4 +11,5 @@ __all__ = [
     "import_pipeline",
     "download_pipeline",
     "get_local_workspace_config",
+    "get_pipeline_specs",
 ]

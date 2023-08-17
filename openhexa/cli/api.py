@@ -10,7 +10,7 @@ from zipfile import ZipFile
 import click
 import requests
 
-from openhexa.sdk.pipelines import get_local_workspace_config, import_pipeline
+from openhexa.sdk.pipelines import get_local_workspace_config, get_pipeline_specs
 
 CONFIGFILE_PATH = os.path.expanduser("~") + "/.openhexa.ini"
 
@@ -192,7 +192,7 @@ def ensure_is_pipeline_dir(pipeline_path: str):
 
 
 def upload_pipeline(config, pipeline_directory_path: str):
-    pipeline = import_pipeline(pipeline_directory_path)
+    pipeline_specs, parameters_specs = get_pipeline_specs(pipeline_directory_path)
     directory = Path(os.path.abspath(pipeline_directory_path))
 
     zipFile = io.BytesIO(b"")
@@ -241,6 +241,7 @@ def upload_pipeline(config, pipeline_directory_path: str):
         zipFile.seek(0)
 
     base64_content = base64.b64encode(zipFile.read()).decode("ascii")
+    parameters = [spec.__dict__ for spec in parameters_specs]
 
     data = graphql(
         config,
@@ -256,10 +257,10 @@ def upload_pipeline(config, pipeline_directory_path: str):
         {
             "input": {
                 "workspaceSlug": config["openhexa"]["current_workspace"],
-                "code": pipeline.code,
+                "code": pipeline_specs.code,
                 "zipfile": base64_content,
-                "parameters": pipeline.parameters_spec(),
-                "timeout": pipeline.timeout,
+                "parameters": parameters,
+                "timeout": pipeline_specs.timeout,
             }
         },
     )
