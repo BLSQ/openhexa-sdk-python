@@ -3,6 +3,8 @@ import configparser
 import enum
 import io
 import os
+
+from dataclasses import asdict
 from importlib.metadata import version
 from pathlib import Path
 from zipfile import ZipFile
@@ -192,7 +194,7 @@ def ensure_is_pipeline_dir(pipeline_path: str):
 
 
 def upload_pipeline(config, pipeline_directory_path: str):
-    pipeline_specs, parameters_specs = get_pipeline_specs(pipeline_directory_path)
+    pipeline_specs = get_pipeline_specs(pipeline_directory_path)
     directory = Path(os.path.abspath(pipeline_directory_path))
 
     zipFile = io.BytesIO(b"")
@@ -241,7 +243,7 @@ def upload_pipeline(config, pipeline_directory_path: str):
         zipFile.seek(0)
 
     base64_content = base64.b64encode(zipFile.read()).decode("ascii")
-    parameters = [spec.__dict__ for spec in parameters_specs]
+    parameters = [asdict(spec) for spec in pipeline_specs.parameters]
 
     data = graphql(
         config,

@@ -1,5 +1,6 @@
 import ast
 import base64
+import dataclasses
 import importlib
 import io
 import os
@@ -10,7 +11,26 @@ from zipfile import ZipFile
 import requests
 from pathlib import Path
 from .pipeline import Pipeline
-from .utils import PipelineSpecs, PipelineParameterSpecs
+
+
+@dataclasses.dataclass
+class PipelineParameterSpecs:
+    code: str
+    type: typing.Union[typing.Type[str], typing.Type[int], typing.Type[bool]]
+    name: typing.Optional[str] = None
+    choices: typing.Optional[typing.Sequence] = None
+    help: typing.Optional[str] = None
+    default: typing.Optional[typing.Any] = None
+    required: bool = True
+    multiple: bool = False
+
+
+@dataclasses.dataclass
+class PipelineSpecs:
+    code: str
+    name: str
+    parameters: typing.Sequence[PipelineParameterSpecs]
+    timeout: int = None
 
 
 def import_pipeline(pipeline_dir_path: str):
@@ -22,45 +42,48 @@ def import_pipeline(pipeline_dir_path: str):
     return pipeline
 
 
-def get_pipeline_specs(pipeline_dir_path) -> typing.Tuple[PipelineSpecs, typing.List[PipelineParameterSpecs]]:
-    pipeline_dir = os.path.abspath(pipeline_dir_path)
-    sys.path.append(pipeline_dir)
+def get_pipeline_specs(pipeline_dir_path) -> PipelineSpecs:
     pipeline_node = None
+    pipeline_decorator = None
+    param_decorators = None
 
     with open(pipeline_dir_path / Path("pipeline.py")) as f:
         tree = ast.parse(f.read())
+        # In order to search for the pipeline decorator, we visit each node of the generated tree,
+        # then check if a node of type function with id 'pipeline' (pipeline decorator) is a present.
         for node in ast.walk(tree):
-            if isinstance(node, ast.FunctionDef) and [
-                decorator for decorator in node.decorator_list if decorator.func and decorator.func.id == "pipeline"
-            ]:
+            if isinstance(node, ast.FunctionDef) and any(
+                [hasattr(dec, "func") and dec.func.id == "pipeline" for dec in node.decorator_list]
+            ):
+                # retrieve the @pipeline decorator and all and if the pipeline has parameter,
+                # retrieve them also.
                 pipeline_node = node
-                break
+                # the pipeline decorator should be unique by pipeline
+                pipeline_decorator = [dec for dec in node.decorator_list if dec.func.id == "pipeline"][0]
+                param_decorators = [
+                    decorator for decorator in pipeline_node.decorator_list if decorator.func.id == "parameter"
+                ]
 
     if pipeline_node:
-        pipeline_decorator = [
-            decorator for decorator in pipeline_node.decorator_list if decorator.func.id == "pipeline"
-        ]
         pipeline_args = {}
-        for keyword in pipeline_decorator[0].keywords:
+        for keyword in pipeline_decorator.keywords:
+            # A keyword (keyword argument) can be of class ast.Constant or ast.Name
             pipeline_args[keyword.arg] = (
                 keyword.value.value if isinstance(keyword.value, ast.Constant) else keyword.value.id
             )
 
-        pipeline_specs = PipelineSpecs(code=pipeline_node.name, **pipeline_args)
-
-        param_decorators = [decorator for decorator in pipeline_node.decorator_list if decorator.func.id == "parameter"]
         params = []
-
         for param_decorator in param_decorators:
             param_decorator_args = {}
             for keyword in param_decorator.keywords:
                 param_decorator_args[keyword.arg] = (
                     keyword.value.value if isinstance(keyword.value, ast.Constant) else keyword.value.id
                 )
+            # param_decorator.args[0].value contains the @parameter decorator code
             param_specs = PipelineParameterSpecs(code=param_decorator.args[0].value, **param_decorator_args)
             params.append(param_specs)
 
-        return pipeline_specs, params
+        return PipelineSpecs(code=pipeline_node.name, parameters=params, **pipeline_args)
 
 
 def download_pipeline(url: str, token: str, run_id: str, target_dir):

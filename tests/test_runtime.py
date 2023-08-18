@@ -1,30 +1,68 @@
-import configparser
-import shutil
-
-from click.testing import CliRunner
+from dataclasses import asdict
 from openhexa.sdk.pipelines.runtime import get_pipeline_specs
-from openhexa.cli.cli import pipelines_init
 from pathlib import Path
+from unittest import TestCase
 
-from unittest import mock
+FIXTURES_DIR = "tests/fixtures"
 
 
-def test_upload_pipeline():
-    config = configparser.ConfigParser()
-    config["openhexa"] = {"debug": True, "current_workspace": "test_workspace"}
-    pipeline_code = "test_pipeline"
+def test_get_pipeline_simple_pipeline_specs():
+    pipeline_code = "simple_pipeline"
+    pipeline_dir = Path.cwd() / f"{FIXTURES_DIR}/{pipeline_code}"
 
-    runner = CliRunner()
-    runner.invoke(pipelines_init, [pipeline_code])
-    pipeline_dir = Path.cwd() / pipeline_code
+    pipeline_specs = get_pipeline_specs(pipeline_dir_path=pipeline_dir)
 
-    with mock.patch("openhexa.cli.api.graphql") as mocked_graphql_client:
-        pipeline_specs, pipeline_parameters_specs = get_pipeline_specs(pipeline_dir_path=pipeline_dir)
-        mocked_graphql_client.return_value = {"success": True, "errors": []}
+    assert len(pipeline_specs.parameters) == 0
+    assert pipeline_specs.code == pipeline_code
+    assert pipeline_specs.name == pipeline_code
+    assert pipeline_specs.timeout is None
 
-        assert len(pipeline_parameters_specs) == 0
-        assert pipeline_specs.code == pipeline_code
-        assert pipeline_specs.name == pipeline_code
-        assert pipeline_specs.timeout is None
 
-    shutil.rmtree(pipeline_dir)
+def test_get_pipeline_with_parameters_specs():
+    test_case = TestCase()
+    pipeline_code = "pipeline_with_parameters"
+    pipeline_dir = Path.cwd() / f"{FIXTURES_DIR}/{pipeline_code}"
+    pipeline_specs = get_pipeline_specs(pipeline_dir_path=pipeline_dir)
+
+    assert pipeline_specs.code == pipeline_code
+    assert pipeline_specs.name == pipeline_code
+    assert pipeline_specs.timeout == 5000
+
+    assert len(pipeline_specs.parameters) == 3
+
+    parameters = [asdict(spec) for spec in pipeline_specs.parameters]
+    test_case.assertEqual(
+        parameters,
+        [
+            {
+                "code": "param1",
+                "type": "str",
+                "name": "First parameter",
+                "choices": None,
+                "help": None,
+                "default": None,
+                "required": True,
+                "multiple": False,
+            },
+            {
+                "code": "param2",
+                "type": "str",
+                "name": None,
+                "choices": None,
+                "help": "This is the second parameter",
+                "default": None,
+                "required": True,
+                "multiple": True,
+            },
+            {
+                "code": "param3",
+                "type": "int",
+                "name": "Third parameter",
+                "choices": None,
+                "help": None,
+                "default": 2,
+                "required": True,
+                "multiple": False,
+            },
+        ],
+    )

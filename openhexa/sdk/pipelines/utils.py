@@ -1,5 +1,3 @@
-import dataclasses
-import typing
 import stringcase
 import yaml
 
@@ -133,22 +131,3 @@ def get_local_workspace_config(path: Path):
                         if key != "type":
                             env_vars[stringcase.constcase(f"{slug}_{key.lower()}")] = str(value)
     return env_vars
-
-
-@dataclasses.dataclass
-class PipelineSpecs:
-    code: str
-    name: str
-    timeout: int = None
-
-
-@dataclasses.dataclass
-class PipelineParameterSpecs:
-    code: str
-    type: typing.Union[typing.Type[str], typing.Type[int], typing.Type[bool]]
-    name: typing.Optional[str] = None
-    choices: typing.Optional[typing.Sequence] = None
-    help: typing.Optional[str] = None
-    default: typing.Optional[typing.Any] = None
-    required: bool = True
-    multiple: bool = False
