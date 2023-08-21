@@ -42,48 +42,48 @@ def import_pipeline(pipeline_dir_path: str):
     return pipeline
 
 
-def get_pipeline_specs(pipeline_dir_path) -> PipelineSpecs:
+def get_pipeline_specs(pipeline_dir) -> PipelineSpecs:
     pipeline_node = None
     pipeline_decorator = None
     param_decorators = None
 
-    with open(pipeline_dir_path / Path("pipeline.py")) as f:
+    with open(pipeline_dir / Path("pipeline.py")) as f:
         tree = ast.parse(f.read())
         # In order to search for the pipeline decorator, we visit each node of the generated tree,
-        # then check if a node of type function with id 'pipeline' (pipeline decorator) is a present.
+        # then check if a node of type function with id 'pipeline' (pipeline decorator) is present.
         for node in ast.walk(tree):
             if isinstance(node, ast.FunctionDef) and any(
                 [hasattr(dec, "func") and dec.func.id == "pipeline" for dec in node.decorator_list]
             ):
-                # retrieve the @pipeline decorator and all and if the pipeline has parameter,
-                # retrieve them also.
+                # retrieve the @pipeline decorator and parameter(s) if present.
                 pipeline_node = node
-                # the pipeline decorator should be unique by pipeline
                 pipeline_decorator = [dec for dec in node.decorator_list if dec.func.id == "pipeline"][0]
                 param_decorators = [
                     decorator for decorator in pipeline_node.decorator_list if decorator.func.id == "parameter"
                 ]
 
-    if pipeline_node:
-        pipeline_args = {}
-        for keyword in pipeline_decorator.keywords:
-            # A keyword (keyword argument) can be of class ast.Constant or ast.Name
-            pipeline_args[keyword.arg] = (
+    if not pipeline_node:
+        raise Exception("Pipeline function not found. Check that openhexa.sdk pipeline decorator is present.")
+
+    pipeline_args = {}
+    for keyword in pipeline_decorator.keywords:
+        # A keyword (keyword argument) can be of class ast.Constant or ast.Name
+        # if it's an instance of ast.Name the value is hold by the id property
+        pipeline_args[keyword.arg] = (
+            keyword.value.value if isinstance(keyword.value, ast.Constant) else keyword.value.id
+        )
+    params = []
+    for param_decorator in param_decorators:
+        param_decorator_args = {}
+        for keyword in param_decorator.keywords:
+            param_decorator_args[keyword.arg] = (
                 keyword.value.value if isinstance(keyword.value, ast.Constant) else keyword.value.id
             )
+        # param_decorator.args[0].value contains the @parameter decorator code
+        param_specs = PipelineParameterSpecs(code=param_decorator.args[0].value, **param_decorator_args)
+        params.append(param_specs)
 
-        params = []
-        for param_decorator in param_decorators:
-            param_decorator_args = {}
-            for keyword in param_decorator.keywords:
-                param_decorator_args[keyword.arg] = (
-                    keyword.value.value if isinstance(keyword.value, ast.Constant) else keyword.value.id
-                )
-            # param_decorator.args[0].value contains the @parameter decorator code
-            param_specs = PipelineParameterSpecs(code=param_decorator.args[0].value, **param_decorator_args)
-            params.append(param_specs)
-
-        return PipelineSpecs(code=pipeline_node.name, parameters=params, **pipeline_args)
+    return PipelineSpecs(code=pipeline_node.name, parameters=params, **pipeline_args)
 
 
 def download_pipeline(url: str, token: str, run_id: str, target_dir):

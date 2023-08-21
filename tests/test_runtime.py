@@ -8,9 +8,9 @@ FIXTURES_DIR = "tests/fixtures"
 
 def test_get_pipeline_simple_pipeline_specs():
     pipeline_code = "simple_pipeline"
-    pipeline_dir = Path.cwd() / f"{FIXTURES_DIR}/{pipeline_code}"
+    pipeline_dir = Path.cwd() / FIXTURES_DIR / pipeline_code
 
-    pipeline_specs = get_pipeline_specs(pipeline_dir_path=pipeline_dir)
+    pipeline_specs = get_pipeline_specs(pipeline_dir)
 
     assert len(pipeline_specs.parameters) == 0
     assert pipeline_specs.code == pipeline_code
@@ -21,8 +21,8 @@ def test_get_pipeline_simple_pipeline_specs():
 def test_get_pipeline_with_parameters_specs():
     test_case = TestCase()
     pipeline_code = "pipeline_with_parameters"
-    pipeline_dir = Path.cwd() / f"{FIXTURES_DIR}/{pipeline_code}"
-    pipeline_specs = get_pipeline_specs(pipeline_dir_path=pipeline_dir)
+    pipeline_dir = Path.cwd() / FIXTURES_DIR / pipeline_code
+    pipeline_specs = get_pipeline_specs(pipeline_dir)
 
     assert pipeline_specs.code == pipeline_code
     assert pipeline_specs.name == pipeline_code
