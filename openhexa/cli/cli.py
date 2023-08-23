@@ -20,7 +20,7 @@ from openhexa.cli.api import (
     upload_pipeline,
 )
 from openhexa.cli.utils import terminate
-from openhexa.sdk.pipelines import get_local_workspace_config, get_pipeline_specs
+from openhexa.sdk.pipelines import get_local_workspace_config, get_pipeline_specs, PipelineNotFound
 
 
 @click.group()
@@ -256,7 +256,8 @@ def pipelines_push(path: str):
     ensure_is_pipeline_dir(path)
 
     try:
-        pipeline = get_pipeline_specs(path)
+        with open(path / Path("pipeline.py"), "r") as pipeline_file:
+            pipeline = get_pipeline_specs(pipeline_file.read())
     except Exception as e:
         click.echo(f'Error while importing pipeline: "{e}"', err=True)
         if is_debug(user_config):
@@ -291,6 +292,13 @@ def pipelines_push(path: str):
             )
             click.echo(
                 f"Done! You can view the pipeline in OpenHexa on {click.style(url, fg='bright_blue', underline=True)}"
+            )
+        except PipelineNotFound as e:
+            terminate(
+                f'Error while importing pipeline: "{e}"',
+                err=True,
+                exception=e,
+                debug=is_debug(user_config),
             )
         except InvalidDefinitionError as e:
             terminate(

@@ -9,8 +9,11 @@ import typing
 from zipfile import ZipFile
 
 import requests
-from pathlib import Path
 from .pipeline import Pipeline
+
+
+class PipelineNotFound(Exception):
+    pass
 
 
 @dataclasses.dataclass
@@ -29,7 +32,7 @@ class PipelineParameterSpecs:
 class PipelineSpecs:
     code: str
     name: str
-    parameters: typing.Sequence[PipelineParameterSpecs]
+    parameters: typing.Sequence[PipelineParameterSpecs] = None
     timeout: int = None
 
 
@@ -42,36 +45,67 @@ def import_pipeline(pipeline_dir_path: str):
     return pipeline
 
 
-def get_pipeline_specs(pipeline_dir) -> PipelineSpecs:
+def _get_openhexa_decorator_id(tree: ast.AST, decorator: str):
+    imported_nodes = [node for node in tree.body if isinstance(node, ast.Import) or isinstance(node, ast.ImportFrom)]
+    if not imported_nodes:
+        return None
+
+    decorator_id = None
+    # First, we need to verify that openhexa.sdk.pipeline decorator is imported and is the one used for the pipeline node.
+    for import_node in imported_nodes:
+        # with import like 'from x import y as z' alias.name will y and alias.asname z
+        if (
+            isinstance(import_node, ast.ImportFrom)
+            and import_node.module == "openhexa.sdk"
+            and any([alias.name == decorator for alias in import_node.names])
+        ):
+            import_alias = [alias for alias in import_node.names if alias.name == decorator][0]
+            decorator_id = import_alias.asname if import_alias.asname else import_alias.name
+            break
+
+        # for simple import (e.g : import module) we only need to check if the module is present
+        if isinstance(import_node, ast.Import) and any([alias.name == "openhexa.sdk" for alias in import_node.names]):
+            import_alias = [alias for alias in import_node.names if alias.name == "openhexa.sdk"][0]
+            decorator_id = import_alias.asname if import_alias.asname else import_alias.name
+            break
+
+    return decorator_id
+
+
+def _get_pipeline_node_specs(tree: ast.AST) -> (ast.AST, PipelineSpecs):
     pipeline_node = None
-    pipeline_decorator = None
-    param_decorators = None
-
-    with open(pipeline_dir / Path("pipeline.py")) as f:
-        tree = ast.parse(f.read())
-        # In order to search for the pipeline decorator, we visit each node of the generated tree,
-        # then check if a node of type function with id 'pipeline' (pipeline decorator) is present.
-        for node in ast.walk(tree):
-            if isinstance(node, ast.FunctionDef) and any(
-                [hasattr(dec, "func") and dec.func.id == "pipeline" for dec in node.decorator_list]
-            ):
-                # retrieve the @pipeline decorator and parameter(s) if present.
-                pipeline_node = node
-                pipeline_decorator = [dec for dec in node.decorator_list if dec.func.id == "pipeline"][0]
-                param_decorators = [
-                    decorator for decorator in pipeline_node.decorator_list if decorator.func.id == "parameter"
-                ]
-
-    if not pipeline_node:
-        raise Exception("Pipeline function not found. Check that openhexa.sdk pipeline decorator is present.")
-
     pipeline_args = {}
-    for keyword in pipeline_decorator.keywords:
-        # A keyword (keyword argument) can be of class ast.Constant or ast.Name
-        # if it's an instance of ast.Name the value is hold by the id property
-        pipeline_args[keyword.arg] = (
-            keyword.value.value if isinstance(keyword.value, ast.Constant) else keyword.value.id
-        )
+
+    decorator_id = _get_openhexa_decorator_id(tree, "pipeline")
+    if not decorator_id:
+        return None
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef) and any(
+            [hasattr(dec, "func") and dec.func.id == decorator_id for dec in node.decorator_list]
+        ):
+            pipeline_node = node
+            break
+
+    if pipeline_node:
+        pipeline_decorator = [dec for dec in pipeline_node.decorator_list if dec.func.id == decorator_id][0]
+        for keyword in pipeline_decorator.keywords:
+            # A keyword (keyword argument) can be of class ast.Constant or ast.Name
+            # if it's an instance of ast.Name the value is hold by the id property
+            pipeline_args[keyword.arg] = (
+                keyword.value.value if isinstance(keyword.value, ast.Constant) else keyword.value.id
+            )
+
+        return pipeline_node, PipelineSpecs(code=pipeline_node.name, **pipeline_args)
+
+
+def _get_pipeline_parameters_specs(tree: ast.AST, pipeline_node: ast.AST) -> typing.Sequence[PipelineParameterSpecs]:
+    decorator_id = _get_openhexa_decorator_id(tree, "parameter")
+    # we assume that the pipeline has no parameter
+    if not decorator_id:
+        return None
+
+    param_decorators = [decorator for decorator in pipeline_node.decorator_list if decorator.func.id == decorator_id]
     params = []
     for param_decorator in param_decorators:
         param_decorator_args = {}
@@ -83,7 +117,22 @@ def get_pipeline_specs(pipeline_dir) -> PipelineSpecs:
         param_specs = PipelineParameterSpecs(code=param_decorator.args[0].value, **param_decorator_args)
         params.append(param_specs)
 
-    return PipelineSpecs(code=pipeline_node.name, parameters=params, **pipeline_args)
+    return params
+
+
+def get_pipeline_specs(pipeline_content: str) -> PipelineSpecs:
+    tree = ast.parse(pipeline_content)
+    # In order to search for the pipeline decorator, we visit each node of the generated tree,
+    # then check if a node of type function with id 'pipeline' (pipeline decorator) is present.
+    pipeline_node_specs = _get_pipeline_node_specs(tree)
+    if not pipeline_node_specs:
+        raise PipelineNotFound("No function with openhexa.sdk pipeline decorator found.")
+
+    pipeline_node, pipeline_specs = pipeline_node_specs
+    pipeline_parameter_specs = _get_pipeline_parameters_specs(tree, pipeline_node)
+    setattr(pipeline_specs, "parameters", pipeline_parameter_specs)
+
+    return pipeline_specs
 
 
 def download_pipeline(url: str, token: str, run_id: str, target_dir):

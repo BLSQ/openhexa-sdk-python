@@ -194,8 +194,9 @@ def ensure_is_pipeline_dir(pipeline_path: str):
 
 
 def upload_pipeline(config, pipeline_directory_path: str):
-    pipeline_specs = get_pipeline_specs(pipeline_directory_path)
     directory = Path(os.path.abspath(pipeline_directory_path))
+    with open(pipeline_directory_path / Path("pipeline.py"), "r") as pipeline_file:
+        pipeline_specs = get_pipeline_specs(pipeline_file.read())
 
     zipFile = io.BytesIO(b"")
 
@@ -243,7 +244,9 @@ def upload_pipeline(config, pipeline_directory_path: str):
         zipFile.seek(0)
 
     base64_content = base64.b64encode(zipFile.read()).decode("ascii")
-    parameters = [asdict(spec) for spec in pipeline_specs.parameters]
+    parameters = []
+    if pipeline_specs.parameters:
+        parameters = [asdict(spec) for spec in pipeline_specs.parameters]
 
     data = graphql(
         config,
