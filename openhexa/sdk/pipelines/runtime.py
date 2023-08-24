@@ -45,44 +45,57 @@ def import_pipeline(pipeline_dir_path: str):
     return pipeline
 
 
-def _get_openhexa_decorator_id(tree: ast.AST, decorator: str):
-    imported_nodes = [node for node in tree.body if isinstance(node, ast.Import) or isinstance(node, ast.ImportFrom)]
-    if not imported_nodes:
-        return None
+def get_openhexa_decorator_id(tree: ast.AST, decorator: str) -> str:
+    """Retrieve an openhexa decorator id. This function help to find if a decorator has been imported
+    from openhexa.sdk module and, if yes, return the decorator_id or alias.
 
-    decorator_id = None
+    Parameters
+    ----------
+    tree : ast.AST
+        Tree representing the pipeline code
+    decorator : str
+        An identifier for the decorator we're looking for.
+
+    Returns
+    -------
+    str | None
+        The decorator id or alias if found, else None.
+    """
+    openhexa_module_name = "openhexa.sdk"
+
     # First, we need to verify that openhexa.sdk.pipeline decorator is imported and is the one used for the pipeline node.
-    for import_node in imported_nodes:
-        # with import like 'from x import y as z' alias.name will y and alias.asname z
-        if (
-            isinstance(import_node, ast.ImportFrom)
-            and import_node.module == "openhexa.sdk"
-            and any([alias.name == decorator for alias in import_node.names])
-        ):
-            import_alias = [alias for alias in import_node.names if alias.name == decorator][0]
-            decorator_id = import_alias.asname if import_alias.asname else import_alias.name
-            break
+    for node in tree.body:
+        # with import like 'from x import y as z' alias.name will be 'y' and alias.asname 'z'
+        if isinstance(node, ast.ImportFrom) and node.module == openhexa_module_name:
+            if any([alias.name == decorator for alias in node.names]):
+                import_alias = [alias for alias in node.names if alias.name == decorator][0]
+                return import_alias.asname if import_alias.asname else import_alias.name
 
-        # for simple import (e.g : import module) we only need to check if the module is present
-        if isinstance(import_node, ast.Import) and any([alias.name == "openhexa.sdk" for alias in import_node.names]):
-            import_alias = [alias for alias in import_node.names if alias.name == "openhexa.sdk"][0]
-            decorator_id = import_alias.asname if import_alias.asname else import_alias.name
-            break
+            # for import 'from x import *' the decorator param passed to this function will be the decorator_id
+            if len(node.names) == 1 and node.names[0].name == "*":
+                return decorator
 
-    return decorator_id
+        if isinstance(node, ast.Import):
+            # for simple import (e.g : import module) we only need to check if the module is present
+            if any([alias.name == openhexa_module_name for alias in node.names]):
+                import_alias = [alias for alias in node.names if alias.name == openhexa_module_name][0]
+                return import_alias.asname if import_alias.asname else import_alias.name
 
 
-def _get_pipeline_node_specs(tree: ast.AST) -> (ast.AST, PipelineSpecs):
+def get_pipeline_node_specs(tree: ast.AST) -> (ast.AST, PipelineSpecs):
     pipeline_node = None
     pipeline_args = {}
 
-    decorator_id = _get_openhexa_decorator_id(tree, "pipeline")
+    decorator_id = get_openhexa_decorator_id(tree, "pipeline")
     if not decorator_id:
         return None
 
     for node in ast.walk(tree):
         if isinstance(node, ast.FunctionDef) and any(
-            [hasattr(dec, "func") and dec.func.id == decorator_id for dec in node.decorator_list]
+            [
+                hasattr(dec, "func") and isinstance(dec.func, ast.Name) and dec.func.id == decorator_id
+                for dec in node.decorator_list
+            ]
         ):
             pipeline_node = node
             break
@@ -99,9 +112,9 @@ def _get_pipeline_node_specs(tree: ast.AST) -> (ast.AST, PipelineSpecs):
         return pipeline_node, PipelineSpecs(code=pipeline_node.name, **pipeline_args)
 
 
-def _get_pipeline_parameters_specs(tree: ast.AST, pipeline_node: ast.AST) -> typing.Sequence[PipelineParameterSpecs]:
-    decorator_id = _get_openhexa_decorator_id(tree, "parameter")
-    # we assume that the pipeline has no parameter
+def get_pipeline_parameters_specs(tree: ast.AST, pipeline_node: ast.AST) -> typing.Sequence[PipelineParameterSpecs]:
+    decorator_id = get_openhexa_decorator_id(tree, "parameter")
+    # we consider that the pipeline has no parameter
     if not decorator_id:
         return None
 
@@ -124,12 +137,12 @@ def get_pipeline_specs(pipeline_content: str) -> PipelineSpecs:
     tree = ast.parse(pipeline_content)
     # In order to search for the pipeline decorator, we visit each node of the generated tree,
     # then check if a node of type function with id 'pipeline' (pipeline decorator) is present.
-    pipeline_node_specs = _get_pipeline_node_specs(tree)
+    pipeline_node_specs = get_pipeline_node_specs(tree)
     if not pipeline_node_specs:
         raise PipelineNotFound("No function with openhexa.sdk pipeline decorator found.")
 
     pipeline_node, pipeline_specs = pipeline_node_specs
-    pipeline_parameter_specs = _get_pipeline_parameters_specs(tree, pipeline_node)
+    pipeline_parameter_specs = get_pipeline_parameters_specs(tree, pipeline_node)
     setattr(pipeline_specs, "parameters", pipeline_parameter_specs)
 
     return pipeline_specs

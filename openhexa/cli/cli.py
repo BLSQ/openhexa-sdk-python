@@ -256,7 +256,7 @@ def pipelines_push(path: str):
     ensure_is_pipeline_dir(path)
 
     try:
-        with open(path / Path("pipeline.py"), "r") as pipeline_file:
+        with open(Path(path) / "pipeline.py", "r") as pipeline_file:
             pipeline = get_pipeline_specs(pipeline_file.read())
     except Exception as e:
         click.echo(f'Error while importing pipeline: "{e}"', err=True)

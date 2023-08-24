@@ -195,7 +195,7 @@ def ensure_is_pipeline_dir(pipeline_path: str):
 
 def upload_pipeline(config, pipeline_directory_path: str):
     directory = Path(os.path.abspath(pipeline_directory_path))
-    with open(pipeline_directory_path / Path("pipeline.py"), "r") as pipeline_file:
+    with open(directory / "pipeline.py", "r") as pipeline_file:
         pipeline_specs = get_pipeline_specs(pipeline_file.read())
 
     zipFile = io.BytesIO(b"")
