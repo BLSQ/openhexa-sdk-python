@@ -1,12 +1,12 @@
-import pytest
-
 from dataclasses import asdict
-from openhexa.sdk.pipelines.runtime import get_pipeline_specs, PipelineNotFound
 from unittest import TestCase
 
+from openhexa.sdk.pipelines.runtime import PipelineNotFound, get_pipeline_specs
 
-def test_get_pipeline_simple_pipeline_specs():
-    pipeline_code = """
+
+class RuntimeTest(TestCase):
+    def test_get_pipeline_simple_pipeline_specs(self):
+        pipeline_code = """
 from openhexa.sdk import current_run, pipeline
 
 @pipeline("simple_pipeline", name="simple_pipeline")
@@ -25,18 +25,17 @@ def task_2(count):
 
 if __name__ == "__main__":
     simple_pipeline()
-"""
+        """
 
-    pipeline_specs = get_pipeline_specs(pipeline_code)
+        pipeline_specs = get_pipeline_specs(pipeline_code)
 
-    assert pipeline_specs.code == pipeline_specs.code
-    assert pipeline_specs.name == pipeline_specs.name
-    assert pipeline_specs.timeout is None
-    assert pipeline_specs.parameters is None
+        assert pipeline_specs.code == pipeline_specs.code
+        assert pipeline_specs.name == pipeline_specs.name
+        assert pipeline_specs.timeout is None
+        assert len(pipeline_specs.parameters) == 0
 
-
-def test_get_pipeline_with_parameters_specs():
-    pipeline_code = """
+    def test_get_pipeline_with_parameters_specs(self):
+        pipeline_code = """
 from openhexa.sdk import current_run, pipeline, parameter
 
 
@@ -78,55 +77,54 @@ def task_3(param):
 
 if __name__ == "__main__":
     pipeline_with_parameters()
-"""
-    pipeline_specs = get_pipeline_specs(pipeline_code)
+        """
+        pipeline_specs = get_pipeline_specs(pipeline_code)
 
-    assert pipeline_specs.code == pipeline_specs.code
-    assert pipeline_specs.name == pipeline_specs.name
-    assert pipeline_specs.timeout == 5000
-    assert len(pipeline_specs.parameters) == 3
-    test_case = TestCase()
+        assert pipeline_specs.code == pipeline_specs.code
+        assert pipeline_specs.name == pipeline_specs.name
+        assert pipeline_specs.timeout == 5000
+        assert len(pipeline_specs.parameters) == 3
+        test_case = TestCase()
 
-    parameters = [asdict(spec) for spec in pipeline_specs.parameters]
-    test_case.assertEqual(
-        parameters,
-        [
-            {
-                "code": "param1",
-                "type": "str",
-                "name": "First parameter",
-                "choices": None,
-                "help": None,
-                "default": None,
-                "required": True,
-                "multiple": False,
-            },
-            {
-                "code": "param2",
-                "type": "str",
-                "name": None,
-                "choices": None,
-                "help": "This is the second parameter",
-                "default": None,
-                "required": True,
-                "multiple": True,
-            },
-            {
-                "code": "param3",
-                "type": "int",
-                "name": "Third parameter",
-                "choices": None,
-                "help": None,
-                "default": 2,
-                "required": True,
-                "multiple": False,
-            },
-        ],
-    )
+        parameters = [asdict(spec) for spec in pipeline_specs.parameters]
+        test_case.assertEqual(
+            parameters,
+            [
+                {
+                    "code": "param1",
+                    "type": "str",
+                    "name": "First parameter",
+                    "choices": None,
+                    "help": None,
+                    "default": None,
+                    "required": True,
+                    "multiple": False,
+                },
+                {
+                    "code": "param2",
+                    "type": "str",
+                    "name": None,
+                    "choices": None,
+                    "help": "This is the second parameter",
+                    "default": None,
+                    "required": True,
+                    "multiple": True,
+                },
+                {
+                    "code": "param3",
+                    "type": "int",
+                    "name": "Third parameter",
+                    "choices": None,
+                    "help": None,
+                    "default": 2,
+                    "required": True,
+                    "multiple": False,
+                },
+            ],
+        )
 
-
-def test_get_pipeline_specs_not_found():
-    pipeline_code = """
+    def test_get_pipeline_specs_not_found(self):
+        pipeline_code = """
 from openhexa.sdk import current_run, pipeline as sdk_pipeline, parameter as param
 
 
@@ -168,14 +166,13 @@ def task_3(param):
 
 if __name__ == "__main__":
     pipeline_with_parameters()
-"""
+        """
 
-    with pytest.raises(PipelineNotFound):
-        get_pipeline_specs(pipeline_code)
+        with self.assertRaises(PipelineNotFound):
+            get_pipeline_specs(pipeline_code)
 
-
-def test_get_pipeline_and_parameters_specs_with_alias():
-    pipeline_code = """
+    def test_get_pipeline_and_parameters_specs_with_alias(self):
+        pipeline_code = """
 from openhexa.sdk import current_run, pipeline as sdk_pipeline, parameter as param
 
 
@@ -217,56 +214,53 @@ def task_3(param):
 
 if __name__ == "__main__":
     pipeline_with_parameters()
-"""
+    """
 
-    test_case = TestCase()
-    pipeline_specs = get_pipeline_specs(pipeline_code)
+        pipeline_specs = get_pipeline_specs(pipeline_code)
 
-    assert pipeline_specs.code == pipeline_specs.code
-    assert pipeline_specs.name == pipeline_specs.name
+        assert pipeline_specs.code == pipeline_specs.code
+        assert pipeline_specs.name == pipeline_specs.name
 
-    parameters = [asdict(spec) for spec in pipeline_specs.parameters]
-    test_case.assertEqual(
-        parameters,
-        [
-            {
-                "code": "param1",
-                "type": "str",
-                "name": "First parameter",
-                "choices": None,
-                "help": None,
-                "default": None,
-                "required": True,
-                "multiple": False,
-            },
-            {
-                "code": "param2",
-                "type": "str",
-                "name": None,
-                "choices": None,
-                "help": "This is the second parameter",
-                "default": None,
-                "required": True,
-                "multiple": True,
-            },
-            {
-                "code": "param3",
-                "type": "int",
-                "name": "Third parameter",
-                "choices": None,
-                "help": None,
-                "default": 2,
-                "required": True,
-                "multiple": False,
-            },
-        ],
-    )
+        parameters = [asdict(spec) for spec in pipeline_specs.parameters]
+        self.assertEqual(
+            parameters,
+            [
+                {
+                    "code": "param1",
+                    "type": "str",
+                    "name": "First parameter",
+                    "choices": None,
+                    "help": None,
+                    "default": None,
+                    "required": True,
+                    "multiple": False,
+                },
+                {
+                    "code": "param2",
+                    "type": "str",
+                    "name": None,
+                    "choices": None,
+                    "help": "This is the second parameter",
+                    "default": None,
+                    "required": True,
+                    "multiple": True,
+                },
+                {
+                    "code": "param3",
+                    "type": "int",
+                    "name": "Third parameter",
+                    "choices": None,
+                    "help": None,
+                    "default": 2,
+                    "required": True,
+                    "multiple": False,
+                },
+            ],
+        )
 
-
-def test_get_pipeline_and_parameters_specs_wildcard_import():
-    pipeline_code = """
+    def test_get_pipeline_and_parameters_specs_wildcard_import(self):
+        pipeline_code = """
 from openhexa.sdk import *
-
 
 @pipeline("pipeline_with_parameters", name="pipeline_with_parameters", timeout=5000)
 @parameter(
@@ -306,47 +300,46 @@ def task_3(param):
 
 if __name__ == "__main__":
     pipeline_with_parameters()
-"""
+    """
 
-    test_case = TestCase()
-    pipeline_specs = get_pipeline_specs(pipeline_code)
+        pipeline_specs = get_pipeline_specs(pipeline_code)
 
-    assert pipeline_specs.code == pipeline_specs.code
-    assert pipeline_specs.name == pipeline_specs.name
+        assert pipeline_specs.code == pipeline_specs.code
+        assert pipeline_specs.name == pipeline_specs.name
 
-    parameters = [asdict(spec) for spec in pipeline_specs.parameters]
-    test_case.assertEqual(
-        parameters,
-        [
-            {
-                "code": "param1",
-                "type": "str",
-                "name": "First parameter",
-                "choices": None,
-                "help": None,
-                "default": None,
-                "required": True,
-                "multiple": False,
-            },
-            {
-                "code": "param2",
-                "type": "str",
-                "name": None,
-                "choices": None,
-                "help": "This is the second parameter",
-                "default": None,
-                "required": True,
-                "multiple": True,
-            },
-            {
-                "code": "param3",
-                "type": "int",
-                "name": "Third parameter",
-                "choices": None,
-                "help": None,
-                "default": 2,
-                "required": True,
-                "multiple": False,
-            },
-        ],
-    )
+        parameters = [asdict(spec) for spec in pipeline_specs.parameters]
+        self.assertEqual(
+            parameters,
+            [
+                {
+                    "code": "param1",
+                    "type": "str",
+                    "name": "First parameter",
+                    "choices": None,
+                    "help": None,
+                    "default": None,
+                    "required": True,
+                    "multiple": False,
+                },
+                {
+                    "code": "param2",
+                    "type": "str",
+                    "name": None,
+                    "choices": None,
+                    "help": "This is the second parameter",
+                    "default": None,
+                    "required": True,
+                    "multiple": True,
+                },
+                {
+                    "code": "param3",
+                    "type": "int",
+                    "name": "Third parameter",
+                    "choices": None,
+                    "help": None,
+                    "default": 2,
+                    "required": True,
+                    "multiple": False,
+                },
+            ],
+        )

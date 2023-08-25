@@ -3,7 +3,6 @@ import configparser
 import enum
 import io
 import os
-
 from dataclasses import asdict
 from importlib.metadata import version
 from pathlib import Path
@@ -244,9 +243,6 @@ def upload_pipeline(config, pipeline_directory_path: str):
         zipFile.seek(0)
 
     base64_content = base64.b64encode(zipFile.read()).decode("ascii")
-    parameters = []
-    if pipeline_specs.parameters:
-        parameters = [asdict(spec) for spec in pipeline_specs.parameters]
 
     data = graphql(
         config,
@@ -264,7 +260,7 @@ def upload_pipeline(config, pipeline_directory_path: str):
                 "workspaceSlug": config["openhexa"]["current_workspace"],
                 "code": pipeline_specs.code,
                 "zipfile": base64_content,
-                "parameters": parameters,
+                "parameters": [asdict(spec) for spec in pipeline_specs.parameters],
                 "timeout": pipeline_specs.timeout,
             }
         },
