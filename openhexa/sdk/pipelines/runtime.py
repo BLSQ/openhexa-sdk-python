@@ -1,16 +1,12 @@
 import ast
 import base64
 import dataclasses
-import importlib
 import io
 import os
-import sys
 import typing
 from zipfile import ZipFile
 
 import requests
-
-from .pipeline import Pipeline
 
 
 class PipelineNotFound(Exception):
@@ -35,15 +31,6 @@ class PipelineSpecs:
     name: str
     parameters: typing.Sequence[PipelineParameterSpecs] = dataclasses.field(default_factory=list)
     timeout: int = None
-
-
-def import_pipeline(pipeline_dir_path: str):
-    pipeline_dir = os.path.abspath(pipeline_dir_path)
-    sys.path.append(pipeline_dir)
-    pipeline_package = importlib.import_module("pipeline")
-
-    pipeline = next(v for _, v in pipeline_package.__dict__.items() if v and type(v) == Pipeline)
-    return pipeline
 
 
 def get_openhexa_decorator_id(tree: ast.AST, decorator: str) -> str:
