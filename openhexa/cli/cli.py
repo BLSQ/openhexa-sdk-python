@@ -1,6 +1,7 @@
 import base64
 import json
 import sys
+import typing
 from importlib.metadata import version
 from pathlib import Path
 
@@ -21,10 +22,9 @@ from openhexa.cli.api import (
 )
 from openhexa.cli.utils import terminate
 from openhexa.sdk.pipelines import (
-    import_pipeline,
     get_local_workspace_config,
     PipelineNotFound,
-    ImportStrategy,
+    get_pipeline_specs,
 )
 
 
@@ -239,14 +239,14 @@ def pipelines_init(name: str):
 
 
 @pipelines.command("push")
-@click.argument("path", default=".", type=click.Path(exists=True, file_okay=False, dir_okay=True))
+@click.argument("pipeline_directory_path", default=".", type=click.Path(exists=True, file_okay=False, dir_okay=True))
 @click.option(
     "--strategy",
-    type=click.Choice(["AST", "IMPORT"]),
+    type=click.Choice(["ast", "import"]),
     help="Import strategy to be used.",
-    default=ImportStrategy.AST.value,
+    default="ast",
 )
-def pipelines_push(path: str, strategy: ImportStrategy):
+def pipelines_push(pipeline_directory_path: str, strategy: typing.Literal["ast", "import"]):
     """
     Push a pipeline to the backend. If the pipeline already exists, it will be updated otherwise it will be created.
 
@@ -264,11 +264,11 @@ def pipelines_push(path: str, strategy: ImportStrategy):
         )
         sys.exit(1)
 
-    ensure_is_pipeline_dir(path)
+    ensure_is_pipeline_dir(pipeline_directory_path)
 
     try:
         # user have the possibility to choose the old import system or the new one (AST)
-        pipeline = import_pipeline(path, strategy)
+        pipeline_specs = get_pipeline_specs(Path.resolve(pipeline_directory_path) / Path("pipeline.py"), strategy)
 
     except Exception as e:
         click.echo(f'Error while importing pipeline: "{e}"', err=True)
@@ -280,26 +280,26 @@ def pipelines_push(path: str, strategy: ImportStrategy):
         if is_debug(user_config):
             click.echo(workspace_pipelines)
 
-        if get_pipeline(user_config, pipeline.code) is None:
+        if get_pipeline(user_config, pipeline_specs.code) is None:
             click.echo(
-                f"Pipeline {click.style(pipeline.code, bold=True)} does not exist in workspace {click.style(workspace, bold=True)}"
+                f"Pipeline {click.style(pipeline_specs.code, bold=True)} does not exist in workspace {click.style(workspace, bold=True)}"
             )
             click.confirm(
-                f"Create pipeline {click.style(pipeline.code, bold=True)} in workspace {click.style(workspace, bold=True)}?",
+                f"Create pipeline {click.style(pipeline_specs.code, bold=True)} in workspace {click.style(workspace, bold=True)}?",
                 True,
                 abort=True,
             )
-            create_pipeline(user_config, pipeline.code, pipeline.name)
+            create_pipeline(user_config, pipeline_specs.code, pipeline_specs.name)
 
         click.echo(
-            f"Pushing pipeline {click.style(pipeline.code, bold=True)} to workspace {click.style(workspace, bold=True)}"
+            f"Pushing pipeline {click.style(pipeline_specs.code, bold=True)} to workspace {click.style(workspace, bold=True)}"
         )
 
         try:
-            new_version = upload_pipeline(user_config, path, strategy)
+            new_version = upload_pipeline(user_config, pipeline_directory_path, strategy)
             click.echo(f"New version created: {new_version}")
 
-            url = f"{user_config['openhexa']['url']}/workspaces/{workspace}/pipelines/{pipeline.code}".replace(
+            url = f"{user_config['openhexa']['url']}/workspaces/{workspace}/pipelines/{pipeline_specs.code}".replace(
                 "api", "app"
             )
             click.echo(

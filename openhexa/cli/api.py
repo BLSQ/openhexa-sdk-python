@@ -3,6 +3,7 @@ import configparser
 import enum
 import io
 import os
+import typing
 from dataclasses import asdict
 from importlib.metadata import version
 from pathlib import Path
@@ -11,7 +12,7 @@ from zipfile import ZipFile
 import click
 import requests
 
-from openhexa.sdk.pipelines import get_local_workspace_config, ImportStrategy, import_pipeline
+from openhexa.sdk.pipelines import get_local_workspace_config, get_pipeline_specs
 
 CONFIGFILE_PATH = os.path.expanduser("~") + "/.openhexa.ini"
 
@@ -192,9 +193,9 @@ def ensure_is_pipeline_dir(pipeline_path: str):
     return True
 
 
-def upload_pipeline(config, pipeline_directory_path: str, strategy: ImportStrategy):
-    directory = Path(os.path.abspath(pipeline_directory_path))
-    pipeline = import_pipeline(pipeline_directory_path, strategy)
+def upload_pipeline(config, pipeline_directory_path: str, strategy: typing.Literal["import", "ast"]):
+    directory_path = Path(os.path.abspath(pipeline_directory_path))
+    pipeline_specs = get_pipeline_specs(pipeline_directory_path, strategy)
 
     zipFile = io.BytesIO(b"")
 
@@ -205,12 +206,12 @@ def upload_pipeline(config, pipeline_directory_path: str, strategy: ImportStrate
 
     # We exclude the workspace directory since it can break the mount of the bucket on /home/hexa/workspace
     # This is also the default value of the WORKSPACE_FILES_PATH env var
-    excluded_paths = [directory / "workspace"]
+    excluded_paths = [directory_path / "workspace"]
     if env_vars.get("WORKSPACE_FILES_PATH") and Path(env_vars["WORKSPACE_FILES_PATH"]) not in excluded_paths:
         excluded_paths.append(Path(env_vars["WORKSPACE_FILES_PATH"]))
 
     with ZipFile(zipFile, "w") as zipObj:
-        for path in directory.glob("**/*"):
+        for path in directory_path.glob("**/*"):
             if path.name == "python":
                 # We are in a virtual environment
                 excluded_paths.append(path.parent.parent)  # ./<venv>/bin/python -> ./<venv>
@@ -231,7 +232,7 @@ def upload_pipeline(config, pipeline_directory_path: str, strategy: ImportStrate
                 continue
             if is_debug(config):
                 click.echo(f"\t{file_path.name}")
-            zipObj.write(file_path, file_path.relative_to(directory))
+            zipObj.write(file_path, file_path.relative_to(directory_path))
 
     zipFile.seek(0)
 
@@ -242,11 +243,7 @@ def upload_pipeline(config, pipeline_directory_path: str, strategy: ImportStrate
         zipFile.seek(0)
 
     base64_content = base64.b64encode(zipFile.read()).decode("ascii")
-    parameters = (
-        pipeline.parameters
-        if strategy == ImportStrategy.IMPORT.value
-        else [asdict(spec) for spec in pipeline.parameters]
-    )
+    parameters = [asdict(spec) for spec in pipeline_specs.parameters]
 
     data = graphql(
         config,
@@ -262,10 +259,10 @@ def upload_pipeline(config, pipeline_directory_path: str, strategy: ImportStrate
         {
             "input": {
                 "workspaceSlug": config["openhexa"]["current_workspace"],
-                "code": pipeline.code,
+                "code": pipeline_specs.code,
                 "zipfile": base64_content,
                 "parameters": parameters,
-                "timeout": pipeline.timeout,
+                "timeout": pipeline_specs.timeout,
             }
         },
     )

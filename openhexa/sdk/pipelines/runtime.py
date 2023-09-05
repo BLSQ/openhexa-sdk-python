@@ -1,7 +1,6 @@
 import ast
 import base64
 import dataclasses
-import enum
 import io
 import importlib
 
@@ -37,24 +36,6 @@ class PipelineSpecs:
     name: str
     parameters: typing.Sequence[PipelineParameterSpecs] = dataclasses.field(default_factory=list)
     timeout: int = None
-
-
-class ImportStrategy(enum.Enum):
-    AST = "AST"
-    IMPORT = "IMPORT"
-
-
-def import_pipeline(pipeline_dir_path: str, strategy: ImportStrategy):
-    if strategy == ImportStrategy.IMPORT:
-        pipeline_dir = os.path.abspath(pipeline_dir_path)
-        sys.path.append(pipeline_dir)
-        pipeline_package = importlib.import_module("pipeline")
-
-        pipeline = next(v for _, v in pipeline_package.__dict__.items() if v and type(v) == Pipeline)
-        return pipeline
-    # if not specified the default behavior is to use ImportStrategy.AST
-    with open(Path(pipeline_dir_path) / "pipeline.py", "r") as pipeline_file:
-        return get_pipeline_specs(pipeline_file.read())
 
 
 def get_openhexa_decorator_id(tree: ast.AST, decorator: str) -> str:
@@ -149,12 +130,37 @@ def get_pipeline_parameters_specs(tree: ast.AST, pipeline_node: ast.AST) -> typi
     return params
 
 
-def get_pipeline_specs(pipeline_content: str) -> PipelineSpecs:
-    tree = ast.parse(pipeline_content)
+def get_pipeline_specs(
+    filepath_or_buffer: typing.Union[str, typing.TextIO, Path], strategy: typing.Literal["import", "ast"]
+) -> PipelineSpecs:
+    if strategy == "ast":
+        return _get_pipeline_specs_with_ast(filepath_or_buffer)
+    elif strategy == "import":
+        return _get_pipeline_specs_with_import(filepath_or_buffer)
+    else:
+        raise ValueError(f"Invalid strategy {strategy}")
+
+
+def _get_pipeline_specs_with_ast(filepath_or_buffer: typing.Union[str, typing.TextIO]) -> PipelineSpecs:
+    # TODO: filepath_or_buffer can be either 'some_dir/pipeline.py', the result of open(), or StringIO...
+    tree = ast.parse(filepath_or_buffer)
     # In order to search for the pipeline decorator, we visit each node of the generated tree,
     # then check if a node of type function with id 'pipeline' (pipeline decorator) is present.
     pipeline_node, specs = get_pipeline_node_specs(tree)
     specs.parameters = get_pipeline_parameters_specs(tree, pipeline_node)
+
+    return specs
+
+
+def _get_pipeline_specs_with_import(filepath_or_buffer: typing.Union[str, typing.TextIO]) -> PipelineSpecs:
+    # TODO: filepath_or_buffer can be either 'some_dir/pipeline.py', the result of open(), or StringIO...
+    # TODO: not sure how it would work with a buffer... create a temporary file?
+    pipeline_dir = os.path.abspath(filepath_or_buffer)
+    sys.path.append(pipeline_dir)
+    pipeline_package = importlib.import_module("pipeline")
+    pipeline = next(v for _, v in pipeline_package.__dict__.items() if v and type(v) == Pipeline)
+    specs = PipelineSpecs(code=pipeline.code, name=pipeline.name)
+    # TODO: continue building specs
 
     return specs
 
