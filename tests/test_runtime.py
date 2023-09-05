@@ -1,12 +1,17 @@
+import stringcase
+
 from dataclasses import asdict
 from unittest import TestCase
+from pathlib import Path
 
-from openhexa.sdk.pipelines.runtime import PipelineNotFound, get_pipeline_specs
+from openhexa.sdk.pipelines.runtime import get_pipeline_specs, import_pipeline, ImportStrategy, PipelineNotFound
+
+FIXTURES_DIR = "tests/fixtures"
 
 
 class RuntimeTest(TestCase):
     def test_get_pipeline_simple_pipeline_specs(self):
-        pipeline_code = """
+        pipeline_content = """
 from openhexa.sdk import current_run, pipeline
 
 @pipeline("simple_pipeline", name="simple_pipeline")
@@ -27,7 +32,7 @@ if __name__ == "__main__":
     simple_pipeline()
         """
 
-        pipeline_specs = get_pipeline_specs(pipeline_code)
+        pipeline_specs = get_pipeline_specs(pipeline_content)
 
         assert pipeline_specs.code == pipeline_specs.code
         assert pipeline_specs.name == pipeline_specs.name
@@ -35,7 +40,7 @@ if __name__ == "__main__":
         assert len(pipeline_specs.parameters) == 0
 
     def test_get_pipeline_with_parameters_specs(self):
-        pipeline_code = """
+        pipeline_content = """
 from openhexa.sdk import current_run, pipeline, parameter
 
 
@@ -78,7 +83,7 @@ def task_3(param):
 if __name__ == "__main__":
     pipeline_with_parameters()
         """
-        pipeline_specs = get_pipeline_specs(pipeline_code)
+        pipeline_specs = get_pipeline_specs(pipeline_content)
 
         assert pipeline_specs.code == pipeline_specs.code
         assert pipeline_specs.name == pipeline_specs.name
@@ -124,7 +129,7 @@ if __name__ == "__main__":
         )
 
     def test_get_pipeline_specs_not_found(self):
-        pipeline_code = """
+        pipeline_content = """
 from openhexa.sdk import current_run, pipeline as sdk_pipeline, parameter as param
 
 
@@ -169,10 +174,10 @@ if __name__ == "__main__":
         """
 
         with self.assertRaises(PipelineNotFound):
-            get_pipeline_specs(pipeline_code)
+            get_pipeline_specs(pipeline_content)
 
     def test_get_pipeline_and_parameters_specs_with_alias(self):
-        pipeline_code = """
+        pipeline_content = """
 from openhexa.sdk import current_run, pipeline as sdk_pipeline, parameter as param
 
 
@@ -216,7 +221,7 @@ if __name__ == "__main__":
     pipeline_with_parameters()
     """
 
-        pipeline_specs = get_pipeline_specs(pipeline_code)
+        pipeline_specs = get_pipeline_specs(pipeline_content)
 
         assert pipeline_specs.code == pipeline_specs.code
         assert pipeline_specs.name == pipeline_specs.name
@@ -259,7 +264,7 @@ if __name__ == "__main__":
         )
 
     def test_get_pipeline_and_parameters_specs_wildcard_import(self):
-        pipeline_code = """
+        pipeline_content = """
 from openhexa.sdk import *
 
 @pipeline("pipeline_with_parameters", name="pipeline_with_parameters", timeout=5000)
@@ -302,7 +307,7 @@ if __name__ == "__main__":
     pipeline_with_parameters()
     """
 
-        pipeline_specs = get_pipeline_specs(pipeline_code)
+        pipeline_specs = get_pipeline_specs(pipeline_content)
 
         assert pipeline_specs.code == pipeline_specs.code
         assert pipeline_specs.name == pipeline_specs.name
@@ -343,3 +348,26 @@ if __name__ == "__main__":
                 },
             ],
         )
+
+    def test_import_simple_pipeline(self):
+        pipeline_code = "simple-pipeline"
+        pipeline_dir = Path.cwd() / f"{FIXTURES_DIR}/simple_pipeline"
+
+        for strategy in [ImportStrategy.AST]:
+            pipeline = import_pipeline(pipeline_dir, strategy)
+            assert pipeline.code == pipeline_code
+            assert pipeline.name == stringcase.snakecase(pipeline_code)
+            assert pipeline.timeout is None
+            assert len(pipeline.parameters) == 0
+
+    def test_import_pipeline_with_parameters(self):
+        pipeline_code = "pipeline-with-parameters"
+        pipeline_dir = Path.cwd() / f"{FIXTURES_DIR}/pipeline_with_parameters"
+
+        for strategy in [ImportStrategy.AST]:
+            pipeline = import_pipeline(pipeline_dir, strategy)
+
+            assert pipeline.code == pipeline_code
+            assert pipeline.name == stringcase.snakecase(pipeline_code)
+            assert pipeline.timeout == 5000
+            assert len(pipeline.parameters) == 3

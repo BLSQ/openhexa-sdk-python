@@ -20,7 +20,12 @@ from openhexa.cli.api import (
     upload_pipeline,
 )
 from openhexa.cli.utils import terminate
-from openhexa.sdk.pipelines import get_local_workspace_config, get_pipeline_specs, PipelineNotFound
+from openhexa.sdk.pipelines import (
+    import_pipeline,
+    get_local_workspace_config,
+    PipelineNotFound,
+    ImportStrategy,
+)
 
 
 @click.group()
@@ -235,7 +240,13 @@ def pipelines_init(name: str):
 
 @pipelines.command("push")
 @click.argument("path", default=".", type=click.Path(exists=True, file_okay=False, dir_okay=True))
-def pipelines_push(path: str):
+@click.option(
+    "--strategy",
+    type=click.Choice(["AST", "IMPORT"]),
+    help="Import strategy to be used.",
+    default=ImportStrategy.AST.value,
+)
+def pipelines_push(path: str, strategy: ImportStrategy):
     """
     Push a pipeline to the backend. If the pipeline already exists, it will be updated otherwise it will be created.
 
@@ -256,8 +267,9 @@ def pipelines_push(path: str):
     ensure_is_pipeline_dir(path)
 
     try:
-        with open(Path(path) / "pipeline.py", "r") as pipeline_file:
-            pipeline = get_pipeline_specs(pipeline_file.read())
+        # user have the possibility to choose the old import system or the new one (AST)
+        pipeline = import_pipeline(path, strategy)
+
     except Exception as e:
         click.echo(f'Error while importing pipeline: "{e}"', err=True)
         if is_debug(user_config):
@@ -284,7 +296,7 @@ def pipelines_push(path: str):
         )
 
         try:
-            new_version = upload_pipeline(user_config, path)
+            new_version = upload_pipeline(user_config, path, strategy)
             click.echo(f"New version created: {new_version}")
 
             url = f"{user_config['openhexa']['url']}/workspaces/{workspace}/pipelines/{pipeline.code}".replace(

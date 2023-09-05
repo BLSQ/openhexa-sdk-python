@@ -11,7 +11,7 @@ from zipfile import ZipFile
 import click
 import requests
 
-from openhexa.sdk.pipelines import get_local_workspace_config, get_pipeline_specs
+from openhexa.sdk.pipelines import get_local_workspace_config, ImportStrategy, import_pipeline
 
 CONFIGFILE_PATH = os.path.expanduser("~") + "/.openhexa.ini"
 
@@ -192,10 +192,9 @@ def ensure_is_pipeline_dir(pipeline_path: str):
     return True
 
 
-def upload_pipeline(config, pipeline_directory_path: str):
+def upload_pipeline(config, pipeline_directory_path: str, strategy: ImportStrategy):
     directory = Path(os.path.abspath(pipeline_directory_path))
-    with open(directory / "pipeline.py", "r") as pipeline_file:
-        pipeline_specs = get_pipeline_specs(pipeline_file.read())
+    pipeline = import_pipeline(pipeline_directory_path, strategy)
 
     zipFile = io.BytesIO(b"")
 
@@ -243,6 +242,11 @@ def upload_pipeline(config, pipeline_directory_path: str):
         zipFile.seek(0)
 
     base64_content = base64.b64encode(zipFile.read()).decode("ascii")
+    parameters = (
+        pipeline.parameters
+        if strategy == ImportStrategy.IMPORT.value
+        else [asdict(spec) for spec in pipeline.parameters]
+    )
 
     data = graphql(
         config,
@@ -258,10 +262,10 @@ def upload_pipeline(config, pipeline_directory_path: str):
         {
             "input": {
                 "workspaceSlug": config["openhexa"]["current_workspace"],
-                "code": pipeline_specs.code,
+                "code": pipeline.code,
                 "zipfile": base64_content,
-                "parameters": [asdict(spec) for spec in pipeline_specs.parameters],
-                "timeout": pipeline_specs.timeout,
+                "parameters": parameters,
+                "timeout": pipeline.timeout,
             }
         },
     )
