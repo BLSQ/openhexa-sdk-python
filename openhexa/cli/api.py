@@ -194,8 +194,8 @@ def ensure_is_pipeline_dir(pipeline_path: str):
 
 
 def upload_pipeline(config, pipeline_directory_path: str, strategy: typing.Literal["import", "ast"]):
-    directory_path = Path(os.path.abspath(pipeline_directory_path))
-    pipeline_specs = get_pipeline_specs(directory_path / "pipeline.py", strategy)
+    directory = Path(os.path.abspath(pipeline_directory_path))
+    pipeline_specs = get_pipeline_specs(directory / "pipeline.py", strategy)
 
     zipFile = io.BytesIO(b"")
 
@@ -206,12 +206,12 @@ def upload_pipeline(config, pipeline_directory_path: str, strategy: typing.Liter
 
     # We exclude the workspace directory since it can break the mount of the bucket on /home/hexa/workspace
     # This is also the default value of the WORKSPACE_FILES_PATH env var
-    excluded_paths = [directory_path / "workspace"]
+    excluded_paths = [directory / "workspace"]
     if env_vars.get("WORKSPACE_FILES_PATH") and Path(env_vars["WORKSPACE_FILES_PATH"]) not in excluded_paths:
         excluded_paths.append(Path(env_vars["WORKSPACE_FILES_PATH"]))
 
     with ZipFile(zipFile, "w") as zipObj:
-        for path in directory_path.glob("**/*"):
+        for path in directory.glob("**/*"):
             if path.name == "python":
                 # We are in a virtual environment
                 excluded_paths.append(path.parent.parent)  # ./<venv>/bin/python -> ./<venv>
@@ -232,7 +232,7 @@ def upload_pipeline(config, pipeline_directory_path: str, strategy: typing.Liter
                 continue
             if is_debug(config):
                 click.echo(f"\t{file_path.name}")
-            zipObj.write(file_path, file_path.relative_to(directory_path))
+            zipObj.write(file_path, file_path.relative_to(directory))
 
     zipFile.seek(0)
 
