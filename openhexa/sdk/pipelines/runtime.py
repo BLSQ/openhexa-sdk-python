@@ -19,15 +19,6 @@ class PipelineNotFound(Exception):
     pass
 
 
-def _get_pipeline_specs_with_import(pipeline_dir_path: Path) -> PipelineSpecs:
-    sys.path.append(str(pipeline_dir_path))
-
-    pipeline_package = importlib.import_module("pipeline")
-    pipeline = next(v for _, v in pipeline_package.__dict__.items() if v and type(v) == Pipeline)
-
-    return pipeline.to_specs()
-
-
 def get_openhexa_decorator_id(tree: ast.AST, decorator: str) -> str:
     """Retrieve an openhexa decorator id. This function help to find if a decorator has been imported
     from openhexa.sdk module and, if yes, return the decorator_id or alias.
@@ -138,6 +129,25 @@ def _get_pipeline_specs_with_ast(pipeline_content: str) -> PipelineSpecs:
     specs.parameters = get_pipeline_parameters_specs(tree, pipeline_node)
 
     return specs
+
+
+def _get_pipeline_specs_with_import(pipeline_dir_path: Path) -> PipelineSpecs:
+    # If we want to be able to import the pipeline.py module, we need to add it to the sys path somehow. Adding the
+    # directory which contains the pipeline is not enough, as it will result in multiple import of a module named
+    # "pipeline". This will make our tests fail: multiple calls to _get_pipeline_specs_with_import will happen in the
+    # same process, and importlib will sometimes return a previous version of the "pipeline" module (it will return
+    # another pipeline). Instead, we add the parent to sys.path, so that our imports won't conflict - hopefully.
+    # This is not bullet-proof - it will only avoid issues up to one level.
+    sys.path.append(str(pipeline_dir_path.parent))
+
+    try:
+        pipeline_package = importlib.import_module(f"{pipeline_dir_path.parts[-1]}.pipeline")
+        pipeline_package = importlib.reload(pipeline_package)
+        pipeline = next(v for _, v in pipeline_package.__dict__.items() if v and type(v) == Pipeline)
+    except Exception:
+        raise PipelineNotFound("Could not find a pipeline")
+
+    return pipeline.to_specs()
 
 
 def download_pipeline(url: str, token: str, run_id: str, target_dir):
