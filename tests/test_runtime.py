@@ -1,12 +1,16 @@
+import typing
+
 import stringcase
 
 from dataclasses import asdict
 from unittest import TestCase
 from pathlib import Path
 
-from openhexa.sdk.pipelines.runtime import get_pipeline_specs, import_pipeline, ImportStrategy, PipelineNotFound
+from openhexa.sdk.pipelines.runtime import get_pipeline_specs, PipelineNotFound
 
 FIXTURES_DIR = "tests/fixtures"
+
+STRATEGIES: typing.List[typing.Literal["ast", "import"]] = ["ast", "import"]
 
 
 class RuntimeTest(TestCase):
@@ -353,21 +357,21 @@ if __name__ == "__main__":
         pipeline_code = "simple-pipeline"
         pipeline_dir = Path.cwd() / f"{FIXTURES_DIR}/simple_pipeline"
 
-        for strategy in [ImportStrategy.AST]:
-            pipeline = import_pipeline(pipeline_dir, strategy)
-            assert pipeline.code == pipeline_code
-            assert pipeline.name == stringcase.snakecase(pipeline_code)
-            assert pipeline.timeout is None
-            assert len(pipeline.parameters) == 0
+        for strategy in STRATEGIES:
+            specs = get_pipeline_specs(pipeline_dir, strategy)
+            assert specs.code == pipeline_code
+            assert specs.name == stringcase.snakecase(pipeline_code)
+            assert specs.timeout is None
+            assert len(specs.parameters) == 0
 
     def test_import_pipeline_with_parameters(self):
         pipeline_code = "pipeline-with-parameters"
         pipeline_dir = Path.cwd() / f"{FIXTURES_DIR}/pipeline_with_parameters"
 
-        for strategy in [ImportStrategy.AST]:
-            pipeline = import_pipeline(pipeline_dir, strategy)
+        for strategy in STRATEGIES:
+            specs = get_pipeline_specs(pipeline_dir, strategy)
 
-            assert pipeline.code == pipeline_code
-            assert pipeline.name == stringcase.snakecase(pipeline_code)
-            assert pipeline.timeout == 5000
-            assert len(pipeline.parameters) == 3
+            assert specs.code == pipeline_code
+            assert specs.name == stringcase.snakecase(pipeline_code)
+            assert specs.timeout == 5000
+            assert len(specs.parameters) == 3
