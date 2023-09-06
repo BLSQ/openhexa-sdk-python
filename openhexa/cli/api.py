@@ -3,7 +3,6 @@ import configparser
 import enum
 import io
 import os
-from dataclasses import asdict
 from importlib.metadata import version
 from pathlib import Path
 from zipfile import ZipFile
@@ -11,7 +10,7 @@ from zipfile import ZipFile
 import click
 import requests
 
-from openhexa.sdk.pipelines import get_local_workspace_config, ImportStrategy, import_pipeline
+from openhexa.sdk.pipelines import get_local_workspace_config, get_pipeline_specs, PipelineIntrospectionStrategy
 
 CONFIGFILE_PATH = os.path.expanduser("~") + "/.openhexa.ini"
 
@@ -192,9 +191,9 @@ def ensure_is_pipeline_dir(pipeline_path: str):
     return True
 
 
-def upload_pipeline(config, pipeline_directory_path: str, strategy: ImportStrategy):
+def upload_pipeline(config, pipeline_directory_path: str, strategy: PipelineIntrospectionStrategy):
     directory = Path(os.path.abspath(pipeline_directory_path))
-    pipeline = import_pipeline(pipeline_directory_path, strategy)
+    pipeline_specs = get_pipeline_specs(directory, strategy)
 
     zipFile = io.BytesIO(b"")
 
@@ -242,11 +241,6 @@ def upload_pipeline(config, pipeline_directory_path: str, strategy: ImportStrate
         zipFile.seek(0)
 
     base64_content = base64.b64encode(zipFile.read()).decode("ascii")
-    parameters = (
-        pipeline.parameters
-        if strategy == ImportStrategy.IMPORT.value
-        else [asdict(spec) for spec in pipeline.parameters]
-    )
 
     data = graphql(
         config,
@@ -262,10 +256,10 @@ def upload_pipeline(config, pipeline_directory_path: str, strategy: ImportStrate
         {
             "input": {
                 "workspaceSlug": config["openhexa"]["current_workspace"],
-                "code": pipeline.code,
+                "code": pipeline_specs.code,
                 "zipfile": base64_content,
-                "parameters": parameters,
-                "timeout": pipeline.timeout,
+                "parameters": pipeline_specs.parameters_spec(),
+                "timeout": pipeline_specs.timeout,
             }
         },
     )

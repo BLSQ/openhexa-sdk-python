@@ -30,6 +30,20 @@ class PipelineParameterSpecs:
     required: bool = True
     multiple: bool = False
 
+    def parameter_spec(self):
+        """Generates specification for the parameter, to be provided to the OpenHexa backend."""
+
+        return {
+            "type": self.type,
+            "required": self.required,
+            "choices": self.choices,
+            "code": self.code,
+            "name": self.name,
+            "help": self.help,
+            "multiple": self.multiple,
+            "default": self.default,
+        }
+
 
 @dataclasses.dataclass
 class PipelineSpecs:
@@ -38,23 +52,27 @@ class PipelineSpecs:
     parameters: typing.Sequence[PipelineParameterSpecs] = dataclasses.field(default_factory=list)
     timeout: int = None
 
+    def parameters_spec(self):
+        return [arg.parameter_spec() for arg in self.parameters]
 
-class ImportStrategy(enum.Enum):
+
+class PipelineIntrospectionStrategy(enum.Enum):
     AST = "AST"
     IMPORT = "IMPORT"
 
 
-def import_pipeline(pipeline_dir_path: str, strategy: ImportStrategy):
-    if strategy == ImportStrategy.IMPORT:
-        pipeline_dir = os.path.abspath(pipeline_dir_path)
-        sys.path.append(pipeline_dir)
-        pipeline_package = importlib.import_module("pipeline")
+def _get_pipeline_specs_with_import(pipeline_dir_path: str) -> PipelineSpecs:
+    pipeline_dir = os.path.abspath(pipeline_dir_path)
+    sys.path.append(pipeline_dir)
 
-        pipeline = next(v for _, v in pipeline_package.__dict__.items() if v and type(v) == Pipeline)
-        return pipeline
-    # if not specified the default behavior is to use ImportStrategy.AST
-    with open(Path(pipeline_dir_path) / "pipeline.py", "r") as pipeline_file:
-        return get_pipeline_specs(pipeline_file.read())
+    pipeline_package = importlib.import_module("pipeline")
+    pipeline = next(v for _, v in pipeline_package.__dict__.items() if v and type(v) == Pipeline)
+
+    specs = PipelineSpecs(
+        code=pipeline.code, name=pipeline.name, timeout=pipeline.timeout, parameters=pipeline.parameters
+    )
+
+    return specs
 
 
 def get_openhexa_decorator_id(tree: ast.AST, decorator: str) -> str:
@@ -149,7 +167,17 @@ def get_pipeline_parameters_specs(tree: ast.AST, pipeline_node: ast.AST) -> typi
     return params
 
 
-def get_pipeline_specs(pipeline_content: str) -> PipelineSpecs:
+def get_pipeline_specs(pipeline_directory_path: Path, strategy: str) -> PipelineSpecs:
+    if strategy.upper() == PipelineIntrospectionStrategy.AST.value:
+        with open(Path(pipeline_directory_path) / "pipeline.py", "r") as pipeline_file:
+            return _get_pipeline_specs_with_ast(pipeline_file.read())
+    elif strategy.upper() == PipelineIntrospectionStrategy.IMPORT.value:
+        return _get_pipeline_specs_with_import(pipeline_directory_path)
+    else:
+        raise ValueError(f"Invalid strategy {strategy}")
+
+
+def _get_pipeline_specs_with_ast(pipeline_content: str) -> PipelineSpecs:
     tree = ast.parse(pipeline_content)
     # In order to search for the pipeline decorator, we visit each node of the generated tree,
     # then check if a node of type function with id 'pipeline' (pipeline decorator) is present.

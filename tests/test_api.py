@@ -6,7 +6,6 @@ import yaml
 
 from click.testing import CliRunner
 from openhexa.cli.api import upload_pipeline
-from openhexa.sdk.pipelines import ImportStrategy
 from openhexa.cli.cli import pipelines_init
 from pathlib import Path
 
@@ -29,7 +28,7 @@ def test_upload_pipeline():
         test_file.write("Test upload")
 
     with mock.patch("openhexa.cli.api.graphql") as mocked_graphql_client:
-        upload_pipeline(config=config, pipeline_directory_path=pipeline_dir, strategy=ImportStrategy.IMPORT)
+        upload_pipeline(config=config, pipeline_directory_path=pipeline_dir, strategy="ast")
         mocked_graphql_client.return_value = {"success": True, "errors": []}
 
         with ZipFile(pipeline_zip_file_dir) as zip_file:
@@ -62,7 +61,7 @@ def test_upload_pipeline_custom_files_path():
         test_file.write("Test upload with custom files path")
 
     with mock.patch("openhexa.cli.api.graphql") as mocked_graphql_client:
-        upload_pipeline(config=config, pipeline_directory_path=pipeline_dir, strategy=ImportStrategy.AST)
+        upload_pipeline(config=config, pipeline_directory_path=pipeline_dir, strategy="ast")
         mocked_graphql_client.return_value = {"success": True, "errors": []}
 
         with ZipFile(pipeline_zip_file_dir) as zip_file:
