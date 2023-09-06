@@ -1,6 +1,5 @@
 import ast
 import base64
-import dataclasses
 import io
 import importlib
 
@@ -11,48 +10,13 @@ import typing
 
 from zipfile import ZipFile
 from pathlib import Path
-from .pipeline import Pipeline
+
+from .parameter import PipelineParameterSpecs
+from .pipeline import Pipeline, PipelineSpecs
 
 
 class PipelineNotFound(Exception):
     pass
-
-
-@dataclasses.dataclass
-class PipelineParameterSpecs:
-    code: str
-    type: typing.Union[typing.Type[str], typing.Type[int], typing.Type[bool]]
-    name: typing.Optional[str] = None
-    choices: typing.Optional[typing.Sequence] = None
-    help: typing.Optional[str] = None
-    default: typing.Optional[typing.Any] = None
-    required: bool = True
-    multiple: bool = False
-
-    def parameter_spec(self):
-        """Generates specification for the parameter, to be provided to the OpenHexa backend."""
-
-        return {
-            "type": self.type,
-            "required": self.required,
-            "choices": self.choices,
-            "code": self.code,
-            "name": self.name,
-            "help": self.help,
-            "multiple": self.multiple,
-            "default": self.default,
-        }
-
-
-@dataclasses.dataclass
-class PipelineSpecs:
-    code: str
-    name: str
-    parameters: typing.Sequence[PipelineParameterSpecs] = dataclasses.field(default_factory=list)
-    timeout: int = None
-
-    def parameters_spec(self):
-        return [arg.parameter_spec() for arg in self.parameters]
 
 
 def _get_pipeline_specs_with_import(pipeline_dir_path: Path) -> PipelineSpecs:
@@ -61,11 +25,7 @@ def _get_pipeline_specs_with_import(pipeline_dir_path: Path) -> PipelineSpecs:
     pipeline_package = importlib.import_module("pipeline")
     pipeline = next(v for _, v in pipeline_package.__dict__.items() if v and type(v) == Pipeline)
 
-    specs = PipelineSpecs(
-        code=pipeline.code, name=pipeline.name, timeout=pipeline.timeout, parameters=pipeline.parameters
-    )
-
-    return specs
+    return pipeline.to_specs()
 
 
 def get_openhexa_decorator_id(tree: ast.AST, decorator: str) -> str:

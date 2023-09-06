@@ -164,9 +164,9 @@ def test_parameter_validate_multiple():
         parameter_4.validate(["ab", "xy"])
 
 
-def test_parameter_parameters_spec():
+def test_parameter_to_specs():
     # required is True by default
-    an_parameter = Parameter("arg1", type=str, default="yep")
+    a_parameter = Parameter("arg1", type=str, default="yep")
     another_parameter = Parameter(
         "arg2",
         type=str,
@@ -177,27 +177,16 @@ def test_parameter_parameters_spec():
         multiple=True,
     )
 
-    assert an_parameter.parameter_spec() == {
-        "code": "arg1",
-        "name": None,
-        "type": "str",
-        "required": True,
-        "choices": None,
-        "help": None,
-        "multiple": False,
-        "default": "yep",
-    }
-
-    assert another_parameter.parameter_spec() == {
-        "code": "arg2",
-        "name": "Arg 2",
-        "type": "str",
-        "required": False,
-        "choices": ["ab", "cd"],
-        "help": "Help 2",
-        "multiple": True,
-        "default": None,
-    }
+    for single_parameter in [a_parameter, another_parameter]:
+        parameter_specs = single_parameter.to_specs()
+        assert parameter_specs.code == single_parameter.code
+        assert parameter_specs.name == single_parameter.name
+        assert parameter_specs.type == single_parameter.type.spec_type
+        assert parameter_specs.required == single_parameter.required
+        assert parameter_specs.choices == single_parameter.choices
+        assert parameter_specs.help == single_parameter.help
+        assert parameter_specs.multiple == single_parameter.multiple
+        assert parameter_specs.default == single_parameter.default
 
 
 def test_parameter_decorator():

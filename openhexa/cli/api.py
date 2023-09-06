@@ -257,7 +257,7 @@ def upload_pipeline(config, pipeline_directory_path: Path, strategy: typing.Lite
                 "workspaceSlug": config["openhexa"]["current_workspace"],
                 "code": pipeline_specs.code,
                 "zipfile": base64_content,
-                "parameters": pipeline_specs.parameters_spec(),
+                "parameters": pipeline_specs.parameters_as_dict(),
                 "timeout": pipeline_specs.timeout,
             }
         },

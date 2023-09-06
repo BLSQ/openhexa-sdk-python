@@ -1,5 +1,21 @@
+import dataclasses
 import re
 import typing
+
+
+@dataclasses.dataclass
+class PipelineParameterSpecs:
+    code: str
+    type: str
+    name: typing.Optional[str] = None
+    choices: typing.Optional[typing.Sequence] = None
+    help: typing.Optional[str] = None
+    default: typing.Optional[typing.Any] = None
+    required: bool = True
+    multiple: bool = False
+
+    def as_dict(self):
+        return dataclasses.asdict(self)
 
 
 class ParameterValueError(Exception):
@@ -252,19 +268,17 @@ class Parameter:
         except ParameterValueError:
             raise InvalidParameterError(f"The default value for {self.code} is not valid.")
 
-    def parameter_spec(self):
-        """Generates specification for this parameter, to be provided to the OpenHexa backend."""
-
-        return {
-            "type": self.type.spec_type,
-            "required": self.required,
-            "choices": self.choices,
-            "code": self.code,
-            "name": self.name,
-            "help": self.help,
-            "multiple": self.multiple,
-            "default": self.default,
-        }
+    def to_specs(self) -> PipelineParameterSpecs:
+        return PipelineParameterSpecs(
+            code=self.code,
+            type=self.type.spec_type,
+            name=self.name,
+            choices=self.choices,
+            help=self.help,
+            default=self.default,
+            required=self.required,
+            multiple=self.multiple,
+        )
 
 
 def parameter(

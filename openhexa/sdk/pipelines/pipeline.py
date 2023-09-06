@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import datetime
 import json
 import os
@@ -16,11 +17,22 @@ from multiprocess import get_context  # NOQA
 
 from openhexa.sdk.utils import Environments, get_environment
 
-from .parameter import FunctionWithParameter, Parameter, ParameterValueError
+from .parameter import FunctionWithParameter, Parameter, ParameterValueError, PipelineParameterSpecs
 from .task import PipelineWithTask
 from .utils import get_local_workspace_config
 
 logger = getLogger(__name__)
+
+
+@dataclasses.dataclass
+class PipelineSpecs:
+    code: str
+    name: str
+    parameters: typing.Sequence[PipelineParameterSpecs] = dataclasses.field(default_factory=list)
+    timeout: int = None
+
+    def parameters_as_dict(self):
+        return [spec.as_dict() for spec in self.parameters]
 
 
 class PipelineConfigError(Exception):
@@ -165,9 +177,6 @@ class Pipeline:
     def get_available_tasks(self):
         return [task for task in self.tasks if task.is_ready()]
 
-    def parameters_spec(self):
-        return [arg.parameter_spec() for arg in self.parameters]
-
     def _update_progress(self, progress: int):
         if self._connected:
             token = os.environ["HEXA_TOKEN"]
@@ -232,3 +241,11 @@ class Pipeline:
                 config = {}
 
         self.run(config)
+
+    def to_specs(self) -> PipelineSpecs:
+        return PipelineSpecs(
+            code=self.code,
+            name=self.name,
+            timeout=self.timeout,
+            parameters=[parameter.to_specs() for parameter in self.parameters],
+        )
