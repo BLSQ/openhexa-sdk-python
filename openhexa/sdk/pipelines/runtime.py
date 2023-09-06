@@ -1,7 +1,6 @@
 import ast
 import base64
 import dataclasses
-import enum
 import io
 import importlib
 
@@ -56,14 +55,8 @@ class PipelineSpecs:
         return [arg.parameter_spec() for arg in self.parameters]
 
 
-class PipelineIntrospectionStrategy(enum.Enum):
-    AST = "AST"
-    IMPORT = "IMPORT"
-
-
-def _get_pipeline_specs_with_import(pipeline_dir_path: str) -> PipelineSpecs:
-    pipeline_dir = os.path.abspath(pipeline_dir_path)
-    sys.path.append(pipeline_dir)
+def _get_pipeline_specs_with_import(pipeline_dir_path: Path) -> PipelineSpecs:
+    sys.path.append(str(pipeline_dir_path))
 
     pipeline_package = importlib.import_module("pipeline")
     pipeline = next(v for _, v in pipeline_package.__dict__.items() if v and type(v) == Pipeline)
@@ -167,11 +160,11 @@ def get_pipeline_parameters_specs(tree: ast.AST, pipeline_node: ast.AST) -> typi
     return params
 
 
-def get_pipeline_specs(pipeline_directory_path: Path, strategy: str) -> PipelineSpecs:
-    if strategy.upper() == PipelineIntrospectionStrategy.AST.value:
-        with open(Path(pipeline_directory_path) / "pipeline.py", "r") as pipeline_file:
+def get_pipeline_specs(pipeline_directory_path: Path, strategy: typing.Literal["ast", "import"]) -> PipelineSpecs:
+    if strategy == "ast":
+        with open(pipeline_directory_path / "pipeline.py", "r") as pipeline_file:
             return _get_pipeline_specs_with_ast(pipeline_file.read())
-    elif strategy.upper() == PipelineIntrospectionStrategy.IMPORT.value:
+    elif strategy == "import":
         return _get_pipeline_specs_with_import(pipeline_directory_path)
     else:
         raise ValueError(f"Invalid strategy {strategy}")

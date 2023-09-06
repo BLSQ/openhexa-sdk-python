@@ -3,6 +3,7 @@ import configparser
 import enum
 import io
 import os
+import typing
 from importlib.metadata import version
 from pathlib import Path
 from zipfile import ZipFile
@@ -10,7 +11,7 @@ from zipfile import ZipFile
 import click
 import requests
 
-from openhexa.sdk.pipelines import get_local_workspace_config, get_pipeline_specs, PipelineIntrospectionStrategy
+from openhexa.sdk.pipelines import get_local_workspace_config, get_pipeline_specs
 
 CONFIGFILE_PATH = os.path.expanduser("~") + "/.openhexa.ini"
 
@@ -179,19 +180,18 @@ def create_pipeline(config, pipeline_code: str, pipeline_name: str):
     return data["createPipeline"]["pipeline"]
 
 
-def ensure_is_pipeline_dir(pipeline_path: str):
-    # Ensure that there is a pipeline.py file in the directory
-    if not os.path.isdir(pipeline_path):
+def ensure_is_pipeline_dir(pipeline_path: Path):
+    """Ensure that there is a pipeline.py file in the directory"""
+
+    if not pipeline_path.is_dir():
         raise Exception(f"Path {pipeline_path} is not a directory")
-    if not os.path.exists(pipeline_path):
+    if not pipeline_path.exists():
         raise Exception(f"Directory {pipeline_path} does not exist")
-    if not os.path.exists(os.path.join(pipeline_path, "pipeline.py")):
+    if not (pipeline_path / "pipeline.py").exists():
         raise Exception(f"Directory {pipeline_path} does not contain a pipeline.py file")
 
-    return True
 
-
-def upload_pipeline(config, pipeline_directory_path: str, strategy: PipelineIntrospectionStrategy):
+def upload_pipeline(config, pipeline_directory_path: Path, strategy: typing.Literal["ast", "import"]):
     directory = Path(os.path.abspath(pipeline_directory_path))
     pipeline_specs = get_pipeline_specs(directory, strategy)
 

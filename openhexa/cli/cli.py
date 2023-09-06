@@ -1,6 +1,7 @@
 import base64
 import json
 import sys
+import typing
 from importlib.metadata import version
 from pathlib import Path
 
@@ -241,12 +242,15 @@ def pipelines_init(name: str):
     help="Import strategy to be used.",
     default="ast",
 )
-def pipelines_push(path: str, strategy: str):
+def pipelines_push(path: str, strategy: typing.Literal["ast", "import"]):
     """
     Push a pipeline to the backend. If the pipeline already exists, it will be updated otherwise it will be created.
 
-    PATH is the path to the pipeline file.
+    (path is the path to the directory in which we have the pipeline file.)
     """
+
+    pipeline_directory_path = Path(path).resolve()
+    ensure_is_pipeline_dir(pipeline_directory_path)
 
     user_config = open_config()
     try:
@@ -259,11 +263,9 @@ def pipelines_push(path: str, strategy: str):
         )
         sys.exit(1)
 
-    ensure_is_pipeline_dir(path)
-
     try:
         # user have the possibility to choose the old import system or the new one (AST)
-        pipeline_specs = get_pipeline_specs(Path(path), strategy)
+        pipeline_specs = get_pipeline_specs(pipeline_directory_path, strategy)
     except Exception as e:
         click.echo(f'Error while importing pipeline: "{e}"', err=True)
         if is_debug(user_config):
@@ -290,7 +292,7 @@ def pipelines_push(path: str, strategy: str):
         )
 
         try:
-            new_version = upload_pipeline(user_config, path, strategy)
+            new_version = upload_pipeline(user_config, pipeline_directory_path, strategy)
             click.echo(f"New version created: {new_version}")
 
             url = f"{user_config['openhexa']['url']}/workspaces/{workspace}/pipelines/{pipeline_specs.code}".replace(
@@ -347,9 +349,11 @@ def pipelines_run(
     from subprocess import Popen
 
     user_config = open_config()
-    ensure_is_pipeline_dir(path)
 
-    env_vars = get_local_workspace_config(Path(path))
+    pipeline_directory_path = Path(path).resolve()
+    ensure_is_pipeline_dir(pipeline_directory_path)
+
+    env_vars = get_local_workspace_config(pipeline_directory_path)
 
     # Prepare the mount for the workspace's files
     mount_files_path = Path(env_vars["WORKSPACE_FILES_PATH"]).absolute()
@@ -358,7 +362,7 @@ def pipelines_run(
         "docker",
         "run",
         "--mount",
-        f"type=bind,source={Path(path).absolute()},target=/home/hexa/pipeline",
+        f"type=bind,source={pipeline_directory_path},target=/home/hexa/pipeline",
         "--mount",
         f"type=bind,source={mount_files_path},target=/home/hexa/workspace",
         "--env",
@@ -385,11 +389,11 @@ def pipelines_run(
         click.echo("You can't specify both -c and -f", err=True)
         return click.Abort()
 
-    config = config_str or "{}"
+    pipeline_config = config_str or "{}"
     if config_file:
-        config = json.dumps(json.loads(config_file.read(), strict=False))
+        pipeline_config = json.dumps(json.loads(config_file.read(), strict=False))
 
-    cmd.extend(["--config", base64.b64encode(config.encode("utf-8")).decode("utf-8")])
+    cmd.extend(["--config", base64.b64encode(pipeline_config.encode("utf-8")).decode("utf-8")])
 
     if is_debug(user_config):
         print(" ".join(cmd))
