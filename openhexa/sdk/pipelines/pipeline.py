@@ -50,7 +50,7 @@ def pipeline(
     """
 
     if any(c not in string.ascii_lowercase + string.digits + "_-" for c in code):
-        raise Exception("Pipeline name should contains only lower case letters, digits, '_' and '-'")
+        raise Exception("Pipeline code should contains only lower case letters, digits, '_' and '-'")
 
     def decorator(fun):
         if isinstance(fun, FunctionWithParameter):
