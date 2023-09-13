@@ -8,7 +8,7 @@ class DHIS2Connection:
     password: str
 
     def __repr__(self):
-        return f"DHIS2Connection(url='{self.url}', username='{self.username}', password='*********')"
+        return f"DHIS2Connection(url='{self.url}', username='{self.username}')"
 
 
 @dataclasses.dataclass
@@ -20,7 +20,7 @@ class PostgreSQLConnection:
     database_name: str
 
     def __repr__(self):
-        return f"PostgreSQLConnection(host='{self.host}', port='{self.port}', username='{self.username}', password='*********', database_name='{self.database_name}')"
+        return f"PostgreSQLConnection(host='{self.host}', port='{self.port}', username='{self.username}', database_name='{self.database_name}')"
 
     @property
     def url(self):
