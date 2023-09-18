@@ -34,7 +34,7 @@ class S3Connection:
     bucket_name: str
 
     def __repr__(self):
-        return f"S3Connection(access_key_id='*******', secret_access_key='*******', bucket_name='{self.bucket_name}')"
+        return f"S3Connection(bucket_name='{self.bucket_name}')"
 
 
 @dataclasses.dataclass
@@ -43,4 +43,4 @@ class GCSConnection:
     bucket_name: str
 
     def __repr__(self):
-        return f"GCSConnection(service_account_key='*******', bucket_name='{self.bucket_name}')"
+        return f"GCSConnection(bucket_name='{self.bucket_name}')"
