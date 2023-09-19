@@ -70,7 +70,7 @@ def get_local_workspace_config(path: Path):
                 if "type" not in connection_config:
                     raise LocalWorkspaceConfigError("Each connection must have a type key.")
 
-                # DHIS2 connections
+                # DHIS2 connection
                 if connection_config["type"] == "dhis2":
                     try:
                         env_vars[f"{stringcase.constcase(slug)}_URL"] = connection_config["url"]
@@ -82,7 +82,7 @@ def get_local_workspace_config(path: Path):
                             "the following keys: url, username, password."
                         )
                         raise LocalWorkspaceConfigError(exception_message)
-                # PostgreSQL connections
+                # PostgreSQL connection
                 elif connection_config["type"] == "postgresql":
                     try:
                         env_vars[f"{stringcase.constcase(slug)}_HOST"] = connection_config["host"]
@@ -96,7 +96,7 @@ def get_local_workspace_config(path: Path):
                             "the following keys: url, username, password."
                         )
                         raise LocalWorkspaceConfigError(exception_message)
-                # S3 connections
+                # S3 connection
                 elif connection_config["type"] == "s3":
                     try:
                         env_vars[f"{stringcase.constcase(slug)}_SECRET_ACCESS_KEY"] = connection_config[
@@ -112,7 +112,7 @@ def get_local_workspace_config(path: Path):
                             "the following keys: secret_key, access_key_id, bucket_name."
                         )
                         raise LocalWorkspaceConfigError(exception_message)
-                # GCS connections
+                # GCS connection
                 elif connection_config["type"] == "gcs":
                     try:
                         env_vars[f"{stringcase.constcase(slug)}_SERVICE_ACCOUNT_KEY"] = connection_config[
@@ -123,6 +123,18 @@ def get_local_workspace_config(path: Path):
                         exception_message = (
                             "Invalid local workspace GCS connection config. Please make sure you provide "
                             "the following keys: service_account_key, bucket_name."
+                        )
+                        raise LocalWorkspaceConfigError(exception_message)
+                    # IASO connection
+                elif connection_config["type"] == "iaso":
+                    try:
+                        env_vars[f"{stringcase.constcase(slug)}_URL"] = connection_config["url"]
+                        env_vars[f"{stringcase.constcase(slug)}_USERNAME"] = connection_config["username"]
+                        env_vars[f"{stringcase.constcase(slug)}_PASSWORD"] = connection_config["password"]
+                    except KeyError:
+                        exception_message = (
+                            "Invalid local workspace iaso connection config. Please make sure you provide "
+                            "the following keys: url, username, password."
                         )
                         raise LocalWorkspaceConfigError(exception_message)
                 # Custom connection

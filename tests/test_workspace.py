@@ -128,6 +128,35 @@ def test_workspace_gcs_connection():
         assert re.search("service_account_key", str(s3_connection)) is None
 
 
+def test_workspace_iaso_connection_not_exist():
+    identifier = "iaso-account"
+    with pytest.raises(ConnectionDoesNotExist):
+        workspace.iaso_connection(identifier=identifier)
+
+
+def test_workspace_iaso_connection():
+    identifier = "iaso-account"
+    env_variable_prefix = stringcase.constcase(identifier)
+    url = "https://test.iaso.org/"
+    username = "iaso"
+    password = "iaso_pwd"
+
+    with mock.patch.dict(
+        os.environ,
+        {
+            f"{env_variable_prefix}_URL": url,
+            f"{env_variable_prefix}_USERNAME": username,
+            f"{env_variable_prefix}_PASSWORD": password,
+        },
+    ):
+        iaso_connection = workspace.iaso_connection(identifier=identifier)
+        assert iaso_connection.url == url
+        assert iaso_connection.username == username
+        assert iaso_connection.password == password
+        assert re.search("password", repr(iaso_connection)) is None
+        assert re.search("password", str(iaso_connection)) is None
+
+
 def test_workspace_custom_connection():
     identifier = "my_connection"
     env_variable_prefix = stringcase.constcase(identifier)
