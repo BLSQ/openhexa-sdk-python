@@ -177,7 +177,13 @@ class CurrentWorkspace:
             if key.startswith(env_variable_prefix):
                 field_key = key[len(f"{env_variable_prefix}_") :].lower()
                 fields[field_key] = value
-        CustomConnection = make_dataclass(identifier, fields.keys())
+
+        dataclass = make_dataclass(identifier, fields.keys())
+
+        class CustomConnection(dataclass):
+            def __repr__(self):
+                return f"CustomConnection(name='{identifier}')"
+
         return CustomConnection(**fields)
 
 

@@ -144,6 +144,8 @@ def test_workspace_custom_connection():
         custom_connection = workspace.custom_connection(identifier=identifier)
         assert custom_connection.username == username
         assert custom_connection.password == password
+        assert re.search(f"{env_variable_prefix}_PASSWORD", repr(custom_connection)) is None
+        assert re.search(f"{env_variable_prefix}_PASSWORD", str(custom_connection)) is None
 
 
 def test_connection_by_slug_warning():
