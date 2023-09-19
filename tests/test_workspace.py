@@ -1,10 +1,10 @@
 import os
-from unittest import mock
-
 import pytest
+import re
 import stringcase
 
 from openhexa.sdk.workspaces.workspace import ConnectionDoesNotExist, workspace
+from unittest import mock
 
 
 def test_workspace_dhis2_connection_not_exist():
@@ -31,6 +31,8 @@ def test_workspace_dhis2_connection():
         assert dhis2_connection.url == url
         assert dhis2_connection.username == username
         assert dhis2_connection.password == password
+        assert re.search("password", repr(dhis2_connection)) is None
+        assert re.search("password", str(dhis2_connection)) is None
 
 
 def test_workspace_postgresql_connection_not_exist():
@@ -65,6 +67,8 @@ def test_workspace_postgresql_connection():
         assert postgres_connection.port == int(port)
         assert postgres_connection.database_name == database_name
         assert postgres_connection.url == url
+        assert re.search("password", repr(postgres_connection)) is None
+        assert re.search("password", str(postgres_connection)) is None
 
 
 def test_workspace_S3_connection_not_exist():
@@ -92,6 +96,10 @@ def test_workspace_s3_connection():
         assert s3_connection.secret_access_key == secret_access_key
         assert s3_connection.access_key_id == access_key_id
         assert s3_connection.bucket_name == bucket_name
+        assert re.search("secret_access_key", repr(s3_connection)) is None
+        assert re.search("secret_access_key", str(s3_connection)) is None
+        assert re.search("access_key_id", repr(s3_connection)) is None
+        assert re.search("access_key_id", str(s3_connection)) is None
 
 
 def test_workspace_gcs_connection_not_exist():
@@ -116,6 +124,8 @@ def test_workspace_gcs_connection():
         s3_connection = workspace.gcs_connection(identifier=identifier)
         assert s3_connection.service_account_key == service_account_key
         assert s3_connection.bucket_name == bucket_name
+        assert re.search("service_account_key", repr(s3_connection)) is None
+        assert re.search("service_account_key", str(s3_connection)) is None
 
 
 def test_workspace_custom_connection():
@@ -134,6 +144,8 @@ def test_workspace_custom_connection():
         custom_connection = workspace.custom_connection(identifier=identifier)
         assert custom_connection.username == username
         assert custom_connection.password == password
+        assert re.search(f"{env_variable_prefix}_PASSWORD", repr(custom_connection)) is None
+        assert re.search(f"{env_variable_prefix}_PASSWORD", str(custom_connection)) is None
 
 
 def test_connection_by_slug_warning():
