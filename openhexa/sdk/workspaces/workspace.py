@@ -4,12 +4,7 @@ from warnings import warn
 
 import stringcase
 
-from .connection import (
-    DHIS2Connection,
-    GCSConnection,
-    PostgreSQLConnection,
-    S3Connection,
-)
+from .connection import DHIS2Connection, GCSConnection, PostgreSQLConnection, S3Connection, IASOConnection
 
 
 class WorkspaceConfigError(Exception):
@@ -165,6 +160,20 @@ class CurrentWorkspace:
             service_account_key=service_account_key,
             bucket_name=bucket_name,
         )
+
+    def iaso_connection(self, identifier: str = None, slug: str = None) -> IASOConnection:
+        identifier = identifier or slug
+        if slug is not None:
+            warn("'slug' is deprecated. Use 'identifier' instead.", DeprecationWarning, stacklevel=2)
+        try:
+            env_variable_prefix = stringcase.constcase(identifier.lower())
+            url = os.environ[f"{env_variable_prefix}_URL"]
+            username = os.environ[f"{env_variable_prefix}_USERNAME"]
+            password = os.environ[f"{env_variable_prefix}_PASSWORD"]
+        except KeyError:
+            raise ConnectionDoesNotExist(f'No IASO connection for "{identifier}"')
+
+        return IASOConnection(url=url, username=username, password=password)
 
     def custom_connection(self, identifier: str = None, slug: str = None):
         identifier = identifier or slug

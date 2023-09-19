@@ -44,3 +44,13 @@ class GCSConnection:
 
     def __repr__(self):
         return f"GCSConnection(bucket_name='{self.bucket_name}')"
+
+
+@dataclasses.dataclass
+class IASOConnection:
+    url: str
+    username: str
+    password: str
+
+    def __repr__(self):
+        return f"IASOConnection(url='{self.url}', username='{self.username}')"
