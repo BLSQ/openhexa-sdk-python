@@ -4,7 +4,15 @@ from warnings import warn
 
 import stringcase
 
-from .connection import DHIS2Connection, GCSConnection, PostgreSQLConnection, S3Connection, IASOConnection
+from ..datasets import Dataset
+from ..utils import graphql
+from .connection import (
+    DHIS2Connection,
+    GCSConnection,
+    IASOConnection,
+    PostgreSQLConnection,
+    S3Connection,
+)
 
 
 class WorkspaceConfigError(Exception):
@@ -16,6 +24,13 @@ class ConnectionDoesNotExist(Exception):
 
 
 class CurrentWorkspace:
+    @property
+    def _token(self):
+        try:
+            return os.environ["HEXA_TOKEN"]
+        except KeyError:
+            raise WorkspaceConfigError("Workspace's token is not available in this environment.")
+
     @property
     def slug(self):
         try:
@@ -194,6 +209,47 @@ class CurrentWorkspace:
                 return f"CustomConnection(name='{identifier}')"
 
         return CustomConnection(**fields)
+
+    def create_dataset(self, identifier: str, name: str, description: str):
+        raise NotImplementedError("create_dataset is not implemented yet.")
+
+    def get_dataset(self, identifier: str):
+        response = graphql(
+            """
+            query getDataset($datasetSlug: String!, $workspaceSlug: String!) {
+                datasetLinkBySlug(datasetSlug: $datasetSlug, workspaceSlug: $workspaceSlug) {
+                    id
+                    workspace {
+                        slug
+                        name
+                    }
+                    dataset {
+                        id
+                        slug
+                        name
+                        description
+                        latestVersion {
+                            id
+                            name
+                            description
+                        }
+                    }
+                }
+            }
+        """,
+            {"datasetSlug": identifier, "workspaceSlug": self.slug},
+        )
+        data = response["datasetLinkBySlug"]
+
+        if data is None:
+            raise ValueError(f"Dataset {identifier} does not exist.")
+
+        return Dataset(
+            id=data["dataset"]["id"],
+            slug=data["dataset"]["slug"],
+            name=data["dataset"]["name"],
+            description=data["dataset"]["description"],
+        )
 
 
 # Once we deprecate the `python pipeline.py` command, we can enhance this to only load the workspace
