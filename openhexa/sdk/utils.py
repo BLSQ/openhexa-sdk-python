@@ -174,7 +174,7 @@ class Page(object):
 def read_content(source: typing.Union[str, os.PathLike[str], typing.IO], encoding: str = "utf-8") -> str:
     # If source is a string or PathLike object
     if isinstance(source, (str, os.PathLike)):
-        with open(os.fspath(source), "rb", encoding=encoding) as f:
+        with open(os.fspath(source), "rb") as f:
             return f.read()
 
     # If source is a buffer
