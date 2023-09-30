@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.1.29](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.28...0.1.29) (2023-09-30)
+
+
+### Features
+
+* **Connections:** add support for IASO connection ([#82](https://github.com/BLSQ/openhexa-sdk-python/issues/82)) ([707b798](https://github.com/BLSQ/openhexa-sdk-python/commit/707b798ac6e8fc7846a241f3d05ef760b224ce45))
+* **Datasets:** Add datasets support to SDK ([#77](https://github.com/BLSQ/openhexa-sdk-python/issues/77)) ([d8eb50e](https://github.com/BLSQ/openhexa-sdk-python/commit/d8eb50e9210f7f610fd4e210dc17daf5331b8e97))
+
+
+### Bug Fixes
+
+* **Connections:** hide sensitive informations when printing  connection ([#79](https://github.com/BLSQ/openhexa-sdk-python/issues/79)) ([db749a3](https://github.com/BLSQ/openhexa-sdk-python/commit/db749a3d1d9119c95013030d390d8ecf568d5b26))
+* **read_content:** bineary files do not take an encoding ([5448287](https://github.com/BLSQ/openhexa-sdk-python/commit/5448287a0e373ffa422028c6288d475c029faa29))
+
+
+### Miscellaneous
+
+* Reame dataset methods ([5c087fc](https://github.com/BLSQ/openhexa-sdk-python/commit/5c087fcb6c5e2b8b8b561bf108f5396079bb15c3))
+
 ## [0.1.28](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.27...0.1.28) (2023-08-14)
 
 
