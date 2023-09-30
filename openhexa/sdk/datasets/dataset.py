@@ -2,6 +2,7 @@ import mimetypes
 import typing
 from os import PathLike
 from pathlib import Path
+
 import requests
 
 from openhexa.sdk.utils import Iterator, Page, graphql, read_content
@@ -150,7 +151,7 @@ class DatasetVersion:
             raise ValueError("This dataset version does not have an id.")
         return VersionFilesIterator(version=self, per_page=50)
 
-    def get(self, filename: str):
+    def get_file(self, filename: str):
         data = graphql(
             """
             query getDatasetFile($versionId: ID!, $filename: String!) {
@@ -181,7 +182,7 @@ class DatasetVersion:
             created_at=file["createdAt"],
         )
 
-    def upload(
+    def add_file(
         self,
         source: typing.Union[str, PathLike[str], typing.IO],
         filename: typing.Optional[str] = None,
