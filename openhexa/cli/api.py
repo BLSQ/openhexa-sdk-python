@@ -266,7 +266,9 @@ def upload_pipeline(config, pipeline_directory_path: str):
 
     if not data["uploadPipeline"]["success"]:
         if PipelineErrorEnum.PIPELINE_DOES_NOT_SUPPORT_PARAMETERS.value in data["uploadPipeline"]["errors"]:
-            raise InvalidDefinitionError("A pipeline with a schedule can't have parameters")
+            raise InvalidDefinitionError(
+                "Cannot push a new version : this pipeline has a schedule and the new version is not schedulable (all parameters must be optional or have default values)."
+            )
         elif PipelineErrorEnum.INVALID_TIMEOUT_VALUE.value in data["uploadPipeline"]["errors"]:
             raise InvalidDefinitionError(
                 "Timeout value is invalid : ensure that it's no negative and inferior to 12 hours."
