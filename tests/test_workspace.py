@@ -1,10 +1,27 @@
 import os
+from tempfile import mkdtemp
+
 import pytest
 import re
 import stringcase
 
 from openhexa.sdk.workspaces.workspace import ConnectionDoesNotExist, workspace
 from unittest import mock
+
+
+def test_workspace_files_path(monkeypatch):
+    assert workspace.files_path == "/home/hexa/workspace"
+
+    monkeypatch.setenv("WORKSPACE_FILES_PATH", "/Users/John/openhexa/project-1/workspace")
+    assert workspace.files_path == "/Users/John/openhexa/project-1/workspace"
+
+
+def test_workspace_tmp_path(monkeypatch):
+    assert workspace.tmp_path == "/home/hexa/tmp"
+
+    mock_tmp_path = mkdtemp()
+    monkeypatch.setenv("WORKSPACE_TMP_PATH", mock_tmp_path)
+    assert workspace.tmp_path == mock_tmp_path
 
 
 def test_workspace_dhis2_connection_not_exist():

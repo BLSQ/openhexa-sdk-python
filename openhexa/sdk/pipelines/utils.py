@@ -1,4 +1,5 @@
 from pathlib import Path
+from tempfile import mkdtemp
 
 import stringcase
 import yaml
@@ -19,6 +20,7 @@ def get_local_workspace_config(path: Path):
     """
 
     env_vars = {}
+
     # This will only work when running the pipeline using "python pipeline.py"
     # (We will have to find another approach for tests or running the pipeline using the CLI)
     local_workspace_config_path = path / Path("workspace.yaml")
@@ -62,6 +64,9 @@ def get_local_workspace_config(path: Path):
                     "keys: username, password, host, port, name."
                 )
                 raise LocalWorkspaceConfigError(exception_message)
+
+            # Create temp dir to simulate /home/hexa/tmp locally
+            env_vars["WORKSPACE_TMP_PATH"] = mkdtemp()
 
         # Connections
         if "connections" in local_workspace_config:
