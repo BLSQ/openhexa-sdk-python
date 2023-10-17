@@ -101,10 +101,15 @@ class CurrentWorkspace:
 
         # FIXME: This is a hack to make the SDK work in the context of the `python pipeline.py` command.
         # We can remove this once we deprecate this way of running pipelines
-        if "WORKSPACE_FILES_PATH" in os.environ:
-            return os.environ["WORKSPACE_FILES_PATH"]
-        else:
-            return "/home/hexa/workspace"
+        return os.environ["WORKSPACE_FILES_PATH"] if "WORKSPACE_FILES_PATH" in os.environ else "/home/hexa/workspace"
+
+    @property
+    def tmp_path(self) -> str:
+        """Return the base path to the tmp directory, without trailing slash"""
+
+        # FIXME: This is a hack to make the SDK work in the context of the `python pipeline.py` command.
+        # We can remove this once we deprecate this way of running pipelines
+        return os.environ["WORKSPACE_TMP_PATH"] if "WORKSPACE_TMP_PATH" in os.environ else "/home/hexa/tmp"
 
     def dhis2_connection(self, identifier: str = None, slug: str = None) -> DHIS2Connection:
         identifier = identifier or slug
