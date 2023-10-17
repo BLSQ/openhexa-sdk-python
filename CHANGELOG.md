@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.30](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.29...0.1.30) (2023-10-17)
+
+
+### Features
+
+* Add tmp_path property on workspace ([#83](https://github.com/BLSQ/openhexa-sdk-python/issues/83)) ([c944b6d](https://github.com/BLSQ/openhexa-sdk-python/commit/c944b6d8d6cea6bfcb1e1e1974ec06c8f47609c2))
+
 ## [0.1.29](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.28...0.1.29) (2023-09-30)
 
 
