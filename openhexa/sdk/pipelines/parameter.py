@@ -125,7 +125,114 @@ class Float(ParameterType):
         return value
 
 
-TYPES_BY_PYTHON_TYPE = {str: String, bool: Boolean, int: Integer, float: Float}
+class PostgreSQLConnectionType(ParameterType):
+    @property
+    def spec_type(self) -> str:
+        return "postgresql"
+
+    @property
+    def expected_type(self) -> typing.Type:
+        return str
+
+    def validate(self, value: typing.Optional[typing.Any], *, allow_empty: bool = True) -> typing.Optional[str]:
+        if not allow_empty and value == "":
+            raise ParameterValueError("Empty values are not accepted.")
+
+        return super().validate(value, allow_empty)
+
+
+class S3ConnectionType(ParameterType):
+    @property
+    def spec_type(self) -> str:
+        return "s3"
+
+    @property
+    def expected_type(self) -> typing.Type:
+        return str
+
+    def validate(self, value: typing.Optional[typing.Any], *, allow_empty: bool = True) -> typing.Optional[str]:
+        if not allow_empty and value == "":
+            raise ParameterValueError("Empty values are not accepted.")
+
+        return super().validate(value, allow_empty)
+
+
+class GCSConnectionType(ParameterType):
+    @property
+    def spec_type(self) -> str:
+        return "gcs"
+
+    @property
+    def expected_type(self) -> typing.Type:
+        return str
+
+    def validate(self, value: typing.Optional[typing.Any], *, allow_empty: bool = True) -> typing.Optional[str]:
+        if not allow_empty and value == "":
+            raise ParameterValueError("Empty values are not accepted.")
+
+        return super().validate(value, allow_empty)
+
+
+class DHIS2ConnectionType(ParameterType):
+    @property
+    def spec_type(self) -> str:
+        return "dhis2"
+
+    @property
+    def expected_type(self) -> typing.Type:
+        return str
+
+    def validate(self, value: typing.Optional[typing.Any], *, allow_empty: bool = True) -> typing.Optional[str]:
+        if not allow_empty and value == "":
+            raise ParameterValueError("Empty values are not accepted.")
+
+        return super().validate(value, allow_empty)
+
+
+class IASOConnectionType(ParameterType):
+    @property
+    def spec_type(self) -> str:
+        return "iaso"
+
+    @property
+    def expected_type(self) -> typing.Type:
+        return str
+
+    def validate(self, value: typing.Optional[typing.Any], *, allow_empty: bool = True) -> typing.Optional[str]:
+        if not allow_empty and value == "":
+            raise ParameterValueError("Empty values are not accepted.")
+
+        return super().validate(value, allow_empty)
+
+
+class CustomConnectionType(ParameterType):
+    @property
+    def spec_type(self) -> str:
+        return "custom"
+
+    @property
+    def expected_type(self) -> typing.Type:
+        return str
+
+    def validate(self, value: typing.Optional[typing.Any], *, allow_empty: bool = True) -> typing.Optional[str]:
+        if not allow_empty and value == "":
+            raise ParameterValueError("Empty values are not accepted.")
+
+        return super().validate(value, allow_empty)
+
+
+TYPES_BY_PYTHON_TYPE = {
+    str: String,
+    bool: Boolean,
+    int: Integer,
+    float: Float,
+    "dhis2": DHIS2ConnectionType,
+    "postgresql": PostgreSQLConnectionType,
+    "iaso": IASOConnectionType,
+    "s3": S3ConnectionType,
+    "gcs": GCSConnectionType,
+    "custom": CustomConnectionType,
+}
 
 
 class InvalidParameterError(Exception):

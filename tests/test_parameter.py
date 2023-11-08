@@ -9,6 +9,12 @@ from openhexa.sdk.pipelines.parameter import (
     Parameter,
     ParameterValueError,
     String,
+    PostgreSQLConnectionType,
+    GCSConnectionType,
+    S3ConnectionType,
+    IASOConnectionType,
+    DHIS2ConnectionType,
+    CustomConnectionType,
     parameter,
 )
 
@@ -63,6 +69,42 @@ def test_parameter_types_validate():
     assert boolean_parameter_type.validate(False) is False
     with pytest.raises(ParameterValueError):
         boolean_parameter_type.validate(86)
+
+    # PostgreSQL Connection
+    postgres_parameter_type = PostgreSQLConnectionType()
+    assert postgres_parameter_type.validate("postgres_connection_identifier") == "postgres_connection_identifier"
+    with pytest.raises(ParameterValueError):
+        postgres_parameter_type.validate(86)
+
+    # IASO Connection
+    iaso_parameter_type = IASOConnectionType()
+    assert postgres_parameter_type.validate("iaso_connection_identifier") == "iaso_connection_identifier"
+    with pytest.raises(ParameterValueError):
+        iaso_parameter_type.validate(86)
+
+    # GCS Connection
+    gcs_parameter_type = GCSConnectionType()
+    assert postgres_parameter_type.validate("gcs_connection_identifier") == "gcs_connection_identifier"
+    with pytest.raises(ParameterValueError):
+        gcs_parameter_type.validate(86)
+
+    # S3 Connection
+    s3_parameter_type = S3ConnectionType()
+    assert s3_parameter_type.validate("s3_connection_identifier") == "s3_connection_identifier"
+    with pytest.raises(ParameterValueError):
+        s3_parameter_type.validate(86)
+
+    # DHIS2 Connection
+    dhsi2_parameter_type = DHIS2ConnectionType()
+    assert dhsi2_parameter_type.validate("dhis2_connection_identifier") == "dhis2_connection_identifier"
+    with pytest.raises(ParameterValueError):
+        dhsi2_parameter_type.validate(86)
+
+    # Custom Connection
+    custom_parameter_type = CustomConnectionType()
+    assert custom_parameter_type.validate("custom_connection_identifier") == "custom_connection_identifier"
+    with pytest.raises(ParameterValueError):
+        custom_parameter_type.validate(86)
 
 
 def test_parameter_init():
