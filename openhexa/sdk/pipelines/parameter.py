@@ -1,5 +1,12 @@
 import re
 import typing
+from openhexa.sdk.workspaces.connection import (
+    DHIS2Connection,
+    IASOConnection,
+    PostgreSQLConnection,
+    S3Connection,
+    GCSConnection,
+)
 
 
 class ParameterValueError(Exception):
@@ -132,13 +139,24 @@ class PostgreSQLConnectionType(ParameterType):
 
     @property
     def expected_type(self) -> typing.Type:
-        return str
+        return PostgreSQLConnectionType
+
+    @property
+    def accepts_choice(self) -> bool:
+        return False
+
+    @property
+    def accepts_multiple(self) -> bool:
+        return False
 
     def validate(self, value: typing.Optional[typing.Any], *, allow_empty: bool = True) -> typing.Optional[str]:
         if not allow_empty and value == "":
             raise ParameterValueError("Empty values are not accepted.")
 
-        return super().validate(value, allow_empty)
+        if not isinstance(value, str):
+            raise ParameterValueError(f"Invalid type for value {value} (expected {str}, got {type(value)})")
+
+        return value
 
 
 class S3ConnectionType(ParameterType):
@@ -148,13 +166,24 @@ class S3ConnectionType(ParameterType):
 
     @property
     def expected_type(self) -> typing.Type:
-        return str
+        return S3ConnectionType
+
+    @property
+    def accepts_choice(self) -> bool:
+        return False
+
+    @property
+    def accepts_multiple(self) -> bool:
+        return False
 
     def validate(self, value: typing.Optional[typing.Any], *, allow_empty: bool = True) -> typing.Optional[str]:
         if not allow_empty and value == "":
             raise ParameterValueError("Empty values are not accepted.")
 
-        return super().validate(value, allow_empty)
+        if not isinstance(value, str):
+            raise ParameterValueError(f"Invalid type for value {value} (expected {str}, got {type(value)})")
+
+        return value
 
 
 class GCSConnectionType(ParameterType):
@@ -164,13 +193,24 @@ class GCSConnectionType(ParameterType):
 
     @property
     def expected_type(self) -> typing.Type:
-        return str
+        return GCSConnectionType
+
+    @property
+    def accepts_choice(self) -> bool:
+        return False
+
+    @property
+    def accepts_multiple(self) -> bool:
+        return False
 
     def validate(self, value: typing.Optional[typing.Any], *, allow_empty: bool = True) -> typing.Optional[str]:
         if not allow_empty and value == "":
             raise ParameterValueError("Empty values are not accepted.")
 
-        return super().validate(value, allow_empty)
+        if not isinstance(value, str):
+            raise ParameterValueError(f"Invalid type for value {value} (expected {str}, got {type(value)})")
+
+        return value
 
 
 class DHIS2ConnectionType(ParameterType):
@@ -180,13 +220,24 @@ class DHIS2ConnectionType(ParameterType):
 
     @property
     def expected_type(self) -> typing.Type:
-        return str
+        return DHIS2ConnectionType
+
+    @property
+    def accepts_choice(self) -> bool:
+        return False
+
+    @property
+    def accepts_multiple(self) -> bool:
+        return False
 
     def validate(self, value: typing.Optional[typing.Any], *, allow_empty: bool = True) -> typing.Optional[str]:
         if not allow_empty and value == "":
             raise ParameterValueError("Empty values are not accepted.")
 
-        return super().validate(value, allow_empty)
+        if not isinstance(value, str):
+            raise ParameterValueError(f"Invalid type for value {value} (expected {str}, got {type(value)})")
+
+        return value
 
 
 class IASOConnectionType(ParameterType):
@@ -196,13 +247,24 @@ class IASOConnectionType(ParameterType):
 
     @property
     def expected_type(self) -> typing.Type:
-        return str
+        return IASOConnectionType
+
+    @property
+    def accepts_choice(self) -> bool:
+        return False
+
+    @property
+    def accepts_multiple(self) -> bool:
+        return False
 
     def validate(self, value: typing.Optional[typing.Any], *, allow_empty: bool = True) -> typing.Optional[str]:
         if not allow_empty and value == "":
             raise ParameterValueError("Empty values are not accepted.")
 
-        return super().validate(value, allow_empty)
+        if not isinstance(value, str):
+            raise ParameterValueError(f"Invalid type for value {value} (expected {str}, got {type(value)})")
+
+        return value
 
 
 class CustomConnectionType(ParameterType):
@@ -214,9 +276,20 @@ class CustomConnectionType(ParameterType):
     def expected_type(self) -> typing.Type:
         return str
 
+    @property
+    def accepts_choice(self) -> bool:
+        return False
+
+    @property
+    def accepts_multiple(self) -> bool:
+        return False
+
     def validate(self, value: typing.Optional[typing.Any], *, allow_empty: bool = True) -> typing.Optional[str]:
         if not allow_empty and value == "":
             raise ParameterValueError("Empty values are not accepted.")
+
+        if not isinstance(value, str):
+            raise ParameterValueError(f"Invalid type for value {value} (expected {str}, got {type(value)})")
 
         return super().validate(value, allow_empty)
 
@@ -226,12 +299,11 @@ TYPES_BY_PYTHON_TYPE = {
     bool: Boolean,
     int: Integer,
     float: Float,
-    "dhis2": DHIS2ConnectionType,
-    "postgresql": PostgreSQLConnectionType,
-    "iaso": IASOConnectionType,
-    "s3": S3ConnectionType,
-    "gcs": GCSConnectionType,
-    "custom": CustomConnectionType,
+    DHIS2Connection: DHIS2ConnectionType,
+    PostgreSQLConnection: PostgreSQLConnectionType,
+    IASOConnection: IASOConnectionType,
+    S3Connection: S3ConnectionType,
+    GCSConnection: GCSConnectionType,
 }
 
 
@@ -450,3 +522,19 @@ class FunctionWithParameter:
             return [self.parameter, *self.function.get_all_parameters()]
 
         return [self.parameter]
+
+
+def is_connection_parameter(param: Parameter):
+    return any(
+        [
+            isinstance(param.type, type)
+            for type in [
+                DHIS2ConnectionType,
+                PostgreSQLConnectionType,
+                IASOConnectionType,
+                S3ConnectionType,
+                GCSConnectionType,
+                CustomConnectionType,
+            ]
+        ]
+    )

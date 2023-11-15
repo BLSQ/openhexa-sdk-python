@@ -16,9 +16,14 @@ from multiprocess import get_context  # NOQA
 
 from openhexa.sdk.utils import Environments, get_environment
 
-from .parameter import FunctionWithParameter, Parameter, ParameterValueError
+from .parameter import (
+    FunctionWithParameter,
+    Parameter,
+    ParameterValueError,
+    is_connection_parameter,
+)
 from .task import PipelineWithTask
-from .utils import get_local_workspace_config
+from .utils import get_local_workspace_config, get_connection_by_type
 
 logger = getLogger(__name__)
 
@@ -97,7 +102,10 @@ class Pipeline:
         for parameter in self.parameters:
             value = config.pop(parameter.code, None)
             validated_value = parameter.validate(value)
-            validated_config[parameter.code] = validated_value
+            if is_connection_parameter(parameter):
+                validated_config[parameter.code] = get_connection_by_type(parameter.type, validated_value)
+            else:
+                validated_config[parameter.code] = validated_value
 
         if len(config) > 0:
             raise ParameterValueError(f"The provided config contains invalid key(s): {', '.join(list(config.keys()))}")
