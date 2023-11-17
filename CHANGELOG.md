@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.31](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.30...0.1.31) (2023-11-17)
+
+
+### Features
+
+* Add support for Python 3.11 ([#87](https://github.com/BLSQ/openhexa-sdk-python/issues/87)) ([03aa815](https://github.com/BLSQ/openhexa-sdk-python/commit/03aa8157896f92afdd5eadf7eeae3ad73741b633))
+
 ## [0.1.30](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.29...0.1.30) (2023-10-17)
 
 
