@@ -4,16 +4,6 @@ from tempfile import mkdtemp
 import stringcase
 import yaml
 
-from openhexa.sdk.workspaces import workspace
-from .parameter import (
-    DHIS2ConnectionType,
-    PostgreSQLConnectionType,
-    IASOConnectionType,
-    S3ConnectionType,
-    GCSConnectionType,
-    CustomConnectionType,
-)
-
 
 class LocalWorkspaceConfigError(Exception):
     pass
@@ -158,23 +148,3 @@ def get_local_workspace_config(path: Path):
                         if key != "type":
                             env_vars[stringcase.constcase(f"{slug}_{key.lower()}")] = str(value)
     return env_vars
-
-
-def get_connection_by_type(type: any, identifier: str):
-    if isinstance(type, DHIS2ConnectionType):
-        return workspace.dhis2_connection(identifier)
-
-    if isinstance(type, PostgreSQLConnectionType):
-        return workspace.postgresql_connection(identifier)
-
-    if isinstance(type, IASOConnectionType):
-        return workspace.iaso_connection(identifier)
-
-    if isinstance(type, S3ConnectionType):
-        return workspace.s3_connection(identifier)
-
-    if isinstance(type, GCSConnectionType):
-        return workspace.gcs_connection(identifier)
-
-    if isinstance(type, CustomConnectionType):
-        return workspace.custom_connection(identifier)

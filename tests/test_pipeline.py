@@ -4,15 +4,14 @@ import pytest
 import stringcase
 import os
 
-from openhexa.sdk.pipelines.parameter import (
-    Parameter,
-    ParameterValueError,
+from openhexa.sdk.workspaces.connection import (
     DHIS2Connection,
     IASOConnection,
     PostgreSQLConnection,
     GCSConnection,
     S3Connection,
 )
+from openhexa.sdk.pipelines.parameter import Parameter, ParameterValueError
 from openhexa.sdk.pipelines.pipeline import Pipeline
 
 
