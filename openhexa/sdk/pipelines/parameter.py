@@ -8,6 +8,7 @@ from openhexa.sdk.workspaces.connection import (
     GCSConnection,
 )
 from openhexa.sdk.workspaces import workspace
+from openhexa.sdk.workspaces.workspace import ConnectionDoesNotExist
 
 
 class ParameterValueError(Exception):
@@ -46,7 +47,7 @@ class ParameterType:
 
         return value
 
-    def validate(self, value: typing.Optional[typing.Any], allow_empty: bool = True) -> typing.Optional[typing.Any]:
+    def validate(self, value: typing.Optional[typing.Any]) -> typing.Optional[typing.Any]:
         """Validate the provided value for this type."""
 
         if not isinstance(value, self.expected_type):
@@ -56,10 +57,8 @@ class ParameterType:
 
         return value
 
-    def validate_default(
-        self, value: typing.Optional[typing.Any], allow_empty: bool = True
-    ) -> typing.Optional[typing.Any]:
-        return self.validate(value, allow_empty=allow_empty)
+    def validate_default(self, value: typing.Optional[typing.Any]):
+        self.validate(value)
 
     def __str__(self) -> str:
         return str(self.expected_type)
@@ -86,11 +85,11 @@ class StringType(ParameterType):
 
         return normalized_value
 
-    def validate(self, value: typing.Optional[typing.Any], *, allow_empty: bool = True) -> typing.Optional[str]:
-        if not allow_empty and value == "":
+    def validate_default(self, value: typing.Optional[typing.Any]):
+        if value == "":
             raise ParameterValueError("Empty values are not accepted.")
 
-        return super().validate(value, allow_empty)
+        super().validate_default(value)
 
 
 class Boolean(ParameterType):
@@ -147,9 +146,7 @@ class ConnectionParameterType(ParameterType):
     def accepts_multiple(self) -> bool:
         return False
 
-    def validate_default(
-        self, value: typing.Optional[typing.Any], allow_empty: bool = True
-    ) -> typing.Optional[typing.Any]:
+    def validate_default(self, value: typing.Optional[typing.Any]):
         if value is None:
             return
 
@@ -158,12 +155,17 @@ class ConnectionParameterType(ParameterType):
         elif value == "":
             raise ParameterValueError("Empty values are not accepted.")
 
-    def validate(self, value: typing.Optional[typing.Any], *, allow_empty: bool = True) -> typing.Optional[str]:
-        if not allow_empty and value == "":
-            raise ParameterValueError("Empty values are not accepted.")
-
+    def validate(self, value: typing.Optional[typing.Any]) -> typing.Optional[str]:
         if not isinstance(value, str):
             raise ParameterValueError(f"Invalid type for value {value} (expected {str}, got {type(value)})")
+
+        try:
+            return self.to_connection(value)
+        except ConnectionDoesNotExist as e:
+            raise ParameterValueError(str(e))
+
+    def to_connection(self, value: str) -> typing.Any:
+        raise NotImplementedError
 
 
 class PostgreSQLConnectionType(ConnectionParameterType):
@@ -175,8 +177,7 @@ class PostgreSQLConnectionType(ConnectionParameterType):
     def expected_type(self) -> typing.Type:
         return PostgreSQLConnectionType
 
-    def validate(self, value: typing.Optional[typing.Any], *, allow_empty: bool = True) -> typing.Optional[str]:
-        super().validate(value, allow_empty=allow_empty)
+    def to_connection(self, value: str) -> typing.Any:
         return workspace.postgresql_connection(value)
 
 
@@ -189,8 +190,7 @@ class S3ConnectionType(ConnectionParameterType):
     def expected_type(self) -> typing.Type:
         return S3ConnectionType
 
-    def validate(self, value: typing.Optional[typing.Any], *, allow_empty: bool = True) -> typing.Optional[str]:
-        super().validate(value, allow_empty=allow_empty)
+    def to_connection(self, value: str) -> typing.Any:
         return workspace.s3_connection(value)
 
 
@@ -203,8 +203,7 @@ class GCSConnectionType(ConnectionParameterType):
     def expected_type(self) -> typing.Type:
         return GCSConnectionType
 
-    def validate(self, value: typing.Optional[typing.Any], *, allow_empty: bool = True) -> typing.Optional[str]:
-        super().validate(value, allow_empty=allow_empty)
+    def to_connection(self, value: str) -> typing.Any:
         return workspace.gcs_connection(value)
 
 
@@ -217,8 +216,7 @@ class DHIS2ConnectionType(ConnectionParameterType):
     def expected_type(self) -> typing.Type:
         return DHIS2ConnectionType
 
-    def validate(self, value: typing.Optional[typing.Any], *, allow_empty: bool = True) -> typing.Optional[str]:
-        super().validate(value, allow_empty=allow_empty)
+    def to_connection(self, value: str) -> typing.Any:
         return workspace.dhis2_connection(value)
 
 
@@ -231,8 +229,7 @@ class IASOConnectionType(ConnectionParameterType):
     def expected_type(self) -> typing.Type:
         return IASOConnectionType
 
-    def validate(self, value: typing.Optional[typing.Any], *, allow_empty: bool = True) -> typing.Optional[str]:
-        super().validate(value, allow_empty=allow_empty)
+    def to_connection(self, value: str) -> typing.Any:
         return workspace.iaso_connection(value)
 
 
@@ -245,8 +242,7 @@ class CustomConnectionType(ConnectionParameterType):
     def expected_type(self) -> typing.Type:
         return str
 
-    def validate(self, value: typing.Optional[typing.Any], *, allow_empty: bool = True) -> typing.Optional[str]:
-        super().validate(value, allow_empty=allow_empty)
+    def to_connection(self, value: str) -> typing.Any:
         return workspace.postgresql_connection(value)
 
 
@@ -381,9 +377,9 @@ class Parameter:
                 if not isinstance(default, list):
                     raise InvalidParameterError("Default values should be lists when using multiple=True")
                 for default_value in default:
-                    self.type.validate_default(default_value, allow_empty=False)
+                    self.type.validate_default(default_value)
             else:
-                self.type.validate_default(default, allow_empty=False)
+                self.type.validate_default(default)
         except ParameterValueError:
             raise InvalidParameterError(f"The default value for {self.code} is not valid.")
 
