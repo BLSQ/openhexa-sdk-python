@@ -65,7 +65,7 @@ class ParameterType:
         return str(self.expected_type)
 
 
-class String(ParameterType):
+class StringType(ParameterType):
     @property
     def spec_type(self) -> str:
         return "str"
@@ -251,7 +251,7 @@ class CustomConnectionType(ConnectionParameterType):
 
 
 TYPES_BY_PYTHON_TYPE = {
-    str: String,
+    str: StringType,
     bool: Boolean,
     int: Integer,
     float: Float,

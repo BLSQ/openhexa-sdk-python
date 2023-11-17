@@ -18,7 +18,7 @@ from openhexa.sdk.pipelines.parameter import (
     InvalidParameterError,
     Parameter,
     ParameterValueError,
-    String,
+    StringType,
     PostgreSQLConnectionType,
     GCSConnectionType,
     S3ConnectionType,
@@ -31,8 +31,8 @@ from unittest import mock
 
 
 def test_parameter_types_normalize():
-    # String
-    string_parameter_type = String()
+    # StringType
+    string_parameter_type = StringType()
     assert string_parameter_type.normalize("a string") == "a string"
     assert string_parameter_type.normalize(" a string ") == "a string"
     assert string_parameter_type.normalize("") is None
@@ -56,8 +56,8 @@ def test_parameter_types_normalize():
 
 
 def test_parameter_types_validate():
-    # String
-    string_parameter_type = String()
+    # StringType
+    string_parameter_type = StringType()
     assert string_parameter_type.validate("a string") == "a string"
     with pytest.raises(ParameterValueError):
         string_parameter_type.validate(86)
@@ -353,7 +353,7 @@ def test_parameter_decorator():
     assert function_parameters[0].multiple is False
 
     assert function_parameters[1].code == "arg2"
-    assert isinstance(function_parameters[1].type, String)
+    assert isinstance(function_parameters[1].type, StringType)
     assert function_parameters[1].name == "Arg 2"
     assert function_parameters[1].help == "Help 2"
     assert function_parameters[1].default == ["yo"]
