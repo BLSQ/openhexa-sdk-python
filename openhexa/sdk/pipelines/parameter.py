@@ -1,5 +1,14 @@
 import re
 import typing
+from openhexa.sdk.workspaces.connection import (
+    DHIS2Connection,
+    IASOConnection,
+    PostgreSQLConnection,
+    S3Connection,
+    GCSConnection,
+)
+from openhexa.sdk.workspaces import workspace
+from openhexa.sdk.workspaces.workspace import ConnectionDoesNotExist
 
 
 class ParameterValueError(Exception):
@@ -38,7 +47,7 @@ class ParameterType:
 
         return value
 
-    def validate(self, value: typing.Optional[typing.Any], allow_empty: bool = True) -> typing.Optional[typing.Any]:
+    def validate(self, value: typing.Optional[typing.Any]) -> typing.Optional[typing.Any]:
         """Validate the provided value for this type."""
 
         if not isinstance(value, self.expected_type):
@@ -48,11 +57,14 @@ class ParameterType:
 
         return value
 
+    def validate_default(self, value: typing.Optional[typing.Any]):
+        self.validate(value)
+
     def __str__(self) -> str:
         return str(self.expected_type)
 
 
-class String(ParameterType):
+class StringType(ParameterType):
     @property
     def spec_type(self) -> str:
         return "str"
@@ -73,11 +85,11 @@ class String(ParameterType):
 
         return normalized_value
 
-    def validate(self, value: typing.Optional[typing.Any], *, allow_empty: bool = True) -> typing.Optional[str]:
-        if not allow_empty and value == "":
+    def validate_default(self, value: typing.Optional[typing.Any]):
+        if value == "":
             raise ParameterValueError("Empty values are not accepted.")
 
-        return super().validate(value, allow_empty)
+        super().validate_default(value)
 
 
 class Boolean(ParameterType):
@@ -125,7 +137,126 @@ class Float(ParameterType):
         return value
 
 
-TYPES_BY_PYTHON_TYPE = {str: String, bool: Boolean, int: Integer, float: Float}
+class ConnectionParameterType(ParameterType):
+    @property
+    def accepts_choice(self) -> bool:
+        return False
+
+    @property
+    def accepts_multiple(self) -> bool:
+        return False
+
+    def validate_default(self, value: typing.Optional[typing.Any]):
+        if value is None:
+            return
+
+        if not isinstance(value, str):
+            raise InvalidParameterError("Default value for connection parameter type should be string.")
+        elif value == "":
+            raise ParameterValueError("Empty values are not accepted.")
+
+    def validate(self, value: typing.Optional[typing.Any]) -> typing.Optional[str]:
+        if not isinstance(value, str):
+            raise ParameterValueError(f"Invalid type for value {value} (expected {str}, got {type(value)})")
+
+        try:
+            return self.to_connection(value)
+        except ConnectionDoesNotExist as e:
+            raise ParameterValueError(str(e))
+
+    def to_connection(self, value: str) -> typing.Any:
+        raise NotImplementedError
+
+
+class PostgreSQLConnectionType(ConnectionParameterType):
+    @property
+    def spec_type(self) -> str:
+        return "postgresql"
+
+    @property
+    def expected_type(self) -> typing.Type:
+        return PostgreSQLConnectionType
+
+    def to_connection(self, value: str) -> typing.Any:
+        return workspace.postgresql_connection(value)
+
+
+class S3ConnectionType(ConnectionParameterType):
+    @property
+    def spec_type(self) -> str:
+        return "s3"
+
+    @property
+    def expected_type(self) -> typing.Type:
+        return S3ConnectionType
+
+    def to_connection(self, value: str) -> typing.Any:
+        return workspace.s3_connection(value)
+
+
+class GCSConnectionType(ConnectionParameterType):
+    @property
+    def spec_type(self) -> str:
+        return "gcs"
+
+    @property
+    def expected_type(self) -> typing.Type:
+        return GCSConnectionType
+
+    def to_connection(self, value: str) -> typing.Any:
+        return workspace.gcs_connection(value)
+
+
+class DHIS2ConnectionType(ConnectionParameterType):
+    @property
+    def spec_type(self) -> str:
+        return "dhis2"
+
+    @property
+    def expected_type(self) -> typing.Type:
+        return DHIS2ConnectionType
+
+    def to_connection(self, value: str) -> typing.Any:
+        return workspace.dhis2_connection(value)
+
+
+class IASOConnectionType(ConnectionParameterType):
+    @property
+    def spec_type(self) -> str:
+        return "iaso"
+
+    @property
+    def expected_type(self) -> typing.Type:
+        return IASOConnectionType
+
+    def to_connection(self, value: str) -> typing.Any:
+        return workspace.iaso_connection(value)
+
+
+class CustomConnectionType(ConnectionParameterType):
+    @property
+    def spec_type(self) -> str:
+        return "custom"
+
+    @property
+    def expected_type(self) -> typing.Type:
+        return str
+
+    def to_connection(self, value: str) -> typing.Any:
+        return workspace.postgresql_connection(value)
+
+
+TYPES_BY_PYTHON_TYPE = {
+    str: StringType,
+    bool: Boolean,
+    int: Integer,
+    float: Float,
+    DHIS2Connection: DHIS2ConnectionType,
+    PostgreSQLConnection: PostgreSQLConnectionType,
+    IASOConnection: IASOConnectionType,
+    S3Connection: S3ConnectionType,
+    GCSConnection: GCSConnectionType,
+}
 
 
 class InvalidParameterError(Exception):
@@ -246,9 +377,9 @@ class Parameter:
                 if not isinstance(default, list):
                     raise InvalidParameterError("Default values should be lists when using multiple=True")
                 for default_value in default:
-                    self.type.validate(default_value, allow_empty=False)
+                    self.type.validate_default(default_value)
             else:
-                self.type.validate(default, allow_empty=False)
+                self.type.validate_default(default)
         except ParameterValueError:
             raise InvalidParameterError(f"The default value for {self.code} is not valid.")
 
