@@ -401,7 +401,17 @@ class Parameter:
 def parameter(
     code: str,
     *,
-    type: typing.Union[typing.Type[str], typing.Type[int], typing.Type[bool], typing.Type[float]],
+    type: typing.Union[
+        typing.Type[str],
+        typing.Type[int],
+        typing.Type[bool],
+        typing.Type[float],
+        typing.Type[DHIS2Connection],
+        typing.Type[IASOConnection],
+        typing.Type[PostgreSQLConnection],
+        typing.Type[GCSConnection],
+        typing.Type[S3Connection],
+    ],
     name: typing.Optional[str] = None,
     choices: typing.Optional[typing.Sequence] = None,
     help: typing.Optional[str] = None,
@@ -417,7 +427,7 @@ def parameter(
     ----------
     code : str
         The parameter identifier (must be unique for a given pipeline)
-    type : {str, int, bool, float}
+    type : {str, int, bool, float, DHIS2Connection, IASOConnection, PostgreSQLConnection, GCSConnection, S3Connection}
         The parameter Python type
     name : str, optional
         A name for the parameter (will be used instead of the code in the web interface)
