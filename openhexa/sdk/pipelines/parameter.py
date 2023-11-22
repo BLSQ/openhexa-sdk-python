@@ -401,7 +401,17 @@ class Parameter:
 def parameter(
     code: str,
     *,
-    type: typing.Union[typing.Type[str], typing.Type[int], typing.Type[bool], typing.Type[float]],
+    type: typing.Union[
+        typing.Type[str],
+        typing.Type[int],
+        typing.Type[bool],
+        typing.Type[float],
+        typing.Type[DHIS2Connection],
+        typing.Type[IASOConnection],
+        typing.Type[PostgreSQLConnection],
+        typing.Type[GCSConnection],
+        typing.Type[S3Connection],
+    ],
     name: typing.Optional[str] = None,
     choices: typing.Optional[typing.Sequence] = None,
     help: typing.Optional[str] = None,
