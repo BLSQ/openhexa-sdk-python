@@ -18,6 +18,7 @@ from openhexa.cli.api import (
     open_config,
     save_config,
     upload_pipeline,
+    delete_pipeline,
 )
 from openhexa.cli.utils import terminate
 from openhexa.sdk.pipelines import get_local_workspace_config, import_pipeline
@@ -302,6 +303,56 @@ def pipelines_push(path: str):
         except Exception as e:
             terminate(
                 f'Error while importing pipeline: "{e}"',
+                err=True,
+                exception=e,
+                debug=is_debug(user_config),
+            )
+
+
+@pipelines.command("delete")
+@click.argument("code", type=str)
+def pipelines_delete(code: str):
+    """
+    Delete a pipeline and all his versions.
+    """
+
+    user_config = open_config()
+    try:
+        workspace = user_config["openhexa"]["current_workspace"]
+    except KeyError:
+        click.echo(
+            "No workspace activated. Use openhexa workspaces add or openhexa workspaces activate to "
+            "activate a workspace.",
+            err=True,
+        )
+        sys.exit(1)
+    else:
+        pipeline = get_pipeline(user_config, code)
+        if get_pipeline(user_config, code) is None:
+            click.echo(
+                f"Pipeline {click.style(code, bold=True)} does not exist in workspace {click.style(workspace, bold=True)}"
+            )
+            sys.exit(1)
+
+        confirmation_code = click.prompt(
+            f"Removing {code} from workspace {workspace}. Please type {code} to confirm",
+            type=str,
+        )
+
+        if confirmation_code != code:
+            click.echo(
+                "Pipeline code and confirmation are different, aborted.",
+                err=True,
+            )
+            sys.exit(1)
+
+        try:
+            if delete_pipeline(user_config, pipeline["id"]):
+                click.echo(f"Pipeline {code} deleted.")
+
+        except Exception as e:
+            terminate(
+                f'Error while deleting pipeline: "{e}"',
                 err=True,
                 exception=e,
                 debug=is_debug(user_config),

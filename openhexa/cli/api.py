@@ -179,6 +179,26 @@ def create_pipeline(config, pipeline_code: str, pipeline_name: str):
     return data["createPipeline"]["pipeline"]
 
 
+def delete_pipeline(config, id: str):
+    data = graphql(
+        config,
+        """
+    mutation deletePipeline($input: DeletePipelineInput!) {
+                    deletePipeline(input: $input) {
+                        success
+                        errors
+                    }
+                }
+    """,
+        {"input": {"id": id}},
+    )
+
+    if not data["deletePipeline"]["success"]:
+        raise Exception(data["deletePipeline"]["errors"])
+
+    return data["deletePipeline"]["success"]
+
+
 def ensure_is_pipeline_dir(pipeline_path: str):
     # Ensure that there is a pipeline.py file in the directory
     if not os.path.isdir(pipeline_path):
