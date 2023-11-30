@@ -335,7 +335,7 @@ def pipelines_delete(code: str):
             sys.exit(1)
 
         confirmation_code = click.prompt(
-            f"Removing {code} from workspace {workspace}. Please type {code} to confirm",
+            f'This will remove the pipeline "{click.style(code, bold=True)}" from the "{click.style(workspace, bold=True)} workspace. This operation cannot be undone.\nPlease enter "{click.style(code, bold=True)}" to confirm',
             type=str,
         )
 
@@ -348,7 +348,7 @@ def pipelines_delete(code: str):
 
         try:
             if delete_pipeline(user_config, pipeline["id"]):
-                click.echo(f"Pipeline {code} deleted.")
+                click.echo(f"Pipeline {click.style(code, bold=True)} deleted.")
 
         except Exception as e:
             terminate(
