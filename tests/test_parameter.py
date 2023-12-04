@@ -2,7 +2,7 @@ import pytest
 import os
 import stringcase
 
-from openhexa.sdk.workspaces.connection import (
+from openhexa.sdk import (
     DHIS2Connection,
     IASOConnection,
     PostgreSQLConnection,

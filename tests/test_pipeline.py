@@ -4,7 +4,7 @@ import pytest
 import stringcase
 import os
 
-from openhexa.sdk.workspaces.connection import (
+from openhexa.sdk import (
     DHIS2Connection,
     IASOConnection,
     PostgreSQLConnection,
