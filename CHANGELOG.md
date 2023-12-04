@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.32](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.31...0.1.32) (2023-12-04)
+
+
+### Features
+
+* **Connections:** import and re-export connection classes in openhexa.sdk ([#93](https://github.com/BLSQ/openhexa-sdk-python/issues/93)) ([2e3db63](https://github.com/BLSQ/openhexa-sdk-python/commit/2e3db639d2a2ef0b6b27e15eca0970457e6822bb))
+* delete pipeline ([#91](https://github.com/BLSQ/openhexa-sdk-python/issues/91)) ([549f73d](https://github.com/BLSQ/openhexa-sdk-python/commit/549f73d55cf3ddab6e1788ec78d484c4078ea85f))
+
 ## [0.1.31](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.30...0.1.31) (2023-11-17)
 
 
