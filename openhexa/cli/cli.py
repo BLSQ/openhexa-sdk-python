@@ -328,7 +328,7 @@ def pipelines_delete(code: str):
         sys.exit(1)
     else:
         pipeline = get_pipeline(user_config, code)
-        if get_pipeline(user_config, code) is None:
+        if pipeline is None:
             click.echo(
                 f"Pipeline {click.style(code, bold=True)} does not exist in workspace {click.style(workspace, bold=True)}"
             )
