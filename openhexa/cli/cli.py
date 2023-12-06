@@ -410,6 +410,8 @@ def pipelines_run(
     if force_pull:
         cmd.extend(["--pull", "always"])
 
+    image = env_vars["WORKSPACE_DOCKER_IMAGE"] if env_vars.get("WORKSPACE_DOCKER_IMAGE") else image
+
     cmd.extend(
         [
             image,
