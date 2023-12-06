@@ -147,4 +147,8 @@ def get_local_workspace_config(path: Path):
                     for key, value in connection_config.items():
                         if key != "type":
                             env_vars[stringcase.constcase(f"{slug}_{key.lower()}")] = str(value)
+        # Workspace docker image
+        if "image" in local_workspace_config:
+            env_vars["WORKSPACE_DOCKER_IMAGE"] = local_workspace_config["image"]
+
     return env_vars
