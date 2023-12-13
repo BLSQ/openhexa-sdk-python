@@ -250,7 +250,7 @@ class CurrentWorkspace:
             raise ValueError(f"Dataset {identifier} does not exist.")
 
         return Dataset(
-            id=data["dataset"]["id"],
+            dataset_id=data["dataset"]["id"],
             slug=data["dataset"]["slug"],
             name=data["dataset"]["name"],
             description=data["dataset"]["description"],

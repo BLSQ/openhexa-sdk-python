@@ -1,5 +1,6 @@
 import mimetypes
 import typing
+from datetime import datetime
 from os import PathLike
 from pathlib import Path
 
@@ -8,139 +9,11 @@ import requests
 from openhexa.sdk.utils import Iterator, Page, graphql, read_content
 
 
-class DatasetFile:
-    _download_url = None
-    version = None
-
-    def __init__(self, version: any, id: str, uri: str, filename: str, content_type: str, created_at: str):
-        self.version = version
-        self.id = id
-        self.uri = uri
-        self.filename = filename
-        self.content_type = content_type
-        self.created_at = created_at
-
-    def read(self):
-        response = requests.get(self.download_url, stream=True)
-        response.raise_for_status()
-        return response.content
-
-    @property
-    def download_url(self):
-        if self._download_url is None:
-            response = graphql(
-                """
-                mutation getDownloadUrl($input: PrepareVersionFileDownloadInput!) {
-                    prepareVersionFileDownload(input: $input) {
-                        downloadUrl
-                        success
-                        errors
-                    }
-                }
-            """,
-                {"input": {"fileId": self.id}},
-            )
-            if response["prepareVersionFileDownload"]["success"] is False:
-                raise Exception(response["prepareVersionFileDownload"]["errors"])
-            self._download_url = response["prepareVersionFileDownload"]["downloadUrl"]
-        return self._download_url
-
-    def __repr__(self) -> str:
-        return f"<DatasetFile id={self.id} filename={self.filename}>"
-
-
-class VersionsIterator(Iterator):
-    def __init__(self, dataset: any, per_page: int = 10):
-        super().__init__(per_page=per_page)
-
-        self.item_to_value = lambda x: DatasetVersion(
-            dataset=dataset, id=x["id"], name=x["name"], created_at=x["createdAt"]
-        )
-        self.dataset = dataset
-        self.has_next_page = True
-
-    def _next_page(self):
-        if not self.has_next_page:
-            return None
-
-        res = graphql(
-            """
-            query getDatasetVersions($datasetId: ID!, $page: Int!, $perPage: Int) {
-                dataset (id: $datasetId) {
-                    versions (page: $page, perPage: $perPage) {
-                        items {
-                            id
-                            name
-                            createdAt
-                        }
-                        totalPages
-                    }
-                }
-            }
-            """,
-            {"datasetId": self.dataset.id, "page": self.page_number + 1, "perPage": self.per_page},
-        )
-        if res["dataset"] is None:
-            raise ValueError(f"Dataset {self.dataset.id} does not exist")
-
-        if res["dataset"]["versions"]["totalPages"] == self.page_number + 1:
-            self.has_next_page = False
-
-        return Page(parent=self, items=res["dataset"]["versions"]["items"], item_to_value=self.item_to_value)
-
-
-class VersionFilesIterator(Iterator):
-    def __init__(self, version: any, per_page: int = 20):
-        super().__init__(per_page=per_page)
-        self.item_to_value = lambda x: DatasetFile(
-            version=version,
-            id=x["id"],
-            uri=x["uri"],
-            filename=x["filename"],
-            content_type=x["contentType"],
-            created_at=x["createdAt"],
-        )
-
-        self.version = version
-        self.has_next_page = True
-
-    def _next_page(self):
-        if not self.has_next_page:
-            return None
-
-        res = graphql(
-            """
-            query getDatasetFiles($versionId: ID!, $page: Int!, $perPage: Int) {
-                datasetVersion (id: $versionId) {
-                    files (page: $page, perPage: $perPage) {
-                        items {
-                            id
-                            uri
-                            filename
-                            contentType
-                            createdAt
-                        }
-                        totalPages
-                    }
-                }
-            }
-            """,
-            {"versionId": self.version.id, "page": self.page_number + 1, "perPage": self.per_page},
-        )
-        if res["datasetVersion"] is None:
-            raise ValueError(f"Dataset version {self.version.id} does not exist")
-
-        if res["datasetVersion"]["files"]["totalPages"] == self.page_number + 1:
-            self.has_next_page = False
-
-        return Page(parent=self, items=res["datasetVersion"]["files"]["items"], item_to_value=self.item_to_value)
-
-
 class DatasetVersion:
     dataset = None
 
-    def __init__(self, dataset: any, id: str, name: str, created_at: str):
-        self.id = id
+    def __init__(self, *, dataset: any, version_id: str, name: str, created_at: datetime):
+        self.id = version_id
         self.name = name
         self.dataset = dataset
         self.created_at = created_at
@@ -175,11 +48,11 @@ class DatasetVersion:
 
         return DatasetFile(
             version=self,
-            id=file["id"],
+            file_id=file["id"],
             uri=file["uri"],
             filename=file["filename"],
             content_type=file["contentType"],
-            created_at=file["createdAt"],
+            created_at=datetime.fromisoformat(file["createdAt"]),
         )
 
     def add_file(
@@ -235,14 +108,146 @@ class DatasetVersion:
 
         response = requests.put(upload_url, data=content, headers={"Content-Type": mime_type})
         response.raise_for_status()
+
         return DatasetFile(
             version=self,
-            id=data["createDatasetVersionFile"]["file"]["id"],
+            file_id=data["createDatasetVersionFile"]["file"]["id"],
             filename=data["createDatasetVersionFile"]["file"]["filename"],
             content_type=data["createDatasetVersionFile"]["file"]["contentType"],
             uri=data["createDatasetVersionFile"]["file"]["uri"],
-            created_at=data["createDatasetVersionFile"]["file"]["createdAt"],
+            created_at=datetime.fromisoformat(data["createDatasetVersionFile"]["file"]["createdAt"]),
         )
+
+
+class DatasetFile:
+    _download_url = None
+    version = None
+
+    def __init__(
+        self, *, version: DatasetVersion, file_id: str, uri: str, filename: str, content_type: str, created_at: datetime
+    ):
+        self.version = version
+        self.id = file_id
+        self.uri = uri
+        self.filename = filename
+        self.content_type = content_type
+        self.created_at = created_at
+
+    def read(self, size: int = -1) -> typing.Union[str, bytes]:
+        response = requests.get(self.download_url, stream=True)
+        response.raise_for_status()
+
+        return response.content
+
+    @property
+    def download_url(self):
+        if self._download_url is None:
+            response = graphql(
+                """
+                mutation getDownloadUrl($input: PrepareVersionFileDownloadInput!) {
+                    prepareVersionFileDownload(input: $input) {
+                        downloadUrl
+                        success
+                        errors
+                    }
+                }
+            """,
+                {"input": {"fileId": self.id}},
+            )
+            if response["prepareVersionFileDownload"]["success"] is False:
+                raise Exception(response["prepareVersionFileDownload"]["errors"])
+            self._download_url = response["prepareVersionFileDownload"]["downloadUrl"]
+        return self._download_url
+
+    def __repr__(self) -> str:
+        return f"<DatasetFile id={self.id} filename={self.filename}>"
+
+
+class VersionsIterator(Iterator):
+    def __init__(self, dataset: any, per_page: int = 10):
+        super().__init__(per_page=per_page)
+
+        self.item_to_value = lambda x: DatasetVersion(
+            dataset=dataset, version_id=x["id"], name=x["name"], created_at=datetime.fromisoformat(x["createdAt"])
+        )
+        self.dataset = dataset
+        self.has_next_page = True
+
+    def _next_page(self):
+        if not self.has_next_page:
+            return None
+
+        res = graphql(
+            """
+            query getDatasetVersions($datasetId: ID!, $page: Int!, $perPage: Int) {
+                dataset (id: $datasetId) {
+                    versions (page: $page, perPage: $perPage) {
+                        items {
+                            id
+                            name
+                            createdAt
+                        }
+                        totalPages
+                    }
+                }
+            }
+            """,
+            {"datasetId": self.dataset.id, "page": self.page_number + 1, "perPage": self.per_page},
+        )
+        if res["dataset"] is None:
+            raise ValueError(f"Dataset {self.dataset.id} does not exist")
+
+        if res["dataset"]["versions"]["totalPages"] == self.page_number + 1:
+            self.has_next_page = False
+
+        return Page(parent=self, items=res["dataset"]["versions"]["items"], item_to_value=self.item_to_value)
+
+
+class VersionFilesIterator(Iterator):
+    def __init__(self, version: any, per_page: int = 20):
+        super().__init__(per_page=per_page)
+        self.item_to_value = lambda x: DatasetFile(
+            version=version,
+            file_id=x["id"],
+            uri=x["uri"],
+            filename=x["filename"],
+            content_type=x["contentType"],
+            created_at=datetime.fromisoformat(x["createdAt"]),
+        )
+
+        self.version = version
+        self.has_next_page = True
+
+    def _next_page(self):
+        if not self.has_next_page:
+            return None
+
+        res = graphql(
+            """
+            query getDatasetFiles($versionId: ID!, $page: Int!, $perPage: Int) {
+                datasetVersion (id: $versionId) {
+                    files (page: $page, perPage: $perPage) {
+                        items {
+                            id
+                            uri
+                            filename
+                            contentType
+                            createdAt
+                        }
+                        totalPages
+                    }
+                }
+            }
+            """,
+            {"versionId": self.version.id, "page": self.page_number + 1, "perPage": self.per_page},
+        )
+        if res["datasetVersion"] is None:
+            raise ValueError(f"Dataset version {self.version.id} does not exist")
+
+        if res["datasetVersion"]["files"]["totalPages"] == self.page_number + 1:
+            self.has_next_page = False
+
+        return Page(parent=self, items=res["datasetVersion"]["files"]["items"], item_to_value=self.item_to_value)
 
 
 class Dataset:
@@ -250,12 +255,13 @@ class Dataset:
 
     def __init__(
         self,
-        id: str,
+        *,
+        dataset_id: str,
         slug: str,
         name: str,
         description: str,
     ):
-        self.id = id
+        self.id = dataset_id
         self.slug = slug
         self.name = name
         self.description = description
@@ -293,7 +299,10 @@ class Dataset:
 
         version = data["version"]
         self._latest_version = DatasetVersion(
-            dataset=self, id=version["id"], name=version["name"], created_at=version["createdAt"]
+            dataset=self,
+            version_id=version["id"],
+            name=version["name"],
+            created_at=datetime.fromisoformat(version["createdAt"]),
         )
 
         return self.latest_version
@@ -321,9 +330,9 @@ class Dataset:
             else:
                 self._latest_version = DatasetVersion(
                     dataset=self,
-                    id=data["dataset"]["latestVersion"]["id"],
+                    version_id=["dataset"]["latestVersion"]["id"],
                     name=data["dataset"]["latestVersion"]["name"],
-                    created_at=data["dataset"]["latestVersion"]["createdAt"],
+                    created_at=datetime.fromisoformat(data["dataset"]["latestVersion"]["createdAt"]),
                 )
 
         return self._latest_version
