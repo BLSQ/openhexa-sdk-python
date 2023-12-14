@@ -30,7 +30,7 @@ from openhexa.sdk.pipelines import get_local_workspace_config, import_pipeline
 @click.pass_context
 def app(ctx, debug):
     """
-    OpenHexa CLI
+    OpenHEXA CLI
     """
     # ensure that ctx.obj exists and is a dict (in case `cli()` is called
     # by means other than the `if` block below)
@@ -291,7 +291,7 @@ def pipelines_push(path: str):
                 "api", "app"
             )
             click.echo(
-                f"Done! You can view the pipeline in OpenHexa on {click.style(url, fg='bright_blue', underline=True)}"
+                f"Done! You can view the pipeline in OpenHEXA on {click.style(url, fg='bright_blue', underline=True)}"
             )
         except InvalidDefinitionError as e:
             terminate(

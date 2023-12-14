@@ -1,5 +1,5 @@
 <div align="center">
-   <img alt="OpenHexa Logo" src="https://raw.githubusercontent.com/BLSQ/openhexa-app/main/hexa/static/img/logo/logo_with_text_grey.svg" height="80">
+   <img alt="OpenHEXA Logo" src="https://raw.githubusercontent.com/BLSQ/openhexa-app/main/hexa/static/img/logo/logo_with_text_grey.svg" height="80">
 </div>
 <p align="center">
     <em>Open-source Data integration platform</em>
@@ -13,22 +13,22 @@
 OpenHEXA Python SDK
 ===================
 
-OpenHexa is an open-source data integration platform developed by [Bluesquare](https://bluesquarehub.com).
+OpenHEXA is an open-source data integration platform developed by [Bluesquare](https://bluesquarehub.com).
 
 Its goal is to facilitate data integration and analysis workflows, in particular in the context of public health 
 projects.
 
-Please refer to the [OpenHexa wiki](https://github.com/BLSQ/openhexa/wiki/Home) for more information about OpenHexa.
+Please refer to the [OpenHEXA wiki](https://github.com/BLSQ/openhexa/wiki/Home) for more information about OpenHEXA.
 
 This repository contains the code the OpenHEXA SDK, a library allows you to write code for the OpenHEXA platform. It 
 is particularly useful to write OpenHEXA data pipelines, but can also be used in the OpenHEXA notebooks environment.
 
 The OpenHEXA wiki has a section dedicated to the SDK: 
-[Using the OpenHEXA SDK](https://github.com/BLSQ/openhexa/wiki/Using-the-OpenHexa-SDK).
+[Using the OpenHEXA SDK](https://github.com/BLSQ/openhexa/wiki/Using-the-OpenHEXA-SDK).
 
-For more information about the technical aspects of OpenHexa, you might be interested in the two following wiki pages:
+For more information about the technical aspects of OpenHEXA, you might be interested in the two following wiki pages:
 
-- [Installing OpenHexa](https://github.com/BLSQ/openhexa/wiki/Installation-instructions)
+- [Installing OpenHEXA](https://github.com/BLSQ/openhexa/wiki/Installation-instructions)
 - [Technical Overview](https://github.com/BLSQ/openhexa/wiki/Technical-overview)
 
 Quickstart

@@ -111,7 +111,18 @@ class CurrentWorkspace:
         # We can remove this once we deprecate this way of running pipelines
         return os.environ["WORKSPACE_TMP_PATH"] if "WORKSPACE_TMP_PATH" in os.environ else "/home/hexa/tmp"
 
-    def dhis2_connection(self, identifier: str = None, slug: str = None) -> DHIS2Connection:
+    @staticmethod
+    def dhis2_connection(identifier: str = None, slug: str = None) -> DHIS2Connection:
+        """Get a DHIS2 connection by its identifier
+
+        Parameters
+        ----------
+        identifier : str
+            The identifier of the connection in the OpenHEXA backend
+        slug : str
+            Deprecated, same as identifier
+        """
+
         identifier = identifier or slug
         if slug is not None:
             warn("'slug' is deprecated. Use 'identifier' instead.", DeprecationWarning, stacklevel=2)
@@ -125,7 +136,18 @@ class CurrentWorkspace:
 
         return DHIS2Connection(url=url, username=username, password=password)
 
-    def postgresql_connection(self, identifier: str = None, slug: str = None) -> PostgreSQLConnection:
+    @staticmethod
+    def postgresql_connection(identifier: str = None, slug: str = None) -> PostgreSQLConnection:
+        """Get a PostgreSQL connection by its identifier
+
+        Parameters
+        ----------
+        identifier : str
+            The identifier of the connection in the OpenHEXA backend
+        slug : str
+            Deprecated, same as identifier
+        """
+
         identifier = identifier or slug
         if slug is not None:
             warn("'slug' is deprecated. Use 'identifier' instead.", DeprecationWarning, stacklevel=2)
@@ -147,7 +169,18 @@ class CurrentWorkspace:
             database_name=dbname,
         )
 
-    def s3_connection(self, identifier: str = None, slug: str = None) -> S3Connection:
+    @staticmethod
+    def s3_connection(identifier: str = None, slug: str = None) -> S3Connection:
+        """Get a AWS S3 connection by its identifier
+
+        Parameters
+        ----------
+        identifier : str
+            The identifier of the connection in the OpenHEXA backend
+        slug : str
+            Deprecated, same as identifier
+        """
+
         identifier = identifier or slug
         if slug is not None:
             warn("'slug' is deprecated. Use 'identifier' instead.", DeprecationWarning, stacklevel=2)
@@ -166,6 +199,16 @@ class CurrentWorkspace:
         )
 
     def gcs_connection(self, identifier: str = None, slug: str = None) -> GCSConnection:
+        """Get a Google Cloud Storage connection by its identifier
+
+        Parameters
+        ----------
+        identifier : str
+            The identifier of the connection in the OpenHEXA backend
+        slug : str
+            Deprecated, same as identifier
+        """
+
         identifier = identifier or slug
         if slug is not None:
             warn("'slug' is deprecated. Use 'identifier' instead.", DeprecationWarning, stacklevel=2)
@@ -181,7 +224,18 @@ class CurrentWorkspace:
             bucket_name=bucket_name,
         )
 
-    def iaso_connection(self, identifier: str = None, slug: str = None) -> IASOConnection:
+    @staticmethod
+    def iaso_connection(identifier: str = None, slug: str = None) -> IASOConnection:
+        """Get a IASO connection by it identifier
+
+        Parameters
+        ----------
+        identifier : str
+            The identifier of the connection in the OpenHEXA backend
+        slug : str
+            Deprecated, same as identifier
+        """
+
         identifier = identifier or slug
         if slug is not None:
             warn("'slug' is deprecated. Use 'identifier' instead.", DeprecationWarning, stacklevel=2)
@@ -195,7 +249,18 @@ class CurrentWorkspace:
 
         return IASOConnection(url=url, username=username, password=password)
 
-    def custom_connection(self, identifier: str = None, slug: str = None):
+    @staticmethod
+    def custom_connection(identifier: str = None, slug: str = None):
+        """Get a custom connection by its identifier
+
+        Parameters
+        ----------
+        identifier : str
+            The identifier of the connection in the OpenHEXA backend
+        slug : str
+            Deprecated, same as identifier
+        """
+
         identifier = identifier or slug
         if slug is not None:
             warn("'slug' is deprecated. Use 'identifier' instead.", DeprecationWarning, stacklevel=2)
@@ -219,6 +284,14 @@ class CurrentWorkspace:
         raise NotImplementedError("create_dataset is not implemented yet.")
 
     def get_dataset(self, identifier: str):
+        """Get a dataset by its identifier
+
+        Parameters
+        ----------
+        identifier : str
+            The identifier of the dataset in the OpenHEXA backend
+        """
+
         response = graphql(
             """
             query getDataset($datasetSlug: String!, $workspaceSlug: String!) {

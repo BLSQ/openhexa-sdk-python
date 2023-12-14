@@ -384,7 +384,7 @@ class Parameter:
             raise InvalidParameterError(f"The default value for {self.code} is not valid.")
 
     def parameter_spec(self):
-        """Generates specification for this parameter, to be provided to the OpenHexa backend."""
+        """Generates specification for this parameter, to be provided to the OpenHEXA backend."""
 
         return {
             "type": self.type.spec_type,
@@ -419,7 +419,7 @@ def parameter(
     required: bool = True,
     multiple: bool = False,
 ):
-    """Decorator that attaches a parameter to an OpenHexa pipeline.
+    """Decorator that attaches a parameter to an OpenHEXA pipeline.
 
     This decorator must be used on a function decorated by the @pipeline decorator.
 

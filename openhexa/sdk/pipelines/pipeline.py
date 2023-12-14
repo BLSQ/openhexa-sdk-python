@@ -34,7 +34,7 @@ class PipelineConfigError(Exception):
 def pipeline(
     code: str, *, name: str = None, timeout: int = None
 ) -> typing.Callable[[typing.Callable[..., typing.Any]], "Pipeline"]:
-    """Decorator that turns a Python function into an OpenHexa pipeline.
+    """Decorator that turns a Python function into an OpenHEXA pipeline.
 
     Parameters
     ----------
@@ -44,7 +44,7 @@ def pipeline(
         An optional name for the pipeline (will be used instead of the code in the web interface)
     timeout : int, optional
         An optional timeout, in seconds, after which the pipeline run will be terminated (if not provided, a default
-        timeout will be applied by the OpenHexa backend)
+        timeout will be applied by the OpenHEXA backend)
 
     Returns
     -------
