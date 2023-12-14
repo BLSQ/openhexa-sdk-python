@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.33](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.32...0.1.33) (2023-12-12)
+
+
+### Features
+
+* **Workspaces:** allow user to specify workspace docker image ([#95](https://github.com/BLSQ/openhexa-sdk-python/issues/95)) ([2455a3e](https://github.com/BLSQ/openhexa-sdk-python/commit/2455a3e2eb136e94e543e8b1c8a44fa329bf9769))
+
+
+### Bug Fixes
+
+* Do not make two requests to the server to check if the pipeline exists ([#94](https://github.com/BLSQ/openhexa-sdk-python/issues/94)) ([4501bda](https://github.com/BLSQ/openhexa-sdk-python/commit/4501bdadf2ba6627f9c718a15c7036df5783044b))
+
 ## [0.1.32](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.31...0.1.32) (2023-12-04)
 
 
