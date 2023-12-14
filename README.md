@@ -1,10 +1,38 @@
-# OpenHexa Python SDK
+<div align="center">
+   <img alt="OpenHexa Logo" src="https://raw.githubusercontent.com/BLSQ/openhexa-app/main/hexa/static/img/logo/logo_with_text_grey.svg" height="80">
+</div>
+<p align="center">
+    <em>Open-source Data integration platform</em>
+</p>
+<p align="center">
+   <a href="https://github.com/BLSQ/openhexa-app/actions/workflows/test.yml">
+      <img alt="Test Suite" src="https://github.com/BLSQ/openhexa-app/actions/workflows/test.yml/badge.svg">
+   </a>
+</p>
 
-The OpenHexa Python SDK is a tool that helps you write code for the OpenHexa platform.
+OpenHEXA Python SDK
+===================
 
-It is particularly useful to write OpenHexa data pipelines, but can also be used in the OpenHexa notebooks environment.
+OpenHexa is an open-source data integration platform developed by [Bluesquare](https://bluesquarehub.com).
 
-## Quickstart
+Its goal is to facilitate data integration and analysis workflows, in particular in the context of public health 
+projects.
+
+Please refer to the [OpenHexa wiki](https://github.com/BLSQ/openhexa/wiki/Home) for more information about OpenHexa.
+
+This repository contains the code the OpenHEXA SDK, a library allows you to write code for the OpenHEXA platform. It 
+is particularly useful to write OpenHEXA data pipelines, but can also be used in the OpenHEXA notebooks environment.
+
+The OpenHEXA wiki has a section dedicated to the SDK: 
+[Using the OpenHEXA SDK](https://github.com/BLSQ/openhexa/wiki/Using-the-OpenHexa-SDK).
+
+For more information about the technical aspects of OpenHexa, you might be interested in the two following wiki pages:
+
+- [Installing OpenHexa](https://github.com/BLSQ/openhexa/wiki/Installation-instructions)
+- [Technical Overview](https://github.com/BLSQ/openhexa/wiki/Technical-overview)
+
+Quickstart
+----------
 
 ### Writing and deploying pipelines
 
@@ -17,7 +45,7 @@ python -m venv venv
 source venv/bin/activate
 ```
 
-You can then install the OpenHexa SDK:
+You can then install the OpenHEXA SDK:
 
 ```shell
 pip install --upgrade openhexa.sdk
@@ -30,8 +58,8 @@ a new pipeline:
 openhexa pipelines init "My awesome pipeline"
 ```
 
-Great! As you can see in the console output, the OpenHexa CLI has created a new directory, which contains the basic 
-structure required for an OpenHexa pipeline. You can now `cd` in the new pipeline directory and run the pipeline:
+Great! As you can see in the console output, the OpenHEXA CLI has created a new directory, which contains the basic 
+structure required for an OpenHEXA pipeline. You can now `cd` in the new pipeline directory and run the pipeline:
 
 ```shell
 cd my_awesome_pipeline
@@ -41,11 +69,11 @@ python pipeline.py
 Congratulations! You have successfully run your first pipeline locally.
 
 If you inspect the actual pipeline code, you will see that it doesn't do a lot of things, but it is still a perfectly 
-valid OpenHexa pipeline.
+valid OpenHEXA pipeline.
 
-Let's publish to an actual OpenHexa workspace so that it can run online.
+Let's publish to an actual OpenHEXA workspace so that it can run online.
 
-Using the OpenHexa web interface, within a workspace, navigate to the Pipelines tab and click on "Create".
+Using the OpenHEXA web interface, within a workspace, navigate to the Pipelines tab and click on "Create".
 
 Copy the command displayed in the popup in your terminal:
 
@@ -62,20 +90,17 @@ openhexa pipelines push
 ```
 
 As it is the first time, the CLI will ask you to confirm the creation operation. After confirmation the console will 
-output the link to the pipeline screen in the OpenHexa interface.
+output the link to the pipeline screen in the OpenHEXA interface.
 
-You can now open the link and run the pipeline using the OpenHexa web interface.
+You can now open the link and run the pipeline using the OpenHEXA web interface.
 
-### Using the SDK in the notebooks environment
+Contributing
+------------
 
-TBC
+The following sections explain how you can set up a local development environment if you want to participate to the 
+development of the SDK.
 
-## Contributing
-
-The following sections explain how you can setup a local development environment if you want to participate to the 
-development of the SDK
-
-### Development setup
+### SDK development setup
 
 Install the SDK in editable mode:
 
@@ -85,7 +110,13 @@ source venv/bin/activate # Activate the venv
 pip install -e ".[dev]"  # Necessary to be able to run the openhexa CLI
 ```
 
-### Using a local installation of the OpenHexa backend to run pipelines
+### Using a local installation of OpenHEXA to run pipelines
+
+While it is possible to run pipelines locally using only the SDK, if you want to run OpenHEXA in a more realistic 
+setting you will need to install the OpenHEXA app and frontend components. Please refer to the 
+[installation instructions](https://github.com/BLSQ/openhexa/wiki/Installation-instructions) for more information.
+
+You can then configure the OpenHEXA CLI to connect to your local backend:
 
 ```shell
 openhexa config set_url http://localhost:8000
@@ -95,7 +126,7 @@ Notes: you can monitor the status of your pipelines using http://localhost:8000/
 
 ### Running the tests
 
-Run the tests using pytest:
+You can run the tests using pytest:
 
 ```shell
 pytest
