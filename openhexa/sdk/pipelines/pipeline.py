@@ -1,3 +1,10 @@
+"""Main pipeline module containing the building blocks for OpenHEXA pipelines.
+
+See https://github.com/BLSQ/openhexa/wiki/User-manual#using-pipelines and
+https://github.com/BLSQ/openhexa/wiki/Writing-OpenHexa-pipelines for more information about OpenHEXA pipelines.
+"""
+
+
 from __future__ import annotations
 
 import argparse

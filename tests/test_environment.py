@@ -1,3 +1,5 @@
+"""Collection of tests related to environment variables handling."""
+
 import os
 from unittest.mock import Mock, patch
 

@@ -1,3 +1,5 @@
+"""Simple module for a sample IO pipeline."""
+
 import json
 
 import pandas as pd

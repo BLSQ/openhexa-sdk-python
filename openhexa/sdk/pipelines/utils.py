@@ -1,3 +1,5 @@
+"""Utilities for running local pipelines."""
+
 from pathlib import Path
 from tempfile import mkdtemp
 

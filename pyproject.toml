@@ -60,10 +60,11 @@ ignore = ["E501"]
 [tool.ruff.lint]
 extend-select = [
   "D",   # pydocstyle
+  # "I"  # isort
 ]
 # Disable all "missing docstrings" rules for now
 # TODO: enable
-ignore = ["D100", "D101", "D102", "D103", "D104", "D105"]
+ignore = ["D101", "D102", "D103", "D104", "D105"]
 
 [tool.ruff.pycodestyle]
 max-doc-length = 120

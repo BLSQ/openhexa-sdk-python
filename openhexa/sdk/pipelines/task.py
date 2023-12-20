@@ -1,3 +1,8 @@
+"""Classes and functions related to pipeline tasks.
+
+See https://github.com/BLSQ/openhexa/wiki/Writing-OpenHexa-pipelines#pipelines-and-tasks for more information.
+"""
+
 from __future__ import annotations
 
 import datetime

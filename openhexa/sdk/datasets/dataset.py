@@ -1,3 +1,9 @@
+"""Dataset-related classes and functions.
+
+See https://github.com/BLSQ/openhexa/wiki/User-manual#datasets and
+https://github.com/BLSQ/openhexa/wiki/Using-the-OpenHexa-SDK#working-with-datasets for more information about datasets.
+"""
+
 import mimetypes
 import typing
 from os import PathLike

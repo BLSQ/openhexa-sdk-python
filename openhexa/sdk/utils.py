@@ -1,3 +1,5 @@
+"""Miscellaneous utility functions."""
+
 import abc
 import enum
 import os

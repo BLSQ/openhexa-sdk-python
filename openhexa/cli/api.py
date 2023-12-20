@@ -1,3 +1,5 @@
+"""Collection of functions that interacts with the OpenHEXA API."""
+
 import base64
 import configparser
 import enum

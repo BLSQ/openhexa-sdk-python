@@ -1,3 +1,5 @@
+"""Simple module for a sample logistic pipeline."""
+
 import json
 import typing
 from io import BytesIO

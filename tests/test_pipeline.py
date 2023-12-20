@@ -1,3 +1,5 @@
+"""Pipeline test module."""
+
 from unittest.mock import Mock, patch
 
 import pytest

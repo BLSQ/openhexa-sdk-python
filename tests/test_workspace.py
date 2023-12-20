@@ -1,3 +1,5 @@
+"""Workspace test module."""
+
 import os
 from tempfile import mkdtemp
 

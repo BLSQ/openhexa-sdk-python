@@ -1,3 +1,5 @@
+"""API interactions test module."""
+
 import configparser
 import os
 import pytest

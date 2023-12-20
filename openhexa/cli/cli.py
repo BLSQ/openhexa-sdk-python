@@ -1,3 +1,5 @@
+"""CLI module, with click."""
+
 import base64
 import json
 import sys
@@ -20,7 +22,6 @@ from openhexa.cli.api import (
     upload_pipeline,
     delete_pipeline,
 )
-from openhexa.cli.utils import terminate
 from openhexa.sdk.pipelines import get_local_workspace_config, import_pipeline
 
 
@@ -271,14 +272,14 @@ def pipelines_push(path: str):
                 f"Done! You can view the pipeline in OpenHEXA on {click.style(url, fg='bright_blue', underline=True)}"
             )
         except InvalidDefinitionError as e:
-            terminate(
+            _terminate(
                 f'Pipeline definition is invalid: "{e}"',
                 err=True,
                 exception=e,
                 debug=is_debug(user_config),
             )
         except Exception as e:
-            terminate(
+            _terminate(
                 f'Error while importing pipeline: "{e}"',
                 err=True,
                 exception=e,
@@ -325,7 +326,7 @@ def pipelines_delete(code: str):
                 click.echo(f"Pipeline {click.style(code, bold=True)} deleted.")
 
         except Exception as e:
-            terminate(
+            _terminate(
                 f'Error while deleting pipeline: "{e}"',
                 err=True,
                 exception=e,
@@ -435,3 +436,10 @@ def pipelines_list():
         else:
             version = "N/A"
         click.echo(f"* {pipeline['code']} - {pipeline['name']} ({version})")
+
+
+def _terminate(message: str, exception: Exception = None, err: bool = False, debug: bool = False):
+    click.echo(message, err=err)
+    if debug and exception:
+        raise exception
+    sys.exit(1)

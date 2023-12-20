@@ -1,3 +1,5 @@
+"""Template for newly generated pipelines."""
+
 from openhexa.sdk import current_run, pipeline
 
 

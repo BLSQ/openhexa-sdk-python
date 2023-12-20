@@ -1,3 +1,8 @@
+"""Pipeline parameters classes and functions.
+
+See https://github.com/BLSQ/openhexa/wiki/Writing-OpenHexa-pipelines#pipeline-parameters for more information.
+"""
+
 import re
 import typing
 from openhexa.sdk.workspaces.connection import (

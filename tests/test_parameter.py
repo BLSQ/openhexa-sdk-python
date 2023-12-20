@@ -1,3 +1,5 @@
+"""Parameter test module."""
+
 import pytest
 import os
 import stringcase

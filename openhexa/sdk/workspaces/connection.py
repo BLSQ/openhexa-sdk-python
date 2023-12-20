@@ -1,3 +1,5 @@
+"""Connection test module."""
+
 import dataclasses
 
 

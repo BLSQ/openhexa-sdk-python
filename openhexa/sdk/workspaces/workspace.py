@@ -1,3 +1,8 @@
+"""Workspace-related classes and functions.
+
+See https://github.com/BLSQ/openhexa/wiki/User-manual#about-workspaces for more information.
+"""
+
 import os
 from dataclasses import make_dataclass
 from warnings import warn

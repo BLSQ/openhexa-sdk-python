@@ -1,3 +1,5 @@
+"""Utilities used by containerized pipeline runners to import and download pipelines."""
+
 import base64
 import importlib
 import io
