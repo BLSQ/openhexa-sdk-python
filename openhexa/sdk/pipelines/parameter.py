@@ -29,7 +29,7 @@ class ParameterType:
         raise NotImplementedError
 
     @property
-    def expected_type(self) -> typing.Type:
+    def expected_type(self) -> type:
         """Returns the python type expected for values."""
         raise NotImplementedError
 
@@ -72,7 +72,7 @@ class StringType(ParameterType):
         return "str"
 
     @property
-    def expected_type(self) -> typing.Type:
+    def expected_type(self) -> type:
         return str
 
     @staticmethod
@@ -100,7 +100,7 @@ class Boolean(ParameterType):
         return "bool"
 
     @property
-    def expected_type(self) -> typing.Type:
+    def expected_type(self) -> type:
         return bool
 
     @property
@@ -118,7 +118,7 @@ class Integer(ParameterType):
         return "int"
 
     @property
-    def expected_type(self) -> typing.Type:
+    def expected_type(self) -> type:
         return int
 
 
@@ -128,7 +128,7 @@ class Float(ParameterType):
         return "float"
 
     @property
-    def expected_type(self) -> typing.Type:
+    def expected_type(self) -> type:
         return float
 
     @staticmethod
@@ -176,7 +176,7 @@ class PostgreSQLConnectionType(ConnectionParameterType):
         return "postgresql"
 
     @property
-    def expected_type(self) -> typing.Type:
+    def expected_type(self) -> type:
         return PostgreSQLConnectionType
 
     def to_connection(self, value: str) -> typing.Any:
@@ -189,7 +189,7 @@ class S3ConnectionType(ConnectionParameterType):
         return "s3"
 
     @property
-    def expected_type(self) -> typing.Type:
+    def expected_type(self) -> type:
         return S3ConnectionType
 
     def to_connection(self, value: str) -> typing.Any:
@@ -202,7 +202,7 @@ class GCSConnectionType(ConnectionParameterType):
         return "gcs"
 
     @property
-    def expected_type(self) -> typing.Type:
+    def expected_type(self) -> type:
         return GCSConnectionType
 
     def to_connection(self, value: str) -> typing.Any:
@@ -215,7 +215,7 @@ class DHIS2ConnectionType(ConnectionParameterType):
         return "dhis2"
 
     @property
-    def expected_type(self) -> typing.Type:
+    def expected_type(self) -> type:
         return DHIS2ConnectionType
 
     def to_connection(self, value: str) -> typing.Any:
@@ -228,7 +228,7 @@ class IASOConnectionType(ConnectionParameterType):
         return "iaso"
 
     @property
-    def expected_type(self) -> typing.Type:
+    def expected_type(self) -> type:
         return IASOConnectionType
 
     def to_connection(self, value: str) -> typing.Any:
@@ -241,7 +241,7 @@ class CustomConnectionType(ConnectionParameterType):
         return "custom"
 
     @property
-    def expected_type(self) -> typing.Type:
+    def expected_type(self) -> type:
         return str
 
     def to_connection(self, value: str) -> typing.Any:
@@ -272,7 +272,7 @@ class Parameter:
         self,
         code: str,
         *,
-        type: typing.Union[typing.Type[str], typing.Type[int], typing.Type[bool]],
+        type: typing.Union[type[str], type[int], type[bool]],
         name: typing.Optional[str] = None,
         choices: typing.Optional[typing.Sequence] = None,
         help: typing.Optional[str] = None,
@@ -402,15 +402,15 @@ def parameter(
     code: str,
     *,
     type: typing.Union[
-        typing.Type[str],
-        typing.Type[int],
-        typing.Type[bool],
-        typing.Type[float],
-        typing.Type[DHIS2Connection],
-        typing.Type[IASOConnection],
-        typing.Type[PostgreSQLConnection],
-        typing.Type[GCSConnection],
-        typing.Type[S3Connection],
+        type[str],
+        type[int],
+        type[bool],
+        type[float],
+        type[DHIS2Connection],
+        type[IASOConnection],
+        type[PostgreSQLConnection],
+        type[GCSConnection],
+        type[S3Connection],
     ],
     name: typing.Optional[str] = None,
     choices: typing.Optional[typing.Sequence] = None,

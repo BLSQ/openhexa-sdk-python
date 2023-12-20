@@ -5,8 +5,6 @@ https://github.com/BLSQ/openhexa/wiki/Writing-OpenHexa-pipelines for more inform
 """
 
 
-from __future__ import annotations
-
 import argparse
 import datetime
 import json
@@ -35,54 +33,6 @@ logger = getLogger(__name__)
 
 
 class PipelineConfigError(Exception):
-    pass
-
-
-def pipeline(
-    code: str, *, name: str = None, timeout: int = None
-) -> typing.Callable[[typing.Callable[..., typing.Any]], "Pipeline"]:
-    """Decorate a Python function as an OpenHEXA pipeline.
-
-    Parameters
-    ----------
-    code : str
-        An identifier for the pipeline (should be unique within the workspace where the pipeline is deployed)
-    name : str, optional
-        An optional name for the pipeline (will be used instead of the code in the web interface)
-    timeout : int, optional
-        An optional timeout, in seconds, after which the pipeline run will be terminated (if not provided, a default
-        timeout will be applied by the OpenHEXA backend)
-
-    Returns
-    -------
-    typing.Callable
-        A decorator that returns a Pipeline
-
-    Examples
-    --------
-    >>> @pipeline("my-pipeline")
-    ... def my_pipeline():
-    ...     a_task()
-    ...
-    ... @my_pipeline.task
-    ... def a_task() -> int:
-    ...     return 42
-    """
-    if any(c not in string.ascii_lowercase + string.digits + "_-" for c in code):
-        raise Exception("Pipeline code should contains only lower case letters, digits, '_' and '-'")
-
-    def decorator(fun):
-        if isinstance(fun, FunctionWithParameter):
-            parameters = fun.get_all_parameters()
-        else:
-            parameters = []
-
-        return Pipeline(code, name, fun, parameters, timeout)
-
-    return decorator
-
-
-class PipelineRunError(Exception):
     pass
 
 
@@ -140,7 +90,7 @@ class Pipeline:
         """
         return PipelineWithTask(function, self)
 
-    def run(self, config: typing.Dict[str, typing.Any]):
+    def run(self, config: dict[str, typing.Any]):
         """Run the pipeline using the provided config.
 
         Parameters
@@ -254,7 +204,7 @@ class Pipeline:
 
         return env == Environments.CLOUD_PIPELINE and "HEXA_SERVER_URL" in os.environ
 
-    def __call__(self, config: typing.Optional[typing.Dict[str, typing.Any]] = None):
+    def __call__(self, config: typing.Optional[dict[str, typing.Any]] = None):
         # Handle local workspace config for dev / testing, if appropriate
         if get_environment() == Environments.LOCAL_PIPELINE:
             os.environ.update(get_local_workspace_config(Path("/home/hexa/pipeline")))
@@ -278,7 +228,7 @@ class Pipeline:
                     "config file with the --config-file/-f argument."
                 )
             if args.config_file is not None:
-                with open(args.config_file, "r") as cf:
+                with open(args.config_file) as cf:
                     try:
                         config = json.load(cf)
                     except json.JSONDecodeError:
@@ -293,3 +243,51 @@ class Pipeline:
                 config = {}
 
         self.run(config)
+
+
+def pipeline(
+    code: str, *, name: str = None, timeout: int = None
+) -> typing.Callable[[typing.Callable[..., typing.Any]], Pipeline]:
+    """Decorate a Python function as an OpenHEXA pipeline.
+
+    Parameters
+    ----------
+    code : str
+        An identifier for the pipeline (should be unique within the workspace where the pipeline is deployed)
+    name : str, optional
+        An optional name for the pipeline (will be used instead of the code in the web interface)
+    timeout : int, optional
+        An optional timeout, in seconds, after which the pipeline run will be terminated (if not provided, a default
+        timeout will be applied by the OpenHEXA backend)
+
+    Returns
+    -------
+    typing.Callable
+        A decorator that returns a Pipeline
+
+    Examples
+    --------
+    >>> @pipeline("my-pipeline")
+    ... def my_pipeline():
+    ...     a_task()
+    ...
+    ... @my_pipeline.task
+    ... def a_task() -> int:
+    ...     return 42
+    """
+    if any(c not in string.ascii_lowercase + string.digits + "_-" for c in code):
+        raise Exception("Pipeline code should contains only lower case letters, digits, '_' and '-'")
+
+    def decorator(fun):
+        if isinstance(fun, FunctionWithParameter):
+            parameters = fun.get_all_parameters()
+        else:
+            parameters = []
+
+        return Pipeline(code, name, fun, parameters, timeout)
+
+    return decorator
+
+
+class PipelineRunError(Exception):
+    pass

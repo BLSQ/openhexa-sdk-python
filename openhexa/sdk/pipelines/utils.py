@@ -30,7 +30,7 @@ def get_local_workspace_config(path: Path):
             "To work with pipelines locally, you need a workspace.yaml file in the same directory as your pipeline file"
         )
 
-    with open(local_workspace_config_path.resolve(), "r") as local_workspace_config_file:
+    with open(local_workspace_config_path.resolve()) as local_workspace_config_file:
         local_workspace_config = yaml.safe_load(local_workspace_config_file)
         # Database config
         if "database" in local_workspace_config:

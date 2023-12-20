@@ -36,7 +36,7 @@ def logistic_stats(deg: str, periods: str, oul: int):
 
 
 @logistic_stats.task
-def dhis2_download(data_element_group: str, periods: str, org_unit_level: int) -> typing.Dict[str, typing.Any]:
+def dhis2_download(data_element_group: str, periods: str, org_unit_level: int) -> dict[str, typing.Any]:
     connection = workspace.dhis2_connection("dhis2-play")
     base_url = f"{connection.url}/api"
     session = requests.Session()
@@ -79,7 +79,7 @@ def worldpop_download():
 
 
 @logistic_stats.task
-def model(dhis2_data: typing.Dict[str, typing.Any], gadm_data, worldpop_data):
+def model(dhis2_data: dict[str, typing.Any], gadm_data, worldpop_data):
     # Load DHIS2 data
     dhis2_df = pd.DataFrame(dhis2_data["rows"], columns=[h["column"] for h in dhis2_data["headers"]])
     dhis2_df = dhis2_df.rename(columns={"Data": "Data element id", "Organisation unit": "Organisation unit id"})

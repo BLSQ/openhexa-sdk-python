@@ -180,16 +180,16 @@ def pipelines_init(name: str):
 
     # Load samples
     sample_directory_path = Path(__file__).parent / Path("skeleton")
-    with open(sample_directory_path / Path(".gitignore"), "r") as sample_ignore_file:
+    with open(sample_directory_path / Path(".gitignore")) as sample_ignore_file:
         sample_ignore_content = sample_ignore_file.read()
-    with open(sample_directory_path / Path("pipeline.py"), "r") as sample_pipeline_file:
+    with open(sample_directory_path / Path("pipeline.py")) as sample_pipeline_file:
         sample_pipeline_content = (
             sample_pipeline_file.read()
             .replace("skeleton-pipeline-code", stringcase.spinalcase(name.lower()))
             .replace("skeleton_pipeline_name", stringcase.snakecase(name.lower()))
             .replace("Skeleton pipeline name", name)
         )
-    with open(sample_directory_path / Path("workspace.yaml"), "r") as sample_workspace_file:
+    with open(sample_directory_path / Path("workspace.yaml")) as sample_workspace_file:
         sample_workspace_content = sample_workspace_file.read()
 
     # Create directory

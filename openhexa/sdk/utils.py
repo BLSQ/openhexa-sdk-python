@@ -22,7 +22,7 @@ def get_environment():
     return Environments[env]
 
 
-def graphql(operation: str, variables: typing.Optional[typing.Dict[str, typing.Any]] = None):
+def graphql(operation: str, variables: typing.Optional[dict[str, typing.Any]] = None):
     auth_token = os.environ[
         "HEXA_TOKEN"
     ]  # Works for notebooks with the membership token and pipelines with the run token
@@ -44,7 +44,7 @@ def graphql(operation: str, variables: typing.Optional[typing.Dict[str, typing.A
     return body["data"]
 
 
-class Iterator(object, metaclass=abc.ABCMeta):
+class Iterator(metaclass=abc.ABCMeta):
     """A generic class for iterating through API list responses."""
 
     def __init__(
@@ -120,7 +120,7 @@ class Iterator(object, metaclass=abc.ABCMeta):
         raise NotImplementedError
 
 
-class Page(object):
+class Page:
     """Single page of results in an iterator.
 
     Args:
