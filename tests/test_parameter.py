@@ -1,35 +1,34 @@
 """Parameter test module."""
 
-import pytest
 import os
+from unittest import mock
+
+import pytest
 import stringcase
 
 from openhexa.sdk import (
     DHIS2Connection,
+    GCSConnection,
     IASOConnection,
     PostgreSQLConnection,
-    GCSConnection,
     S3Connection,
 )
-
 from openhexa.sdk.pipelines.parameter import (
     Boolean,
+    DHIS2ConnectionType,
     Float,
     FunctionWithParameter,
+    GCSConnectionType,
+    IASOConnectionType,
     Integer,
     InvalidParameterError,
     Parameter,
     ParameterValueError,
-    StringType,
     PostgreSQLConnectionType,
-    GCSConnectionType,
     S3ConnectionType,
-    IASOConnectionType,
-    DHIS2ConnectionType,
+    StringType,
     parameter,
 )
-
-from unittest import mock
 
 
 def test_parameter_types_normalize():

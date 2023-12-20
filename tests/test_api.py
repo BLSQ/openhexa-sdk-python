@@ -2,18 +2,18 @@
 
 import configparser
 import os
-import pytest
 import shutil
-import yaml
 import uuid
-
-from click.testing import CliRunner
-from openhexa.cli.api import upload_pipeline
-from openhexa.cli.cli import pipelines_init, pipelines_delete
 from pathlib import Path
-
 from unittest import mock
 from zipfile import ZipFile
+
+import pytest
+import yaml
+from click.testing import CliRunner
+
+from openhexa.cli.api import upload_pipeline
+from openhexa.cli.cli import pipelines_delete, pipelines_init
 
 
 def test_upload_pipeline():

@@ -12,6 +12,7 @@ import stringcase
 from openhexa.cli.api import (
     InvalidDefinitionError,
     create_pipeline,
+    delete_pipeline,
     ensure_is_pipeline_dir,
     get_pipeline,
     get_pipelines,
@@ -20,7 +21,6 @@ from openhexa.cli.api import (
     open_config,
     save_config,
     upload_pipeline,
-    delete_pipeline,
 )
 from openhexa.sdk.pipelines import get_local_workspace_config, import_pipeline
 

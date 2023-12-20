@@ -1,16 +1,16 @@
 """Pipeline test module."""
 
+import os
 from unittest.mock import Mock, patch
 
 import pytest
 import stringcase
-import os
 
 from openhexa.sdk import (
     DHIS2Connection,
+    GCSConnection,
     IASOConnection,
     PostgreSQLConnection,
-    GCSConnection,
     S3Connection,
 )
 from openhexa.sdk.pipelines.parameter import Parameter, ParameterValueError

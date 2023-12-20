@@ -60,7 +60,7 @@ ignore = ["E501"]
 [tool.ruff.lint]
 extend-select = [
   "D",   # pydocstyle
-  # "I"  # isort
+  "I"  # isort
 ]
 # Disable all "missing docstrings" rules for now
 # TODO: enable

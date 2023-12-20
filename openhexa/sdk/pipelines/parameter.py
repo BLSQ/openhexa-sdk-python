@@ -5,14 +5,15 @@ See https://github.com/BLSQ/openhexa/wiki/Writing-OpenHexa-pipelines#pipeline-pa
 
 import re
 import typing
+
+from openhexa.sdk.workspaces import workspace
 from openhexa.sdk.workspaces.connection import (
     DHIS2Connection,
+    GCSConnection,
     IASOConnection,
     PostgreSQLConnection,
     S3Connection,
-    GCSConnection,
 )
-from openhexa.sdk.workspaces import workspace
 from openhexa.sdk.workspaces.workspace import ConnectionDoesNotExist
 
 

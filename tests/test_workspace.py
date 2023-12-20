@@ -1,14 +1,14 @@
 """Workspace test module."""
 
 import os
+import re
 from tempfile import mkdtemp
+from unittest import mock
 
 import pytest
-import re
 import stringcase
 
 from openhexa.sdk.workspaces.workspace import ConnectionDoesNotExist, workspace
-from unittest import mock
 
 
 def test_workspace_files_path(monkeypatch):
