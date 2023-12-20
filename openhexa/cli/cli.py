@@ -29,9 +29,7 @@ from openhexa.sdk.pipelines import get_local_workspace_config, import_pipeline
 @click.version_option(version("openhexa.sdk"))
 @click.pass_context
 def app(ctx, debug):
-    """
-    OpenHEXA CLI
-    """
+    """OpenHEXA CLI."""
     # ensure that ctx.obj exists and is a dict (in case `cli()` is called
     # by means other than the `if` block below)
     ctx.ensure_object(dict)
@@ -44,9 +42,7 @@ def app(ctx, debug):
 @app.group(invoke_without_command=True)
 @click.pass_context
 def workspaces(ctx):
-    """
-    Manage workspaces (add workspace, remove workspace, list workspaces, activate a workspace)
-    """
+    """Manage workspaces (add workspace, remove workspace, list workspaces, activate a workspace)."""
     if ctx.invoked_subcommand is None:
         ctx.forward(workspaces_list)
 
@@ -55,9 +51,7 @@ def workspaces(ctx):
 @click.argument("slug")
 @click.option("--token", prompt=True, hide_input=True, confirmation_prompt=False)
 def workspaces_add(slug, token):
-    """
-    Add a workspace to the configuration and activate it. The access token is required to access the workspace.
-    """
+    """Add a workspace to the configuration and activate it. The access token is required to access the workspace."""
     user_config = open_config()
     if slug in user_config["workspaces"]:
         click.echo(f"Workspace {slug} already exists. We will only update its token.")
@@ -83,10 +77,7 @@ def workspaces_add(slug, token):
 @workspaces.command(name="activate")
 @click.argument("slug")
 def workspaces_activate(slug):
-    """
-    Activate a workspace that is already in the configuration. The activated workspace will be used for the 'pipelines' commands.
-    """
-
+    """Activate a workspace that is already in the configuration. The activated workspace will be used for the 'pipelines' commands."""
     user_config = open_config()
     if slug not in user_config["workspaces"]:
         click.echo(f"Workspace {slug} does not exist on {user_config['openhexa']['url']}. Available workspaces:")
@@ -100,9 +91,7 @@ def workspaces_activate(slug):
 
 @workspaces.command(name="list")
 def workspaces_list():
-    """
-    List the workspaces in the configuration.
-    """
+    """List the workspaces in the configuration."""
     user_config = open_config()
 
     click.echo("Workspaces:")
@@ -143,10 +132,7 @@ def workspaces_rm(slug):
 @app.group(invoke_without_command=True)
 @click.pass_context
 def config(ctx):
-    """
-    Manage configuration of the CLI.
-    """
-
+    """Manage configuration of the CLI."""
     if ctx.invoked_subcommand is None:
         user_config = open_config()
         click.echo("Debug: " + ("True" if is_debug(user_config) else "False"))
@@ -162,10 +148,7 @@ def config(ctx):
 @config.command(name="set_url")
 @click.argument("url")
 def config_set_url(url):
-    """
-    Set the URL of the backend.
-
-    """
+    """Set the URL of the backend."""
     user_config = open_config()
     user_config["openhexa"].update({"url": url})
     save_config(user_config)
@@ -175,9 +158,7 @@ def config_set_url(url):
 @app.group(invoke_without_command=True)
 @click.pass_context
 def pipelines(ctx):
-    """
-    Manage pipelines (list pipelines, push a pipeline to the backend)
-    """
+    """Manage pipelines (list pipelines, push a pipeline to the backend)."""
     if ctx.invoked_subcommand is None:
         ctx.forward(pipelines_list)
 
@@ -185,10 +166,7 @@ def pipelines(ctx):
 @pipelines.command("init")
 @click.argument("name", type=str)
 def pipelines_init(name: str):
-    """
-    Initialize a new pipeline in a fresh directory.
-    """
-
+    """Initialize a new pipeline in a fresh directory."""
     new_pipeline_directory_name = stringcase.snakecase(name.lower())
     new_pipeline_path = Path.cwd() / Path(new_pipeline_directory_name)
     if new_pipeline_path.exists():
@@ -242,7 +220,6 @@ def pipelines_push(path: str):
 
     PATH is the path to the pipeline file.
     """
-
     user_config = open_config()
     try:
         workspace = user_config["openhexa"]["current_workspace"]
@@ -312,10 +289,7 @@ def pipelines_push(path: str):
 @pipelines.command("delete")
 @click.argument("code", type=str)
 def pipelines_delete(code: str):
-    """
-    Delete a pipeline and all his versions.
-    """
-
+    """Delete a pipeline and all his versions."""
     user_config = open_config()
     try:
         workspace = user_config["openhexa"]["current_workspace"]
@@ -378,9 +352,7 @@ def pipelines_run(
     config_file: click.File = None,
     force_pull=False,
 ):
-    """
-    Run a pipeline locally.
-    """
+    """Run a pipeline locally."""
     from subprocess import Popen
 
     user_config = open_config()
@@ -443,9 +415,7 @@ def pipelines_run(
 
 @pipelines.command("list")
 def pipelines_list():
-    """
-    List all the remote pipelines of the current workspace.
-    """
+    """List all the remote pipelines of the current workspace."""
     user_config = open_config()
     workspace = user_config["openhexa"]["current_workspace"]
 

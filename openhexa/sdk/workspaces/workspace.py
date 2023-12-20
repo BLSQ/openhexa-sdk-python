@@ -139,7 +139,7 @@ class CurrentWorkspace:
 
     @staticmethod
     def dhis2_connection(identifier: str = None, slug: str = None) -> DHIS2Connection:
-        """Get a DHIS2 connection by its identifier
+        """Get a DHIS2 connection by its identifier.
 
         Parameters
         ----------
@@ -163,7 +163,7 @@ class CurrentWorkspace:
 
     @staticmethod
     def postgresql_connection(identifier: str = None, slug: str = None) -> PostgreSQLConnection:
-        """Get a PostgreSQL connection by its identifier
+        """Get a PostgreSQL connection by its identifier.
 
         Parameters
         ----------
@@ -195,7 +195,7 @@ class CurrentWorkspace:
 
     @staticmethod
     def s3_connection(identifier: str = None, slug: str = None) -> S3Connection:
-        """Get an AWS S3 connection by its identifier
+        """Get an AWS S3 connection by its identifier.
 
         Parameters
         ----------
@@ -223,7 +223,7 @@ class CurrentWorkspace:
 
     @staticmethod
     def gcs_connection(identifier: str = None, slug: str = None) -> GCSConnection:
-        """Get a Google Cloud Storage connection by its identifier
+        """Get a Google Cloud Storage connection by its identifier.
 
         Parameters
         ----------
@@ -249,7 +249,7 @@ class CurrentWorkspace:
 
     @staticmethod
     def iaso_connection(identifier: str = None, slug: str = None) -> IASOConnection:
-        """Get a IASO connection by it identifier
+        """Get a IASO connection by it identifier.
 
         Parameters
         ----------
@@ -273,7 +273,7 @@ class CurrentWorkspace:
 
     @staticmethod
     def custom_connection(identifier: str = None, slug: str = None):
-        """Get a custom connection by its identifier
+        """Get a custom connection by its identifier.
 
         Parameters
         ----------
@@ -305,7 +305,7 @@ class CurrentWorkspace:
         raise NotImplementedError("create_dataset is not implemented yet.")
 
     def get_dataset(self, identifier: str) -> Dataset:
-        """Get a dataset by its identifier
+        """Get a dataset by its identifier.
 
         Parameters
         ----------

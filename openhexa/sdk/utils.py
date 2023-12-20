@@ -68,42 +68,33 @@ class Iterator(object, metaclass=abc.ABCMeta):
         """int: The total number of results fetched so far."""
 
     def _items_iter(self):
-        """Iterator for each item returned."""
         for page in self._page_iter(increment=False):
             for item in page:
                 self.num_results += 1
                 yield item
 
-    def __iter__(self):
-        """Iterator for each item returned.
-
-        Returns:
-            types.GeneratorType[Any]: A generator of items from the API.
-
-        Raises:
-            ValueError: If the iterator has already been started.
-        """
+    def __iter__(self) -> typing.Generator[typing.Any, None, None]:
         if self._started:
             raise ValueError("Iterator has already started", self)
         self._started = True
+
         return self._items_iter()
 
     def __next__(self):
         if self.__active_iterator is None:
             self.__active_iterator = iter(self)
+
         return next(self.__active_iterator)
 
-    def _page_iter(self, increment):
-        """Generator of pages of API responses.
+    def _page_iter(self, increment: bool):
+        """Generate pages of API responses.
 
-        Args:
-            increment (bool): Flag indicating if the total number of results
-                should be incremented on each page. This is useful since a page
-                iterator will want to increment by results per page while an
-                items iterator will want to increment per item.
-
-        Yields:
-            Page: each page of items from the API.
+        Parameters
+        ----------
+        increment : bool
+            Flag indicating if the total number of results should be incremented on each page.
+            This is useful since a page iterator will want to increment by results per page while an
+            items iterator will want to increment per item.
         """
         page = self._next_page()
         while page is not None:
@@ -120,7 +111,8 @@ class Iterator(object, metaclass=abc.ABCMeta):
         This does nothing and is intended to be over-ridden by subclasses
         to return the next :class:`Page`.
 
-        Raises:
+        Raises
+        ------
             NotImplementedError: Always, this method is abstract.
         """
         raise NotImplementedError
@@ -158,7 +150,6 @@ class Page(object):
         return self._remaining
 
     def __iter__(self):
-        """The :class:`Page` is an iterator of items."""
         return self
 
     def __next__(self):

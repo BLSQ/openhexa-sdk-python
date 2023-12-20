@@ -18,7 +18,6 @@ def get_local_workspace_config(path: Path):
     This is obviously brittle as it relies on setting the correct env variables keys, any changes upstream must
     be reflected here.
     """
-
     env_vars = {}
 
     # This will only work when running the pipeline using "python pipeline.py"

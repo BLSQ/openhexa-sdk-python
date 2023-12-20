@@ -16,17 +16,15 @@ class ParameterValueError(Exception):
 
 
 class ParameterType:
-    """Base class for parameter types. Those parameter types are used when using the @parameter decorator"""
+    """Base class for parameter types. Those parameter types are used when using the @parameter decorator."""
 
     def spec_type(self) -> str:
-        """Returns a type string for the specs that are sent to the backend."""
-
+        """Return a type string for the specs that are sent to the backend."""
         raise NotImplementedError
 
     @property
     def expected_type(self) -> typing.Type:
         """Returns the python type expected for values."""
-
         raise NotImplementedError
 
     @property
@@ -44,12 +42,10 @@ class ParameterType:
         This can be used to handle empty values and normalize them to None, or to perform type conversions, allowing us
         to allow multiple input types but still normalize everything to a single type.
         """
-
         return value
 
     def validate(self, value: typing.Optional[typing.Any]) -> typing.Optional[typing.Any]:
         """Validate the provided value for this type."""
-
         if not isinstance(value, self.expected_type):
             raise ParameterValueError(
                 f"Invalid type for value {value} (expected {self.expected_type}, got {type(value)})"
@@ -318,8 +314,7 @@ class Parameter:
         self.default = default
 
     def validate(self, value: typing.Any) -> typing.Any:
-        """Validates the provided value against the parameter, taking required / default options into account."""
-
+        """Validate the provided value against the parameter, taking required / default options into account."""
         if self.multiple:
             return self._validate_multiple(value)
         else:
@@ -384,8 +379,7 @@ class Parameter:
             raise InvalidParameterError(f"The default value for {self.code} is not valid.")
 
     def parameter_spec(self) -> dict[str, typing.Any]:
-        """Generates specification for this parameter, to be provided to the OpenHEXA backend."""
-
+        """Build specification for this parameter, to be provided to the OpenHEXA backend."""
         return {
             "type": self.type.spec_type,
             "required": self.required,
@@ -419,7 +413,7 @@ def parameter(
     required: bool = True,
     multiple: bool = False,
 ):
-    """Decorator that attaches a parameter to an OpenHEXA pipeline.
+    """Decorate a pipeline function by attaching a parameter to it..
 
     This decorator must be used on a function decorated by the @pipeline decorator.
 
@@ -470,7 +464,7 @@ def parameter(
 
 
 class FunctionWithParameter:
-    """This class serves as a wrapper for functions decorated with the @parameter decorator."""
+    """Wrapper class for functions decorated with the @parameter decorator."""
 
     def __init__(self, function, added_parameter: Parameter):
         self.function = function

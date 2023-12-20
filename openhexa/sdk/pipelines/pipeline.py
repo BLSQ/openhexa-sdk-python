@@ -34,7 +34,7 @@ class PipelineConfigError(Exception):
 def pipeline(
     code: str, *, name: str = None, timeout: int = None
 ) -> typing.Callable[[typing.Callable[..., typing.Any]], "Pipeline"]:
-    """Decorator that turns a Python function into an OpenHEXA pipeline.
+    """Decorate a Python function as an OpenHEXA pipeline.
 
     Parameters
     ----------
@@ -215,7 +215,7 @@ class Pipeline:
         print(f'{now} Successfully completed pipeline "{self.code}"')
 
     def parameters_spec(self) -> list[dict[str, typing.Any]]:
-        """Return the individual specifications of all the parameters of this pipeline"""
+        """Return the individual specifications of all the parameters of this pipeline."""
         return [arg.parameter_spec() for arg in self.parameters]
 
     def _get_available_tasks(self) -> list[Task]:
