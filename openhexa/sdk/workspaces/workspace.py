@@ -25,21 +25,26 @@ class ConnectionDoesNotExist(Exception):
 
 class CurrentWorkspace:
     @property
-    def _token(self):
+    def _token(self) -> str:
         try:
             return os.environ["HEXA_TOKEN"]
         except KeyError:
             raise WorkspaceConfigError("Workspace's token is not available in this environment.")
 
     @property
-    def slug(self):
+    def slug(self) -> str:
+        """The unique slug of the workspace.
+
+        Slugs are used to identify the workspace.
+        """
         try:
             return os.environ["HEXA_WORKSPACE"]
         except KeyError:
-            raise WorkspaceConfigError("Workspace's slug is not available in this environment.")
+            raise WorkspaceConfigError("The workspace slug is not available in this environment.")
 
     @property
-    def database_host(self):
+    def database_host(self) -> str:
+        """The workspace database host."""
         try:
             return os.environ["WORKSPACE_DATABASE_HOST"]
         except KeyError:
@@ -49,7 +54,8 @@ class CurrentWorkspace:
             )
 
     @property
-    def database_username(self):
+    def database_username(self) -> str:
+        """The workspace database username."""
         try:
             return os.environ["WORKSPACE_DATABASE_USERNAME"]
         except KeyError:
@@ -60,6 +66,7 @@ class CurrentWorkspace:
 
     @property
     def database_password(self):
+        """The workspace database password."""
         try:
             return os.environ.get("WORKSPACE_DATABASE_PASSWORD")
         except KeyError:
@@ -70,6 +77,7 @@ class CurrentWorkspace:
 
     @property
     def database_name(self):
+        """The workspace database name."""
         try:
             return os.environ["WORKSPACE_DATABASE_DB_NAME"]
         except KeyError:
@@ -80,6 +88,7 @@ class CurrentWorkspace:
 
     @property
     def database_port(self):
+        """The workspace database port."""
         try:
             return int(os.environ["WORKSPACE_DATABASE_PORT"])
         except KeyError:
@@ -90,6 +99,11 @@ class CurrentWorkspace:
 
     @property
     def database_url(self):
+        """The workspace database URL.
+
+        The URL follows the official PostgreSQL specification.
+        (See https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING for more information)
+        """
         return (
             f"postgresql://{self.database_username}:{self.database_password}"
             f"@{self.database_host}:{self.database_port}/{self.database_name}"
@@ -97,16 +111,28 @@ class CurrentWorkspace:
 
     @property
     def files_path(self) -> str:
-        """Return the base path to the filesystem, without trailing slash"""
+        """
+        The base path to the filesystem, without trailing slash.
 
+        Examples
+        --------
+        >>> f"{workspace.files_path}/some/path"
+        /home/hexa/workspace/some/path
+        """
         # FIXME: This is a hack to make the SDK work in the context of the `python pipeline.py` command.
         # We can remove this once we deprecate this way of running pipelines
         return os.environ["WORKSPACE_FILES_PATH"] if "WORKSPACE_FILES_PATH" in os.environ else "/home/hexa/workspace"
 
     @property
     def tmp_path(self) -> str:
-        """Return the base path to the tmp directory, without trailing slash"""
+        """
+        The base path to the tmp directory, without trailing slash.
 
+        Examples
+        --------
+        >>> f"{workspace.tmp_path}/some/path"
+        /home/hexa/tmp/some/path
+        """
         # FIXME: This is a hack to make the SDK work in the context of the `python pipeline.py` command.
         # We can remove this once we deprecate this way of running pipelines
         return os.environ["WORKSPACE_TMP_PATH"] if "WORKSPACE_TMP_PATH" in os.environ else "/home/hexa/tmp"
@@ -122,7 +148,6 @@ class CurrentWorkspace:
         slug : str
             Deprecated, same as identifier
         """
-
         identifier = identifier or slug
         if slug is not None:
             warn("'slug' is deprecated. Use 'identifier' instead.", DeprecationWarning, stacklevel=2)
@@ -147,7 +172,6 @@ class CurrentWorkspace:
         slug : str
             Deprecated, same as identifier
         """
-
         identifier = identifier or slug
         if slug is not None:
             warn("'slug' is deprecated. Use 'identifier' instead.", DeprecationWarning, stacklevel=2)
@@ -171,7 +195,7 @@ class CurrentWorkspace:
 
     @staticmethod
     def s3_connection(identifier: str = None, slug: str = None) -> S3Connection:
-        """Get a AWS S3 connection by its identifier
+        """Get an AWS S3 connection by its identifier
 
         Parameters
         ----------
@@ -180,7 +204,6 @@ class CurrentWorkspace:
         slug : str
             Deprecated, same as identifier
         """
-
         identifier = identifier or slug
         if slug is not None:
             warn("'slug' is deprecated. Use 'identifier' instead.", DeprecationWarning, stacklevel=2)
@@ -198,7 +221,8 @@ class CurrentWorkspace:
             bucket_name=bucket_name,
         )
 
-    def gcs_connection(self, identifier: str = None, slug: str = None) -> GCSConnection:
+    @staticmethod
+    def gcs_connection(identifier: str = None, slug: str = None) -> GCSConnection:
         """Get a Google Cloud Storage connection by its identifier
 
         Parameters
@@ -208,7 +232,6 @@ class CurrentWorkspace:
         slug : str
             Deprecated, same as identifier
         """
-
         identifier = identifier or slug
         if slug is not None:
             warn("'slug' is deprecated. Use 'identifier' instead.", DeprecationWarning, stacklevel=2)
@@ -235,7 +258,6 @@ class CurrentWorkspace:
         slug : str
             Deprecated, same as identifier
         """
-
         identifier = identifier or slug
         if slug is not None:
             warn("'slug' is deprecated. Use 'identifier' instead.", DeprecationWarning, stacklevel=2)
@@ -260,7 +282,6 @@ class CurrentWorkspace:
         slug : str
             Deprecated, same as identifier
         """
-
         identifier = identifier or slug
         if slug is not None:
             warn("'slug' is deprecated. Use 'identifier' instead.", DeprecationWarning, stacklevel=2)
@@ -283,7 +304,7 @@ class CurrentWorkspace:
     def create_dataset(self, identifier: str, name: str, description: str):
         raise NotImplementedError("create_dataset is not implemented yet.")
 
-    def get_dataset(self, identifier: str):
+    def get_dataset(self, identifier: str) -> Dataset:
         """Get a dataset by its identifier
 
         Parameters
@@ -291,7 +312,6 @@ class CurrentWorkspace:
         identifier : str
             The identifier of the dataset in the OpenHEXA backend
         """
-
         response = graphql(
             """
             query getDataset($datasetSlug: String!, $workspaceSlug: String!) {

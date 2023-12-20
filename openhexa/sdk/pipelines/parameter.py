@@ -383,7 +383,7 @@ class Parameter:
         except ParameterValueError:
             raise InvalidParameterError(f"The default value for {self.code} is not valid.")
 
-    def parameter_spec(self):
+    def parameter_spec(self) -> dict[str, typing.Any]:
         """Generates specification for this parameter, to be provided to the OpenHEXA backend."""
 
         return {

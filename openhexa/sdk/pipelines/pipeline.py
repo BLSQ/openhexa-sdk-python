@@ -21,7 +21,7 @@ from .parameter import (
     Parameter,
     ParameterValueError,
 )
-from .task import PipelineWithTask
+from .task import PipelineWithTask, Task
 from .utils import get_local_workspace_config
 
 logger = getLogger(__name__)
@@ -51,8 +51,16 @@ def pipeline(
     typing.Callable
         A decorator that returns a Pipeline
 
+    Examples
+    --------
+    >>> @pipeline("my-pipeline")
+    ... def my_pipeline():
+    ...     a_task()
+    ...
+    ... @my_pipeline.task
+    ... def a_task() -> int:
+    ...     return 42
     """
-
     if any(c not in string.ascii_lowercase + string.digits + "_-" for c in code):
         raise Exception("Pipeline code should contains only lower case letters, digits, '_' and '-'")
 
@@ -72,6 +80,24 @@ class PipelineRunError(Exception):
 
 
 class Pipeline:
+    """OpenHEXA pipeline class.
+
+    Pipeline are usually instantiated through the @pipeline decorator.
+
+    Attributes
+    ----------
+    code : str
+        A unique code to identify the pipeline within a workspace.
+    name : str
+        A user-friendly name for the pipeline (will be displayed in the web interface).
+    function: typing.Callable
+        The actual pipeline function.
+    parameters : typing.Sequence[Parameter]
+        A list of Parameter instance corresponding to the pipeline parameters.
+    timeout : int
+        The timeout in seconds after which the pipeline will be killed.
+    """
+
     def __init__(
         self,
         code: str,
@@ -87,12 +113,34 @@ class Pipeline:
         self.timeout = timeout
         self.tasks = []
 
-    def task(self, function):
-        """task decorator"""
+    def task(self, function) -> PipelineWithTask:
+        """Task decorator.
 
+        Examples
+        --------
+        >>> @pipeline("my-pipeline")
+        ... def my_pipeline():
+        ...     result_1 = task1()
+        ...     task2(result_1)
+        ...
+        ... @my_pipeline.task
+        ... def task_1() -> int:
+        ...     return 42
+        ...
+        ... @my_pipeline.task
+        ... def task_2(foo: int):
+        ...     pass
+        """
         return PipelineWithTask(function, self)
 
     def run(self, config: typing.Dict[str, typing.Any]):
+        """Run the pipeline using the provided config.
+
+        Parameters
+        ----------
+        config : typing.Dict[str, typing.Any]
+            The parameter values to use for this pipeline run.
+        """
         now = datetime.datetime.utcnow().replace(microsecond=0).isoformat()
         print(f'{now} Starting pipeline "{self.code}"')
 
@@ -116,7 +164,7 @@ class Pipeline:
         completed = 0
 
         while True:
-            tasks = self.get_available_tasks()
+            tasks = self._get_available_tasks()
             # filter already pooled task, even if they are not finished
             tasks = [t for t in tasks if not t.pooled]
 
@@ -166,11 +214,12 @@ class Pipeline:
 
         print(f'{now} Successfully completed pipeline "{self.code}"')
 
-    def get_available_tasks(self):
-        return [task for task in self.tasks if task.is_ready()]
-
-    def parameters_spec(self):
+    def parameters_spec(self) -> list[dict[str, typing.Any]]:
+        """Return the individual specifications of all the parameters of this pipeline"""
         return [arg.parameter_spec() for arg in self.parameters]
+
+    def _get_available_tasks(self) -> list[Task]:
+        return [task for task in self.tasks if task.is_ready()]
 
     def _update_progress(self, progress: int):
         if self._connected:
@@ -193,8 +242,9 @@ class Pipeline:
             print(f"Progress update: {progress}%")
 
     @property
-    def _connected(self):
+    def _connected(self) -> bool:
         env = get_environment()
+
         return env == Environments.CLOUD_PIPELINE and "HEXA_SERVER_URL" in os.environ
 
     def __call__(self, config: typing.Optional[typing.Dict[str, typing.Any]] = None):
