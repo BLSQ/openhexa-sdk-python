@@ -59,7 +59,7 @@ ignore = ["E501"]
 
 [tool.ruff.lint]
 extend-select = [
-  "D",   # pydocstyle
+  "D",  # pydocstyle
   "I",  # isort
   "UP"  # pyupgrade
 ]

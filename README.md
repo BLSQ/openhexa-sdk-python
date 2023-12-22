@@ -31,6 +31,14 @@ For more information about the technical aspects of OpenHEXA, you might be inter
 - [Installing OpenHEXA](https://github.com/BLSQ/openhexa/wiki/Installation-instructions)
 - [Technical Overview](https://github.com/BLSQ/openhexa/wiki/Technical-overview)
 
+Requirements
+------------
+
+The OpenHEXA SDK requires Python version 3.9 or newer, but it is not yet compatible with Python 3.12 or later versions.
+
+If you want to be able to run pipeline in a containerized environment on your machine, you will need 
+[Docker](https://www.docker.com/).
+
 Quickstart
 ----------
 
