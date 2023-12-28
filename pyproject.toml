@@ -61,11 +61,12 @@ ignore = ["E501"]
 extend-select = [
   "D",  # pydocstyle
   "I",  # isort
-  "UP"  # pyupgrade
+  "UP",  # pyupgrade
+  "ANN", # flake8-annotations
 ]
-# Disable all "missing docstrings" rules for now
+# Disable all "missing docstrings" and "missing type annotations" rules for now
 # TODO: enable
-ignore = ["D103", "D104", "D105"]
+ignore = ["D103", "D104", "D105", "ANN001", "ANN002", "ANN003", "ANN101", "ANN102", "ANN201", "ANN202", "ANN204", "ANN205", "ANN401"]
 
 [tool.ruff.pycodestyle]
 max-doc-length = 120
