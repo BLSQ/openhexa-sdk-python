@@ -12,7 +12,10 @@ import openhexa.sdk.pipelines.pipeline
 
 
 class TaskCom:
-    """Lightweight data transfer object allowing tasks to communicate."""
+    """Lightweight data transfer object allowing tasks to communicate.
+
+    TaskCom instances also allow us to build the pipeline dependency graph.
+    """
 
     def __init__(self, task):
         self.result = task.result
@@ -38,27 +41,11 @@ class Task:
         self.active = False
         self.pooled = False
 
-    def __call__(self, *task_args, **task_kwargs):
-        self.active = True  # uncalled tasks will be skipped
-        # check that all inputs are tasks
-        self.task_args = task_args
-        self.task_kwargs = task_kwargs
-        return self
+    def is_ready(self) -> bool:
+        """Determine whether the task is ready to be run.
 
-    def __repr__(self):
-        return self.name
-
-    def get_node_inputs(self):
-        inputs = []
-        for a in self.task_args:
-            if issubclass(type(a), Task):
-                inputs.append(a)
-        for k, a in self.task_kwargs.items():
-            if issubclass(type(a), Task):
-                inputs.append(a)
-        return inputs
-
-    def is_ready(self):
+        This involves checking whether tasks higher up in the dependency graph have been executed.
+        """
         if not self.active:
             return False
 
@@ -71,24 +58,32 @@ class Task:
 
         return True if self.end_time is None else False
 
-    def get_tasks_ready(self):
+    def get_ready_tasks(self) -> list[Task]:
+        """Find and return all tasks that can be launched at this point in time."""
         tasks = []
         for a in self.task_args:
             if issubclass(type(a), Task):
                 if a.is_ready():
                     tasks.append(a)
                 else:
-                    tasks += a.get_tasks_ready()
+                    tasks += a.get_ready_tasks()
         for k, a in self.task_kwargs.items():
             if issubclass(type(a), Task):
                 if a.is_ready():
                     tasks.append(a)
                 else:
-                    tasks += a.get_tasks_ready()
+                    tasks += a.get_ready_tasks()
 
         return list(set(tasks))
 
-    def run(self):
+    def run(self) -> TaskCom:
+        """Run the task.
+
+        Returns
+        -------
+        TaskCom
+            A TaskCom instance which can in turn be passed to other tasks.
+        """
         if self.end_time:
             # already executed, return previous result
             return self.result
@@ -118,10 +113,17 @@ class Task:
         # done!
         return TaskCom(self)
 
-    def stateless_run(self):
-        self.result = None
-        self.start_time, self.end_time = None, None
-        return self.run()
+    def __call__(self, *task_args, **task_kwargs):
+        """Wrap the task with args and kwargs and return it."""
+        self.active = True  # uncalled tasks will be skipped
+        # check that all inputs are tasks
+        self.task_args = task_args
+        self.task_kwargs = task_kwargs
+
+        return self
+
+    def __repr__(self):
+        return self.name
 
 
 class PipelineWithTask:
@@ -135,7 +137,8 @@ class PipelineWithTask:
         self.function = function
         self.pipeline = pipeline
 
-    def __call__(self, *task_args, **task_kwargs):
+    def __call__(self, *task_args, **task_kwargs) -> Task:
+        """Attach the new task to the decorated pipeline and return it."""
         task = Task(self.function)(*task_args, **task_kwargs)
         self.pipeline.tasks.append(task)
         return task

@@ -36,6 +36,11 @@ class PostgreSQLConnection:
 
     @property
     def url(self):
+        """Provide a URL to the PostgreSQL database.
+
+        The URL follows the official PostgreSQL specification.
+        (See https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING for more information)
+        """
         return f"postgresql://{self.username}:{self.password}" f"@{self.host}:{self.port}/{self.database_name}"
 
 

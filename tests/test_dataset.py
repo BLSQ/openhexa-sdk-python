@@ -16,6 +16,7 @@ class DatasetTest(TestCase):
     )
     @patch("openhexa.sdk.datasets.dataset.graphql")
     def test_create_dataset_version(self, mock_graphql):
+        """Ensure that dataset versions can be created."""
         d = Dataset(
             id="id",
             slug="my-dataset",

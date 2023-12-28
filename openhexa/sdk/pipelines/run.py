@@ -25,6 +25,10 @@ class CurrentRun:
         return Path("~/tmp/")
 
     def add_file_output(self, path: str):
+        """Record a run output for a file creation operation.
+
+        This output will be visible in the web interface, on the pipeline run page.
+        """
         stripped_path = path.replace(workspace.files_path, "")
         name = stripped_path.strip("/")
         if self._connected:
@@ -45,6 +49,10 @@ class CurrentRun:
             print(f"Sending output with path {stripped_path}")
 
     def add_database_output(self, table_name: str):
+        """Record a run output for a database operation.
+
+        This output will be visible in the web interface, on the pipeline run page.
+        """
         if self._connected:
             graphql(
                 """
@@ -63,18 +71,23 @@ class CurrentRun:
             print(f"Sending output with table_name {table_name}")
 
     def log_debug(self, message: str):
+        """Log a message with the DEBUG priority."""
         self._log_message("DEBUG", message)
 
     def log_info(self, message: str):
+        """Log a message with the INFO priority."""
         self._log_message("INFO", message)
 
     def log_warning(self, message: str):
+        """Log a message with the WARNING priority."""
         self._log_message("WARNING", message)
 
     def log_error(self, message: str):
+        """Log a message with the ERROR priority."""
         self._log_message("ERROR", message)
 
     def log_critical(self, message: str):
+        """Log a message with the CRITICAL priority."""
         self._log_message("CRITICAL", message)
 
     def _log_message(

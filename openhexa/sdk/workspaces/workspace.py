@@ -313,6 +313,7 @@ class CurrentWorkspace:
         return CustomConnection(**fields)
 
     def create_dataset(self, identifier: str, name: str, description: str):
+        """Create a new dataset."""
         raise NotImplementedError("create_dataset is not implemented yet.")
 
     def get_dataset(self, identifier: str) -> Dataset:
