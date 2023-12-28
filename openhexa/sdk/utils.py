@@ -8,7 +8,9 @@ import typing
 import requests
 
 
-class Environments(enum.Enum):
+class Environment(enum.Enum):
+    """Enumeration of supported runtime environments."""
+
     LOCAL_PIPELINE = "LOCAL_PIPELINE"
     CLOUD_PIPELINE = "CLOUD_PIPELINE"
     CLOUD_JUPYTER = "CLOUD_JUPYTER"
@@ -17,9 +19,11 @@ class Environments(enum.Enum):
 
 def get_environment():
     env = os.environ.get("HEXA_ENVIRONMENT", "STANDALONE").upper()
-    if env not in Environments.__members__:
+
+    try:
+        return Environment[env]
+    except KeyError:
         raise ValueError(f"Invalid environment: {env}")
-    return Environments[env]
 
 
 def graphql(operation: str, variables: typing.Optional[dict[str, typing.Any]] = None):

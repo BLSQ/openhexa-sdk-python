@@ -5,11 +5,17 @@ import os
 import typing
 from pathlib import Path
 
-from openhexa.sdk.utils import Environments, get_environment, graphql
+from openhexa.sdk.utils import Environment, get_environment, graphql
 from openhexa.sdk.workspaces import workspace
 
 
 class CurrentRun:
+    """Represents the current run of a pipeline.
+
+    CurrentRun instances allow pipeline developers to interact with the OpenHEXA backend, by sending messages and
+    adding outputs that will be available through the web interface.
+    """
+
     @property
     def _connected(self):
         return "HEXA_SERVER_URL" in os.environ
@@ -93,7 +99,7 @@ class CurrentRun:
             print(now, priority, message)
 
 
-if get_environment() == Environments.CLOUD_JUPYTER:
+if get_environment() == Environment.CLOUD_JUPYTER:
     current_run = None
 else:
     current_run = CurrentRun()

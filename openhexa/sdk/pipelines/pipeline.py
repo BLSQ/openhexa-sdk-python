@@ -19,7 +19,7 @@ from pathlib import Path
 import requests
 from multiprocess import get_context  # NOQA
 
-from openhexa.sdk.utils import Environments, get_environment
+from openhexa.sdk.utils import Environment, get_environment
 
 from .parameter import (
     FunctionWithParameter,
@@ -30,10 +30,6 @@ from .task import PipelineWithTask, Task
 from .utils import get_local_workspace_config
 
 logger = getLogger(__name__)
-
-
-class PipelineConfigError(Exception):
-    pass
 
 
 class Pipeline:
@@ -202,17 +198,17 @@ class Pipeline:
     def _connected(self) -> bool:
         env = get_environment()
 
-        return env == Environments.CLOUD_PIPELINE and "HEXA_SERVER_URL" in os.environ
+        return env == Environment.CLOUD_PIPELINE and "HEXA_SERVER_URL" in os.environ
 
     def __call__(self, config: typing.Optional[dict[str, typing.Any]] = None):
         # Handle local workspace config for dev / testing, if appropriate
-        if get_environment() == Environments.LOCAL_PIPELINE:
+        if get_environment() == Environment.LOCAL_PIPELINE:
             os.environ.update(get_local_workspace_config(Path("/home/hexa/pipeline")))
 
         # User can run their pipeline using `python pipeline.py`. It's considered as a standalone usage of the library.
         # Since we still support this use case for the moment, we'll try to load the workspace.yaml
         # at the path of the file
-        elif get_environment() == Environments.STANDALONE:
+        elif get_environment() == Environment.STANDALONE:
             os.environ.update(get_local_workspace_config(Path(sys.argv[0]).parent))
 
         if config is None:  # Called without arguments, in the pipeline file itself
@@ -289,5 +285,13 @@ def pipeline(
     return decorator
 
 
+class PipelineConfigError(Exception):
+    """Error raised whenver the config passed to the pipeline run method is invalid."""
+
+    pass
+
+
 class PipelineRunError(Exception):
+    """Generic pipeline runtime error, raised whenever user code raises an exception."""
+
     pass

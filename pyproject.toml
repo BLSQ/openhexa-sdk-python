@@ -65,7 +65,7 @@ extend-select = [
 ]
 # Disable all "missing docstrings" rules for now
 # TODO: enable
-ignore = ["D101", "D102", "D103", "D104", "D105"]
+ignore = ["D102", "D103", "D104", "D105"]
 
 [tool.ruff.pycodestyle]
 max-doc-length = 120

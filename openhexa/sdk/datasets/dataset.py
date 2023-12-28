@@ -15,6 +15,8 @@ from openhexa.sdk.utils import Iterator, Page, graphql, read_content
 
 
 class DatasetFile:
+    """Represent a single file within a dataset. Files are attached to dataset through versions."""
+
     _download_url = None
     version = None
 
@@ -56,6 +58,8 @@ class DatasetFile:
 
 
 class VersionsIterator(Iterator):
+    """Custom iterator class to iterate versions using our GraphQL API."""
+
     def __init__(self, dataset: any, per_page: int = 10):
         super().__init__(per_page=per_page)
 
@@ -96,6 +100,8 @@ class VersionsIterator(Iterator):
 
 
 class VersionFilesIterator(Iterator):
+    """Custom iterator class to iterate version files using our GraphQL API."""
+
     def __init__(self, version: any, per_page: int = 20):
         super().__init__(per_page=per_page)
         self.item_to_value = lambda x: DatasetFile(
@@ -143,6 +149,8 @@ class VersionFilesIterator(Iterator):
 
 
 class DatasetVersion:
+    """Dataset files are not directly attached to a dataset, but rather to a version."""
+
     dataset = None
 
     def __init__(self, dataset: any, id: str, name: str, created_at: str):
@@ -252,6 +260,11 @@ class DatasetVersion:
 
 
 class Dataset:
+    """Datasets are versioned, documented files.
+
+    See https://github.com/BLSQ/openhexa/wiki/Using-the-OpenHexa-SDK#working-with-datasets for more information.
+    """
+
     _latest_version = None
 
     def __init__(

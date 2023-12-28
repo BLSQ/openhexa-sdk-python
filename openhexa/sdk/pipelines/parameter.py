@@ -17,10 +17,6 @@ from openhexa.sdk.workspaces.connection import (
 from openhexa.sdk.workspaces.workspace import ConnectionDoesNotExist
 
 
-class ParameterValueError(Exception):
-    pass
-
-
 class ParameterType:
     """Base class for parameter types. Those parameter types are used when using the @parameter decorator."""
 
@@ -67,6 +63,8 @@ class ParameterType:
 
 
 class StringType(ParameterType):
+    """Type class for string parameters."""
+
     @property
     def spec_type(self) -> str:
         return "str"
@@ -95,6 +93,8 @@ class StringType(ParameterType):
 
 
 class Boolean(ParameterType):
+    """Type class for boolean parameters."""
+
     @property
     def spec_type(self) -> str:
         return "bool"
@@ -113,6 +113,8 @@ class Boolean(ParameterType):
 
 
 class Integer(ParameterType):
+    """Type class for integer parameters."""
+
     @property
     def spec_type(self) -> str:
         return "int"
@@ -123,6 +125,8 @@ class Integer(ParameterType):
 
 
 class Float(ParameterType):
+    """Type class for float parameters."""
+
     @property
     def spec_type(self) -> str:
         return "float"
@@ -140,6 +144,8 @@ class Float(ParameterType):
 
 
 class ConnectionParameterType(ParameterType):
+    """Abstract base class for connection parameter type classes."""
+
     @property
     def accepts_choice(self) -> bool:
         return False
@@ -171,6 +177,8 @@ class ConnectionParameterType(ParameterType):
 
 
 class PostgreSQLConnectionType(ConnectionParameterType):
+    """Type class for PostgreSQL connections."""
+
     @property
     def spec_type(self) -> str:
         return "postgresql"
@@ -184,6 +192,8 @@ class PostgreSQLConnectionType(ConnectionParameterType):
 
 
 class S3ConnectionType(ConnectionParameterType):
+    """Type class for S3 connections."""
+
     @property
     def spec_type(self) -> str:
         return "s3"
@@ -197,6 +207,8 @@ class S3ConnectionType(ConnectionParameterType):
 
 
 class GCSConnectionType(ConnectionParameterType):
+    """Type class for GCS connections."""
+
     @property
     def spec_type(self) -> str:
         return "gcs"
@@ -210,6 +222,8 @@ class GCSConnectionType(ConnectionParameterType):
 
 
 class DHIS2ConnectionType(ConnectionParameterType):
+    """Type class for DHIS2 connections."""
+
     @property
     def spec_type(self) -> str:
         return "dhis2"
@@ -223,6 +237,8 @@ class DHIS2ConnectionType(ConnectionParameterType):
 
 
 class IASOConnectionType(ConnectionParameterType):
+    """Type class for IASO connections."""
+
     @property
     def spec_type(self) -> str:
         return "iaso"
@@ -236,6 +252,8 @@ class IASOConnectionType(ConnectionParameterType):
 
 
 class CustomConnectionType(ConnectionParameterType):
+    """Type class for custom connections."""
+
     @property
     def spec_type(self) -> str:
         return "custom"
@@ -261,10 +279,6 @@ TYPES_BY_PYTHON_TYPE = {
 }
 
 
-class InvalidParameterError(Exception):
-    pass
-
-
 class Parameter:
     """Pipeline parameter class. Contains validation logic specs generation logic."""
 
@@ -282,7 +296,8 @@ class Parameter:
     ):
         if re.match("^[a-z_][a-z_0-9]+$", code) is None:
             raise InvalidParameterError(
-                f"Invalid parameter code provided ({code}). Parameter must start with a letter or an underscore, and can only contain lower case letters, numbers and underscores."
+                f"Invalid parameter code provided ({code}). Parameter must start with a letter or an underscore, "
+                f"and can only contain lower case letters, numbers and underscores."
             )
 
         self.code = code
@@ -292,7 +307,8 @@ class Parameter:
         except KeyError:
             valid_parameter_types = [str(k) for k in TYPES_BY_PYTHON_TYPE.keys()]
             raise InvalidParameterError(
-                f"Invalid parameter type provided ({type}). Valid parameter types are {', '.join(valid_parameter_types)}"
+                f"Invalid parameter type provided ({type}). "
+                f"Valid parameter types are {', '.join(valid_parameter_types)}"
             )
 
         if choices is not None:
@@ -484,3 +500,15 @@ class FunctionWithParameter:
             return [self.parameter, *self.function.get_all_parameters()]
 
         return [self.parameter]
+
+
+class InvalidParameterError(Exception):
+    """Raised whenever parameter options (usually passed to the @parameter decorator) are invalid."""
+
+    pass
+
+
+class ParameterValueError(Exception):
+    """Raised whenever values for a parameter provided for a pipeline run are invalid."""
+
+    pass

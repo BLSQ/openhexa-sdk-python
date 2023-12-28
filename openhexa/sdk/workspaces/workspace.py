@@ -21,20 +21,26 @@ from .connection import (
 
 
 class WorkspaceConfigError(Exception):
+    """Raised whenever the system cannot find an environment variable required to configure the current workspace."""
+
     pass
 
 
 class ConnectionDoesNotExist(Exception):
+    """Raised whenever an attempt is made to get a connection through an invalid identifier."""
+
     pass
 
 
 class CurrentWorkspace:
+    """Represents the currently configured OpenHEXA workspace, with its filesystem, database and connections."""
+
     @property
     def _token(self) -> str:
         try:
             return os.environ["HEXA_TOKEN"]
         except KeyError:
-            raise WorkspaceConfigError("Workspace's token is not available in this environment.")
+            raise WorkspaceConfigError("The workspace token is not available in this environment.")
 
     @property
     def slug(self) -> str:

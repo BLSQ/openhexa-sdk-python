@@ -8,6 +8,8 @@ from openhexa.sdk.datasets import Dataset
 
 
 class DatasetTest(TestCase):
+    """Dataset test class."""
+
     @patch.dict(
         os.environ,
         {"HEXA_WORKSPACE": "workspace-slug", "HEXA_TOKEN": "token", "HEXA_SERVER_URL": "server"},

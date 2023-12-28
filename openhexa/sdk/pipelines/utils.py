@@ -8,6 +8,8 @@ import yaml
 
 
 class LocalWorkspaceConfigError(Exception):
+    """Raised whenever the local workspace config file does not exist or is invalid."""
+
     pass
 
 

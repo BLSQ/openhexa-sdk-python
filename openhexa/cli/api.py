@@ -18,10 +18,14 @@ CONFIGFILE_PATH = os.path.expanduser("~") + "/.openhexa.ini"
 
 
 class InvalidDefinitionError(Exception):
+    """Raised whenever pipeline parameters and/or pipeline options are incompatible."""
+
     pass
 
 
-class PipelineErrorEnum(enum.Enum):
+class PipelineDefinitionErrorCode(enum.Enum):
+    """Enumeration of possible pipeline definition error codes."""
+
     PIPELINE_DOES_NOT_SUPPORT_PARAMETERS = "PIPELINE_DOES_NOT_SUPPORT_PARAMETERS"
     INVALID_TIMEOUT_VALUE = "INVALID_TIMEOUT_VALUE"
 
@@ -287,11 +291,12 @@ def upload_pipeline(config, pipeline_directory_path: str):
     )
 
     if not data["uploadPipeline"]["success"]:
-        if PipelineErrorEnum.PIPELINE_DOES_NOT_SUPPORT_PARAMETERS.value in data["uploadPipeline"]["errors"]:
+        if PipelineDefinitionErrorCode.PIPELINE_DOES_NOT_SUPPORT_PARAMETERS.value in data["uploadPipeline"]["errors"]:
             raise InvalidDefinitionError(
-                "Cannot push a new version : this pipeline has a schedule and the new version is not schedulable (all parameters must be optional or have default values)."
+                "Cannot push a new version : this pipeline has a schedule and the new version cannot be scheduled "
+                "(all parameters must be optional or have default values)."
             )
-        elif PipelineErrorEnum.INVALID_TIMEOUT_VALUE.value in data["uploadPipeline"]["errors"]:
+        elif PipelineDefinitionErrorCode.INVALID_TIMEOUT_VALUE.value in data["uploadPipeline"]["errors"]:
             raise InvalidDefinitionError(
                 "Timeout value is invalid : ensure that it's no negative and inferior to 12 hours."
             )

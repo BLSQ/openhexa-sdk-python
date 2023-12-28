@@ -12,6 +12,8 @@ import openhexa.sdk.pipelines.pipeline
 
 
 class TaskCom:
+    """Lightweight data transfer object allowing tasks to communicate."""
+
     def __init__(self, task):
         self.result = task.result
         self.start_time = task.start_time
@@ -19,6 +21,11 @@ class TaskCom:
 
 
 class Task:
+    """Tasks are pipeline data processing code units.
+
+    See https://github.com/BLSQ/openhexa/wiki/Writing-OpenHexa-pipelines#pipelines-and-tasks for more information.
+    """
+
     def __init__(self, function: typing.Callable):
         self.name = function.__name__
         self.compute = function
@@ -118,10 +125,12 @@ class Task:
 
 
 class PipelineWithTask:
+    """Pipeline with attached tasks, usually through the @task decorator."""
+
     def __init__(
         self,
         function: typing.Callable,
-        pipeline: openhexa.sdk.pipelines.pipeline.Pipeline,
+        pipeline: openhexa.sdk.pipelines.Pipeline,
     ):
         self.function = function
         self.pipeline = pipeline
