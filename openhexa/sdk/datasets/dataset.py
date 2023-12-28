@@ -29,12 +29,14 @@ class DatasetFile:
         self.created_at = created_at
 
     def read(self):
+        """Download the file content and return it."""
         response = requests.get(self.download_url, stream=True)
         response.raise_for_status()
         return response.content
 
     @property
     def download_url(self):
+        """Build and return a pre-signed URL for the file."""
         if self._download_url is None:
             response = graphql(
                 """
@@ -161,11 +163,13 @@ class DatasetVersion:
 
     @property
     def files(self):
+        """Build and return an iterator of files for this version."""
         if self.id is None:
             raise ValueError("This dataset version does not have an id.")
         return VersionFilesIterator(version=self, per_page=50)
 
-    def get_file(self, filename: str):
+    def get_file(self, filename: str) -> DatasetFile:
+        """Get a file by name."""
         data = graphql(
             """
             query getDatasetFile($versionId: ID!, $filename: String!) {
@@ -185,7 +189,7 @@ class DatasetVersion:
 
         file = data["datasetVersion"]["fileByName"]
         if file is None:
-            return None
+            raise FileExistsError(f"The file {filename} does not exist for version {self}")
 
         return DatasetFile(
             version=self,
@@ -200,7 +204,8 @@ class DatasetVersion:
         self,
         source: typing.Union[str, PathLike[str], typing.IO],
         filename: typing.Optional[str] = None,
-    ):
+    ) -> DatasetFile:
+        """Create a new dataset file and add it to the dataset version."""
         mime_type = None
         if isinstance(source, (str, PathLike)):
             path = Path(source)
@@ -279,9 +284,8 @@ class Dataset:
         self.name = name
         self.description = description
 
-    def create_version(self, name: typing.Any):
-        # Check that all files exist
-
+    def create_version(self, name: typing.Any) -> DatasetVersion:
+        """Build a dataset version, save it and return it."""
         response = graphql(
             """
             mutation createDatasetVersion($input: CreateDatasetVersionInput!) {
@@ -318,7 +322,11 @@ class Dataset:
         return self.latest_version
 
     @property
-    def latest_version(self):
+    def latest_version(self) -> typing.Optional[DatasetVersion]:
+        """Return the latest version, if any.
+
+        This property method will query the backend to try to fetch the latest version.
+        """
         if self._latest_version is None:
             data = graphql(
                 """
@@ -348,8 +356,13 @@ class Dataset:
         return self._latest_version
 
     @property
-    def versions(self):
+    def versions(self) -> VersionsIterator:
+        """Build and return an iterator for versions."""
         return VersionsIterator(dataset=self, per_page=10)
 
     def __repr__(self) -> str:
         return f"<Dataset slug={self.slug} id={self.id}>"
+
+
+class FileNotFound(Exception):
+    """Raised whenever an attempt is made to get a file that does not exist."""

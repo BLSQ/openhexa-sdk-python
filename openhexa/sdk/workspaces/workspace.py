@@ -12,6 +12,7 @@ import stringcase
 from ..datasets import Dataset
 from ..utils import graphql
 from .connection import (
+    CustomConnection,
     DHIS2Connection,
     GCSConnection,
     IASOConnection,
@@ -283,7 +284,7 @@ class CurrentWorkspace:
         return IASOConnection(url=url, username=username, password=password)
 
     @staticmethod
-    def custom_connection(identifier: str = None, slug: str = None):
+    def custom_connection(identifier: str = None, slug: str = None) -> CustomConnection:
         """Get a custom connection by its identifier.
 
         Parameters
@@ -296,21 +297,18 @@ class CurrentWorkspace:
         identifier = identifier or slug
         if slug is not None:
             warn("'slug' is deprecated. Use 'identifier' instead.", DeprecationWarning, stacklevel=2)
-        identifier = identifier.lower()
-        env_variable_prefix = stringcase.constcase(identifier)
+        env_variable_prefix = stringcase.constcase(identifier.lower())
         fields = {}
         for key, value in os.environ.items():
             if key.startswith(env_variable_prefix):
                 field_key = key[len(f"{env_variable_prefix}_") :].lower()
                 fields[field_key] = value
 
-        dataclass = make_dataclass(identifier, fields.keys())
+        dataclass = make_dataclass(
+            stringcase.pascalcase(identifier), fields.keys(), bases=(CustomConnection,), repr=False
+        )
 
-        class CustomConnection(dataclass):
-            def __repr__(self):
-                return f"CustomConnection(name='{identifier}')"
-
-        return CustomConnection(**fields)
+        return dataclass(**fields)
 
     def create_dataset(self, identifier: str, name: str, description: str):
         """Create a new dataset."""

@@ -201,6 +201,11 @@ class Pipeline:
         return env == Environment.CLOUD_PIPELINE and "HEXA_SERVER_URL" in os.environ
 
     def __call__(self, config: typing.Optional[dict[str, typing.Any]] = None):
+        """Call the pipeline by running it, after having configured the environment.
+
+        This method can be called with an explicit configuration. If no configuration is provided, it will parse the
+        command-line arguments to build it.
+        """
         # Handle local workspace config for dev / testing, if appropriate
         if get_environment() == Environment.LOCAL_PIPELINE:
             os.environ.update(get_local_workspace_config(Path("/home/hexa/pipeline")))

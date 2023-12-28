@@ -4,7 +4,14 @@ import dataclasses
 
 
 @dataclasses.dataclass
-class DHIS2Connection:
+class Connection:
+    """Abstract base class for connections."""
+
+    pass
+
+
+@dataclasses.dataclass
+class DHIS2Connection(Connection):
     """DHIS2 connection.
 
     See https://docs.dhis2.org/ for more information.
@@ -19,7 +26,7 @@ class DHIS2Connection:
 
 
 @dataclasses.dataclass
-class PostgreSQLConnection:
+class PostgreSQLConnection(Connection):
     """PostgreSQL database connection.
 
     See https://www.postgresql.org/docs/ for more information.
@@ -45,7 +52,7 @@ class PostgreSQLConnection:
 
 
 @dataclasses.dataclass
-class S3Connection:
+class S3Connection(Connection):
     """AWS S3 connection.
 
     See https://docs.aws.amazon.com/s3/ for more information.
@@ -60,7 +67,7 @@ class S3Connection:
 
 
 @dataclasses.dataclass
-class GCSConnection:
+class GCSConnection(Connection):
     """Google Cloud Storage connection.
 
     See https://cloud.google.com/storage/docs for more information.
@@ -71,6 +78,17 @@ class GCSConnection:
 
     def __repr__(self):
         return f"GCSConnection(bucket_name='{self.bucket_name}')"
+
+
+@dataclasses.dataclass
+class CustomConnection(Connection):
+    """Marker class for custom connections.
+
+    The actual class will be built dynamically through the Workspace.custom_connection() method.
+    """
+
+    def __repr__(self):
+        return f"CustomConnection(name='{self.__class__.__name__.lower()}')"
 
 
 @dataclasses.dataclass
