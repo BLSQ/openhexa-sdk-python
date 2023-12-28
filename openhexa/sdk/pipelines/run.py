@@ -3,7 +3,6 @@
 import datetime
 import os
 import typing
-from pathlib import Path
 
 from openhexa.sdk.utils import Environment, get_environment, graphql
 from openhexa.sdk.workspaces import workspace
@@ -19,10 +18,6 @@ class CurrentRun:
     @property
     def _connected(self):
         return "HEXA_SERVER_URL" in os.environ
-
-    @property
-    def tmp_path(self):
-        return Path("~/tmp/")
 
     def add_file_output(self, path: str):
         """Record a run output for a file creation operation.
