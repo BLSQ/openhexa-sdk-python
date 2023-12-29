@@ -12,6 +12,7 @@ from openhexa.sdk.workspaces.workspace import ConnectionDoesNotExist
 
 
 def test_workspace_files_path(monkeypatch, workspace):
+    """Basic checks for the Workspace.files_path() method."""
     assert workspace.files_path == "/home/hexa/workspace"
 
     monkeypatch.setenv("WORKSPACE_FILES_PATH", "/Users/John/openhexa/project-1/workspace")
@@ -19,6 +20,7 @@ def test_workspace_files_path(monkeypatch, workspace):
 
 
 def test_workspace_tmp_path(monkeypatch, workspace):
+    """Basic checks for the Workspace.tmp_path() method."""
     assert workspace.tmp_path == "/home/hexa/tmp"
 
     mock_tmp_path = mkdtemp()
