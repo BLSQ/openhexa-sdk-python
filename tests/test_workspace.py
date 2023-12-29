@@ -8,17 +8,17 @@ from unittest import mock
 import pytest
 import stringcase
 
-from openhexa.sdk.workspaces.workspace import ConnectionDoesNotExist, workspace
+from openhexa.sdk.workspaces.workspace import ConnectionDoesNotExist
 
 
-def test_workspace_files_path(monkeypatch):
+def test_workspace_files_path(monkeypatch, workspace):
     assert workspace.files_path == "/home/hexa/workspace"
 
     monkeypatch.setenv("WORKSPACE_FILES_PATH", "/Users/John/openhexa/project-1/workspace")
     assert workspace.files_path == "/Users/John/openhexa/project-1/workspace"
 
 
-def test_workspace_tmp_path(monkeypatch):
+def test_workspace_tmp_path(monkeypatch, workspace):
     assert workspace.tmp_path == "/home/hexa/tmp"
 
     mock_tmp_path = mkdtemp()
@@ -26,13 +26,15 @@ def test_workspace_tmp_path(monkeypatch):
     assert workspace.tmp_path == mock_tmp_path
 
 
-def test_workspace_dhis2_connection_not_exist():
+def test_workspace_dhis2_connection_not_exist(workspace):
+    """Does not exist test case for DHIS2 connections."""
     identifier = "polio-ff3a0d"
     with pytest.raises(ConnectionDoesNotExist):
         workspace.dhis2_connection(identifier=identifier)
 
 
-def test_workspace_dhis2_connection():
+def test_workspace_dhis2_connection(workspace):
+    """Base test case for DHIS2 connections."""
     identifier = "polio-ff3a0d"
     env_variable_prefix = stringcase.constcase(identifier)
     url = "https://test.dhis2.org/"
@@ -54,13 +56,15 @@ def test_workspace_dhis2_connection():
         assert re.search("password", str(dhis2_connection), re.IGNORECASE) is None
 
 
-def test_workspace_postgresql_connection_not_exist():
+def test_workspace_postgresql_connection_not_exist(workspace):
+    """Does not exist test case for PostgreSQL connections."""
     identifier = "polio-ff3a0d"
     with pytest.raises(ConnectionDoesNotExist):
         workspace.postgresql_connection(identifier=identifier)
 
 
-def test_workspace_postgresql_connection():
+def test_workspace_postgresql_connection(workspace):
+    """Base test case for PostgreSQL connections."""
     identifier = "polio-ff3a0d"
     env_variable_prefix = stringcase.constcase(identifier)
     host = "https://172.17.0.1"
@@ -90,13 +94,15 @@ def test_workspace_postgresql_connection():
         assert re.search("password", str(postgres_connection), re.IGNORECASE) is None
 
 
-def test_workspace_S3_connection_not_exist():
+def test_workspace_S3_connection_not_exist(workspace):
+    """Does not exist test case for S3 connections."""
     identifier = "polio-ff3a0d"
     with pytest.raises(ConnectionDoesNotExist):
         workspace.s3_connection(identifier=identifier)
 
 
-def test_workspace_s3_connection():
+def test_workspace_s3_connection(workspace):
+    """Base test case for S3 connections."""
     identifier = "polio-ff3a0d"
     env_variable_prefix = stringcase.constcase(identifier)
     secret_access_key = "HqQBxH0BAI3zF7kANUNlGg"
@@ -121,13 +127,15 @@ def test_workspace_s3_connection():
         assert re.search("access_key_id", str(s3_connection), re.IGNORECASE) is None
 
 
-def test_workspace_gcs_connection_not_exist():
+def test_workspace_gcs_connection_not_exist(workspace):
+    """Does not exist test case for GCS connections."""
     identifier = "polio-ff3a0d"
     with pytest.raises(ConnectionDoesNotExist):
         workspace.gcs_connection(identifier=identifier)
 
 
-def test_workspace_gcs_connection():
+def test_workspace_gcs_connection(workspace):
+    """Base test case for GCS connections."""
     identifier = "polio-ff3a0d"
     env_variable_prefix = stringcase.constcase(identifier)
     service_account_key = "HqQBxH0BAI3zF7kANUNlGg"
@@ -147,13 +155,15 @@ def test_workspace_gcs_connection():
         assert re.search("service_account_key", str(s3_connection), re.IGNORECASE) is None
 
 
-def test_workspace_iaso_connection_not_exist():
+def test_workspace_iaso_connection_not_exist(workspace):
+    """Does not exist test case for IASO connections."""
     identifier = "iaso-account"
     with pytest.raises(ConnectionDoesNotExist):
         workspace.iaso_connection(identifier=identifier)
 
 
-def test_workspace_iaso_connection():
+def test_workspace_iaso_connection(workspace):
+    """Base test case for IASO connections."""
     identifier = "iaso-account"
     env_variable_prefix = stringcase.constcase(identifier)
     url = "https://test.iaso.org/"
@@ -176,7 +186,15 @@ def test_workspace_iaso_connection():
         assert re.search("password", str(iaso_connection), re.IGNORECASE) is None
 
 
-def test_workspace_custom_connection():
+def test_workspace_custom_connection_not_exist(workspace):
+    """Does not exist test case for custom connections."""
+    identifier = "custom-stuff"
+    with pytest.raises(ConnectionDoesNotExist):
+        workspace.custom_connection(identifier=identifier)
+
+
+def test_workspace_custom_connection(workspace):
+    """Base test case for custom connections."""
     identifier = "my_connection"
     env_variable_prefix = stringcase.constcase(identifier)
     username = "kaggle_username"
@@ -196,7 +214,8 @@ def test_workspace_custom_connection():
         assert re.search("password", str(custom_connection), re.IGNORECASE) is None
 
 
-def test_connection_by_slug_warning():
+def test_connection_by_slug_warning(workspace):
+    """Ensure that using the slug keyword argument when getting a connection generates a deprecation warning."""
     identifier = "polio-ff3a0d"
     env_variable_prefix = stringcase.constcase(identifier)
     url = "https://test.dhis2.org/"
@@ -216,7 +235,8 @@ def test_connection_by_slug_warning():
         assert workspace.dhis2_connection(identifier=identifier).url == url
 
 
-def test_connection_various_case():
+def test_connection_various_case(workspace):
+    """Ensure that identifiers used when getting connections are case-insensitive."""
     env_variable_prefix = stringcase.constcase("polio-123")
     url = "https://test.dhis2.org/"
     username = "dhis2"

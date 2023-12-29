@@ -304,6 +304,9 @@ class CurrentWorkspace:
                 field_key = key[len(f"{env_variable_prefix}_") :].lower()
                 fields[field_key] = value
 
+        if len(fields) == 0:
+            raise ConnectionDoesNotExist(f'No custom connection for "{identifier}"')
+
         dataclass = make_dataclass(
             stringcase.pascalcase(identifier), fields.keys(), bases=(CustomConnection,), repr=False
         )
