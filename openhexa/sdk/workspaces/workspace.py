@@ -123,8 +123,7 @@ class CurrentWorkspace:
 
     @property
     def files_path(self) -> str:
-        """
-        The base path to the filesystem, without trailing slash.
+        """The base path to the filesystem, without trailing slash.
 
         Examples
         --------
@@ -137,8 +136,7 @@ class CurrentWorkspace:
 
     @property
     def tmp_path(self) -> str:
-        """
-        The base path to the tmp directory, without trailing slash.
+        """The base path to the tmp directory, without trailing slash.
 
         Examples
         --------

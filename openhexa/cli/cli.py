@@ -109,8 +109,7 @@ def workspaces_list():
 @workspaces.command(name="rm")
 @click.argument("slug")
 def workspaces_rm(slug):
-    """
-    Remove a workspace from the configuration.
+    """Remove a workspace from the configuration.
 
     SLUG is the slug of the workspace to remove from the configuration.
     """
@@ -216,8 +215,7 @@ def pipelines_init(name: str):
 @pipelines.command("push")
 @click.argument("path", default=".", type=click.Path(exists=True, file_okay=False, dir_okay=True))
 def pipelines_push(path: str):
-    """
-    Push a pipeline to the backend. If the pipeline already exists, it will be updated otherwise it will be created.
+    """Push a pipeline to the backend. If the pipeline already exists, it will be updated otherwise it will be created.
 
     PATH is the path to the pipeline file.
     """
