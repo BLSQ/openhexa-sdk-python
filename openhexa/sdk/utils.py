@@ -131,15 +131,15 @@ class Iterator(metaclass=abc.ABCMeta):
 class Page:
     """Single page of results in an iterator.
 
-    Args:
-        parent (Iterator): The iterator that owns
-            the current page.
-        items (Sequence[Any]): An iterable (that also defines __len__) of items
-            from a raw API response.
-        item_to_value (Callable[google.api_core.page_iterator.Iterator, Any]):
-            Callable to convert an item from the type in the raw API response
-            into the native object. Will be called with the iterator and a
-            single item.
+    Parameters
+    ----------
+    parent : Iterator
+        The iterator that owns the current page.
+    items: Sequence[Any]
+        An iterable (that also defines __len__) of items from a raw API response.
+    item_to_value: Callable[dict[str, Any], Any]:
+        Callable to convert an item from the type in the raw API response into the native object.
+        Will be called with the iterator and a single item.
     """
 
     def __init__(self, parent, items, item_to_value):
