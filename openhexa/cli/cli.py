@@ -343,13 +343,11 @@ def pipelines_delete(code: str):
     help="Configuration JSON file",
 )
 @click.option("--image", type=str, help="Docker image to use", default="blsq/openhexa-base-notebook:latest")
-@click.option("--force-pull", is_flag=True, help="Force pull of the docker image", default=False)
 def pipelines_run(
     path: str,
     image: str,
     config_str: str = "{}",
     config_file: click.File = None,
-    force_pull=False,
 ):
     """Run a pipeline locally."""
     from subprocess import Popen
@@ -376,10 +374,9 @@ def pipelines_run(
         "--platform",
         "linux/amd64",
         "--rm",
+        "--pull",
+        "always",
     ]
-
-    if force_pull:
-        cmd.extend(["--pull", "always"])
 
     image = env_vars["WORKSPACE_DOCKER_IMAGE"] if env_vars.get("WORKSPACE_DOCKER_IMAGE") else image
 
