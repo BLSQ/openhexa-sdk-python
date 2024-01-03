@@ -63,6 +63,7 @@ class ParameterType:
         self.validate(value)
 
     def __str__(self) -> str:
+        """Cast parameter as string."""
         return str(self.expected_type)
 
 

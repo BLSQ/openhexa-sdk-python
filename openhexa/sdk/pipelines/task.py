@@ -123,6 +123,7 @@ class Task:
         return self
 
     def __repr__(self):
+        """Representation of the task using its name."""
         return self.name
 
 

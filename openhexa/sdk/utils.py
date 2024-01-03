@@ -82,6 +82,7 @@ class Iterator(metaclass=abc.ABCMeta):
                 yield item
 
     def __iter__(self) -> typing.Generator[typing.Any, None, None]:
+        """Implement __iter()."""
         if self._started:
             raise ValueError("Iterator has already started", self)
         self._started = True
@@ -89,6 +90,7 @@ class Iterator(metaclass=abc.ABCMeta):
         return self._items_iter()
 
     def __next__(self):
+        """Implement next()."""
         if self.__active_iterator is None:
             self.__active_iterator = iter(self)
 
@@ -158,6 +160,7 @@ class Page:
         return self._remaining
 
     def __iter__(self):
+        """Implement __iter__()."""
         return self
 
     def __next__(self):

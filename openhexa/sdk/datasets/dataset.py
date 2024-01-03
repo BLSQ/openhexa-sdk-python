@@ -56,6 +56,7 @@ class DatasetFile:
         return self._download_url
 
     def __repr__(self) -> str:
+        """Safe representation of the dataset file."""
         return f"<DatasetFile id={self.id} filename={self.filename}>"
 
 
@@ -361,6 +362,7 @@ class Dataset:
         return VersionsIterator(dataset=self, per_page=10)
 
     def __repr__(self) -> str:
+        """Safe representation of the dataset."""
         return f"<Dataset slug={self.slug} id={self.id}>"
 
 

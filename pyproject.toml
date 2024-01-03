@@ -66,7 +66,7 @@ extend-select = [
 ]
 # Disable all "missing docstrings" and "missing type annotations" rules for now
 # TODO: enable
-ignore = ["D105", "ANN001", "ANN002", "ANN003", "ANN101", "ANN102", "ANN201", "ANN202", "ANN204", "ANN205", "ANN401"]
+ignore = ["ANN001", "ANN002", "ANN003", "ANN101", "ANN102", "ANN201", "ANN202", "ANN204", "ANN205", "ANN401"]
 
 [tool.ruff.pycodestyle]
 max-doc-length = 120

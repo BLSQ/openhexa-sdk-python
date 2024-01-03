@@ -22,6 +22,7 @@ class DHIS2Connection(Connection):
     password: str
 
     def __repr__(self):
+        """Safe representation of the DHIS2 connection (no credentials)."""
         return f"DHIS2Connection(url='{self.url}', username='{self.username}')"
 
 
@@ -39,7 +40,11 @@ class PostgreSQLConnection(Connection):
     database_name: str
 
     def __repr__(self):
-        return f"PostgreSQLConnection(host='{self.host}', port='{self.port}', username='{self.username}', database_name='{self.database_name}')"
+        """Safe representation of the PostgreSQL connection (no credentials)."""
+        return (
+            f"PostgreSQLConnection(host='{self.host}', port='{self.port}', username='{self.username}', "
+            f"database_name='{self.database_name}')"
+        )
 
     @property
     def url(self):
@@ -63,6 +68,7 @@ class S3Connection(Connection):
     bucket_name: str
 
     def __repr__(self):
+        """Safe representation of the S3 connection (no credentials)."""
         return f"S3Connection(bucket_name='{self.bucket_name}')"
 
 
@@ -77,6 +83,7 @@ class GCSConnection(Connection):
     bucket_name: str
 
     def __repr__(self):
+        """Safe representation of the GCS connection (no credentials)."""
         return f"GCSConnection(bucket_name='{self.bucket_name}')"
 
 
@@ -88,6 +95,7 @@ class CustomConnection(Connection):
     """
 
     def __repr__(self):
+        """Safe representation of the custom connection (no credentials)."""
         return f"CustomConnection(name='{self.__class__.__name__.lower()}')"
 
 
@@ -103,4 +111,5 @@ class IASOConnection:
     password: str
 
     def __repr__(self):
+        """Safe representation of the IASO connection (no credentials)."""
         return f"IASOConnection(url='{self.url}', username='{self.username}')"
