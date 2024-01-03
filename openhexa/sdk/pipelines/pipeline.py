@@ -1,7 +1,7 @@
 """Main pipeline module containing the building blocks for OpenHEXA pipelines.
 
 See https://github.com/BLSQ/openhexa/wiki/User-manual#using-pipelines and
-https://github.com/BLSQ/openhexa/wiki/Writing-OpenHexa-pipelines for more information about OpenHEXA pipelines.
+https://github.com/BLSQ/openhexa/wiki/Writing-OpenHEXA-pipelines for more information about OpenHEXA pipelines.
 """
 
 

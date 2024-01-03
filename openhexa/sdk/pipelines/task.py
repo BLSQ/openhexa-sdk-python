@@ -1,6 +1,6 @@
 """Classes and functions related to pipeline tasks.
 
-See https://github.com/BLSQ/openhexa/wiki/Writing-OpenHexa-pipelines#pipelines-and-tasks for more information.
+See https://github.com/BLSQ/openhexa/wiki/Writing-OpenHEXA-pipelines#pipelines-and-tasks for more information.
 """
 
 from __future__ import annotations
@@ -26,7 +26,7 @@ class TaskCom:
 class Task:
     """Tasks are pipeline data processing code units.
 
-    See https://github.com/BLSQ/openhexa/wiki/Writing-OpenHexa-pipelines#pipelines-and-tasks for more information.
+    See https://github.com/BLSQ/openhexa/wiki/Writing-OpenHEXA-pipelines#pipelines-and-tasks for more information.
     """
 
     def __init__(self, function: typing.Callable):
