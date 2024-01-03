@@ -15,9 +15,9 @@ from openhexa.cli.api import (
     delete_pipeline,
     ensure_is_pipeline_dir,
     get_pipeline,
-    get_pipelines,
     get_workspace,
     is_debug,
+    list_pipelines,
     open_config,
     save_config,
     upload_pipeline,
@@ -242,7 +242,7 @@ def pipelines_push(path: str):
             raise e
         sys.exit(1)
     else:
-        workspace_pipelines = get_pipelines(user_config)
+        workspace_pipelines = list_pipelines(user_config)
         if is_debug(user_config):
             click.echo(workspace_pipelines)
 
@@ -424,18 +424,18 @@ def pipelines_list():
         click.echo("No workspace activated", err=True)
         sys.exit(1)
 
-    workspace_pipelines = get_pipelines(user_config)
+    workspace_pipelines = list_pipelines(user_config)
     if len(workspace_pipelines) == 0:
         click.echo(f"No pipelines in workspace {workspace}")
         return
     click.echo("Pipelines:")
     for pipeline in workspace_pipelines:
-        version = pipeline["currentVersion"].get("number")
-        if version:
-            version = f"v{version}"
+        current_version = pipeline["currentVersion"].get("number")
+        if current_version is not None:
+            current_version = f"v{current_version}"
         else:
-            version = "N/A"
-        click.echo(f"* {pipeline['code']} - {pipeline['name']} ({version})")
+            current_version = "N/A"
+        click.echo(f"* {pipeline['code']} - {pipeline['name']} ({current_version})")
 
 
 def _terminate(message: str, exception: Exception = None, err: bool = False, debug: bool = False):

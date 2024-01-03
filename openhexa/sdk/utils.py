@@ -18,6 +18,7 @@ class Environment(enum.Enum):
 
 
 def get_environment():
+    """Get the environment from the HEXA_ENVIRONMENT (see Environment enum)."""
     env = os.environ.get("HEXA_ENVIRONMENT", "STANDALONE").upper()
 
     try:
@@ -26,7 +27,8 @@ def get_environment():
         raise ValueError(f"Invalid environment: {env}")
 
 
-def graphql(operation: str, variables: typing.Optional[dict[str, typing.Any]] = None):
+def graphql(operation: str, variables: typing.Optional[dict[str, typing.Any]] = None) -> dict[str, typing.Any]:
+    """Performa GraphQL query."""
     auth_token = os.environ[
         "HEXA_TOKEN"
     ]  # Works for notebooks with the membership token and pipelines with the run token
@@ -168,7 +170,8 @@ class Page:
         return result
 
 
-def read_content(source: typing.Union[str, os.PathLike[str], typing.IO], encoding: str = "utf-8") -> str:
+def read_content(source: typing.Union[str, os.PathLike[str], typing.IO], encoding: str = "utf-8") -> bytes:
+    """Read file content and return it as bytes."""
     # If source is a string or PathLike object
     if isinstance(source, (str, os.PathLike)):
         with open(os.fspath(source), "rb") as f:

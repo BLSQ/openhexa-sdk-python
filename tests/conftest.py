@@ -8,6 +8,7 @@ import openhexa.sdk
 
 @pytest.fixture(scope="function")
 def workspace():
+    """Build workspace fixture."""
     from openhexa.sdk import workspace as global_workspace
 
     reload(openhexa.sdk)
@@ -17,6 +18,7 @@ def workspace():
 
 @pytest.fixture(scope="function")
 def current_run():
+    """Build current run fixture."""
     from openhexa.sdk import current_run as global_current_run
 
     reload(openhexa.sdk)

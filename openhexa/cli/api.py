@@ -1,10 +1,11 @@
 """Collection of functions that interacts with the OpenHEXA API."""
 
 import base64
-import configparser
 import enum
 import io
 import os
+import typing
+from configparser import ConfigParser
 from importlib.metadata import version
 from pathlib import Path
 from zipfile import ZipFile
@@ -30,12 +31,17 @@ class PipelineDefinitionErrorCode(enum.Enum):
     INVALID_TIMEOUT_VALUE = "INVALID_TIMEOUT_VALUE"
 
 
-def is_debug(config: configparser.ConfigParser):
+def is_debug(config: ConfigParser) -> bool:
+    """Determine whether the provided configuration has the debug flag."""
     return config.getboolean("openhexa", "debug", fallback=False)
 
 
 def open_config():
-    config = configparser.ConfigParser()
+    """Open the local configuration file using configparser.
+
+    A default configuration file will generated if the file does not exist.
+    """
+    config = ConfigParser()
     if os.path.exists(CONFIGFILE_PATH):
         config.read(CONFIGFILE_PATH)
     else:
@@ -50,12 +56,14 @@ def open_config():
     return config
 
 
-def save_config(config):
+def save_config(config: ConfigParser):
+    """Save the provided configparser local configuration to disk."""
     with open(CONFIGFILE_PATH, "w") as configfile:
         config.write(configfile)
 
 
 def graphql(config, query: str, variables=None, token=None):
+    """Perform a GraphQL request."""
     url = config["openhexa"]["url"] + "/graphql/"
     if token is None:
         current_workspace = config["openhexa"]["current_workspace"]
@@ -95,6 +103,7 @@ def graphql(config, query: str, variables=None, token=None):
 
 
 def get_workspace(config, slug: str, token: str):
+    """Get a single workspace."""
     return graphql(
         config,
         """
@@ -110,7 +119,8 @@ def get_workspace(config, slug: str, token: str):
     )["workspace"]
 
 
-def get_pipelines(config):
+def list_pipelines(config):
+    """List all pipelines in the workspace."""
     data = graphql(
         config,
         """
@@ -132,7 +142,8 @@ def get_pipelines(config):
     return data["pipelines"]["items"]
 
 
-def get_pipeline(config, pipeline_code: str):
+def get_pipeline(config, pipeline_code: str) -> dict[str, typing.Any]:
+    """Get a single pipeline."""
     data = graphql(
         config,
         """
@@ -155,6 +166,7 @@ def get_pipeline(config, pipeline_code: str):
 
 
 def create_pipeline(config, pipeline_code: str, pipeline_name: str):
+    """Create a pipeline using the API."""
     data = graphql(
         config,
         """
@@ -185,7 +197,8 @@ def create_pipeline(config, pipeline_code: str, pipeline_name: str):
     return data["createPipeline"]["pipeline"]
 
 
-def delete_pipeline(config, id: str):
+def delete_pipeline(config, pipeline_id: str):
+    """Delete a single pipeline."""
     data = graphql(
         config,
         """
@@ -196,7 +209,7 @@ def delete_pipeline(config, id: str):
                     }
                 }
     """,
-        {"input": {"id": id}},
+        {"input": {"id": pipeline_id}},
     )
 
     if not data["deletePipeline"]["success"]:
@@ -206,7 +219,7 @@ def delete_pipeline(config, id: str):
 
 
 def ensure_is_pipeline_dir(pipeline_path: str):
-    # Ensure that there is a pipeline.py file in the directory
+    """Ensure that there is a pipeline.py file in the directory."""
     if not os.path.isdir(pipeline_path):
         raise Exception(f"Path {pipeline_path} is not a directory")
     if not os.path.exists(pipeline_path):
@@ -217,11 +230,15 @@ def ensure_is_pipeline_dir(pipeline_path: str):
     return True
 
 
-def upload_pipeline(config, pipeline_directory_path: str):
+def upload_pipeline(config, pipeline_directory_path: typing.Union[str, Path]):
+    """Upload the pipeline contained in the provided directory using the GraphQL API.
+
+    The pipeline code will be zipped and base64-encoded before being sent to tge backend.
+    """
     pipeline = import_pipeline(pipeline_directory_path)
     directory = Path(os.path.abspath(pipeline_directory_path))
 
-    zipFile = io.BytesIO(b"")
+    zip_file = io.BytesIO(b"")
 
     if is_debug(config):
         click.echo("Generating ZIP file:")
@@ -234,7 +251,7 @@ def upload_pipeline(config, pipeline_directory_path: str):
     if env_vars.get("WORKSPACE_FILES_PATH") and Path(env_vars["WORKSPACE_FILES_PATH"]) not in excluded_paths:
         excluded_paths.append(Path(env_vars["WORKSPACE_FILES_PATH"]))
 
-    with ZipFile(zipFile, "w") as zipObj:
+    with ZipFile(zip_file, "w") as zipObj:
         for path in directory.glob("**/*"):
             if path.name == "python":
                 # We are in a virtual environment
@@ -258,15 +275,15 @@ def upload_pipeline(config, pipeline_directory_path: str):
                 click.echo(f"\t{file_path.name}")
             zipObj.write(file_path, file_path.relative_to(directory))
 
-    zipFile.seek(0)
+    zip_file.seek(0)
 
     if is_debug(config):
-        # Write zipFile to disk for debugging
+        # Write zip_file to disk for debugging
         with open("pipeline.zip", "wb") as debug_file:
-            debug_file.write(zipFile.read())
-        zipFile.seek(0)
+            debug_file.write(zip_file.read())
+        zip_file.seek(0)
 
-    base64_content = base64.b64encode(zipFile.read()).decode("ascii")
+    base64_content = base64.b64encode(zip_file.read()).decode("ascii")
 
     data = graphql(
         config,

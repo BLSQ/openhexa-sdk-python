@@ -28,6 +28,7 @@ from openhexa.sdk import parameter, pipeline, workspace
 )
 @parameter("oul", name="Organisation unit level", type=int, default=2)
 def logistic_stats(deg: str, periods: str, oul: int):
+    """Run a basic logistic stats pipeline."""
     dhis2_data = dhis2_download(deg, periods, oul)
     gadm_data = gadm_download()
     worldpop_data = worldpop_download()
@@ -37,6 +38,7 @@ def logistic_stats(deg: str, periods: str, oul: int):
 
 @logistic_stats.task
 def dhis2_download(data_element_group: str, periods: str, org_unit_level: int) -> dict[str, typing.Any]:
+    """Download DHIS2 data."""
     connection = workspace.dhis2_connection("dhis2-play")
     base_url = f"{connection.url}/api"
     session = requests.Session()
@@ -63,6 +65,7 @@ def dhis2_download(data_element_group: str, periods: str, org_unit_level: int) -
 
 @logistic_stats.task
 def gadm_download():
+    """Download administrative boundaries data from UCDavis."""
     url = "https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/gadm41_SLE.gpkg"
     r = requests.get(url, timeout=30)
 
@@ -71,6 +74,7 @@ def gadm_download():
 
 @logistic_stats.task
 def worldpop_download():
+    """Download population data from worldpop.org."""
     base_url = "https://data.worldpop.org/"
     url = f"{base_url}GIS/Population/Global_2000_2020_Constrained/2020/maxar_v1/SLE/sle_ppp_2020_UNadj_constrained.tif"
     r = requests.get(url)
@@ -80,6 +84,7 @@ def worldpop_download():
 
 @logistic_stats.task
 def model(dhis2_data: dict[str, typing.Any], gadm_data, worldpop_data):
+    """Build a basic data model."""
     # Load DHIS2 data
     dhis2_df = pd.DataFrame(dhis2_data["rows"], columns=[h["column"] for h in dhis2_data["headers"]])
     dhis2_df = dhis2_df.rename(columns={"Data": "Data element id", "Organisation unit": "Organisation unit id"})
