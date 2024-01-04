@@ -1,3 +1,5 @@
+"""Utilities for running local pipelines."""
+
 from pathlib import Path
 from tempfile import mkdtemp
 
@@ -6,6 +8,8 @@ import yaml
 
 
 class LocalWorkspaceConfigError(Exception):
+    """Raised whenever the local workspace config file does not exist or is invalid."""
+
     pass
 
 
@@ -18,7 +22,6 @@ def get_local_workspace_config(path: Path):
     This is obviously brittle as it relies on setting the correct env variables keys, any changes upstream must
     be reflected here.
     """
-
     env_vars = {}
 
     # This will only work when running the pipeline using "python pipeline.py"
@@ -29,7 +32,7 @@ def get_local_workspace_config(path: Path):
             "To work with pipelines locally, you need a workspace.yaml file in the same directory as your pipeline file"
         )
 
-    with open(local_workspace_config_path.resolve(), "r") as local_workspace_config_file:
+    with open(local_workspace_config_path.resolve()) as local_workspace_config_file:
         local_workspace_config = yaml.safe_load(local_workspace_config_file)
         # Database config
         if "database" in local_workspace_config:

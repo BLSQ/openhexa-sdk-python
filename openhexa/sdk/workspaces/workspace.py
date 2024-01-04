@@ -1,3 +1,8 @@
+"""Workspace-related classes and functions.
+
+See https://github.com/BLSQ/openhexa/wiki/User-manual#about-workspaces for more information.
+"""
+
 import os
 from dataclasses import make_dataclass
 from warnings import warn
@@ -7,6 +12,7 @@ import stringcase
 from ..datasets import Dataset
 from ..utils import graphql
 from .connection import (
+    CustomConnection,
     DHIS2Connection,
     GCSConnection,
     IASOConnection,
@@ -16,30 +22,41 @@ from .connection import (
 
 
 class WorkspaceConfigError(Exception):
+    """Raised whenever the system cannot find an environment variable required to configure the current workspace."""
+
     pass
 
 
 class ConnectionDoesNotExist(Exception):
+    """Raised whenever an attempt is made to get a connection through an invalid identifier."""
+
     pass
 
 
 class CurrentWorkspace:
+    """Represents the currently configured OpenHEXA workspace, with its filesystem, database and connections."""
+
     @property
-    def _token(self):
+    def _token(self) -> str:
         try:
             return os.environ["HEXA_TOKEN"]
         except KeyError:
-            raise WorkspaceConfigError("Workspace's token is not available in this environment.")
+            raise WorkspaceConfigError("The workspace token is not available in this environment.")
 
     @property
-    def slug(self):
+    def slug(self) -> str:
+        """The unique slug of the workspace.
+
+        Slugs are used to identify the workspace.
+        """
         try:
             return os.environ["HEXA_WORKSPACE"]
         except KeyError:
-            raise WorkspaceConfigError("Workspace's slug is not available in this environment.")
+            raise WorkspaceConfigError("The workspace slug is not available in this environment.")
 
     @property
-    def database_host(self):
+    def database_host(self) -> str:
+        """The workspace database host."""
         try:
             return os.environ["WORKSPACE_DATABASE_HOST"]
         except KeyError:
@@ -49,7 +66,8 @@ class CurrentWorkspace:
             )
 
     @property
-    def database_username(self):
+    def database_username(self) -> str:
+        """The workspace database username."""
         try:
             return os.environ["WORKSPACE_DATABASE_USERNAME"]
         except KeyError:
@@ -60,6 +78,7 @@ class CurrentWorkspace:
 
     @property
     def database_password(self):
+        """The workspace database password."""
         try:
             return os.environ.get("WORKSPACE_DATABASE_PASSWORD")
         except KeyError:
@@ -70,6 +89,7 @@ class CurrentWorkspace:
 
     @property
     def database_name(self):
+        """The workspace database name."""
         try:
             return os.environ["WORKSPACE_DATABASE_DB_NAME"]
         except KeyError:
@@ -80,6 +100,7 @@ class CurrentWorkspace:
 
     @property
     def database_port(self):
+        """The workspace database port."""
         try:
             return int(os.environ["WORKSPACE_DATABASE_PORT"])
         except KeyError:
@@ -90,6 +111,11 @@ class CurrentWorkspace:
 
     @property
     def database_url(self):
+        """The workspace database URL.
+
+        The URL follows the official PostgreSQL specification.
+        (See https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING for more information)
+        """
         return (
             f"postgresql://{self.database_username}:{self.database_password}"
             f"@{self.database_host}:{self.database_port}/{self.database_name}"
@@ -97,21 +123,41 @@ class CurrentWorkspace:
 
     @property
     def files_path(self) -> str:
-        """Return the base path to the filesystem, without trailing slash"""
+        """The base path to the filesystem, without trailing slash.
 
+        Examples
+        --------
+        >>> f"{workspace.files_path}/some/path"
+        /home/hexa/workspace/some/path
+        """
         # FIXME: This is a hack to make the SDK work in the context of the `python pipeline.py` command.
         # We can remove this once we deprecate this way of running pipelines
         return os.environ["WORKSPACE_FILES_PATH"] if "WORKSPACE_FILES_PATH" in os.environ else "/home/hexa/workspace"
 
     @property
     def tmp_path(self) -> str:
-        """Return the base path to the tmp directory, without trailing slash"""
+        """The base path to the tmp directory, without trailing slash.
 
+        Examples
+        --------
+        >>> f"{workspace.tmp_path}/some/path"
+        /home/hexa/tmp/some/path
+        """
         # FIXME: This is a hack to make the SDK work in the context of the `python pipeline.py` command.
         # We can remove this once we deprecate this way of running pipelines
         return os.environ["WORKSPACE_TMP_PATH"] if "WORKSPACE_TMP_PATH" in os.environ else "/home/hexa/tmp"
 
-    def dhis2_connection(self, identifier: str = None, slug: str = None) -> DHIS2Connection:
+    @staticmethod
+    def dhis2_connection(identifier: str = None, slug: str = None) -> DHIS2Connection:
+        """Get a DHIS2 connection by its identifier.
+
+        Parameters
+        ----------
+        identifier : str
+            The identifier of the connection in the OpenHEXA backend
+        slug : str
+            Deprecated, same as identifier
+        """
         identifier = identifier or slug
         if slug is not None:
             warn("'slug' is deprecated. Use 'identifier' instead.", DeprecationWarning, stacklevel=2)
@@ -125,7 +171,17 @@ class CurrentWorkspace:
 
         return DHIS2Connection(url=url, username=username, password=password)
 
-    def postgresql_connection(self, identifier: str = None, slug: str = None) -> PostgreSQLConnection:
+    @staticmethod
+    def postgresql_connection(identifier: str = None, slug: str = None) -> PostgreSQLConnection:
+        """Get a PostgreSQL connection by its identifier.
+
+        Parameters
+        ----------
+        identifier : str
+            The identifier of the connection in the OpenHEXA backend
+        slug : str
+            Deprecated, same as identifier
+        """
         identifier = identifier or slug
         if slug is not None:
             warn("'slug' is deprecated. Use 'identifier' instead.", DeprecationWarning, stacklevel=2)
@@ -147,7 +203,17 @@ class CurrentWorkspace:
             database_name=dbname,
         )
 
-    def s3_connection(self, identifier: str = None, slug: str = None) -> S3Connection:
+    @staticmethod
+    def s3_connection(identifier: str = None, slug: str = None) -> S3Connection:
+        """Get an AWS S3 connection by its identifier.
+
+        Parameters
+        ----------
+        identifier : str
+            The identifier of the connection in the OpenHEXA backend
+        slug : str
+            Deprecated, same as identifier
+        """
         identifier = identifier or slug
         if slug is not None:
             warn("'slug' is deprecated. Use 'identifier' instead.", DeprecationWarning, stacklevel=2)
@@ -165,7 +231,17 @@ class CurrentWorkspace:
             bucket_name=bucket_name,
         )
 
-    def gcs_connection(self, identifier: str = None, slug: str = None) -> GCSConnection:
+    @staticmethod
+    def gcs_connection(identifier: str = None, slug: str = None) -> GCSConnection:
+        """Get a Google Cloud Storage connection by its identifier.
+
+        Parameters
+        ----------
+        identifier : str
+            The identifier of the connection in the OpenHEXA backend
+        slug : str
+            Deprecated, same as identifier
+        """
         identifier = identifier or slug
         if slug is not None:
             warn("'slug' is deprecated. Use 'identifier' instead.", DeprecationWarning, stacklevel=2)
@@ -181,7 +257,17 @@ class CurrentWorkspace:
             bucket_name=bucket_name,
         )
 
-    def iaso_connection(self, identifier: str = None, slug: str = None) -> IASOConnection:
+    @staticmethod
+    def iaso_connection(identifier: str = None, slug: str = None) -> IASOConnection:
+        """Get a IASO connection by it identifier.
+
+        Parameters
+        ----------
+        identifier : str
+            The identifier of the connection in the OpenHEXA backend
+        slug : str
+            Deprecated, same as identifier
+        """
         identifier = identifier or slug
         if slug is not None:
             warn("'slug' is deprecated. Use 'identifier' instead.", DeprecationWarning, stacklevel=2)
@@ -195,30 +281,48 @@ class CurrentWorkspace:
 
         return IASOConnection(url=url, username=username, password=password)
 
-    def custom_connection(self, identifier: str = None, slug: str = None):
+    @staticmethod
+    def custom_connection(identifier: str = None, slug: str = None) -> CustomConnection:
+        """Get a custom connection by its identifier.
+
+        Parameters
+        ----------
+        identifier : str
+            The identifier of the connection in the OpenHEXA backend
+        slug : str
+            Deprecated, same as identifier
+        """
         identifier = identifier or slug
         if slug is not None:
             warn("'slug' is deprecated. Use 'identifier' instead.", DeprecationWarning, stacklevel=2)
-        identifier = identifier.lower()
-        env_variable_prefix = stringcase.constcase(identifier)
+        env_variable_prefix = stringcase.constcase(identifier.lower())
         fields = {}
         for key, value in os.environ.items():
             if key.startswith(env_variable_prefix):
                 field_key = key[len(f"{env_variable_prefix}_") :].lower()
                 fields[field_key] = value
 
-        dataclass = make_dataclass(identifier, fields.keys())
+        if len(fields) == 0:
+            raise ConnectionDoesNotExist(f'No custom connection for "{identifier}"')
 
-        class CustomConnection(dataclass):
-            def __repr__(self):
-                return f"CustomConnection(name='{identifier}')"
+        dataclass = make_dataclass(
+            stringcase.pascalcase(identifier), fields.keys(), bases=(CustomConnection,), repr=False
+        )
 
-        return CustomConnection(**fields)
+        return dataclass(**fields)
 
     def create_dataset(self, identifier: str, name: str, description: str):
+        """Create a new dataset."""
         raise NotImplementedError("create_dataset is not implemented yet.")
 
-    def get_dataset(self, identifier: str):
+    def get_dataset(self, identifier: str) -> Dataset:
+        """Get a dataset by its identifier.
+
+        Parameters
+        ----------
+        identifier : str
+            The identifier of the dataset in the OpenHEXA backend
+        """
         response = graphql(
             """
             query getDataset($datasetSlug: String!, $workspaceSlug: String!) {

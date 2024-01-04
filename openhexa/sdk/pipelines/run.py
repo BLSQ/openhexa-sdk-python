@@ -1,22 +1,29 @@
+"""Pipeline run module."""
+
 import datetime
 import os
 import typing
-from pathlib import Path
 
-from openhexa.sdk.utils import Environments, get_environment, graphql
+from openhexa.sdk.utils import Environment, get_environment, graphql
 from openhexa.sdk.workspaces import workspace
 
 
 class CurrentRun:
+    """Represents the current run of a pipeline.
+
+    CurrentRun instances allow pipeline developers to interact with the OpenHEXA backend, by sending messages and
+    adding outputs that will be available through the web interface.
+    """
+
     @property
     def _connected(self):
         return "HEXA_SERVER_URL" in os.environ
 
-    @property
-    def tmp_path(self):
-        return Path("~/tmp/")
-
     def add_file_output(self, path: str):
+        """Record a run output for a file creation operation.
+
+        This output will be visible in the web interface, on the pipeline run page.
+        """
         stripped_path = path.replace(workspace.files_path, "")
         name = stripped_path.strip("/")
         if self._connected:
@@ -37,6 +44,10 @@ class CurrentRun:
             print(f"Sending output with path {stripped_path}")
 
     def add_database_output(self, table_name: str):
+        """Record a run output for a database operation.
+
+        This output will be visible in the web interface, on the pipeline run page.
+        """
         if self._connected:
             graphql(
                 """
@@ -55,18 +66,23 @@ class CurrentRun:
             print(f"Sending output with table_name {table_name}")
 
     def log_debug(self, message: str):
+        """Log a message with the DEBUG priority."""
         self._log_message("DEBUG", message)
 
     def log_info(self, message: str):
+        """Log a message with the INFO priority."""
         self._log_message("INFO", message)
 
     def log_warning(self, message: str):
+        """Log a message with the WARNING priority."""
         self._log_message("WARNING", message)
 
     def log_error(self, message: str):
+        """Log a message with the ERROR priority."""
         self._log_message("ERROR", message)
 
     def log_critical(self, message: str):
+        """Log a message with the CRITICAL priority."""
         self._log_message("CRITICAL", message)
 
     def _log_message(
@@ -91,7 +107,7 @@ class CurrentRun:
             print(now, priority, message)
 
 
-if get_environment() == Environments.CLOUD_JUPYTER:
+if get_environment() == Environment.CLOUD_JUPYTER:
     current_run = None
 else:
     current_run = CurrentRun()

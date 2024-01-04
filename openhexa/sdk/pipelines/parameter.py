@@ -1,40 +1,43 @@
+"""Pipeline parameters classes and functions.
+
+See https://github.com/BLSQ/openhexa/wiki/Writing-OpenHEXA-pipelines#pipeline-parameters for more information.
+"""
 import re
 import typing
+
+from openhexa.sdk.workspaces import workspace
 from openhexa.sdk.workspaces.connection import (
+    Connection,
+    CustomConnection,
     DHIS2Connection,
+    GCSConnection,
     IASOConnection,
     PostgreSQLConnection,
     S3Connection,
-    GCSConnection,
 )
-from openhexa.sdk.workspaces import workspace
 from openhexa.sdk.workspaces.workspace import ConnectionDoesNotExist
 
 
-class ParameterValueError(Exception):
-    pass
-
-
 class ParameterType:
-    """Base class for parameter types. Those parameter types are used when using the @parameter decorator"""
+    """Base class for parameter types. Those parameter types are used when using the @parameter decorator."""
 
     def spec_type(self) -> str:
-        """Returns a type string for the specs that are sent to the backend."""
-
+        """Return a type string for the specs that are sent to the backend."""
         raise NotImplementedError
 
     @property
-    def expected_type(self) -> typing.Type:
+    def expected_type(self) -> type:
         """Returns the python type expected for values."""
-
         raise NotImplementedError
 
     @property
-    def accepts_choice(self) -> bool:
+    def accepts_choices(self) -> bool:
+        """Return True only if the parameter type supports the "choices" optional argument."""
         return True
 
     @property
     def accepts_multiple(self) -> bool:
+        """Return True only if the parameter type supports multiple values."""
         return True
 
     @staticmethod
@@ -44,12 +47,10 @@ class ParameterType:
         This can be used to handle empty values and normalize them to None, or to perform type conversions, allowing us
         to allow multiple input types but still normalize everything to a single type.
         """
-
         return value
 
     def validate(self, value: typing.Optional[typing.Any]) -> typing.Optional[typing.Any]:
         """Validate the provided value for this type."""
-
         if not isinstance(value, self.expected_type):
             raise ParameterValueError(
                 f"Invalid type for value {value} (expected {self.expected_type}, got {type(value)})"
@@ -58,23 +59,30 @@ class ParameterType:
         return value
 
     def validate_default(self, value: typing.Optional[typing.Any]):
+        """Validate the default value configured for this type."""
         self.validate(value)
 
     def __str__(self) -> str:
+        """Cast parameter as string."""
         return str(self.expected_type)
 
 
 class StringType(ParameterType):
+    """Type class for string parameters."""
+
     @property
     def spec_type(self) -> str:
+        """Return a type string for the specs that are sent to the backend."""
         return "str"
 
     @property
-    def expected_type(self) -> typing.Type:
+    def expected_type(self) -> type:
+        """Returns the python type expected for values."""
         return str
 
     @staticmethod
     def normalize(value: typing.Any) -> typing.Optional[str]:
+        """Strip leading and trailing whitespaces and convert empty strings to None."""
         if isinstance(value, str):
             normalized_value = value.strip()
         else:
@@ -86,6 +94,7 @@ class StringType(ParameterType):
         return normalized_value
 
     def validate_default(self, value: typing.Optional[typing.Any]):
+        """Validate the default value configured for this type."""
         if value == "":
             raise ParameterValueError("Empty values are not accepted.")
 
@@ -93,44 +102,59 @@ class StringType(ParameterType):
 
 
 class Boolean(ParameterType):
+    """Type class for boolean parameters."""
+
     @property
     def spec_type(self) -> str:
+        """Return a type string for the specs that are sent to the backend."""
         return "bool"
 
     @property
-    def expected_type(self) -> typing.Type:
+    def expected_type(self) -> type:
+        """Returns the python type expected for values."""
         return bool
 
     @property
-    def accepts_choice(self) -> bool:
+    def accepts_choices(self) -> bool:
+        """Return a type string for the specs that are sent to the backend."""
         return False
 
     @property
     def accepts_multiple(self) -> bool:
+        """Return a type string for the specs that are sent to the backend."""
         return False
 
 
 class Integer(ParameterType):
+    """Type class for integer parameters."""
+
     @property
     def spec_type(self) -> str:
+        """Return a type string for the specs that are sent to the backend."""
         return "int"
 
     @property
-    def expected_type(self) -> typing.Type:
+    def expected_type(self) -> type:
+        """Returns the python type expected for values."""
         return int
 
 
 class Float(ParameterType):
+    """Type class for float parameters."""
+
     @property
     def spec_type(self) -> str:
+        """Return a type string for the specs that are sent to the backend."""
         return "float"
 
     @property
-    def expected_type(self) -> typing.Type:
+    def expected_type(self) -> type:
+        """Returns the python type expected for values."""
         return float
 
     @staticmethod
     def normalize(value: typing.Any) -> typing.Any:
+        """Normalize int values to float values if appropriate."""
         if isinstance(value, int):
             return float(value)
 
@@ -138,15 +162,20 @@ class Float(ParameterType):
 
 
 class ConnectionParameterType(ParameterType):
+    """Abstract base class for connection parameter type classes."""
+
     @property
-    def accepts_choice(self) -> bool:
+    def accepts_choices(self) -> bool:
+        """Return True only if the parameter type supports the "choice values."""
         return False
 
     @property
     def accepts_multiple(self) -> bool:
+        """Return True only if the parameter type supports multiple values."""
         return False
 
     def validate_default(self, value: typing.Optional[typing.Any]):
+        """Validate the default value configured for this type."""
         if value is None:
             return
 
@@ -155,7 +184,8 @@ class ConnectionParameterType(ParameterType):
         elif value == "":
             raise ParameterValueError("Empty values are not accepted.")
 
-    def validate(self, value: typing.Optional[typing.Any]) -> typing.Optional[str]:
+    def validate(self, value: typing.Optional[typing.Any]) -> Connection:
+        """Validate the provided value for this type."""
         if not isinstance(value, str):
             raise ParameterValueError(f"Invalid type for value {value} (expected {str}, got {type(value)})")
 
@@ -164,86 +194,117 @@ class ConnectionParameterType(ParameterType):
         except ConnectionDoesNotExist as e:
             raise ParameterValueError(str(e))
 
-    def to_connection(self, value: str) -> typing.Any:
+    def to_connection(self, value: str) -> Connection:
+        """Build a connection instance from the provided value (which should be a connection identifier)."""
         raise NotImplementedError
 
 
 class PostgreSQLConnectionType(ConnectionParameterType):
+    """Type class for PostgreSQL connections."""
+
     @property
     def spec_type(self) -> str:
+        """Return a type string for the specs that are sent to the backend."""
         return "postgresql"
 
     @property
-    def expected_type(self) -> typing.Type:
+    def expected_type(self) -> type:
+        """Returns the python type expected for values."""
         return PostgreSQLConnectionType
 
-    def to_connection(self, value: str) -> typing.Any:
+    def to_connection(self, value: str) -> PostgreSQLConnection:
+        """Build a PostgreSQL connection instance from the provided value (which should be a connection identifier)."""
         return workspace.postgresql_connection(value)
 
 
 class S3ConnectionType(ConnectionParameterType):
+    """Type class for S3 connections."""
+
     @property
     def spec_type(self) -> str:
+        """Return a type string for the specs that are sent to the backend."""
         return "s3"
 
     @property
-    def expected_type(self) -> typing.Type:
+    def expected_type(self) -> type:
+        """Returns the python type expected for values."""
         return S3ConnectionType
 
-    def to_connection(self, value: str) -> typing.Any:
+    def to_connection(self, value: str) -> S3Connection:
+        """Build a S3 connection instance from the provided value (which should be a connection identifier)."""
         return workspace.s3_connection(value)
 
 
 class GCSConnectionType(ConnectionParameterType):
+    """Type class for GCS connections."""
+
     @property
     def spec_type(self) -> str:
+        """Return a type string for the specs that are sent to the backend."""
         return "gcs"
 
     @property
-    def expected_type(self) -> typing.Type:
+    def expected_type(self) -> type:
+        """Returns the python type expected for values."""
         return GCSConnectionType
 
-    def to_connection(self, value: str) -> typing.Any:
+    def to_connection(self, value: str) -> GCSConnection:
+        """Build a GCS connection instance from the provided value (which should be a connection identifier)."""
         return workspace.gcs_connection(value)
 
 
 class DHIS2ConnectionType(ConnectionParameterType):
+    """Type class for DHIS2 connections."""
+
     @property
     def spec_type(self) -> str:
+        """Return a type string for the specs that are sent to the backend."""
         return "dhis2"
 
     @property
-    def expected_type(self) -> typing.Type:
+    def expected_type(self) -> type:
+        """Returns the python type expected for values."""
         return DHIS2ConnectionType
 
-    def to_connection(self, value: str) -> typing.Any:
+    def to_connection(self, value: str) -> DHIS2Connection:
+        """Build a DHIS2 connection instance from the provided value (which should be a connection identifier)."""
         return workspace.dhis2_connection(value)
 
 
 class IASOConnectionType(ConnectionParameterType):
+    """Type class for IASO connections."""
+
     @property
     def spec_type(self) -> str:
+        """Return a type string for the specs that are sent to the backend."""
         return "iaso"
 
     @property
-    def expected_type(self) -> typing.Type:
+    def expected_type(self) -> type:
+        """Returns the python type expected for values."""
         return IASOConnectionType
 
-    def to_connection(self, value: str) -> typing.Any:
+    def to_connection(self, value: str) -> IASOConnection:
+        """Build a IASO connection instance from the provided value (which should be a connection identifier)."""
         return workspace.iaso_connection(value)
 
 
 class CustomConnectionType(ConnectionParameterType):
+    """Type class for custom connections."""
+
     @property
     def spec_type(self) -> str:
+        """Return a type string for the specs that are sent to the backend."""
         return "custom"
 
     @property
-    def expected_type(self) -> typing.Type:
+    def expected_type(self) -> type:
+        """Returns the python type expected for values."""
         return str
 
-    def to_connection(self, value: str) -> typing.Any:
-        return workspace.postgresql_connection(value)
+    def to_connection(self, value: str) -> CustomConnection:
+        """Build a custom connection instance from the provided value (which should be a connection identifier)."""
+        return workspace.custom_connection(value)
 
 
 TYPES_BY_PYTHON_TYPE = {
@@ -259,10 +320,6 @@ TYPES_BY_PYTHON_TYPE = {
 }
 
 
-class InvalidParameterError(Exception):
-    pass
-
-
 class Parameter:
     """Pipeline parameter class. Contains validation logic specs generation logic."""
 
@@ -270,7 +327,7 @@ class Parameter:
         self,
         code: str,
         *,
-        type: typing.Union[typing.Type[str], typing.Type[int], typing.Type[bool]],
+        type: typing.Union[type[str], type[int], type[bool]],
         name: typing.Optional[str] = None,
         choices: typing.Optional[typing.Sequence] = None,
         help: typing.Optional[str] = None,
@@ -280,7 +337,8 @@ class Parameter:
     ):
         if re.match("^[a-z_][a-z_0-9]+$", code) is None:
             raise InvalidParameterError(
-                f"Invalid parameter code provided ({code}). Parameter must start with a letter or an underscore, and can only contain lower case letters, numbers and underscores."
+                f"Invalid parameter code provided ({code}). Parameter must start with a letter or an underscore, "
+                f"and can only contain lower case letters, numbers and underscores."
             )
 
         self.code = code
@@ -290,11 +348,12 @@ class Parameter:
         except KeyError:
             valid_parameter_types = [str(k) for k in TYPES_BY_PYTHON_TYPE.keys()]
             raise InvalidParameterError(
-                f"Invalid parameter type provided ({type}). Valid parameter types are {', '.join(valid_parameter_types)}"
+                f"Invalid parameter type provided ({type}). "
+                f"Valid parameter types are {', '.join(valid_parameter_types)}"
             )
 
         if choices is not None:
-            if not self.type.accepts_choice:
+            if not self.type.accepts_choices:
                 raise InvalidParameterError(f"Parameters of type {self.type} don't accept choices.")
             elif len(choices) == 0:
                 raise InvalidParameterError("Choices, if provided, cannot be empty.")
@@ -318,8 +377,7 @@ class Parameter:
         self.default = default
 
     def validate(self, value: typing.Any) -> typing.Any:
-        """Validates the provided value against the parameter, taking required / default options into account."""
-
+        """Validate the provided value against the parameter, taking required / default options into account."""
         if self.multiple:
             return self._validate_multiple(value)
         else:
@@ -383,9 +441,8 @@ class Parameter:
         except ParameterValueError:
             raise InvalidParameterError(f"The default value for {self.code} is not valid.")
 
-    def parameter_spec(self):
-        """Generates specification for this parameter, to be provided to the OpenHexa backend."""
-
+    def parameter_spec(self) -> dict[str, typing.Any]:
+        """Build specification for this parameter, to be provided to the OpenHEXA backend."""
         return {
             "type": self.type.spec_type,
             "required": self.required,
@@ -402,15 +459,15 @@ def parameter(
     code: str,
     *,
     type: typing.Union[
-        typing.Type[str],
-        typing.Type[int],
-        typing.Type[bool],
-        typing.Type[float],
-        typing.Type[DHIS2Connection],
-        typing.Type[IASOConnection],
-        typing.Type[PostgreSQLConnection],
-        typing.Type[GCSConnection],
-        typing.Type[S3Connection],
+        type[str],
+        type[int],
+        type[bool],
+        type[float],
+        type[DHIS2Connection],
+        type[IASOConnection],
+        type[PostgreSQLConnection],
+        type[GCSConnection],
+        type[S3Connection],
     ],
     name: typing.Optional[str] = None,
     choices: typing.Optional[typing.Sequence] = None,
@@ -419,7 +476,7 @@ def parameter(
     required: bool = True,
     multiple: bool = False,
 ):
-    """Decorator that attaches a parameter to an OpenHexa pipeline.
+    """Decorate a pipeline function by attaching a parameter to it..
 
     This decorator must be used on a function decorated by the @pipeline decorator.
 
@@ -470,17 +527,31 @@ def parameter(
 
 
 class FunctionWithParameter:
-    """This class serves as a wrapper for functions decorated with the @parameter decorator."""
+    """Wrapper class for pipeline functions decorated with the @parameter decorator."""
 
     def __init__(self, function, added_parameter: Parameter):
         self.function = function
         self.parameter = added_parameter
 
-    def __call__(self, *args, **kwargs):
-        return self.function(*args, **kwargs)
-
-    def get_all_parameters(self):
+    def get_all_parameters(self) -> list[Parameter]:
+        """Go through the decorators chain to find all pipeline parameters."""
         if isinstance(self.function, FunctionWithParameter):
             return [self.parameter, *self.function.get_all_parameters()]
 
         return [self.parameter]
+
+    def __call__(self, *args, **kwargs):
+        """Call the decorated pipeline function."""
+        return self.function(*args, **kwargs)
+
+
+class InvalidParameterError(Exception):
+    """Raised whenever parameter options (usually passed to the @parameter decorator) are invalid."""
+
+    pass
+
+
+class ParameterValueError(Exception):
+    """Raised whenever values for a parameter provided for a pipeline run are invalid."""
+
+    pass

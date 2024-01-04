@@ -1,3 +1,5 @@
+"""Utilities used by containerized pipeline runners to import and download pipelines."""
+
 import base64
 import importlib
 import io
@@ -11,6 +13,7 @@ from .pipeline import Pipeline
 
 
 def import_pipeline(pipeline_dir_path: str):
+    """Import pipeline code within provided path using importlib."""
     pipeline_dir = os.path.abspath(pipeline_dir_path)
     sys.path.append(pipeline_dir)
     pipeline_package = importlib.import_module("pipeline")
@@ -19,7 +22,8 @@ def import_pipeline(pipeline_dir_path: str):
     return pipeline
 
 
-def download_pipeline(url: str, token: str, run_id: str, target_dir):
+def download_pipeline(url: str, token: str, run_id: str, target_dir: str):
+    """Download pipeline code and unzip it into the target directory."""
     r = requests.post(
         url + "/graphql/",
         headers={"Authorization": f"Bearer {token}"},

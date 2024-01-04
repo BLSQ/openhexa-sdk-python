@@ -1,36 +1,38 @@
-import pytest
+"""Parameter test module."""
+
 import os
+from unittest import mock
+
+import pytest
 import stringcase
 
 from openhexa.sdk import (
     DHIS2Connection,
+    GCSConnection,
     IASOConnection,
     PostgreSQLConnection,
-    GCSConnection,
     S3Connection,
 )
-
 from openhexa.sdk.pipelines.parameter import (
     Boolean,
+    DHIS2ConnectionType,
     Float,
     FunctionWithParameter,
+    GCSConnectionType,
+    IASOConnectionType,
     Integer,
     InvalidParameterError,
     Parameter,
     ParameterValueError,
-    StringType,
     PostgreSQLConnectionType,
-    GCSConnectionType,
     S3ConnectionType,
-    IASOConnectionType,
-    DHIS2ConnectionType,
+    StringType,
     parameter,
 )
 
-from unittest import mock
-
 
 def test_parameter_types_normalize():
+    """Check normalization or basic types."""
     # StringType
     string_parameter_type = StringType()
     assert string_parameter_type.normalize("a string") == "a string"
@@ -56,6 +58,7 @@ def test_parameter_types_normalize():
 
 
 def test_parameter_types_validate():
+    """Sanity checks for basic types validation."""
     # StringType
     string_parameter_type = StringType()
     assert string_parameter_type.validate("a string") == "a string"
@@ -83,6 +86,7 @@ def test_parameter_types_validate():
 
 
 def test_validate_postgres_connection():
+    """Check PostgreSQL connection validation."""
     identifier = "polio-ff3a0d"
     env_variable_prefix = stringcase.constcase(identifier)
     host = "https://172.17.0.1"
@@ -109,6 +113,7 @@ def test_validate_postgres_connection():
 
 
 def test_validate_dhis2_connection():
+    """Check DHIS2 connection validation."""
     identifier = "dhis2-connection-id"
     env_variable_prefix = stringcase.constcase(identifier)
     url = "https://test.dhis2.org/"
@@ -123,13 +128,14 @@ def test_validate_dhis2_connection():
             f"{env_variable_prefix}_PASSWORD": password,
         },
     ):
-        dhsi2_parameter_type = DHIS2ConnectionType()
-        assert dhsi2_parameter_type.validate(identifier) == DHIS2Connection(url, username, password)
+        dhis2_parameter_type = DHIS2ConnectionType()
+        assert dhis2_parameter_type.validate(identifier) == DHIS2Connection(url, username, password)
         with pytest.raises(ParameterValueError):
-            dhsi2_parameter_type.validate(86)
+            dhis2_parameter_type.validate(86)
 
 
 def test_validate_iaso_connection():
+    """Check IASO connection validation."""
     identifier = "iaso-connection-id"
     env_variable_prefix = stringcase.constcase(identifier)
     url = "https://test.iaso.org/"
@@ -151,6 +157,7 @@ def test_validate_iaso_connection():
 
 
 def test_validate_gcs_connection():
+    """Check GCS connection validation."""
     identifier = "gcs-connection-id"
     env_variable_prefix = stringcase.constcase(identifier)
     service_account_key = "HqQBxH0BAI3zF7kANUNlGg"
@@ -170,6 +177,7 @@ def test_validate_gcs_connection():
 
 
 def test_validate_s3_connection():
+    """Check S3 connection validation."""
     identifier = "s3-connection-id"
     env_variable_prefix = stringcase.constcase(identifier)
     secret_access_key = "HqQBxH0BAI3zF7kANUNlGg"
@@ -191,9 +199,10 @@ def test_validate_s3_connection():
 
 
 def test_parameter_init():
+    """Sanity checks for parameter initialization."""
     # Wrong type
     with pytest.raises(InvalidParameterError):
-        Parameter("arg", type="string")
+        Parameter("arg", type="string")  # NOQA
 
     # Wrong code
     with pytest.raises(InvalidParameterError):
@@ -233,6 +242,7 @@ def test_parameter_init():
 
 
 def test_parameter_validate_single():
+    """Base check for single-value validation."""
     # required is True by default
     parameter_1 = Parameter("arg1", type=str)
     assert parameter_1.validate("a valid string") == "a valid string"
@@ -257,6 +267,7 @@ def test_parameter_validate_single():
 
 
 def test_parameter_validate_multiple():
+    """Test multiple values validation rules."""
     # required is True by default
     parameter_1 = Parameter("arg1", type=str, multiple=True)
     assert parameter_1.validate(["Valid string", "Another valid string"]) == [
@@ -290,6 +301,7 @@ def test_parameter_validate_multiple():
 
 
 def test_parameter_parameters_spec():
+    """Verify that parameter specifications are built properly and have the proper defaults."""
     # required is True by default
     an_parameter = Parameter("arg1", type=str, default="yep")
     another_parameter = Parameter(
@@ -326,6 +338,8 @@ def test_parameter_parameters_spec():
 
 
 def test_parameter_decorator():
+    """Ensure that the @parameter decorator behaves as expected (options and defaults)."""
+
     @parameter("arg1", type=int)
     @parameter(
         "arg2",

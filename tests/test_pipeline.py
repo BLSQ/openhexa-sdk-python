@@ -1,14 +1,16 @@
+"""Pipeline test module."""
+
+import os
 from unittest.mock import Mock, patch
 
 import pytest
 import stringcase
-import os
 
 from openhexa.sdk import (
     DHIS2Connection,
+    GCSConnection,
     IASOConnection,
     PostgreSQLConnection,
-    GCSConnection,
     S3Connection,
 )
 from openhexa.sdk.pipelines.parameter import Parameter, ParameterValueError
@@ -16,6 +18,7 @@ from openhexa.sdk.pipelines.pipeline import Pipeline
 
 
 def test_pipeline_run_valid_config():
+    """Happy path for pipeline run config."""
     pipeline_func = Mock()
     parameter_1 = Parameter("arg1", type=str)
     parameter_2 = Parameter("arg2", type=str, multiple=True)
@@ -28,6 +31,7 @@ def test_pipeline_run_valid_config():
 
 
 def test_pipeline_run_invalid_config():
+    """Verify thatinvalid configuration values raise an exception."""
     pipeline_func = Mock()
     parameter_1 = Parameter("arg1", type=str)
     pipeline = Pipeline("code", "pipeline", pipeline_func, [parameter_1])
@@ -36,6 +40,7 @@ def test_pipeline_run_invalid_config():
 
 
 def test_pipeline_run_extra_config():
+    """Verify that extra (unexpected) configuration values raise an exception."""
     pipeline_func = Mock()
     parameter_1 = Parameter("arg1", type=str)
     pipeline = Pipeline("code", "pipeline", pipeline_func, [parameter_1])
@@ -44,6 +49,7 @@ def test_pipeline_run_extra_config():
 
 
 def test_pipeline_run_connection_dhis2_parameter_config():
+    """Ensure that DHIS2 connection parameter values are built properly."""
     identifier = "dhis2-connection-id"
     env_variable_prefix = stringcase.constcase(identifier)
     url = "https://test.dhis2.org/"
@@ -69,6 +75,7 @@ def test_pipeline_run_connection_dhis2_parameter_config():
 
 
 def test_pipeline_run_connection_iaso_parameter_config():
+    """Ensure that IASO connection parameter values are built properly."""
     identifier = "iaso-connection-id"
     env_variable_prefix = stringcase.constcase(identifier)
     url = "https://test.iaso.org/"
@@ -93,6 +100,7 @@ def test_pipeline_run_connection_iaso_parameter_config():
 
 
 def test_pipeline_run_connection_gcs_parameter_config():
+    """Ensure that GCS connection parameter values are built properly."""
     identifier = "gcs-connection-id"
     env_variable_prefix = stringcase.constcase(identifier)
     service_account_key = "HqQBxH0BAI3zF7kANUNlGg"
@@ -115,6 +123,7 @@ def test_pipeline_run_connection_gcs_parameter_config():
 
 
 def test_pipeline_run_connection_s3_parameter_config():
+    """Ensure that S3 connection parameter values are built properly."""
     identifier = "s3-connection-id"
     env_variable_prefix = stringcase.constcase(identifier)
     secret_access_key = "HqQBxH0BAI3zF7kANUNlGg"
@@ -141,6 +150,7 @@ def test_pipeline_run_connection_s3_parameter_config():
 
 
 def test_pipeline_run_connection_postgres_parameter_config():
+    """Ensure that postgreSQL connection parameter values are built properly."""
     identifier = "postgres-connection-id"
     env_variable_prefix = stringcase.constcase(identifier)
     host = "https://127.0.0.1"
@@ -173,6 +183,7 @@ def test_pipeline_run_connection_postgres_parameter_config():
 
 
 def test_pipeline_parameters_spec():
+    """Base checks for parameter specs building."""
     pipeline_func = Mock()
     parameter_1 = Parameter("arg1", type=str)
     parameter_2 = Parameter("arg2", type=str, multiple=True)

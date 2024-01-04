@@ -1,3 +1,9 @@
+"""Dataset-related classes and functions.
+
+See https://github.com/BLSQ/openhexa/wiki/User-manual#datasets and
+https://github.com/BLSQ/openhexa/wiki/Using-the-OpenHEXA-SDK#working-with-datasets for more information about datasets.
+"""
+
 import mimetypes
 import typing
 from os import PathLike
@@ -9,6 +15,8 @@ from openhexa.sdk.utils import Iterator, Page, graphql, read_content
 
 
 class DatasetFile:
+    """Represent a single file within a dataset. Files are attached to dataset through versions."""
+
     _download_url = None
     version = None
 
@@ -21,12 +29,14 @@ class DatasetFile:
         self.created_at = created_at
 
     def read(self):
+        """Download the file content and return it."""
         response = requests.get(self.download_url, stream=True)
         response.raise_for_status()
         return response.content
 
     @property
     def download_url(self):
+        """Build and return a pre-signed URL for the file."""
         if self._download_url is None:
             response = graphql(
                 """
@@ -46,10 +56,13 @@ class DatasetFile:
         return self._download_url
 
     def __repr__(self) -> str:
+        """Safe representation of the dataset file."""
         return f"<DatasetFile id={self.id} filename={self.filename}>"
 
 
 class VersionsIterator(Iterator):
+    """Custom iterator class to iterate versions using our GraphQL API."""
+
     def __init__(self, dataset: any, per_page: int = 10):
         super().__init__(per_page=per_page)
 
@@ -90,6 +103,8 @@ class VersionsIterator(Iterator):
 
 
 class VersionFilesIterator(Iterator):
+    """Custom iterator class to iterate version files using our GraphQL API."""
+
     def __init__(self, version: any, per_page: int = 20):
         super().__init__(per_page=per_page)
         self.item_to_value = lambda x: DatasetFile(
@@ -137,6 +152,8 @@ class VersionFilesIterator(Iterator):
 
 
 class DatasetVersion:
+    """Dataset files are not directly attached to a dataset, but rather to a version."""
+
     dataset = None
 
     def __init__(self, dataset: any, id: str, name: str, created_at: str):
@@ -147,11 +164,13 @@ class DatasetVersion:
 
     @property
     def files(self):
+        """Build and return an iterator of files for this version."""
         if self.id is None:
             raise ValueError("This dataset version does not have an id.")
         return VersionFilesIterator(version=self, per_page=50)
 
-    def get_file(self, filename: str):
+    def get_file(self, filename: str) -> DatasetFile:
+        """Get a file by name."""
         data = graphql(
             """
             query getDatasetFile($versionId: ID!, $filename: String!) {
@@ -171,7 +190,7 @@ class DatasetVersion:
 
         file = data["datasetVersion"]["fileByName"]
         if file is None:
-            return None
+            raise FileExistsError(f"The file {filename} does not exist for version {self}")
 
         return DatasetFile(
             version=self,
@@ -186,7 +205,8 @@ class DatasetVersion:
         self,
         source: typing.Union[str, PathLike[str], typing.IO],
         filename: typing.Optional[str] = None,
-    ):
+    ) -> DatasetFile:
+        """Create a new dataset file and add it to the dataset version."""
         mime_type = None
         if isinstance(source, (str, PathLike)):
             path = Path(source)
@@ -246,6 +266,11 @@ class DatasetVersion:
 
 
 class Dataset:
+    """Datasets are versioned, documented files.
+
+    See https://github.com/BLSQ/openhexa/wiki/Using-the-OpenHEXA-SDK#working-with-datasets for more information.
+    """
+
     _latest_version = None
 
     def __init__(
@@ -260,9 +285,8 @@ class Dataset:
         self.name = name
         self.description = description
 
-    def create_version(self, name: typing.Any):
-        # Check that all files exist
-
+    def create_version(self, name: typing.Any) -> DatasetVersion:
+        """Build a dataset version, save it and return it."""
         response = graphql(
             """
             mutation createDatasetVersion($input: CreateDatasetVersionInput!) {
@@ -299,7 +323,11 @@ class Dataset:
         return self.latest_version
 
     @property
-    def latest_version(self):
+    def latest_version(self) -> typing.Optional[DatasetVersion]:
+        """Return the latest version, if any.
+
+        This property method will query the backend to try to fetch the latest version.
+        """
         if self._latest_version is None:
             data = graphql(
                 """
@@ -329,8 +357,14 @@ class Dataset:
         return self._latest_version
 
     @property
-    def versions(self):
+    def versions(self) -> VersionsIterator:
+        """Build and return an iterator for versions."""
         return VersionsIterator(dataset=self, per_page=10)
 
     def __repr__(self) -> str:
+        """Safe representation of the dataset."""
         return f"<Dataset slug={self.slug} id={self.id}>"
+
+
+class FileNotFound(Exception):
+    """Raised whenever an attempt is made to get a file that does not exist."""

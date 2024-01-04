@@ -1,26 +1,29 @@
+"""API interactions test module."""
+
 import configparser
 import os
-import pytest
 import shutil
-import yaml
 import uuid
-
-from click.testing import CliRunner
-from openhexa.cli.api import upload_pipeline
-from openhexa.cli.cli import pipelines_init, pipelines_delete
 from pathlib import Path
-
 from unittest import mock
 from zipfile import ZipFile
 
+import pytest
+import yaml
+from click.testing import CliRunner
+
+from openhexa.cli.api import upload_pipeline
+from openhexa.cli.cli import pipelines_delete, pipelines_init
+
 
 def test_upload_pipeline():
+    """Test upload API call."""
     # to enable zip file creation
     config = configparser.ConfigParser()
     config["openhexa"] = {"debug": True, "current_workspace": "test_workspace"}
 
     runner = CliRunner()
-    runner.invoke(pipelines_init, ["test_pipelines"])
+    runner.invoke(pipelines_init, ["test_pipelines"])  # NOQA
     pipeline_dir = Path.cwd() / "test_pipelines"
     pipeline_zip_file_dir = Path.cwd() / "pipeline.zip"
 
@@ -41,17 +44,18 @@ def test_upload_pipeline():
 
 
 def test_upload_pipeline_custom_files_path():
+    """Test upload API call (custom file path)."""
     # to enable zip file creation
     config = configparser.ConfigParser()
     config["openhexa"] = {"debug": True, "current_workspace": "test_workspace"}
 
     runner = CliRunner()
-    runner.invoke(pipelines_init, ["test_pipelines"])
+    runner.invoke(pipelines_init, ["test_pipelines"])  # NOQA
     pipeline_dir = Path.cwd() / "test_pipelines"
     pipeline_zip_file_dir = Path.cwd() / "pipeline.zip"
 
     (pipeline_dir / Path("data")).mkdir()
-    # setup a custom path for files location in workspace.yaml
+    # set up a custom path for files location in workspace.yaml
     pipeline_configs = {"files": {"path": "./data"}}
 
     with open(pipeline_dir / Path("workspace.yaml"), "w") as pipeline_configs_file:
@@ -74,6 +78,7 @@ def test_upload_pipeline_custom_files_path():
 
 
 def test_delete_pipeline_not_in_workspace():
+    """Test delete pipeline (pipeline does not exist)."""
     config = configparser.ConfigParser()
     config["openhexa"] = {"debug": True, "current_workspace": "test_workspace"}
 
@@ -83,12 +88,13 @@ def test_delete_pipeline_not_in_workspace():
         runner = CliRunner()
         mocked_config.return_value = config
         mocked_graphql_client.return_value = {"pipelineByCode": None}
-        r = runner.invoke(pipelines_delete, ["test_pipelines"], input="test_pipelines")
+        r = runner.invoke(pipelines_delete, ["test_pipelines"], input="test_pipelines")  # NOQA
 
         assert r.output == "Pipeline test_pipelines does not exist in workspace test_workspace\n"
 
 
 def test_delete_pipeline_confirm_code_invalid():
+    """Test delete pipeline with an invalid confirmation code."""
     config = configparser.ConfigParser()
     config["openhexa"] = {"debug": True, "current_workspace": "test_workspace"}
 
@@ -105,12 +111,13 @@ def test_delete_pipeline_confirm_code_invalid():
                 "currentVersion": {"number": 1},
             }
         }
-        r = runner.invoke(pipelines_delete, ["test_pipelines"], input="test_pipeline")
+        r = runner.invoke(pipelines_delete, ["test_pipelines"], input="test_pipeline")  # NOQA
         # "Pipeline code and confirmation are different
         assert r.exit_code == 1
 
 
 def test_delete_pipeline():
+    """Happy path for delete pipeline API call."""
     config = configparser.ConfigParser()
     config["openhexa"] = {"debug": True, "current_workspace": "test_workspace"}
 
@@ -126,6 +133,6 @@ def test_delete_pipeline():
             "currentVersion": {"number": 1},
         }
         mocked_delete_pipeline.return_value = True
-        r = runner.invoke(pipelines_delete, ["test_pipelines"], input="test_pipelines")
+        r = runner.invoke(pipelines_delete, ["test_pipelines"], input="test_pipelines")  # NOQA
 
         assert r.exit_code == 0

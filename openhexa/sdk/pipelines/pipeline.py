@@ -1,4 +1,9 @@
-from __future__ import annotations
+"""Main pipeline module containing the building blocks for OpenHEXA pipelines.
+
+See https://github.com/BLSQ/openhexa/wiki/User-manual#using-pipelines and
+https://github.com/BLSQ/openhexa/wiki/Writing-OpenHEXA-pipelines for more information about OpenHEXA pipelines.
+"""
+
 
 import argparse
 import datetime
@@ -14,64 +19,38 @@ from pathlib import Path
 import requests
 from multiprocess import get_context  # NOQA
 
-from openhexa.sdk.utils import Environments, get_environment
+from openhexa.sdk.utils import Environment, get_environment
 
 from .parameter import (
     FunctionWithParameter,
     Parameter,
     ParameterValueError,
 )
-from .task import PipelineWithTask
+from .task import PipelineWithTask, Task
 from .utils import get_local_workspace_config
 
 logger = getLogger(__name__)
 
 
-class PipelineConfigError(Exception):
-    pass
+class Pipeline:
+    """OpenHEXA pipeline class.
 
+    Pipeline are usually instantiated through the @pipeline decorator.
 
-def pipeline(
-    code: str, *, name: str = None, timeout: int = None
-) -> typing.Callable[[typing.Callable[..., typing.Any]], "Pipeline"]:
-    """Decorator that turns a Python function into an OpenHexa pipeline.
-
-    Parameters
+    Attributes
     ----------
     code : str
-        An identifier for the pipeline (should be unique within the workspace where the pipeline is deployed)
-    name : str, optional
-        An optional name for the pipeline (will be used instead of the code in the web interface)
-    timeout : int, optional
-        An optional timeout, in seconds, after which the pipeline run will be terminated (if not provided, a default
-        timeout will be applied by the OpenHexa backend)
-
-    Returns
-    -------
-    typing.Callable
-        A decorator that returns a Pipeline
-
+        A unique code to identify the pipeline within a workspace.
+    name : str
+        A user-friendly name for the pipeline (will be displayed in the web interface).
+    function: typing.Callable
+        The actual pipeline function.
+    parameters : typing.Sequence[Parameter]
+        A list of Parameter instance corresponding to the pipeline parameters.
+    timeout : int
+        The timeout in seconds after which the pipeline will be killed.
     """
 
-    if any(c not in string.ascii_lowercase + string.digits + "_-" for c in code):
-        raise Exception("Pipeline code should contains only lower case letters, digits, '_' and '-'")
-
-    def decorator(fun):
-        if isinstance(fun, FunctionWithParameter):
-            parameters = fun.get_all_parameters()
-        else:
-            parameters = []
-
-        return Pipeline(code, name, fun, parameters, timeout)
-
-    return decorator
-
-
-class PipelineRunError(Exception):
-    pass
-
-
-class Pipeline:
     def __init__(
         self,
         code: str,
@@ -87,12 +66,34 @@ class Pipeline:
         self.timeout = timeout
         self.tasks = []
 
-    def task(self, function):
-        """task decorator"""
+    def task(self, function) -> PipelineWithTask:
+        """Task decorator.
 
+        Examples
+        --------
+        >>> @pipeline("my-pipeline")
+        ... def my_pipeline():
+        ...     result_1 = task1()
+        ...     task2(result_1)
+        ...
+        ... @my_pipeline.task
+        ... def task_1() -> int:
+        ...     return 42
+        ...
+        ... @my_pipeline.task
+        ... def task_2(foo: int):
+        ...     pass
+        """
         return PipelineWithTask(function, self)
 
-    def run(self, config: typing.Dict[str, typing.Any]):
+    def run(self, config: dict[str, typing.Any]):
+        """Run the pipeline using the provided config.
+
+        Parameters
+        ----------
+        config : typing.Dict[str, typing.Any]
+            The parameter values to use for this pipeline run.
+        """
         now = datetime.datetime.utcnow().replace(microsecond=0).isoformat()
         print(f'{now} Starting pipeline "{self.code}"')
 
@@ -116,7 +117,7 @@ class Pipeline:
         completed = 0
 
         while True:
-            tasks = self.get_available_tasks()
+            tasks = self._get_available_tasks()
             # filter already pooled task, even if they are not finished
             tasks = [t for t in tasks if not t.pooled]
 
@@ -166,11 +167,12 @@ class Pipeline:
 
         print(f'{now} Successfully completed pipeline "{self.code}"')
 
-    def get_available_tasks(self):
-        return [task for task in self.tasks if task.is_ready()]
-
-    def parameters_spec(self):
+    def parameters_spec(self) -> list[dict[str, typing.Any]]:
+        """Return the individual specifications of all the parameters of this pipeline."""
         return [arg.parameter_spec() for arg in self.parameters]
+
+    def _get_available_tasks(self) -> list[Task]:
+        return [task for task in self.tasks if task.is_ready()]
 
     def _update_progress(self, progress: int):
         if self._connected:
@@ -193,19 +195,25 @@ class Pipeline:
             print(f"Progress update: {progress}%")
 
     @property
-    def _connected(self):
+    def _connected(self) -> bool:
         env = get_environment()
-        return env == Environments.CLOUD_PIPELINE and "HEXA_SERVER_URL" in os.environ
 
-    def __call__(self, config: typing.Optional[typing.Dict[str, typing.Any]] = None):
+        return env == Environment.CLOUD_PIPELINE and "HEXA_SERVER_URL" in os.environ
+
+    def __call__(self, config: typing.Optional[dict[str, typing.Any]] = None):
+        """Call the pipeline by running it, after having configured the environment.
+
+        This method can be called with an explicit configuration. If no configuration is provided, it will parse the
+        command-line arguments to build it.
+        """
         # Handle local workspace config for dev / testing, if appropriate
-        if get_environment() == Environments.LOCAL_PIPELINE:
+        if get_environment() == Environment.LOCAL_PIPELINE:
             os.environ.update(get_local_workspace_config(Path("/home/hexa/pipeline")))
 
         # User can run their pipeline using `python pipeline.py`. It's considered as a standalone usage of the library.
         # Since we still support this use case for the moment, we'll try to load the workspace.yaml
         # at the path of the file
-        elif get_environment() == Environments.STANDALONE:
+        elif get_environment() == Environment.STANDALONE:
             os.environ.update(get_local_workspace_config(Path(sys.argv[0]).parent))
 
         if config is None:  # Called without arguments, in the pipeline file itself
@@ -221,7 +229,7 @@ class Pipeline:
                     "config file with the --config-file/-f argument."
                 )
             if args.config_file is not None:
-                with open(args.config_file, "r") as cf:
+                with open(args.config_file) as cf:
                     try:
                         config = json.load(cf)
                     except json.JSONDecodeError:
@@ -236,3 +244,59 @@ class Pipeline:
                 config = {}
 
         self.run(config)
+
+
+def pipeline(
+    code: str, *, name: str = None, timeout: int = None
+) -> typing.Callable[[typing.Callable[..., typing.Any]], Pipeline]:
+    """Decorate a Python function as an OpenHEXA pipeline.
+
+    Parameters
+    ----------
+    code : str
+        An identifier for the pipeline (should be unique within the workspace where the pipeline is deployed)
+    name : str, optional
+        An optional name for the pipeline (will be used instead of the code in the web interface)
+    timeout : int, optional
+        An optional timeout, in seconds, after which the pipeline run will be terminated (if not provided, a default
+        timeout will be applied by the OpenHEXA backend)
+
+    Returns
+    -------
+    typing.Callable
+        A decorator that returns a Pipeline
+
+    Examples
+    --------
+    >>> @pipeline("my-pipeline")
+    ... def my_pipeline():
+    ...     a_task()
+    ...
+    ... @my_pipeline.task
+    ... def a_task() -> int:
+    ...     return 42
+    """
+    if any(c not in string.ascii_lowercase + string.digits + "_-" for c in code):
+        raise Exception("Pipeline code should contains only lower case letters, digits, '_' and '-'")
+
+    def decorator(fun):
+        if isinstance(fun, FunctionWithParameter):
+            parameters = fun.get_all_parameters()
+        else:
+            parameters = []
+
+        return Pipeline(code, name, fun, parameters, timeout)
+
+    return decorator
+
+
+class PipelineConfigError(Exception):
+    """Error raised whenver the config passed to the pipeline run method is invalid."""
+
+    pass
+
+
+class PipelineRunError(Exception):
+    """Generic pipeline runtime error, raised whenever user code raises an exception."""
+
+    pass
