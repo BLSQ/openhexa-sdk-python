@@ -39,7 +39,7 @@ def is_debug(config: ConfigParser) -> bool:
 def open_config():
     """Open the local configuration file using configparser.
 
-    A default configuration file will generated if the file does not exist.
+    A default configuration file will be generated if the file does not exist.
     """
     config = ConfigParser()
     if os.path.exists(CONFIGFILE_PATH):
@@ -233,7 +233,7 @@ def ensure_is_pipeline_dir(pipeline_path: str):
 def upload_pipeline(config, pipeline_directory_path: typing.Union[str, Path]):
     """Upload the pipeline contained in the provided directory using the GraphQL API.
 
-    The pipeline code will be zipped and base64-encoded before being sent to tge backend.
+    The pipeline code will be zipped and base64-encoded before being sent to the backend.
     """
     pipeline = import_pipeline(pipeline_directory_path)
     directory = Path(os.path.abspath(pipeline_directory_path))

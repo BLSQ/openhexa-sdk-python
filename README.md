@@ -20,8 +20,8 @@ projects.
 
 Please refer to the [OpenHEXA wiki](https://github.com/BLSQ/openhexa/wiki/Home) for more information about OpenHEXA.
 
-This repository contains the code the OpenHEXA SDK, a library allows you to write code for the OpenHEXA platform. It 
-is particularly useful to write OpenHEXA data pipelines, but can also be used in the OpenHEXA notebooks environment.
+This repository contains the code of the OpenHEXA SDK, a library allows you to write code for the OpenHEXA platform. 
+It is particularly useful to write OpenHEXA data pipelines, but can also be used in the OpenHEXA notebooks environment.
 
 The OpenHEXA wiki has a section dedicated to the SDK: 
 [Using the OpenHEXA SDK](https://github.com/BLSQ/openhexa/wiki/Using-the-OpenHEXA-SDK).
