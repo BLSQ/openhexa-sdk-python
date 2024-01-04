@@ -6,7 +6,7 @@
 </p>
 <p align="center">
    <a href="https://github.com/BLSQ/openhexa-app/actions/workflows/test.yml">
-      <img alt="Test Suite" src="https://github.com/BLSQ/openhexa-app/actions/workflows/test.yml/badge.svg">
+      <img alt="Test Suite" src="https://github.com/BLSQ/openhexa-sdk-python/actions/workflows/ci.yml/badge.svg">
    </a>
 </p>
 
@@ -42,8 +42,6 @@ If you want to be able to run pipeline in a containerized environment on your ma
 Quickstart
 ----------
 
-### Writing and deploying pipelines
-
 Here's a super minimal example to get you started. First, create a new directory and a virtual environment:
 
 ```shell
@@ -58,6 +56,9 @@ You can then install the OpenHEXA SDK:
 ```shell
 pip install --upgrade openhexa.sdk
 ```
+
+💡New OpenHEXA SDK versions are released on a regular basis. Don't forget to update your local installations with 
+`pip install --upgrade` from times to times!
 
 Now that the SDK is installed withing your virtual environmentYou can now use the `openhexa` CLI utility to create 
 a new pipeline:
