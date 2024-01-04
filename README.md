@@ -26,11 +26,6 @@ It is particularly useful to write OpenHEXA data pipelines, but can also be used
 The OpenHEXA wiki has a section dedicated to the SDK: 
 [Using the OpenHEXA SDK](https://github.com/BLSQ/openhexa/wiki/Using-the-OpenHEXA-SDK).
 
-For more information about the technical aspects of OpenHEXA, you might be interested in the two following wiki pages:
-
-- [Installing OpenHEXA](https://github.com/BLSQ/openhexa/wiki/Installation-instructions)
-- [Technical Overview](https://github.com/BLSQ/openhexa/wiki/Technical-overview)
-
 Requirements
 ------------
 
