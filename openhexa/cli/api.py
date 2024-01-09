@@ -102,6 +102,11 @@ def graphql(config, query: str, variables=None, token=None):
     return data["data"]
 
 
+def get_skeleton_dir():
+    """Get the path to the skeleton directory."""
+    return Path(__file__).parent / "skeleton"
+
+
 def get_workspace(config, slug: str, token: str):
     """Get a single workspace."""
     return graphql(
@@ -228,6 +233,39 @@ def ensure_is_pipeline_dir(pipeline_path: str):
         raise Exception(f"Directory {pipeline_path} does not contain a pipeline.py file")
 
     return True
+
+
+# This is easier to mock in the tests than trying to mock click.confirm
+def ask_pipeline_config_creation():
+    """Mockable function to ask the user if he wants to create a pipeline config file.
+
+    Returns
+    -------
+        bool: True if the user wants to create a pipeline config file, False otherwise.
+
+    """
+    return click.confirm(
+        "No workspace.yaml file found. Do you want to create one?",
+        default=True,
+    )
+
+
+def ensure_pipeline_config_exists(pipeline_path: Path):
+    """Ensure that there is a workspace.yaml file in the directory. If it does not exist, it asks the user if he wants to create it.
+
+    Args:
+        pipeline_path (Path): Base directory of the pipeline
+    """
+    if (pipeline_path / "workspace.yaml").exists():
+        return True
+
+    if ask_pipeline_config_creation():
+        content = open(get_skeleton_dir() / "workspace.yaml").read()
+        with open(pipeline_path / "workspace.yaml", "w") as f:
+            f.write(content)
+        return True
+    else:
+        raise Exception("No workspace.yaml file found")
 
 
 def upload_pipeline(config, pipeline_directory_path: typing.Union[str, Path]):
