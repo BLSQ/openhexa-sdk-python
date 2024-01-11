@@ -160,7 +160,11 @@ class CurrentWorkspace:
         """
         identifier = identifier or slug
         if slug is not None:
-            warn("'slug' is deprecated. Use 'identifier' instead.", DeprecationWarning, stacklevel=2)
+            warn(
+                "'slug' is deprecated. Use 'identifier' instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
         try:
             env_variable_prefix = stringcase.constcase(identifier.lower())
             url = os.environ[f"{env_variable_prefix}_URL"]
@@ -184,7 +188,11 @@ class CurrentWorkspace:
         """
         identifier = identifier or slug
         if slug is not None:
-            warn("'slug' is deprecated. Use 'identifier' instead.", DeprecationWarning, stacklevel=2)
+            warn(
+                "'slug' is deprecated. Use 'identifier' instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
         try:
             env_variable_prefix = stringcase.constcase(identifier.lower())
             host = os.environ[f"{env_variable_prefix}_HOST"]
@@ -216,7 +224,11 @@ class CurrentWorkspace:
         """
         identifier = identifier or slug
         if slug is not None:
-            warn("'slug' is deprecated. Use 'identifier' instead.", DeprecationWarning, stacklevel=2)
+            warn(
+                "'slug' is deprecated. Use 'identifier' instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
         try:
             env_variable_prefix = stringcase.constcase(identifier.lower())
             secret_access_key = os.environ[f"{env_variable_prefix}_SECRET_ACCESS_KEY"]
@@ -244,7 +256,11 @@ class CurrentWorkspace:
         """
         identifier = identifier or slug
         if slug is not None:
-            warn("'slug' is deprecated. Use 'identifier' instead.", DeprecationWarning, stacklevel=2)
+            warn(
+                "'slug' is deprecated. Use 'identifier' instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
         try:
             env_variable_prefix = stringcase.constcase(identifier.lower())
             service_account_key = os.environ[f"{env_variable_prefix}_SERVICE_ACCOUNT_KEY"]
@@ -270,7 +286,11 @@ class CurrentWorkspace:
         """
         identifier = identifier or slug
         if slug is not None:
-            warn("'slug' is deprecated. Use 'identifier' instead.", DeprecationWarning, stacklevel=2)
+            warn(
+                "'slug' is deprecated. Use 'identifier' instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
         try:
             env_variable_prefix = stringcase.constcase(identifier.lower())
             url = os.environ[f"{env_variable_prefix}_URL"]
@@ -294,7 +314,11 @@ class CurrentWorkspace:
         """
         identifier = identifier or slug
         if slug is not None:
-            warn("'slug' is deprecated. Use 'identifier' instead.", DeprecationWarning, stacklevel=2)
+            warn(
+                "'slug' is deprecated. Use 'identifier' instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
         env_variable_prefix = stringcase.constcase(identifier.lower())
         fields = {}
         for key, value in os.environ.items():
@@ -306,14 +330,60 @@ class CurrentWorkspace:
             raise ConnectionDoesNotExist(f'No custom connection for "{identifier}"')
 
         dataclass = make_dataclass(
-            stringcase.pascalcase(identifier), fields.keys(), bases=(CustomConnection,), repr=False
+            stringcase.pascalcase(identifier),
+            fields.keys(),
+            bases=(CustomConnection,),
+            repr=False,
         )
 
         return dataclass(**fields)
 
-    def create_dataset(self, identifier: str, name: str, description: str):
-        """Create a new dataset."""
-        raise NotImplementedError("create_dataset is not implemented yet.")
+    def create_dataset(self, name: str, description: str):
+        """Create a new dataset.
+
+        Parameters
+        ----------
+        name: str
+            The name of the dataset
+        description: str
+            The description of the dataset
+
+        Returns
+        -------
+        Dataset
+            The created dataset
+
+        Raises
+        ------
+        ValueError
+            If the dataset could not be created
+        """
+        rsp = graphql(
+            """
+        mutation createDataset($input: CreateDatasetInput!) {
+            createDataset(input: $input) {
+                success
+                errors
+                dataset {
+                    slug
+                }
+            }
+        }
+        """,
+            {
+                "input": {
+                    "workspaceSlug": self.slug,
+                    "name": name,
+                    "description": description,
+                }
+            },
+        )
+
+        if rsp["createDataset"]["success"] is False:
+            raise ValueError(rsp["createDataset"]["errors"][0])
+
+        identifier = rsp["createDataset"]["dataset"]["slug"]
+        return self.get_dataset(identifier)
 
     def get_dataset(self, identifier: str) -> Dataset:
         """Get a dataset by its identifier.
@@ -322,6 +392,16 @@ class CurrentWorkspace:
         ----------
         identifier : str
             The identifier of the dataset in the OpenHEXA backend
+
+        Returns
+        -------
+        Dataset
+            The dataset
+
+        Raises
+        ------
+        ValueError
+            If the dataset does not exist
         """
         response = graphql(
             """
