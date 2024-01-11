@@ -182,6 +182,11 @@ def read_content(source: typing.Union[str, os.PathLike[str], typing.IO], encodin
 
     # If source is a buffer
     elif hasattr(source, "read"):
-        return source.read().encode(encoding)
+        content = source.read()
+
+        if not isinstance(content, bytes):
+            return content.encode(encoding)
+        else:
+            return content
 
     raise ValueError("Unsupported type for source")
