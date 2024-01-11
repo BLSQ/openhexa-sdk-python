@@ -14,7 +14,9 @@ from openhexa.cli.api import (
     create_pipeline,
     delete_pipeline,
     ensure_is_pipeline_dir,
+    ensure_pipeline_config_exists,
     get_pipeline,
+    get_skeleton_dir,
     get_workspace,
     is_debug,
     list_pipelines,
@@ -178,7 +180,7 @@ def pipelines_init(name: str):
         sys.exit(1)
 
     # Load samples
-    sample_directory_path = Path(__file__).parent / Path("skeleton")
+    sample_directory_path = get_skeleton_dir()
     with open(sample_directory_path / Path(".gitignore")) as sample_ignore_file:
         sample_ignore_content = sample_ignore_file.read()
     with open(sample_directory_path / Path("pipeline.py")) as sample_pipeline_file:
@@ -193,12 +195,12 @@ def pipelines_init(name: str):
 
     # Create directory
     new_pipeline_path.mkdir(exist_ok=False)
-    (new_pipeline_path / Path("workspace")).mkdir(exist_ok=False)
-    with open(new_pipeline_path / Path(".gitignore"), "w") as ignore_file:
+    (new_pipeline_path / "workspace").mkdir(exist_ok=False)
+    with open(new_pipeline_path / ".gitignore", "w") as ignore_file:
         ignore_file.write(sample_ignore_content)
-    with open(new_pipeline_path / Path("pipeline.py"), "w") as pipeline_file:
+    with open(new_pipeline_path / "pipeline.py", "w") as pipeline_file:
         pipeline_file.write(sample_pipeline_content)
-    with open(new_pipeline_path / Path("workspace.yaml"), "w") as workspace_file:
+    with open(new_pipeline_path / "workspace.yaml", "w") as workspace_file:
         workspace_file.write(sample_workspace_content)
 
     # Success
@@ -231,6 +233,7 @@ def pipelines_push(path: str):
         sys.exit(1)
 
     ensure_is_pipeline_dir(path)
+    ensure_pipeline_config_exists(Path(path))
 
     try:
         pipeline = import_pipeline(path)
@@ -342,7 +345,12 @@ def pipelines_delete(code: str):
     default=None,
     help="Configuration JSON file",
 )
-@click.option("--image", type=str, help="Docker image to use", default="blsq/openhexa-base-notebook:latest")
+@click.option(
+    "--image",
+    type=str,
+    help="Docker image to use",
+    default="blsq/openhexa-base-notebook:latest",
+)
 def pipelines_run(
     path: str,
     image: str,
@@ -352,14 +360,14 @@ def pipelines_run(
     """Run a pipeline locally."""
     from subprocess import Popen
 
+    path = Path(path)
     user_config = open_config()
     ensure_is_pipeline_dir(path)
+    ensure_pipeline_config_exists(path)
+    env_vars = get_local_workspace_config(path)
 
-    env_vars = get_local_workspace_config(Path(path))
-
-    # Prepare the mount for the workspace's files
+    # # Prepare the mount for the workspace's files
     mount_files_path = Path(env_vars["WORKSPACE_FILES_PATH"]).absolute()
-
     cmd = [
         "docker",
         "run",
@@ -405,7 +413,6 @@ def pipelines_run(
         cmd,
         close_fds=True,
     )
-
     return proc.wait()
 
 
