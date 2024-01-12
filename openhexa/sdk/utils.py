@@ -1,6 +1,7 @@
 """Miscellaneous utility functions."""
 
 import abc
+import contextlib
 import enum
 import os
 import typing
@@ -173,20 +174,21 @@ class Page:
         return result
 
 
-def read_content(source: typing.Union[str, os.PathLike[str], typing.IO], encoding: str = "utf-8") -> bytes:
+@contextlib.contextmanager
+def read_content(source: typing.Union[str, os.PathLike[str], typing.IO, bytes]):
     """Read file content and return it as bytes."""
-    # If source is a string or PathLike object
-    if isinstance(source, (str, os.PathLike)):
-        with open(os.fspath(source), "rb") as f:
-            return f.read()
+    try:
+        if isinstance(source, bytes):
+            yield source
+        elif hasattr(source, "read"):
+            yield source
+        # If source is a string or PathLike object
+        elif isinstance(source, (str, os.PathLike)):
+            with open(os.fspath(source), "rb") as f:
+                yield f
 
-    # If source is a buffer
-    elif hasattr(source, "read"):
-        content = source.read()
-
-        if not isinstance(content, bytes):
-            return content.encode(encoding)
         else:
-            return content
-
-    raise ValueError("Unsupported type for source")
+            raise ValueError("Unsupported type for source")
+    finally:
+        if hasattr(source, "close"):
+            source.close()

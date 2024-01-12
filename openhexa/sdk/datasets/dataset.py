@@ -203,14 +203,14 @@ class DatasetVersion:
 
     def add_file(
         self,
-        source: typing.Union[str, PathLike[str], typing.IO],
+        source: typing.Union[str, PathLike[str], typing.IO, bytes],
         filename: typing.Optional[str] = None,
     ) -> DatasetFile:
         """Create a new dataset file and add it to the dataset version."""
         mime_type = None
         if isinstance(source, (str, PathLike)):
             path = Path(source)
-            filename = path.name
+            filename = path.name if filename is None else filename
             mime_type, _ = mimetypes.guess_type(path)
         else:
             if filename is None:
@@ -249,19 +249,18 @@ class DatasetVersion:
                 raise ValueError("A file with this name already exists in this dataset version")
             else:
                 raise Exception(errors)
-
-        upload_url = data["createDatasetVersionFile"]["uploadUrl"]
-        content = read_content(source)
-
-        response = requests.put(upload_url, data=content, headers={"Content-Type": mime_type})
+        result = data["createDatasetVersionFile"]
+        upload_url = result["uploadUrl"]
+        with read_content(source) as content:
+            response = requests.put(upload_url, data=content, headers={"Content-Type": mime_type})
         response.raise_for_status()
         return DatasetFile(
             version=self,
-            id=data["createDatasetVersionFile"]["file"]["id"],
-            filename=data["createDatasetVersionFile"]["file"]["filename"],
-            content_type=data["createDatasetVersionFile"]["file"]["contentType"],
-            uri=data["createDatasetVersionFile"]["file"]["uri"],
-            created_at=data["createDatasetVersionFile"]["file"]["createdAt"],
+            id=result["file"]["id"],
+            filename=result["file"]["filename"],
+            content_type=result["file"]["contentType"],
+            uri=result["file"]["uri"],
+            created_at=result["file"]["createdAt"],
         )
 
 
