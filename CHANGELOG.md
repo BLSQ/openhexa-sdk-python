@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.1.34](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.33...0.1.34) (2024-01-16)
+
+
+### Features
+
+* **Dataset:** Create dataset with the SDK ([#110](https://github.com/BLSQ/openhexa-sdk-python/issues/110)) ([cba3e7e](https://github.com/BLSQ/openhexa-sdk-python/commit/cba3e7e861487204a534295492ee93e3c118387c))
+* **Workspaces:** list datasets in a workspace ([#112](https://github.com/BLSQ/openhexa-sdk-python/issues/112)) ([916832a](https://github.com/BLSQ/openhexa-sdk-python/commit/916832a44bae906cfe0a2706bf90c8057ab1b43f))
+
+
+### Bug Fixes
+
+* **CLI:** Ask the user to create the workspace.yaml if not found ([#109](https://github.com/BLSQ/openhexa-sdk-python/issues/109)) ([1da1a04](https://github.com/BLSQ/openhexa-sdk-python/commit/1da1a049f1c91fa8ff0e8389528b0a904f31c661))
+* **dataset:** Support bytes directly in read_content ([#111](https://github.com/BLSQ/openhexa-sdk-python/issues/111)) ([e83eefb](https://github.com/BLSQ/openhexa-sdk-python/commit/e83eefba04713db3c38749395a043e6dfb58a977))
+* **Docker:** Always force pull the image ([#103](https://github.com/BLSQ/openhexa-sdk-python/issues/103)) ([c538e10](https://github.com/BLSQ/openhexa-sdk-python/commit/c538e109e05b541d0e70dec8196e564338afd6db))
+
+
+### Miscellaneous
+
+* **deps-dev:** update build requirement from ~=0.10.0 to &gt;=0.10,&lt;1.1 ([#99](https://github.com/BLSQ/openhexa-sdk-python/issues/99)) ([a15457e](https://github.com/BLSQ/openhexa-sdk-python/commit/a15457ef3436d708b173a6c21cd90ff558f30b20))
+* **deps-dev:** update geopandas requirement from ~=0.12.2 to ~=0.14.2 ([#107](https://github.com/BLSQ/openhexa-sdk-python/issues/107)) ([a843015](https://github.com/BLSQ/openhexa-sdk-python/commit/a84301538d1d606e40a198eeafcbfd0f82c34d7e))
+* **deps-dev:** update pandas requirement from ~=2.0.0 to ~=2.1.4 ([#105](https://github.com/BLSQ/openhexa-sdk-python/issues/105)) ([b8691d1](https://github.com/BLSQ/openhexa-sdk-python/commit/b8691d1d9db9b66b1f6bd7130c0bd3d28c3d384f))
+* **deps-dev:** update pytest requirement from ~=7.3.0 to ~=7.4.4 ([#108](https://github.com/BLSQ/openhexa-sdk-python/issues/108)) ([f972373](https://github.com/BLSQ/openhexa-sdk-python/commit/f9723731bf3b98fb3f9155b09ef55548698a8c70))
+* **deps-dev:** update pytest-cov requirement ([#97](https://github.com/BLSQ/openhexa-sdk-python/issues/97)) ([65568b9](https://github.com/BLSQ/openhexa-sdk-python/commit/65568b99e628ade197c833037efeccf74b73ae08))
+* **deps-dev:** update rasterstats requirement ([#98](https://github.com/BLSQ/openhexa-sdk-python/issues/98)) ([e361c42](https://github.com/BLSQ/openhexa-sdk-python/commit/e361c426403316826a4fd6433a135a85f2d10886))
+* **deps-dev:** update requests requirement ([#100](https://github.com/BLSQ/openhexa-sdk-python/issues/100)) ([e5d9f3d](https://github.com/BLSQ/openhexa-sdk-python/commit/e5d9f3da1eba7ecda0b204138288d1283c8e7c6a))
+* **deps-dev:** update setuptools requirement ([#101](https://github.com/BLSQ/openhexa-sdk-python/issues/101)) ([6582ada](https://github.com/BLSQ/openhexa-sdk-python/commit/6582adab38dded7b2a4104459de541af3d3f3468))
+
 ## [0.1.33](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.32...0.1.33) (2023-12-12)
 
 
