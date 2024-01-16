@@ -440,6 +440,47 @@ class CurrentWorkspace:
             description=data["dataset"]["description"],
         )
 
+    def list_datasets(self) -> list[Dataset]:
+        """List datasets in a workspace.
+
+        Returns
+        -------
+        List of Datasets
+        """
+        response = graphql(
+            """
+            query getWorkspaceDatasets($slug: String!) {
+                workspace(slug: $slug) {
+                    datasets {
+                        items { 
+                            id
+                            dataset {
+                                id
+                                slug
+                                name
+                                description
+                            }
+                        }
+                    
+                    }
+                }
+            }
+        """,
+            {"slug": self.slug},
+        )
+        data = response["workspace"]["datasets"]["items"]
+        datasets = [
+            Dataset(
+                id=d["dataset"]["id"],
+                slug=d["dataset"]["slug"],
+                name=d["dataset"]["name"],
+                description=d["dataset"]["description"],
+            )
+            for d in data
+        ]
+
+        return datasets
+
 
 # Once we deprecate the `python pipeline.py` command, we can enhance this to only load the workspace
 # if we're in a pipeline/jupyter context
