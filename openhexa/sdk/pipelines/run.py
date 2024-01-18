@@ -4,7 +4,7 @@ import datetime
 import os
 import typing
 
-from openhexa.sdk.utils import Environment, get_environment, graphql
+from openhexa.sdk.utils import Environment, get_environment, graphql, read_content
 from openhexa.sdk.workspaces import workspace
 
 
@@ -26,22 +26,23 @@ class CurrentRun:
         """
         stripped_path = path.replace(workspace.files_path, "")
         name = stripped_path.strip("/")
-        if self._connected:
-            graphql(
-                """
-                mutation addPipelineOutput ($input: AddPipelineOutputInput!) {
-                    addPipelineOutput(input: $input) { success errors }
-                }""",
-                {
-                    "input": {
-                        "uri": f"gs://{os.environ['WORKSPACE_BUCKET_NAME']}{stripped_path}",
-                        "type": "file",
-                        "name": name,
-                    }
-                },
-            )
-        else:
-            print(f"Sending output with path {stripped_path}")
+        with read_content(path):
+            if self._connected:
+                graphql(
+                    """
+                    mutation addPipelineOutput ($input: AddPipelineOutputInput!) {
+                        addPipelineOutput(input: $input) { success errors }
+                    }""",
+                    {
+                        "input": {
+                            "uri": f"gs://{os.environ['WORKSPACE_BUCKET_NAME']}{stripped_path}",
+                            "type": "file",
+                            "name": name,
+                        }
+                    },
+                )
+            else:
+                print(f"Sending output with path {stripped_path}")
 
     def add_database_output(self, table_name: str):
         """Record a run output for a database operation.
