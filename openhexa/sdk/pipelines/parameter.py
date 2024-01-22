@@ -317,6 +317,7 @@ TYPES_BY_PYTHON_TYPE = {
     IASOConnection: IASOConnectionType,
     S3Connection: S3ConnectionType,
     GCSConnection: GCSConnectionType,
+    CustomConnection: CustomConnectionType,
 }
 
 
@@ -468,6 +469,7 @@ def parameter(
         type[PostgreSQLConnection],
         type[GCSConnection],
         type[S3Connection],
+        type[CustomConnection],
     ],
     name: typing.Optional[str] = None,
     choices: typing.Optional[typing.Sequence] = None,

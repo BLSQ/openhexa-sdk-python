@@ -2,7 +2,14 @@
 
 from .pipelines import current_run, parameter, pipeline
 from .workspaces import workspace
-from .workspaces.connection import DHIS2Connection, GCSConnection, IASOConnection, PostgreSQLConnection, S3Connection
+from .workspaces.connection import (
+    CustomConnection,
+    DHIS2Connection,
+    GCSConnection,
+    IASOConnection,
+    PostgreSQLConnection,
+    S3Connection,
+)
 
 __all__ = [
     "workspace",
@@ -14,4 +21,5 @@ __all__ = [
     "PostgreSQLConnection",
     "GCSConnection",
     "S3Connection",
+    "CustomConnection",
 ]
