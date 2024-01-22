@@ -12,9 +12,11 @@ from openhexa.sdk import (
     IASOConnection,
     PostgreSQLConnection,
     S3Connection,
+    workspace,
 )
 from openhexa.sdk.pipelines.parameter import (
     Boolean,
+    CustomConnectionType,
     DHIS2ConnectionType,
     Float,
     FunctionWithParameter,
@@ -196,6 +198,30 @@ def test_validate_s3_connection():
         assert s3_parameter_type.validate(identifier) == S3Connection(access_key_id, secret_access_key, bucket_name)
         with pytest.raises(ParameterValueError):
             s3_parameter_type.validate(86)
+
+
+def test_validate_custom_connection():
+    """Check Custom connection validation."""
+    identifier = "custom-connection-id"
+    env_variable_prefix = stringcase.constcase(identifier)
+    field_1 = "field_1"
+    field_2 = "field_2"
+
+    with mock.patch.dict(
+        os.environ,
+        {
+            f"{env_variable_prefix}_FIELD_1": field_1,
+            f"{env_variable_prefix}_FIELD_2": field_2,
+        },
+    ):
+        custom_co_type = CustomConnectionType()
+
+        custom_co = custom_co_type.validate(identifier)
+        _custom_co = workspace.custom_connection(identifier)
+
+        assert str(custom_co) == str(_custom_co)
+        with pytest.raises(ParameterValueError):
+            custom_co_type.validate(86)
 
 
 def test_parameter_init():

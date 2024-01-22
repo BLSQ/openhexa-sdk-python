@@ -300,7 +300,7 @@ class CustomConnectionType(ConnectionParameterType):
     @property
     def expected_type(self) -> type:
         """Returns the python type expected for values."""
-        return str
+        return CustomConnectionType
 
     def to_connection(self, value: str) -> CustomConnection:
         """Build a custom connection instance from the provided value (which should be a connection identifier)."""
