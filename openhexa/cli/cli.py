@@ -349,7 +349,7 @@ def pipelines_delete(code: str):
     "--image",
     type=str,
     help="Docker image to use",
-    default="blsq/openhexa-base-notebook:latest",
+    default="blsq/openhexa-blsq-environment:latest",
 )
 def pipelines_run(
     path: str,
