@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.35](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.34...0.1.35) (2024-01-23)
+
+
+### Features
+
+* **CLI:** Use blsq/openhexa-blsq-environment as the image to run the pipeline ([#115](https://github.com/BLSQ/openhexa-sdk-python/issues/115)) ([c813e3a](https://github.com/BLSQ/openhexa-sdk-python/commit/c813e3a1bc44a3ad8524326bfc3cdf4abca92cde))
+
+
+### Bug Fixes
+
+* **Parameters:** add support for custom connection ([#116](https://github.com/BLSQ/openhexa-sdk-python/issues/116)) ([65db931](https://github.com/BLSQ/openhexa-sdk-python/commit/65db93107d1c6a46d4f5af46171490b39722521f))
+
 ## [0.1.34](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.33...0.1.34) (2024-01-16)
 
 
