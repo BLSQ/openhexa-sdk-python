@@ -1,10 +1,11 @@
 """Pipeline run module."""
 
 import datetime
+import errno
 import os
 import typing
 
-from openhexa.sdk.utils import Environment, get_environment, graphql, read_content
+from openhexa.sdk.utils import Environment, get_environment, graphql
 from openhexa.sdk.workspaces import workspace
 
 
@@ -26,23 +27,27 @@ class CurrentRun:
         """
         stripped_path = path.replace(workspace.files_path, "")
         name = stripped_path.strip("/")
-        with read_content(path):
-            if self._connected:
-                graphql(
-                    """
-                    mutation addPipelineOutput ($input: AddPipelineOutputInput!) {
-                        addPipelineOutput(input: $input) { success errors }
-                    }""",
-                    {
-                        "input": {
-                            "uri": f"gs://{os.environ['WORKSPACE_BUCKET_NAME']}{stripped_path}",
-                            "type": "file",
-                            "name": name,
-                        }
-                    },
-                )
-            else:
-                print(f"Sending output with path {stripped_path}")
+        if self._connected:
+            res = graphql(
+                """
+                mutation addPipelineOutput ($input: AddPipelineOutputInput!) {
+                    addPipelineOutput(input: $input) { success errors }
+                }""",
+                {
+                    "input": {
+                        "uri": f"gs://{os.environ['WORKSPACE_BUCKET_NAME']}{stripped_path}",
+                        "type": "file",
+                        "name": name,
+                    }
+                },
+            )
+            if not res["addPipelineOutput"]["success"]:
+                if "FILE_NOT_FOUND" in res["addPipelineOutput"]["errors"]:
+                    raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), path)
+
+                raise Exception(res["addPipelineOutput"]["errors"])
+        else:
+            print(f"Sending output with path {stripped_path}")
 
     def add_database_output(self, table_name: str):
         """Record a run output for a database operation.
@@ -50,7 +55,7 @@ class CurrentRun:
         This output will be visible in the web interface, on the pipeline run page.
         """
         if self._connected:
-            graphql(
+            res = graphql(
                 """
                 mutation addPipelineOutput ($input: AddPipelineOutputInput!) {
                     addPipelineOutput(input: $input) { success errors }
@@ -63,6 +68,9 @@ class CurrentRun:
                     }
                 },
             )
+            if not res["addPipelineOutput"]["success"]:
+                if "TABLE_NOT_FOUND" in res["addPipelineOutput"]["errors"]:
+                    raise Exception(f"{table_name} doesn't exist in workspace {workspace.slug}")
         else:
             print(f"Sending output with table_name {table_name}")
 
