@@ -300,7 +300,7 @@ class CustomConnectionType(ConnectionParameterType):
     @property
     def expected_type(self) -> type:
         """Returns the python type expected for values."""
-        return str
+        return CustomConnectionType
 
     def to_connection(self, value: str) -> CustomConnection:
         """Build a custom connection instance from the provided value (which should be a connection identifier)."""
@@ -317,6 +317,7 @@ TYPES_BY_PYTHON_TYPE = {
     IASOConnection: IASOConnectionType,
     S3Connection: S3ConnectionType,
     GCSConnection: GCSConnectionType,
+    CustomConnection: CustomConnectionType,
 }
 
 
@@ -468,6 +469,7 @@ def parameter(
         type[PostgreSQLConnection],
         type[GCSConnection],
         type[S3Connection],
+        type[CustomConnection],
     ],
     name: typing.Optional[str] = None,
     choices: typing.Optional[typing.Sequence] = None,
