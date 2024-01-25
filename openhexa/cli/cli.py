@@ -216,7 +216,8 @@ def pipelines_init(name: str):
 
 @pipelines.command("push")
 @click.argument("path", default=".", type=click.Path(exists=True, file_okay=False, dir_okay=True))
-def pipelines_push(path: str):
+@click.option("--yes", is_flag=True, default=False, help="Do not ask for confirmation")
+def pipelines_push(path: str, yes: bool = False):
     """Push a pipeline to the backend. If the pipeline already exists, it will be updated otherwise it will be created.
 
     PATH is the path to the pipeline file.
@@ -251,11 +252,13 @@ def pipelines_push(path: str):
             click.echo(
                 f"Pipeline {click.style(pipeline.code, bold=True)} does not exist in workspace {click.style(workspace, bold=True)}"
             )
-            click.confirm(
-                f"Create pipeline {click.style(pipeline.code, bold=True)} in workspace {click.style(workspace, bold=True)}?",
-                True,
-                abort=True,
-            )
+            if not yes:
+                # Ask for confirmation
+                click.confirm(
+                    f"Create pipeline {click.style(pipeline.code, bold=True)} in workspace {click.style(workspace, bold=True)}?",
+                    True,
+                    abort=True,
+                )
             create_pipeline(user_config, pipeline.code, pipeline.name)
 
         click.echo(
