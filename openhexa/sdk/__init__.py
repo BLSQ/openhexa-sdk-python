@@ -1,5 +1,6 @@
 """SDK package."""
 
+from .datasets import Dataset
 from .pipelines import current_run, parameter, pipeline
 from .workspaces import workspace
 from .workspaces.connection import (
@@ -22,4 +23,5 @@ __all__ = [
     "GCSConnection",
     "S3Connection",
     "CustomConnection",
+    "Dataset",
 ]

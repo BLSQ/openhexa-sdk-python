@@ -7,6 +7,7 @@ import pytest
 import stringcase
 
 from openhexa.sdk import (
+    Dataset,
     DHIS2Connection,
     GCSConnection,
     IASOConnection,
@@ -17,6 +18,7 @@ from openhexa.sdk import (
 from openhexa.sdk.pipelines.parameter import (
     Boolean,
     CustomConnectionType,
+    DatasetType,
     DHIS2ConnectionType,
     Float,
     FunctionWithParameter,
@@ -222,6 +224,22 @@ def test_validate_custom_connection():
         assert str(custom_co) == str(_custom_co)
         with pytest.raises(ParameterValueError):
             custom_co_type.validate(86)
+
+
+@mock.patch("openhexa.sdk.workspace.get_dataset")
+def test_validate_dataset_parameter(mock_get_dataset):
+    """Check Dataset parameter validation."""
+    identifier = "dataset-slug"
+
+    dataset = Dataset(id="id", slug=identifier, name="name", description="Description")
+
+    mock_get_dataset.return_value = dataset
+
+    dataset_type = DatasetType()
+
+    assert dataset_type.validate(identifier) == dataset
+    with pytest.raises(ParameterValueError):
+        dataset_type.validate(86)
 
 
 def test_parameter_init():

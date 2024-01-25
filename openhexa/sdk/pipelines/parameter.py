@@ -5,6 +5,7 @@ See https://github.com/BLSQ/openhexa/wiki/Writing-OpenHEXA-pipelines#pipeline-pa
 import re
 import typing
 
+from openhexa.sdk.datasets import Dataset
 from openhexa.sdk.workspaces import workspace
 from openhexa.sdk.workspaces.connection import (
     Connection,
@@ -307,6 +308,34 @@ class CustomConnectionType(ConnectionParameterType):
         return workspace.custom_connection(value)
 
 
+class DatasetType(ParameterType):
+    """Type class for dataset parameter."""
+
+    @property
+    def spec_type(self) -> str:
+        """Return a type string for the specs that are sent to the backend."""
+        return "dataset"
+
+    @property
+    def expected_type(self) -> type:
+        """Returns the python type expected for values."""
+        return DatasetType
+
+    def validate(self, value: typing.Optional[typing.Any]) -> Dataset:
+        """Validate the provided value for this type."""
+        if not isinstance(value, str):
+            raise ParameterValueError(f"Invalid type for value {value} (expected {str}, got {type(value)})")
+
+        try:
+            return self.to_dataset(value)
+        except ValueError as e:
+            raise ParameterValueError(str(e))
+
+    def to_dataset(self, value: str) -> CustomConnection:
+        """Build a dataset instance from the provided value (which should be a dataset identifier)."""
+        return workspace.get_dataset(value)
+
+
 TYPES_BY_PYTHON_TYPE = {
     str: StringType,
     bool: Boolean,
@@ -318,6 +347,7 @@ TYPES_BY_PYTHON_TYPE = {
     S3Connection: S3ConnectionType,
     GCSConnection: GCSConnectionType,
     CustomConnection: CustomConnectionType,
+    Dataset: DatasetType,
 }
 
 
@@ -470,6 +500,7 @@ def parameter(
         type[GCSConnection],
         type[S3Connection],
         type[CustomConnection],
+        type[Dataset],
     ],
     name: typing.Optional[str] = None,
     choices: typing.Optional[typing.Sequence] = None,
