@@ -211,7 +211,7 @@ class PostgreSQLConnectionType(ConnectionParameterType):
     @property
     def expected_type(self) -> type:
         """Returns the python type expected for values."""
-        return PostgreSQLConnectionType
+        return PostgreSQLConnection
 
     def to_connection(self, value: str) -> PostgreSQLConnection:
         """Build a PostgreSQL connection instance from the provided value (which should be a connection identifier)."""
@@ -229,7 +229,7 @@ class S3ConnectionType(ConnectionParameterType):
     @property
     def expected_type(self) -> type:
         """Returns the python type expected for values."""
-        return S3ConnectionType
+        return S3Connection
 
     def to_connection(self, value: str) -> S3Connection:
         """Build a S3 connection instance from the provided value (which should be a connection identifier)."""
@@ -247,7 +247,7 @@ class GCSConnectionType(ConnectionParameterType):
     @property
     def expected_type(self) -> type:
         """Returns the python type expected for values."""
-        return GCSConnectionType
+        return GCSConnection
 
     def to_connection(self, value: str) -> GCSConnection:
         """Build a GCS connection instance from the provided value (which should be a connection identifier)."""
@@ -265,7 +265,7 @@ class DHIS2ConnectionType(ConnectionParameterType):
     @property
     def expected_type(self) -> type:
         """Returns the python type expected for values."""
-        return DHIS2ConnectionType
+        return DHIS2Connection
 
     def to_connection(self, value: str) -> DHIS2Connection:
         """Build a DHIS2 connection instance from the provided value (which should be a connection identifier)."""
@@ -283,7 +283,7 @@ class IASOConnectionType(ConnectionParameterType):
     @property
     def expected_type(self) -> type:
         """Returns the python type expected for values."""
-        return IASOConnectionType
+        return IASOConnection
 
     def to_connection(self, value: str) -> IASOConnection:
         """Build a IASO connection instance from the provided value (which should be a connection identifier)."""
@@ -301,7 +301,7 @@ class CustomConnectionType(ConnectionParameterType):
     @property
     def expected_type(self) -> type:
         """Returns the python type expected for values."""
-        return CustomConnectionType
+        return CustomConnection
 
     def to_connection(self, value: str) -> CustomConnection:
         """Build a custom connection instance from the provided value (which should be a connection identifier)."""
@@ -319,7 +319,17 @@ class DatasetType(ParameterType):
     @property
     def expected_type(self) -> type:
         """Returns the python type expected for values."""
-        return DatasetType
+        return Dataset
+
+    def validate_default(self, value: typing.Optional[typing.Any]):
+        """Validate the default value configured for this type."""
+        if value is None:
+            return
+
+        if not isinstance(value, str):
+            raise InvalidParameterError("Default value for dataset parameter type should be string.")
+        elif value == "":
+            raise ParameterValueError("Empty values are not accepted.")
 
     def validate(self, value: typing.Optional[typing.Any]) -> Dataset:
         """Validate the provided value for this type."""
@@ -327,13 +337,9 @@ class DatasetType(ParameterType):
             raise ParameterValueError(f"Invalid type for value {value} (expected {str}, got {type(value)})")
 
         try:
-            return self.to_dataset(value)
+            return workspace.get_dataset(value)
         except ValueError as e:
             raise ParameterValueError(str(e))
-
-    def to_dataset(self, value: str) -> CustomConnection:
-        """Build a dataset instance from the provided value (which should be a dataset identifier)."""
-        return workspace.get_dataset(value)
 
 
 TYPES_BY_PYTHON_TYPE = {
