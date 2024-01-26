@@ -1,6 +1,7 @@
 """Pipeline run module."""
 
 import datetime
+import errno
 import os
 import typing
 
@@ -27,7 +28,7 @@ class CurrentRun:
         stripped_path = path.replace(workspace.files_path, "")
         name = stripped_path.strip("/")
         if self._connected:
-            graphql(
+            res = graphql(
                 """
                 mutation addPipelineOutput ($input: AddPipelineOutputInput!) {
                     addPipelineOutput(input: $input) { success errors }
@@ -40,6 +41,11 @@ class CurrentRun:
                     }
                 },
             )
+            if not res["addPipelineOutput"]["success"]:
+                if "FILE_NOT_FOUND" in res["addPipelineOutput"]["errors"]:
+                    raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), path)
+
+                raise Exception(res["addPipelineOutput"]["errors"])
         else:
             print(f"Sending output with path {stripped_path}")
 
@@ -49,7 +55,7 @@ class CurrentRun:
         This output will be visible in the web interface, on the pipeline run page.
         """
         if self._connected:
-            graphql(
+            res = graphql(
                 """
                 mutation addPipelineOutput ($input: AddPipelineOutputInput!) {
                     addPipelineOutput(input: $input) { success errors }
@@ -62,6 +68,9 @@ class CurrentRun:
                     }
                 },
             )
+            if not res["addPipelineOutput"]["success"]:
+                if "TABLE_NOT_FOUND" in res["addPipelineOutput"]["errors"]:
+                    raise Exception(f"{table_name} doesn't exist in workspace {workspace.slug}")
         else:
             print(f"Sending output with table_name {table_name}")
 
