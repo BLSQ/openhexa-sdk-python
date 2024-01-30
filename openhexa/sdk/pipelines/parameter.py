@@ -442,6 +442,9 @@ class Parameter:
         except ParameterValueError:
             raise InvalidParameterError(f"The default value for {self.code} is not valid.")
 
+        if self.choices is not None and default not in self.choices:
+            raise InvalidParameterError(f"The default value for {self.code} is not included in the provided choices.")
+
     def parameter_spec(self) -> dict[str, typing.Any]:
         """Build specification for this parameter, to be provided to the OpenHEXA backend."""
         return {

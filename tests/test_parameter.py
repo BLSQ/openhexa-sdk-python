@@ -265,6 +265,8 @@ def test_parameter_init():
         Parameter("arg", type=str, default="")
     with pytest.raises(InvalidParameterError):
         Parameter("arg", type=str, default=[""], multiple=True)
+    with pytest.raises(InvalidParameterError):
+        Parameter("arg", type=str, choices=["foo", "bar"], default="Bar")
 
 
 def test_parameter_validate_single():
