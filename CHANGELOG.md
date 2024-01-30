@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.1.36](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.35...0.1.36) (2024-01-30)
+
+
+### Features
+
+* **CLI:** User can add --yes to the  command to not have to confirm the creation of the pipeline ([85a9098](https://github.com/BLSQ/openhexa-sdk-python/commit/85a9098e72a3889879ad4723ffea94c773a6178b))
+
+
+### Bug Fixes
+
+* **CurrentRun:** check if file exist when adding output ([#114](https://github.com/BLSQ/openhexa-sdk-python/issues/114)) ([4dfe8d1](https://github.com/BLSQ/openhexa-sdk-python/commit/4dfe8d12d56ed2d66007a90b48372adb0b5ac3d3))
+
+
+### Miscellaneous
+
+* **deps-dev:** update geopandas requirement ([#121](https://github.com/BLSQ/openhexa-sdk-python/issues/121)) ([80f21cb](https://github.com/BLSQ/openhexa-sdk-python/commit/80f21cb5435b9626671f6bceec3ef8a16a40fbd3))
+* **deps-dev:** update pandas requirement ([#117](https://github.com/BLSQ/openhexa-sdk-python/issues/117)) ([2270bef](https://github.com/BLSQ/openhexa-sdk-python/commit/2270befb55d29a2b95bd4310d58ee4e4fc3d191c))
+* **deps-dev:** update pytest requirement from ~=7.3.0 to &gt;=7.3,&lt;8.1 ([#122](https://github.com/BLSQ/openhexa-sdk-python/issues/122)) ([94d867f](https://github.com/BLSQ/openhexa-sdk-python/commit/94d867fdb4a29163d9f69e6c549203d23dabe143))
+* **deps:** update requests ([75301e9](https://github.com/BLSQ/openhexa-sdk-python/commit/75301e92e63d5c33b4be29798a6bf54e79d13fbc))
+
 ## [0.1.35](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.34...0.1.35) (2024-01-23)
 
 
