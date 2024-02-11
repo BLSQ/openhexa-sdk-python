@@ -369,6 +369,8 @@ def pipelines_run(
     ensure_pipeline_config_exists(path)
     env_vars = get_local_workspace_config(path)
 
+    current_workspace = user_config["openhexa"].get("current_workspace", None)
+
     # # Prepare the mount for the workspace's files
     mount_files_path = Path(env_vars["WORKSPACE_FILES_PATH"]).absolute()
     cmd = [
@@ -381,7 +383,7 @@ def pipelines_run(
         "--env",
         "HEXA_ENVIRONMENT=local_pipeline",
         "--env",
-        f"HEXA_WORKSPACE={user_config['openhexa']['current_workspace']}",
+        f"HEXA_WORKSPACE={current_workspace}",
         "--platform",
         "linux/amd64",
         "--rm",
