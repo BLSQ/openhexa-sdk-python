@@ -1,14 +1,17 @@
 """CLI test module."""
 
+import base64
 from configparser import ConfigParser
+from io import BytesIO
 from pathlib import Path
 from tempfile import mkdtemp
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
+from zipfile import ZipFile
 
 from click.testing import CliRunner
 
-from openhexa.cli.cli import pipelines_run
+from openhexa.cli.cli import pipelines_download, pipelines_run
 
 
 class CliRunTest(TestCase):
@@ -86,3 +89,62 @@ class CliRunTest(TestCase):
                 self.assertEqual(result.exit_code, 0)
                 self.assertTrue((Path(tmp) / "workspace.yaml").exists())
                 mock_popen.assert_called_once()
+
+    @patch("openhexa.cli.api.graphql")
+    def test_download_pipeline_no_pipeline(self, mock_graphql):
+        """Test the download pipeline command."""
+        with self.runner.isolated_filesystem() as tmp:
+            # Unknown pipeline
+            mock_graphql.return_value = {"pipelineByCode": None}
+            result = self.runner.invoke(pipelines_download, ["test_pipeline", tmp])
+            self.assertIn(
+                "No pipeline exists in test_workspace with code test_pipeline",
+                str(result.exception),
+            )
+
+    @patch("openhexa.cli.api.graphql")
+    def test_download_pipeline_overwrite(self, mock_graphql):
+        """Test the download pipeline command with an existing director with and without content."""
+        with self.runner.isolated_filesystem() as tmp:
+            # Create a zipfile with a pipeline.py file in a buffer
+            zip_buffer = BytesIO()
+            fake_zipfile = ZipFile(zip_buffer, "w")
+            fake_zipfile.writestr("pipeline.py", "print('pipeline.py file')")
+            fake_zipfile.close()
+
+            # Known Pipeline & non empty directory
+            with open(tmp + "/pipeline.py", "w") as f:
+                f.write("<content>")
+            mock_graphql.return_value = {
+                "pipelineByCode": {"currentVersion": {"zipfile": base64.b64encode(zip_buffer.getvalue()).decode()}}
+            }
+            result = self.runner.invoke(pipelines_download, ["test_pipeline", tmp], input="N\n")
+            self.assertIn("Overwrite the files?", result.output)
+            self.assertIn(f"{tmp} is not empty", result.output)
+            self.assertEqual(open(tmp + "/pipeline.py").read(), "<content>")
+
+            # Overwrite the files in the directory
+            mock_graphql.return_value = {
+                "pipelineByCode": {"currentVersion": {"zipfile": base64.b64encode(zip_buffer.getvalue()).decode()}}
+            }
+            result = self.runner.invoke(pipelines_download, ["test_pipeline", tmp], input="y\n")
+            self.assertIn("Overwrite the files?", result.output)
+            self.assertEqual(open(tmp + "/pipeline.py").read(), "print('pipeline.py file')")
+
+    @patch("openhexa.cli.api.graphql")
+    def test_download_pipeline(self, mock_graphql):
+        """Test the download pipeline command."""
+        with self.runner.isolated_filesystem() as tmp:
+            # Create a zipfile with a pipeline.py file in a buffer
+            zip_buffer = BytesIO()
+            fake_zipfile = ZipFile(zip_buffer, "w")
+            fake_zipfile.writestr("pipeline.py", "print('pipeline.py file')")
+            fake_zipfile.close()
+
+            mock_graphql.return_value = {
+                "pipelineByCode": {"currentVersion": {"zipfile": base64.b64encode(zip_buffer.getvalue()).decode()}}
+            }
+            result = self.runner.invoke(pipelines_download, ["test_pipeline", tmp])
+            self.assertEqual(result.exit_code, 0)
+            self.assertTrue((Path(tmp) / "pipeline.py").exists())
+            self.assertEqual(open(tmp + "/pipeline.py").read(), "print('pipeline.py file')")
