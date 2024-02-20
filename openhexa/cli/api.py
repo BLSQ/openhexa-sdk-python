@@ -31,6 +31,12 @@ class PipelineDefinitionErrorCode(enum.Enum):
     INVALID_TIMEOUT_VALUE = "INVALID_TIMEOUT_VALUE"
 
 
+class PermissionDenied(Exception):
+    """Raised whenever an operation on a pipeline is denied by the backend."""
+
+    pass
+
+
 def is_debug(config: ConfigParser) -> bool:
     """Determine whether the provided configuration has the debug flag."""
     return config.getboolean("openhexa", "debug", fallback=False)
@@ -218,6 +224,11 @@ def delete_pipeline(config, pipeline_id: str):
     )
 
     if not data["deletePipeline"]["success"]:
+        if "PERMISSION_DENIED" in data["deletePipeline"]["errors"]:
+            raise Exception(
+                "Check that you have the correct permission or the pipeline is not in a queued/running state."
+            )
+
         raise Exception(data["deletePipeline"]["errors"])
 
     return data["deletePipeline"]["success"]

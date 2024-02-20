@@ -82,9 +82,10 @@ def test_delete_pipeline_not_in_workspace():
     config = configparser.ConfigParser()
     config["openhexa"] = {"debug": True, "current_workspace": "test_workspace"}
 
-    with mock.patch("openhexa.cli.api.graphql") as mocked_graphql_client, mock.patch(
-        "openhexa.cli.cli.open_config"
-    ) as mocked_config:
+    with (
+        mock.patch("openhexa.cli.api.graphql") as mocked_graphql_client,
+        mock.patch("openhexa.cli.cli.open_config") as mocked_config,
+    ):
         runner = CliRunner()
         mocked_config.return_value = config
         mocked_graphql_client.return_value = {"pipelineByCode": None}
@@ -98,9 +99,10 @@ def test_delete_pipeline_confirm_code_invalid():
     config = configparser.ConfigParser()
     config["openhexa"] = {"debug": True, "current_workspace": "test_workspace"}
 
-    with mock.patch("openhexa.cli.api.graphql") as mocked_graphql_client, mock.patch(
-        "openhexa.cli.cli.open_config"
-    ) as mocked_config:
+    with (
+        mock.patch("openhexa.cli.api.graphql") as mocked_graphql_client,
+        mock.patch("openhexa.cli.cli.open_config") as mocked_config,
+    ):
         runner = CliRunner()
         mocked_config.return_value = config
 
@@ -121,9 +123,11 @@ def test_delete_pipeline():
     config = configparser.ConfigParser()
     config["openhexa"] = {"debug": True, "current_workspace": "test_workspace"}
 
-    with mock.patch("openhexa.cli.cli.get_pipeline") as mocked_get_pipeline, mock.patch(
-        "openhexa.cli.cli.delete_pipeline"
-    ) as mocked_delete_pipeline, mock.patch("openhexa.cli.cli.open_config") as mocked_config:
+    with (
+        mock.patch("openhexa.cli.cli.get_pipeline") as mocked_get_pipeline,
+        mock.patch("openhexa.cli.cli.delete_pipeline") as mocked_delete_pipeline,
+        mock.patch("openhexa.cli.cli.open_config") as mocked_config,
+    ):
         runner = CliRunner()
         mocked_config.return_value = config
 
@@ -136,3 +140,31 @@ def test_delete_pipeline():
         r = runner.invoke(pipelines_delete, ["test_pipelines"], input="test_pipelines")  # NOQA
 
         assert r.exit_code == 0
+
+
+def test_delete_pipeline_permission_denied():
+    """Failed path for delete pipeline API call."""
+    config = configparser.ConfigParser()
+    config["openhexa"] = {"debug": True, "current_workspace": "test_workspace"}
+
+    with (
+        mock.patch("openhexa.cli.cli.get_pipeline") as mocked_get_pipeline,
+        mock.patch("openhexa.cli.cli.delete_pipeline") as mocked_delete_pipeline,
+        mock.patch("openhexa.cli.cli.open_config") as mocked_config,
+    ):
+        runner = CliRunner()
+        mocked_config.return_value = config
+
+        mocked_get_pipeline.return_value = {
+            "id": uuid.uuid4(),
+            "code": "test_pipelines",
+            "currentVersion": {"number": 1},
+        }
+        mocked_delete_pipeline.side_effect = Exception(
+            "Check that you have the correct permission or the pipeline is not in a queued/running state"
+        )
+        r = runner.invoke(pipelines_delete, ["test_pipelines"], input="test_pipelines")  # NOQA
+
+        assert "Check that you have the correct permission or the pipeline is not in a queued/running state" in str(
+            r.exception
+        )

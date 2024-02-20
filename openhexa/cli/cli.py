@@ -313,25 +313,13 @@ def pipelines_delete(code: str):
             )
             sys.exit(1)
 
-        confirmation_code = click.prompt(
-            f'This will remove the pipeline "{click.style(code, bold=True)}" from the "{click.style(workspace, bold=True)} workspace. This operation cannot be undone.\nPlease enter "{click.style(code, bold=True)}" to confirm',
-            type=str,
-        )
-
-        if confirmation_code != code:
-            click.echo(
-                "Pipeline code and confirmation are different, aborted.",
-                err=True,
-            )
-            sys.exit(1)
-
         try:
             if delete_pipeline(user_config, pipeline["id"]):
                 click.echo(f"Pipeline {click.style(code, bold=True)} deleted.")
 
         except Exception as e:
             _terminate(
-                f'Error while deleting pipeline: "{e}"',
+                f'Error while deleting pipeline {code}: "{e}"',
                 err=True,
                 exception=e,
                 debug=is_debug(user_config),
