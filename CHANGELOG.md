@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.1.37](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.36...0.1.37) (2024-02-20)
+
+
+### Features
+
+* **Parameter:** add support for Dataset parameter type ([#120](https://github.com/BLSQ/openhexa-sdk-python/issues/120)) ([783b672](https://github.com/BLSQ/openhexa-sdk-python/commit/783b67208d21f5a226ebb6f65d1f35dfe6da6d3d))
+* **Pipelines:** Allow user to download the latest version of a pipeline ([#128](https://github.com/BLSQ/openhexa-sdk-python/issues/128)) ([2dae69d](https://github.com/BLSQ/openhexa-sdk-python/commit/2dae69da69d4742b844f4b8e0c0e5b4e999da41d))
+
+
+### Bug Fixes
+
+* **CLI:** Running a pipeline should not require an active workspace ([#126](https://github.com/BLSQ/openhexa-sdk-python/issues/126)) ([7618d91](https://github.com/BLSQ/openhexa-sdk-python/commit/7618d918ebe701de41191dfe58196c3118f0bd9f))
+* **Parameter:** check if default value is in choices ([#123](https://github.com/BLSQ/openhexa-sdk-python/issues/123)) ([726df4e](https://github.com/BLSQ/openhexa-sdk-python/commit/726df4ef94a556552778baa09262aad0537e4f49))
+
 ## [0.1.36](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.35...0.1.36) (2024-01-30)
 
 
