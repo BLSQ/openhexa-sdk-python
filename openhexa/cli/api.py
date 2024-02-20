@@ -24,6 +24,18 @@ class InvalidDefinitionError(Exception):
     pass
 
 
+class NoActiveWorkspaceError(Exception):
+    """Raised when no workspace is currently active in the configuration."""
+
+    pass
+
+
+class OutputDirectoryError(Exception):
+    """Raised when the output directory is not a directory or is not empty."""
+
+    pass
+
+
 class PipelineDefinitionErrorCode(enum.Enum):
     """Enumeration of possible pipeline definition error codes."""
 
@@ -65,6 +77,8 @@ def save_config(config: ConfigParser):
 def graphql(config, query: str, variables=None, token=None):
     """Perform a GraphQL request."""
     url = config["openhexa"]["url"] + "/graphql/"
+    if config["openhexa"]["current_workspace"] is None:
+        raise NoActiveWorkspaceError
     if token is None:
         current_workspace = config["openhexa"]["current_workspace"]
         token = config["workspaces"].get(current_workspace)
@@ -126,6 +140,8 @@ def get_workspace(config, slug: str, token: str):
 
 def list_pipelines(config):
     """List all pipelines in the workspace."""
+    if config["openhexa"]["current_workspace"] is None:
+        raise NoActiveWorkspaceError
     data = graphql(
         config,
         """
@@ -149,6 +165,8 @@ def list_pipelines(config):
 
 def get_pipeline(config, pipeline_code: str) -> dict[str, typing.Any]:
     """Get a single pipeline."""
+    if config["openhexa"]["current_workspace"] is None:
+        raise NoActiveWorkspaceError
     data = graphql(
         config,
         """
@@ -172,6 +190,8 @@ def get_pipeline(config, pipeline_code: str) -> dict[str, typing.Any]:
 
 def create_pipeline(config, pipeline_code: str, pipeline_name: str):
     """Create a pipeline using the API."""
+    if config["openhexa"]["current_workspace"] is None:
+        raise NoActiveWorkspaceError
     data = graphql(
         config,
         """
@@ -200,6 +220,39 @@ def create_pipeline(config, pipeline_code: str, pipeline_name: str):
         raise Exception(data["createPipeline"]["errors"])
 
     return data["createPipeline"]["pipeline"]
+
+
+def download_pipeline_sourcecode(config, pipeline_code, output_path: Path = None, force_overwrite=False):
+    """Download the source code of a pipeline."""
+    if config["openhexa"]["current_workspace"] is None:
+        raise NoActiveWorkspaceError
+    if output_path.exists() and not output_path.is_dir():
+        raise OutputDirectoryError(f"{output_path.absolute()} is not a directory")
+    if output_path.exists() and output_path.is_dir() and any(output_path.iterdir()) and not force_overwrite:
+        raise OutputDirectoryError(f"{output_path.absolute()} is not empty")
+    r = graphql(
+        config,
+        """
+        query getPipelineVersionSourceCode($workspaceSlug: String!, $pipelineCode: String!)  {
+            pipelineByCode(workspaceSlug: $workspaceSlug, code: $pipelineCode) {
+                currentVersion {
+                    zipfile
+                }
+            }
+        }
+    """,
+        {
+            "workspaceSlug": config["openhexa"]["current_workspace"],
+            "pipelineCode": pipeline_code,
+        },
+    )
+    if r["pipelineByCode"] is None:
+        raise Exception(f"No pipeline exists in {config['openhexa']['current_workspace']} with code {pipeline_code}")
+    if r["pipelineByCode"]["currentVersion"] is None:
+        raise Exception(f"No version found for pipeline {pipeline_code}")
+
+    zip_file = base64.b64decode(r["pipelineByCode"]["currentVersion"]["zipfile"])
+    ZipFile(io.BytesIO(zip_file)).extractall(output_path)
 
 
 def delete_pipeline(config, pipeline_id: str):
@@ -273,6 +326,9 @@ def upload_pipeline(config, pipeline_directory_path: typing.Union[str, Path]):
 
     The pipeline code will be zipped and base64-encoded before being sent to the backend.
     """
+    if config["openhexa"]["current_workspace"] is None:
+        raise NoActiveWorkspaceError
+
     pipeline = import_pipeline(pipeline_directory_path)
     directory = Path(os.path.abspath(pipeline_directory_path))
 

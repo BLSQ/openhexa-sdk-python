@@ -11,8 +11,11 @@ import stringcase
 
 from openhexa.cli.api import (
     InvalidDefinitionError,
+    NoActiveWorkspaceError,
+    OutputDirectoryError,
     create_pipeline,
     delete_pipeline,
+    download_pipeline_sourcecode,
     ensure_is_pipeline_dir,
     ensure_pipeline_config_exists,
     get_pipeline,
@@ -289,6 +292,39 @@ def pipelines_push(path: str, yes: bool = False):
                 exception=e,
                 debug=is_debug(user_config),
             )
+
+
+@pipelines.command("download")
+@click.argument("code", type=str)
+@click.argument(
+    "output",
+    type=click.Path(path_type=Path),
+    default=".",
+)
+def pipelines_download(code: str, output: Path):
+    """Download a pipeline and unzip it at the output path given."""
+    user_config = open_config()
+    try:
+        force_overwrite = False
+        if output.exists() and output.is_dir() and any(output.iterdir()):
+            force_overwrite = click.confirm(
+                f"Directory {click.style(output.absolute(), bold=True)} is not empty. Overwrite the files?"
+            )
+        download_pipeline_sourcecode(user_config, code, output, force_overwrite)
+        click.echo(f"You can find the pipeline source code in '{click.style(output.absolute(), bold=True)}'")
+    except OutputDirectoryError as e:
+        click.echo(
+            str(e),
+            err=True,
+        )
+        sys.exit(1)
+    except NoActiveWorkspaceError:
+        click.echo(
+            "No workspace activated. Use openhexa workspaces add or openhexa workspaces activate to "
+            "activate a workspace.",
+            err=True,
+        )
+        sys.exit(1)
 
 
 @pipelines.command("delete")
