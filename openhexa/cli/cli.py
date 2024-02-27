@@ -27,7 +27,9 @@ from openhexa.cli.api import (
     save_config,
     upload_pipeline,
 )
-from openhexa.sdk.pipelines import get_local_workspace_config, import_pipeline
+from openhexa.sdk.pipelines import get_local_workspace_config
+from openhexa.sdk.pipelines.exceptions import PipelineNotFound
+from openhexa.sdk.pipelines.runtime import get_pipeline_metadata
 
 
 @click.group()
@@ -218,7 +220,16 @@ def pipelines_init(name: str):
 
 
 @pipelines.command("push")
-@click.argument("path", default=".", type=click.Path(exists=True, file_okay=False, dir_okay=True))
+@click.argument(
+    "path",
+    default=".",
+    type=click.Path(
+        exists=True,
+        path_type=Path,
+        file_okay=False,
+        dir_okay=True,
+    ),
+)
 @click.option("--yes", is_flag=True, default=False, help="Do not ask for confirmation")
 def pipelines_push(path: str, yes: bool = False):
     """Push a pipeline to the backend. If the pipeline already exists, it will be updated otherwise it will be created.
@@ -237,18 +248,24 @@ def pipelines_push(path: str, yes: bool = False):
         sys.exit(1)
 
     ensure_is_pipeline_dir(path)
-    ensure_pipeline_config_exists(Path(path))
+    ensure_pipeline_config_exists(path)
 
     try:
-        pipeline = import_pipeline(path)
+        pipeline = get_pipeline_metadata(path)
+    except PipelineNotFound:
+        click.echo(
+            f"No function with openhexa.sdk pipeline decorator found in {click.style(path, bold=True)}.",
+            err=True,
+        )
+        sys.exit(1)
     except Exception as e:
         click.echo(f'Error while importing pipeline: "{e}"', err=True)
         if is_debug(user_config):
             raise e
         sys.exit(1)
     else:
-        workspace_pipelines = list_pipelines(user_config)
         if is_debug(user_config):
+            workspace_pipelines = list_pipelines(user_config)
             click.echo(workspace_pipelines)
 
         if get_pipeline(user_config, pipeline.code) is None:
@@ -375,7 +392,7 @@ def pipelines_delete(code: str):
 
 
 @pipelines.command("run")
-@click.argument("path", default=".", type=click.Path(exists=True, file_okay=False, dir_okay=True))
+@click.argument("path", default=".", type=click.Path(exists=True, file_okay=False, dir_okay=True, path_type=Path))
 @click.option("-c", "config_str", type=str, help="Configuration JSON as a string")
 @click.option(
     "-f",
@@ -399,7 +416,6 @@ def pipelines_run(
     """Run a pipeline locally."""
     from subprocess import Popen
 
-    path = Path(path)
     user_config = open_config()
     ensure_is_pipeline_dir(path)
     ensure_pipeline_config_exists(path)

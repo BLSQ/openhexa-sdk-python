@@ -6,6 +6,7 @@ import io
 import os
 import typing
 from configparser import ConfigParser
+from dataclasses import asdict
 from importlib.metadata import version
 from pathlib import Path
 from zipfile import ZipFile
@@ -13,7 +14,8 @@ from zipfile import ZipFile
 import click
 import requests
 
-from openhexa.sdk.pipelines import get_local_workspace_config, import_pipeline
+from openhexa.sdk.pipelines import get_local_workspace_config
+from openhexa.sdk.pipelines.runtime import get_pipeline_metadata
 
 CONFIGFILE_PATH = os.path.expanduser("~") + "/.openhexa.ini"
 
@@ -251,8 +253,9 @@ def download_pipeline_sourcecode(config, pipeline_code, output_path: Path = None
     if r["pipelineByCode"]["currentVersion"] is None:
         raise Exception(f"No version found for pipeline {pipeline_code}")
 
-    zip_file = base64.b64decode(r["pipelineByCode"]["currentVersion"]["zipfile"])
-    ZipFile(io.BytesIO(zip_file)).extractall(output_path)
+    zip_file = base64.b64decode(r["pipelineByCode"]["currentVersion"]["zipfile"].encode("ascii"))
+    with ZipFile(io.BytesIO(zip_file)) as zf:
+        zf.extractall(output_path)
 
 
 def delete_pipeline(config, pipeline_id: str):
@@ -321,7 +324,7 @@ def ensure_pipeline_config_exists(pipeline_path: Path):
         raise Exception("No workspace.yaml file found")
 
 
-def upload_pipeline(config, pipeline_directory_path: typing.Union[str, Path]):
+def upload_pipeline(config, pipeline_directory_path: Path):
     """Upload the pipeline contained in the provided directory using the GraphQL API.
 
     The pipeline code will be zipped and base64-encoded before being sent to the backend.
@@ -329,15 +332,15 @@ def upload_pipeline(config, pipeline_directory_path: typing.Union[str, Path]):
     if config["openhexa"]["current_workspace"] is None:
         raise NoActiveWorkspaceError
 
-    pipeline = import_pipeline(pipeline_directory_path)
-    directory = Path(os.path.abspath(pipeline_directory_path))
+    directory = pipeline_directory_path.absolute()
+    pipeline = get_pipeline_metadata(directory)
 
     zip_file = io.BytesIO(b"")
 
     if is_debug(config):
         click.echo("Generating ZIP file:")
     files = []
-    env_vars = get_local_workspace_config(Path(pipeline_directory_path))
+    env_vars = get_local_workspace_config(pipeline_directory_path)
 
     # We exclude the workspace directory since it can break the mount of the bucket on /home/hexa/workspace
     # This is also the default value of the WORKSPACE_FILES_PATH env var
@@ -378,7 +381,6 @@ def upload_pipeline(config, pipeline_directory_path: typing.Union[str, Path]):
         zip_file.seek(0)
 
     base64_content = base64.b64encode(zip_file.read()).decode("ascii")
-
     data = graphql(
         config,
         """
@@ -395,7 +397,7 @@ def upload_pipeline(config, pipeline_directory_path: typing.Union[str, Path]):
                 "workspaceSlug": config["openhexa"]["current_workspace"],
                 "code": pipeline.code,
                 "zipfile": base64_content,
-                "parameters": pipeline.parameters_spec(),
+                "parameters": [asdict(p) for p in pipeline.parameters],
                 "timeout": pipeline.timeout,
             }
         },
