@@ -79,7 +79,7 @@ def workspaces_activate(slug):
         click.echo(f"Current workspace set to {click.style(slug, bold=True)}")
     except ValueError:
         _terminate(
-            f"Workspace {slug} does not exist on {settings.api_url}. Available workspaces:\n {", ".join(settings.workspaces.keys())}"
+            f"Workspace {slug} does not exist on {settings.api_url}. Available workspaces:\n {', '.join(settings.workspaces.keys())}"
         )
 
 
@@ -218,7 +218,7 @@ def pipelines_push(path: str, yes: bool = False):
             click.echo(f"New version created: {new_version}")
 
             click.echo(
-                f"Done! You can view the pipeline in OpenHEXA on {click.style(url = f'{settings.public_api_url}/workspaces/{workspace}/pipelines/{pipeline.code}', fg='bright_blue', underline=True)}"
+                f"Done! You can view the pipeline in OpenHEXA on {click.style(f'{settings.public_api_url}/workspaces/{workspace}/pipelines/{pipeline.code}', fg='bright_blue', underline=True)}"
             )
         except InvalidDefinitionError as e:
             _terminate(
