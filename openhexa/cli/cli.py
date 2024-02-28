@@ -55,7 +55,7 @@ def workspaces(ctx):
 
 @workspaces.command(name="add")
 @click.argument("slug")
-@click.option("--token", prompt=True, hide_input=True, confirmation_prompt=False)
+@click.option("--token", prompt=True, hide_input=True, confirmation_prompt=False, envvar="HEXA_TOKEN")
 def workspaces_add(slug, token):
     """Add a workspace to the configuration and activate it. The access token is required to access the workspace."""
     user_config = open_config()
