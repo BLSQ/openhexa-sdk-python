@@ -5,7 +5,6 @@ import enum
 import io
 import os
 import typing
-from configparser import ConfigParser
 from dataclasses import asdict
 from importlib.metadata import version
 from pathlib import Path
@@ -13,11 +12,11 @@ from zipfile import ZipFile
 
 import click
 import requests
+import stringcase
 
+from openhexa.cli.settings import settings
 from openhexa.sdk.pipelines import get_local_workspace_config
 from openhexa.sdk.pipelines.runtime import get_pipeline_metadata
-
-CONFIGFILE_PATH = os.path.expanduser("~") + "/.openhexa.ini"
 
 
 class InvalidDefinitionError(Exception):
@@ -45,50 +44,17 @@ class PipelineDefinitionErrorCode(enum.Enum):
     INVALID_TIMEOUT_VALUE = "INVALID_TIMEOUT_VALUE"
 
 
-def is_debug(config: ConfigParser) -> bool:
-    """Determine whether the provided configuration has the debug flag."""
-    return config.getboolean("openhexa", "debug", fallback=False)
-
-
-def open_config():
-    """Open the local configuration file using configparser.
-
-    A default configuration file will be generated if the file does not exist.
-    """
-    config = ConfigParser()
-    if os.path.exists(CONFIGFILE_PATH):
-        config.read(CONFIGFILE_PATH)
-    else:
-        config.read_string(
-            """
-        [openhexa]
-        url=https://api.openhexa.org
-
-        [workspaces]
-        """
-        )
-    return config
-
-
-def save_config(config: ConfigParser):
-    """Save the provided configparser local configuration to disk."""
-    with open(CONFIGFILE_PATH, "w") as configfile:
-        config.write(configfile)
-
-
-def graphql(config, query: str, variables=None, token=None):
+def graphql(query: str, variables=None, token=None):
     """Perform a GraphQL request."""
-    url = config["openhexa"]["url"] + "/graphql/"
-    if config["openhexa"]["current_workspace"] is None:
+    url = settings.api_url + "/graphql/"
+    if settings.current_workspace is None:
         raise NoActiveWorkspaceError
-    if token is None:
-        current_workspace = config["openhexa"]["current_workspace"]
-        token = config["workspaces"].get(current_workspace)
-
-    if not token:
+    if token is None and settings.access_token is None:
         raise Exception("No token found for workspace")
+    elif token is None:
+        token = settings.access_token
 
-    if is_debug(config):
+    if settings.debug:
         click.echo("")
         click.echo("Graphql Query:")
         click.echo(f"URL: {url}")
@@ -106,7 +72,7 @@ def graphql(config, query: str, variables=None, token=None):
     response.raise_for_status()
     data = response.json()
 
-    if is_debug(config):
+    if settings.debug:
         click.echo("Graphql Response:")
         click.echo(data)
         click.echo("")
@@ -123,10 +89,9 @@ def get_skeleton_dir():
     return Path(__file__).parent / "skeleton"
 
 
-def get_workspace(config, slug: str, token: str):
+def get_workspace(slug: str, token: str):
     """Get a single workspace."""
     return graphql(
-        config,
         """
             query getWorkspace($slug: String!) {
                 workspace(slug: $slug) {
@@ -140,12 +105,11 @@ def get_workspace(config, slug: str, token: str):
     )["workspace"]
 
 
-def list_pipelines(config):
+def list_pipelines():
     """List all pipelines in the workspace."""
-    if config["openhexa"]["current_workspace"] is None:
+    if settings.current_workspace is None:
         raise NoActiveWorkspaceError
     data = graphql(
-        config,
         """
     query getWorkspacePipelines($workspaceSlug: String!) {
         pipelines(workspaceSlug: $workspaceSlug) {
@@ -160,17 +124,16 @@ def list_pipelines(config):
         }
     }
     """,
-        {"workspaceSlug": config["openhexa"]["current_workspace"]},
+        {"workspaceSlug": settings.current_workspace},
     )
     return data["pipelines"]["items"]
 
 
-def get_pipeline(config, pipeline_code: str) -> dict[str, typing.Any]:
+def get_pipeline(pipeline_code: str) -> dict[str, typing.Any]:
     """Get a single pipeline."""
-    if config["openhexa"]["current_workspace"] is None:
+    if settings.current_workspace is None:
         raise NoActiveWorkspaceError
     data = graphql(
-        config,
         """
     query getWorkspacePipeline($workspaceSlug: String!, $pipelineCode: String!) {
         pipelineByCode (workspaceSlug: $workspaceSlug, code: $pipelineCode) {
@@ -183,19 +146,18 @@ def get_pipeline(config, pipeline_code: str) -> dict[str, typing.Any]:
     }
     """,
         {
-            "workspaceSlug": config["openhexa"]["current_workspace"],
+            "workspaceSlug": settings.current_workspace,
             "pipelineCode": pipeline_code,
         },
     )
     return data["pipelineByCode"]
 
 
-def create_pipeline(config, pipeline_code: str, pipeline_name: str):
+def create_pipeline(pipeline_code: str, pipeline_name: str):
     """Create a pipeline using the API."""
-    if config["openhexa"]["current_workspace"] is None:
+    if settings.current_workspace is None:
         raise NoActiveWorkspaceError
     data = graphql(
-        config,
         """
     mutation createPipeline($input: CreatePipelineInput!) {
         createPipeline(input: $input) {
@@ -211,7 +173,7 @@ def create_pipeline(config, pipeline_code: str, pipeline_name: str):
     """,
         {
             "input": {
-                "workspaceSlug": config["openhexa"]["current_workspace"],
+                "workspaceSlug": settings.current_workspace,
                 "code": pipeline_code,
                 "name": pipeline_name,
             }
@@ -224,16 +186,15 @@ def create_pipeline(config, pipeline_code: str, pipeline_name: str):
     return data["createPipeline"]["pipeline"]
 
 
-def download_pipeline_sourcecode(config, pipeline_code, output_path: Path = None, force_overwrite=False):
+def download_pipeline_sourcecode(pipeline_code, output_path: Path = None, force_overwrite=False):
     """Download the source code of a pipeline."""
-    if config["openhexa"]["current_workspace"] is None:
+    if settings.current_workspace is None:
         raise NoActiveWorkspaceError
     if output_path.exists() and not output_path.is_dir():
         raise OutputDirectoryError(f"{output_path.absolute()} is not a directory")
     if output_path.exists() and output_path.is_dir() and any(output_path.iterdir()) and not force_overwrite:
         raise OutputDirectoryError(f"{output_path.absolute()} is not empty")
     r = graphql(
-        config,
         """
         query getPipelineVersionSourceCode($workspaceSlug: String!, $pipelineCode: String!)  {
             pipelineByCode(workspaceSlug: $workspaceSlug, code: $pipelineCode) {
@@ -244,12 +205,12 @@ def download_pipeline_sourcecode(config, pipeline_code, output_path: Path = None
         }
     """,
         {
-            "workspaceSlug": config["openhexa"]["current_workspace"],
+            "workspaceSlug": settings.current_workspace,
             "pipelineCode": pipeline_code,
         },
     )
     if r["pipelineByCode"] is None:
-        raise Exception(f"No pipeline exists in {config['openhexa']['current_workspace']} with code {pipeline_code}")
+        raise Exception(f"No pipeline exists in {settings.current_workspace} with code {pipeline_code}")
     if r["pipelineByCode"]["currentVersion"] is None:
         raise Exception(f"No version found for pipeline {pipeline_code}")
 
@@ -258,10 +219,9 @@ def download_pipeline_sourcecode(config, pipeline_code, output_path: Path = None
         zf.extractall(output_path)
 
 
-def delete_pipeline(config, pipeline_id: str):
+def delete_pipeline(pipeline_id: str):
     """Delete a single pipeline."""
     data = graphql(
-        config,
         """
     mutation deletePipeline($input: DeletePipelineInput!) {
                     deletePipeline(input: $input) {
@@ -324,12 +284,54 @@ def ensure_pipeline_config_exists(pipeline_path: Path):
         raise Exception("No workspace.yaml file found")
 
 
-def upload_pipeline(config, pipeline_directory_path: Path):
+def create_pipeline_structure(pipeline_name: str, base_path: Path) -> Path:
+    """Create the structure of a pipeline in the provided directory based on a skeleton.
+
+    Args
+    -----
+        pipeline_name (str): Name of the pipeline.
+        base_path (Path): Base directory of the pipeline.
+
+    Returns
+    -------
+        Path: Path to the created pipeline directory.
+    """
+    output_directory = base_path / stringcase.snakecase(pipeline_name.lower())
+    sample_directory_path = get_skeleton_dir()
+
+    if output_directory.exists():
+        raise ValueError(f"Directory {output_directory} already exists")
+    with open(sample_directory_path / Path(".gitignore")) as sample_ignore_file:
+        sample_ignore_content = sample_ignore_file.read()
+    with open(sample_directory_path / Path("pipeline.py")) as sample_pipeline_file:
+        sample_pipeline_content = (
+            sample_pipeline_file.read()
+            .replace("skeleton-pipeline-code", stringcase.spinalcase(pipeline_name.lower()))
+            .replace("skeleton_pipeline_name", stringcase.snakecase(pipeline_name.lower()))
+            .replace("Skeleton pipeline name", pipeline_name)
+        )
+    with open(sample_directory_path / Path("workspace.yaml")) as sample_workspace_file:
+        sample_workspace_content = sample_workspace_file.read()
+
+    # Create directory
+    output_directory.mkdir(exist_ok=False)
+    (output_directory / "workspace").mkdir(exist_ok=False)
+    with open(output_directory / ".gitignore", "w") as ignore_file:
+        ignore_file.write(sample_ignore_content)
+    with open(output_directory / "pipeline.py", "w") as pipeline_file:
+        pipeline_file.write(sample_pipeline_content)
+    with open(output_directory / "workspace.yaml", "w") as workspace_file:
+        workspace_file.write(sample_workspace_content)
+
+    return output_directory
+
+
+def upload_pipeline(pipeline_directory_path: typing.Union[str, Path]):
     """Upload the pipeline contained in the provided directory using the GraphQL API.
 
     The pipeline code will be zipped and base64-encoded before being sent to the backend.
     """
-    if config["openhexa"]["current_workspace"] is None:
+    if settings.current_workspace is None:
         raise NoActiveWorkspaceError
 
     directory = pipeline_directory_path.absolute()
@@ -337,7 +339,7 @@ def upload_pipeline(config, pipeline_directory_path: Path):
 
     zip_file = io.BytesIO(b"")
 
-    if is_debug(config):
+    if settings.debug:
         click.echo("Generating ZIP file:")
     files = []
     env_vars = get_local_workspace_config(pipeline_directory_path)
@@ -359,22 +361,22 @@ def upload_pipeline(config, pipeline_directory_path: Path):
 
             files.append(path)
 
-        if is_debug(config):
+        if settings.debug:
             click.echo(f"Excluded dirs: {[p.absolute() for p in excluded_paths]}")
 
         for file_path in files:
             # Do not include files from the excluded paths
             if any([file_path.is_relative_to(excluded_dir) for excluded_dir in excluded_paths]):
-                if is_debug(config):
+                if settings.debug:
                     click.echo(f"\t{file_path.name} (excluded)")
                 continue
-            if is_debug(config):
+            if settings.debug:
                 click.echo(f"\t{file_path.name}")
             zipObj.write(file_path, file_path.relative_to(directory))
 
     zip_file.seek(0)
 
-    if is_debug(config):
+    if settings.debug:
         # Write zip_file to disk for debugging
         with open("pipeline.zip", "wb") as debug_file:
             debug_file.write(zip_file.read())
@@ -382,7 +384,6 @@ def upload_pipeline(config, pipeline_directory_path: Path):
 
     base64_content = base64.b64encode(zip_file.read()).decode("ascii")
     data = graphql(
-        config,
         """
             mutation uploadPipeline($input: UploadPipelineInput!) {
                 uploadPipeline(input: $input) {
@@ -394,7 +395,7 @@ def upload_pipeline(config, pipeline_directory_path: Path):
         """,
         {
             "input": {
-                "workspaceSlug": config["openhexa"]["current_workspace"],
+                "workspaceSlug": settings.current_workspace,
                 "code": pipeline.code,
                 "zipfile": base64_content,
                 "parameters": [asdict(p) for p in pipeline.parameters],
