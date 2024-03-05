@@ -24,10 +24,10 @@ from openhexa.cli.api import (
     list_pipelines,
     upload_pipeline,
 )
+from openhexa.cli.settings import settings
 from openhexa.sdk.pipelines import get_local_workspace_config
 from openhexa.sdk.pipelines.exceptions import PipelineNotFound
 from openhexa.sdk.pipelines.runtime import get_pipeline_metadata
-from openhexa.cli.settings import settings
 
 
 @click.group()
@@ -162,7 +162,6 @@ def pipelines_init(name: str):
         dir_okay=True,
     ),
 )
-@click.option("--yes", is_flag=True, default=False, help="Do not ask for confirmation")
 def pipelines_push(path: str, yes: bool = False):
     """Push a pipeline to the backend. If the pipeline already exists, it will be updated otherwise it will be created.
 
@@ -177,7 +176,6 @@ def pipelines_push(path: str, yes: bool = False):
         )
 
     ensure_is_pipeline_dir(path)
-    ensure_pipeline_config_exists(path)
 
     try:
         pipeline = get_pipeline_metadata(path)
