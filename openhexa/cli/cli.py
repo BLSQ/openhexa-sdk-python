@@ -58,16 +58,11 @@ def workspaces_add(slug, token):
         click.echo(f"Adding workspace {slug}")
     try:
         get_workspace(slug, token)
-    except Exception as e:
-        click.echo(
-            f"Error while getting workspace '{slug}' on {settings.api_}. Check the slug of the workspace and the access token.",
-            err=True,
+        settings.add_workspace(slug, token)
+    except ValueError:
+        _terminate(
+            f"Workspace {slug} does not exist on {settings.api_url}. Available workspaces:\n {', '.join(settings.workspaces.keys())}"
         )
-        if settings.debug:
-            raise e
-        return click.Abort()
-
-    settings.add_workspace(slug, token)
 
 
 @workspaces.command(name="activate")
