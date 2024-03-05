@@ -37,6 +37,24 @@ class OutputDirectoryError(Exception):
     pass
 
 
+class APIError(Exception):
+    """Raised when an error occurs while interacting with the API."""
+
+    pass
+
+
+class InvalidTokenError(APIError):
+    """Raised when the token is invalid."""
+
+    pass
+
+
+class GraphQLError(APIError):
+    """Raised when a GraphQL request returns an error."""
+
+    pass
+
+
 class PipelineDefinitionErrorCode(enum.Enum):
     """Enumeration of possible pipeline definition error codes."""
 
@@ -69,7 +87,11 @@ def graphql(query: str, variables=None, token=None):
         },
         json={"query": query, "variables": variables},
     )
-    response.raise_for_status()
+    try:
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        raise GraphQLError(str(e))
+
     data = response.json()
 
     if settings.debug:
@@ -79,8 +101,8 @@ def graphql(query: str, variables=None, token=None):
 
     if data.get("errors"):
         if data.get("errors")[0].get("extensions", {}).get("code") == "UNAUTHENTICATED":
-            raise Exception("Token is invalid, please update the token")
-        raise Exception(data["errors"])
+            raise InvalidTokenError
+        raise GraphQLError(data["errors"])
     return data["data"]
 
 

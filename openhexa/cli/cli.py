@@ -9,6 +9,7 @@ from pathlib import Path
 import click
 
 from openhexa.cli.api import (
+    APIError,
     InvalidDefinitionError,
     NoActiveWorkspaceError,
     OutputDirectoryError,
@@ -59,9 +60,11 @@ def workspaces_add(slug, token):
     try:
         get_workspace(slug, token)
         settings.add_workspace(slug, token)
-    except ValueError:
+    except APIError as e:
         _terminate(
-            f"Workspace {slug} does not exist on {settings.api_url}. Available workspaces:\n {', '.join(settings.workspaces.keys())}"
+            f"Workspace {slug} does not exist on {settings.api_url}. Available workspaces:\n {', '.join(settings.workspaces.keys())}",
+            exception=e,
+            err=True,
         )
 
 
