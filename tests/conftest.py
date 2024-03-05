@@ -1,8 +1,10 @@
 """Module-level test fixtures."""
 from importlib import reload
+from unittest import mock
 
 import pytest
 
+import openhexa.cli
 import openhexa.sdk
 
 
@@ -24,3 +26,17 @@ def current_run():
     reload(openhexa.sdk)
 
     return global_current_run
+
+
+@pytest.fixture(scope="function", autouse=True)
+def settings(monkeypatch):
+    """Build settings fixture."""
+    settings_mock = mock.MagicMock()
+    monkeypatch.setattr("openhexa.cli.settings.settings", settings_mock)
+    reload(openhexa.cli.api)
+    settings_mock.current_workspace = "workspace-slug"
+    settings_mock.api_url = "http://localhost:8000/graphql"
+    settings_mock.workspaces = {"workspace-slug": "token", "another-workspace-slug": "token"}
+    settings_mock.debug = False
+    settings_mock.access_token = "token"
+    return settings_mock

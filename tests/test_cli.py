@@ -1,7 +1,6 @@
 """CLI test module."""
 
 import base64
-from configparser import ConfigParser
 from io import BytesIO
 from pathlib import Path
 from tempfile import mkdtemp
@@ -9,33 +8,21 @@ from unittest import TestCase
 from unittest.mock import MagicMock, patch
 from zipfile import ZipFile
 
+import pytest
 from click.testing import CliRunner
 
 from openhexa.cli.cli import pipelines_download, pipelines_run
 
 
+@pytest.mark.usefixtures("settings")
 class CliRunTest(TestCase):
     """Test the CLI."""
 
     runner = None
-    user_config = None
 
     def setUp(self):
         """Configure the CLI runner and the user config."""
         self.runner = CliRunner()
-        self.user_config = ConfigParser()
-        self.user_config.read_string(
-            """
-            [openhexa]
-            url=https://test.openhexa.org
-            current_workspace=test_workspace
-
-            [workspaces]
-            test_workspace = WORKSPACE_TOKEN
-            """
-        )
-        self.patch_user_config = patch("openhexa.cli.cli.open_config", return_value=self.user_config)
-        self.patch_user_config.start()
         return super().setUp()
 
     def tearDown(self) -> None:
@@ -45,7 +32,6 @@ class CliRunTest(TestCase):
         -------
             None
         """
-        self.patch_user_config.stop()
         return super().tearDown()
 
     @patch("openhexa.cli.api.ask_pipeline_config_creation", return_value=True)
@@ -98,7 +84,7 @@ class CliRunTest(TestCase):
             mock_graphql.return_value = {"pipelineByCode": None}
             result = self.runner.invoke(pipelines_download, ["test_pipeline", tmp])
             self.assertIn(
-                "No pipeline exists in test_workspace with code test_pipeline",
+                "No pipeline exists in workspace-slug with code test_pipeline",
                 str(result.exception),
             )
 

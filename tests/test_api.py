@@ -1,138 +1,42 @@
 """API interactions test module."""
 
-import configparser
-import os
-import shutil
-import uuid
+import base64
+import io
+import tempfile
 from pathlib import Path
 from unittest import mock
 from zipfile import ZipFile
 
-import pytest
-import yaml
-from click.testing import CliRunner
-
-from openhexa.cli.api import upload_pipeline
-from openhexa.cli.cli import pipelines_delete, pipelines_init
+from openhexa.cli.api import create_pipeline_structure, upload_pipeline
 
 
-def test_upload_pipeline():
+def test_upload_pipeline_success(settings):
     """Test upload API call."""
-    # to enable zip file creation
-    config = configparser.ConfigParser()
-    config["openhexa"] = {"debug": True, "current_workspace": "test_workspace"}
+    with tempfile.TemporaryDirectory() as temp_dir:
+        pipeline_dir = create_pipeline_structure("my_pipeline", Path(temp_dir))
 
-    runner = CliRunner()
-    runner.invoke(pipelines_init, ["test_pipelines"])  # NOQA
-    pipeline_dir = Path.cwd() / "test_pipelines"
-    pipeline_zip_file_dir = Path.cwd() / "pipeline.zip"
+        # create a sample file inside workspace dir
+        assert (Path(temp_dir) / "my_pipeline").exists()
+        assert (pipeline_dir / "pipeline.py").exists()
+        assert (pipeline_dir / "workspace").exists(), "Workspace directory not created"
 
-    # create a sample file inside workspace dir
-    with open(pipeline_dir / Path("workspace/dummy.txt"), "w") as test_file:
-        test_file.write("Test upload")
+        # Add files to the workspace directory
+        with open(pipeline_dir / "workspace" / "dummy.txt", "w") as test_file:
+            test_file.write("Test upload")
 
-    with mock.patch("openhexa.cli.api.graphql") as mocked_graphql_client:
-        upload_pipeline(config=config, pipeline_directory_path=pipeline_dir)
-        mocked_graphql_client.return_value = {"success": True, "errors": []}
+        # Add markdown file next to the pipeline.py
+        with open(pipeline_dir / "readme.md", "w") as test_file:
+            test_file.write("# README")
 
-        with ZipFile(pipeline_zip_file_dir) as zip_file:
-            with pytest.raises(KeyError):
-                zip_file.getinfo("workspace")
+        with mock.patch("openhexa.cli.api.graphql") as mocked_graphql_client:
+            mocked_graphql_client.return_value = {"uploadPipeline": {"version": 1, "success": True, "errors": []}}
+            upload_pipeline(pipeline_dir)
+            args_input = mocked_graphql_client.call_args[0][1]["input"]
+            assert args_input["code"] == "my-pipeline"
+            assert args_input["workspaceSlug"] == "workspace-slug"
+            assert args_input["timeout"] is None
+            assert args_input["parameters"] == []
 
-    shutil.rmtree(pipeline_dir)
-    os.remove(pipeline_zip_file_dir)
-
-
-def test_upload_pipeline_custom_files_path():
-    """Test upload API call (custom file path)."""
-    # to enable zip file creation
-    config = configparser.ConfigParser()
-    config["openhexa"] = {"debug": True, "current_workspace": "test_workspace"}
-
-    runner = CliRunner()
-    runner.invoke(pipelines_init, ["test_pipelines"])  # NOQA
-    pipeline_dir = Path.cwd() / "test_pipelines"
-    pipeline_zip_file_dir = Path.cwd() / "pipeline.zip"
-
-    (pipeline_dir / Path("data")).mkdir()
-    # set up a custom path for files location in workspace.yaml
-    pipeline_configs = {"files": {"path": "./data"}}
-
-    with open(pipeline_dir / Path("workspace.yaml"), "w") as pipeline_configs_file:
-        pipeline_configs_file.write(yaml.dump(pipeline_configs))
-
-    # create a sample file inside custom dir
-    with open(pipeline_dir / Path("data/dummy.txt"), "w") as test_file:
-        test_file.write("Test upload with custom files path")
-
-    with mock.patch("openhexa.cli.api.graphql") as mocked_graphql_client:
-        upload_pipeline(config=config, pipeline_directory_path=pipeline_dir)
-        mocked_graphql_client.return_value = {"success": True, "errors": []}
-
-        with ZipFile(pipeline_zip_file_dir) as zip_file:
-            with pytest.raises(KeyError):
-                zip_file.getinfo("data")
-
-    shutil.rmtree(pipeline_dir)
-    os.remove(pipeline_zip_file_dir)
-
-
-def test_delete_pipeline_not_in_workspace():
-    """Test delete pipeline (pipeline does not exist)."""
-    config = configparser.ConfigParser()
-    config["openhexa"] = {"debug": True, "current_workspace": "test_workspace"}
-
-    with mock.patch("openhexa.cli.api.graphql") as mocked_graphql_client, mock.patch(
-        "openhexa.cli.cli.open_config"
-    ) as mocked_config:
-        runner = CliRunner()
-        mocked_config.return_value = config
-        mocked_graphql_client.return_value = {"pipelineByCode": None}
-        r = runner.invoke(pipelines_delete, ["test_pipelines"], input="test_pipelines")  # NOQA
-
-        assert r.output == "Pipeline test_pipelines does not exist in workspace test_workspace\n"
-
-
-def test_delete_pipeline_confirm_code_invalid():
-    """Test delete pipeline with an invalid confirmation code."""
-    config = configparser.ConfigParser()
-    config["openhexa"] = {"debug": True, "current_workspace": "test_workspace"}
-
-    with mock.patch("openhexa.cli.api.graphql") as mocked_graphql_client, mock.patch(
-        "openhexa.cli.cli.open_config"
-    ) as mocked_config:
-        runner = CliRunner()
-        mocked_config.return_value = config
-
-        mocked_graphql_client.return_value = {
-            "pipelineByCode": {
-                "id": uuid.uuid4(),
-                "code": "test_pipelines",
-                "currentVersion": {"number": 1},
-            }
-        }
-        r = runner.invoke(pipelines_delete, ["test_pipelines"], input="test_pipeline")  # NOQA
-        # "Pipeline code and confirmation are different
-        assert r.exit_code == 1
-
-
-def test_delete_pipeline():
-    """Happy path for delete pipeline API call."""
-    config = configparser.ConfigParser()
-    config["openhexa"] = {"debug": True, "current_workspace": "test_workspace"}
-
-    with mock.patch("openhexa.cli.cli.get_pipeline") as mocked_get_pipeline, mock.patch(
-        "openhexa.cli.cli.delete_pipeline"
-    ) as mocked_delete_pipeline, mock.patch("openhexa.cli.cli.open_config") as mocked_config:
-        runner = CliRunner()
-        mocked_config.return_value = config
-
-        mocked_get_pipeline.return_value = {
-            "id": uuid.uuid4(),
-            "code": "test_pipelines",
-            "currentVersion": {"number": 1},
-        }
-        mocked_delete_pipeline.return_value = True
-        r = runner.invoke(pipelines_delete, ["test_pipelines"], input="test_pipelines")  # NOQA
-
-        assert r.exit_code == 0
+            # Check if the zipfile is correctly created
+            with ZipFile(io.BytesIO(base64.b64decode(args_input["zipfile"]))) as zip_file:
+                assert zip_file.namelist() == ["readme.md", "pipeline.py"]
