@@ -1,16 +1,28 @@
 """Utilities for running local pipelines."""
 
+import re
 from pathlib import Path
 from tempfile import mkdtemp
 
 import stringcase
 import yaml
 
+from openhexa.sdk.pipelines.exceptions import InvalidParameterError
+
 
 class LocalWorkspaceConfigError(Exception):
     """Raised whenever the local workspace config file does not exist or is invalid."""
 
     pass
+
+
+def validate_pipeline_parameter_code(code: str):
+    """Validate a pipeline parameter code."""
+    if re.match("^[a-z_][a-z_0-9]+$", code) is None:
+        raise InvalidParameterError(
+            f"Invalid parameter code provided ({code}). Parameter must start with a letter or an underscore, "
+            f"and can only contain lower case letters, numbers and underscores."
+        )
 
 
 def get_local_workspace_config(path: Path):
