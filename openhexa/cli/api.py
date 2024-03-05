@@ -363,13 +363,17 @@ def upload_pipeline(pipeline_directory_path: typing.Union[str, Path]):
     if settings.debug:
         click.echo("Generating ZIP file:")
     files = []
-    env_vars = get_local_workspace_config(pipeline_directory_path)
 
     # We exclude the workspace directory since it can break the mount of the bucket on /home/hexa/workspace
     # This is also the default value of the WORKSPACE_FILES_PATH env var
     excluded_paths = [directory / "workspace"]
-    if env_vars.get("WORKSPACE_FILES_PATH") and Path(env_vars["WORKSPACE_FILES_PATH"]) not in excluded_paths:
-        excluded_paths.append(Path(env_vars["WORKSPACE_FILES_PATH"]))
+    try:
+        env_vars = get_local_workspace_config(pipeline_directory_path)
+        if env_vars.get("WORKSPACE_FILES_PATH") and Path(env_vars["WORKSPACE_FILES_PATH"]) not in excluded_paths:
+            excluded_paths.append(Path(env_vars["WORKSPACE_FILES_PATH"]))
+    except FileNotFoundError:
+        # No workspace.yaml file found, we can ignore this error and assume the default value of WORKSPACE_FILES_PATH
+        pass
 
     with ZipFile(zip_file, "w") as zipObj:
         for path in directory.glob("**/*"):
