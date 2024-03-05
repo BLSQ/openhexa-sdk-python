@@ -62,7 +62,7 @@ def workspaces_add(slug, token):
         settings.add_workspace(slug, token)
     except APIError as e:
         _terminate(
-            f"Workspace {slug} does not exist on {settings.api_url}. Available workspaces:\n {', '.join(settings.workspaces.keys())}",
+            f"Workspace {slug} does not exist on {settings.api_url}.",
             exception=e,
             err=True,
         )
@@ -410,4 +410,4 @@ def _terminate(message: str, exception: Exception = None, err: bool = False):
     click.echo(message, err=err)
     if settings.debug and exception:
         raise exception
-    sys.exit(1)
+    click.Abort()
