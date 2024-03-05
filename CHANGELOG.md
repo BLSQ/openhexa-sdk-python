@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.38](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.37...0.1.38) (2024-03-05)
+
+
+### Features
+
+* **Pipeline:** Use the AST to get the specs of the pipeline and its parameters ([#130](https://github.com/BLSQ/openhexa-sdk-python/issues/130)) ([9515499](https://github.com/BLSQ/openhexa-sdk-python/commit/951549925fae7ace4bf26a1922dea7f7738c6982))
+* Use a new way to load settings ([#131](https://github.com/BLSQ/openhexa-sdk-python/issues/131)) ([9619673](https://github.com/BLSQ/openhexa-sdk-python/commit/9619673f226149915afb73387ed8e0f8891ed520))
+
 ## [0.1.37](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.36...0.1.37) (2024-02-20)
 
 
