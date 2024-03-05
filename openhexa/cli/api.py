@@ -65,12 +65,11 @@ class PipelineDefinitionErrorCode(enum.Enum):
 def graphql(query: str, variables=None, token=None):
     """Perform a GraphQL request."""
     url = settings.api_url + "/graphql/"
-    if settings.current_workspace is None:
-        raise NoActiveWorkspaceError
-    if token is None and settings.access_token is None:
-        raise Exception("No token found for workspace")
-    elif token is None:
+    if token is None:
         token = settings.access_token
+
+    if token is None:
+        raise InvalidTokenError("No token found for workspace")
 
     if settings.debug:
         click.echo("")
