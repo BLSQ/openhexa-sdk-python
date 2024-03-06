@@ -63,4 +63,6 @@ def test_upload_pipeline_success(settings):
 
             # Check if the zipfile is correctly created
             with ZipFile(io.BytesIO(base64.b64decode(args_input["zipfile"]))) as zip_file:
-                assert zip_file.namelist() == ["readme.md", "pipeline.py"]
+                assert "readme.md" in zip_file.namelist()
+                assert "pipeline.py" in zip_file.namelist()
+                assert len(zip_file.namelist()) == 2
