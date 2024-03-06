@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.39](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.38...0.1.39) (2024-03-06)
+
+
+### Features
+
+* Add jinja2 templates, add github workflow ([7f53c6a](https://github.com/BLSQ/openhexa-sdk-python/commit/7f53c6a281eab59d3e559c50f57f283844300252))
+
+
+### Bug Fixes
+
+* **ci:** Fix python3.9 tests ([3d9aa95](https://github.com/BLSQ/openhexa-sdk-python/commit/3d9aa955262e19ba549d160d2f650a7ac7403ddb))
+
 ## [0.1.38](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.37...0.1.38) (2024-03-05)
 
 
