@@ -2,7 +2,6 @@
 
 import base64
 import json
-import sys
 from importlib.metadata import version
 from pathlib import Path
 
@@ -139,16 +138,49 @@ def pipelines(ctx):
 @click.argument("name", type=str)
 def pipelines_init(name: str):
     """Initialize a new pipeline in a fresh directory."""
+    click.echo(f"Creating pipeline {name}...")
+    workflow_mode = None
+    modes = [
+        ("push", "Push the pipeline on new commits on main"),
+        ("release", "Push the pipeline when a git tag is created"),
+        ("manual", "Push the pipeline manually from GitHub actions"),
+    ]
+    if click.confirm("Do you want to create a workflow to publish the pipeline to OpenHEXA from GitHub?", default=True):
+        if settings.current_workspace is None:
+            _terminate(
+                "No workspace activated. Use openhexa workspaces add or openhexa workspaces activate to "
+                "activate a workspace.",
+                err=True,
+            )
+
+        click.echo("Select the trigger for the GitHub action:")
+        for idx, (mode, text) in enumerate(modes):
+            click.echo(f" {click.style(idx + 1, bold=True)}: ({click.style(mode, bold=True)}) {text}")
+        mode_choice = click.prompt("Select a mode", type=click.IntRange(min=1, max=3), default=1)
+        workflow_mode = modes[mode_choice - 1][0]
     try:
-        pipeline_directory = create_pipeline_structure(name, Path.cwd())
+        pipeline_directory = create_pipeline_structure(
+            name, Path.cwd(), workspace=settings.current_workspace, workflow_mode=workflow_mode
+        )
+
+        if workflow_mode:
+            click.echo(
+                f"Github workflow created. Please add your OpenHEXA pipeline token to the secrets of your repository with the key '{click.style('OH_TOKEN', bold=True)}'."
+            )
     except ValueError:
         _terminate(
-            f"Error while creating pipeline {name}. The directory already exists. Please choose a different name for your pipeline.",
+            click.style(
+                f"\n❌ Error while creating pipeline {name}. The directory already exists. Please choose a different name for your pipeline.",
+                fg="red",
+            ),
             err=True,
         )
     else:
         # Success
-        click.echo(f"{click.style('Success!', fg='green')} Your pipeline has been created in {pipeline_directory}")
+        click.echo("")
+        click.echo(
+            f"{click.style('✅ Success!', fg='green')} Your pipeline has been created in {click.style(pipeline_directory, underline=True, fg='bright_blue')}"
+        )
 
 
 @pipelines.command("push")
@@ -162,6 +194,7 @@ def pipelines_init(name: str):
         dir_okay=True,
     ),
 )
+@click.option("--yes", is_flag=True, help="Skip confirmation")
 def pipelines_push(path: str, yes: bool = False):
     """Push a pipeline to the backend. If the pipeline already exists, it will be updated otherwise it will be created.
 
@@ -170,7 +203,7 @@ def pipelines_push(path: str, yes: bool = False):
     workspace = settings.current_workspace
     if workspace is None:
         _terminate(
-            "No workspace activated. Use openhexa workspaces add or openhexa workspaces activate to "
+            "❌ No workspace activated. Use openhexa workspaces add or openhexa workspaces activate to "
             "activate a workspace.",
             err=True,
         )
@@ -180,13 +213,12 @@ def pipelines_push(path: str, yes: bool = False):
     try:
         pipeline = get_pipeline_metadata(path)
     except PipelineNotFound:
-        click.echo(
-            f"No function with openhexa.sdk pipeline decorator found in {click.style(path, bold=True)}.",
+        _terminate(
+            f"❌ No function with openhexa.sdk pipeline decorator found in {click.style(path, bold=True)}.",
             err=True,
         )
-        sys.exit(1)
     except Exception as e:
-        _terminate(f'Error while importing pipeline: "{e}"', exception=e, err=True)
+        _terminate(f'❌ Error while importing pipeline: "{e}"', exception=e, err=True)
     else:
         workspace_pipelines = list_pipelines()
         if settings.debug:
@@ -211,20 +243,21 @@ def pipelines_push(path: str, yes: bool = False):
 
         try:
             new_version = upload_pipeline(path)
-            click.echo(f"New version created: {new_version}")
-
             click.echo(
-                f"Done! You can view the pipeline in OpenHEXA on {click.style(f'{settings.public_api_url}/workspaces/{workspace}/pipelines/{pipeline.code}', fg='bright_blue', underline=True)}"
+                click.style(
+                    f"✅ New version '{new_version}' created! You can view the pipeline in OpenHEXA on {click.style(f'{settings.public_api_url}/workspaces/{workspace}/pipelines/{pipeline.code}', fg='bright_blue', underline=True)}",
+                    fg="green",
+                )
             )
         except InvalidDefinitionError as e:
             _terminate(
-                f'Pipeline definition is invalid: "{e}"',
+                f'❌ Pipeline definition is invalid: "{e}"',
                 err=True,
                 exception=e,
             )
         except Exception as e:
             _terminate(
-                f'Error while importing pipeline: "{e}"',
+                f'❌ Error while importing pipeline: "{e}"',
                 err=True,
                 exception=e,
             )
@@ -248,18 +281,13 @@ def pipelines_download(code: str, output: Path):
         download_pipeline_sourcecode(code, output, force_overwrite)
         click.echo(f"You can find the pipeline source code in '{click.style(output.absolute(), bold=True)}'")
     except OutputDirectoryError as e:
-        click.echo(
-            str(e),
-            err=True,
-        )
-        sys.exit(1)
+        _terminate(str(e), err=True, exception=e)
     except NoActiveWorkspaceError:
-        click.echo(
-            "No workspace activated. Use openhexa workspaces add or openhexa workspaces activate to "
+        _terminate(
+            "❌ No workspace activated. Use openhexa workspaces add or openhexa workspaces activate to "
             "activate a workspace.",
             err=True,
         )
-        sys.exit(1)
 
 
 @pipelines.command("delete")
@@ -268,17 +296,16 @@ def pipelines_delete(code: str):
     """Delete a pipeline and all his versions."""
     if settings.current_workspace is None:
         _terminate(
-            "No workspace activated. Use openhexa workspaces add or openhexa workspaces activate to "
+            "❌ No workspace activated. Use openhexa workspaces add or openhexa workspaces activate to "
             "activate a workspace.",
             err=True,
         )
     else:
         pipeline = get_pipeline(code)
         if pipeline is None:
-            click.echo(
-                f"Pipeline {click.style(code, bold=True)} does not exist in workspace {click.style(settings.current_workspace, bold=True)}"
+            _terminate(
+                f"❌  Pipeline {click.style(code, bold=True)} does not exist in workspace {click.style(settings.current_workspace, bold=True)}"
             )
-            sys.exit(1)
 
         confirmation_code = click.prompt(
             f'This will remove the pipeline "{click.style(code, bold=True)}" from the "{click.style(settings.current_workspace, bold=True)} workspace. This operation cannot be undone.\nPlease enter "{click.style(code, bold=True)}" to confirm',
@@ -286,19 +313,18 @@ def pipelines_delete(code: str):
         )
 
         if confirmation_code != code:
-            click.echo(
-                "Pipeline code and confirmation are different, aborted.",
+            _terminate(
+                "❌ Pipeline code and confirmation are different, aborted.",
                 err=True,
             )
-            sys.exit(1)
 
         try:
             if delete_pipeline(pipeline["id"]):
-                click.echo(f"Pipeline {click.style(code, bold=True)} deleted.")
+                click.echo(click.style(f"✅ Pipeline {click.style(code, bold=True)} deleted.", fg="green"))
 
         except Exception as e:
             _terminate(
-                f'Error while deleting pipeline: "{e}"',
+                f'❌ Error while deleting pipeline: "{e}"',
                 err=True,
                 exception=e,
             )
@@ -329,7 +355,6 @@ def pipelines_run(
     """Run a pipeline locally."""
     from subprocess import Popen
 
-    path = Path(path)
     ensure_is_pipeline_dir(path)
     ensure_pipeline_config_exists(path)
     env_vars = get_local_workspace_config(path)
@@ -365,7 +390,7 @@ def pipelines_run(
     )
 
     if config_str and config_file:
-        click.echo("You can't specify both -c and -f", err=True)
+        click.echo("❌ You can't specify both -c and -f", err=True)
         return click.Abort()
 
     config = config_str or "{}"
@@ -405,7 +430,7 @@ def pipelines_list():
 
 
 def _terminate(message: str, exception: Exception = None, err: bool = False):
-    click.echo(message, err=err)
+    click.echo(click.style(message, fg="red"), err=err)
     if settings.debug and exception:
         raise exception
     click.Abort()

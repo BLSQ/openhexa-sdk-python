@@ -13,6 +13,7 @@ from zipfile import ZipFile
 import click
 import requests
 import stringcase
+from jinja2 import Template
 
 from openhexa.cli.settings import settings
 from openhexa.sdk.pipelines import get_local_workspace_config
@@ -305,45 +306,50 @@ def ensure_pipeline_config_exists(pipeline_path: Path):
         raise Exception("No workspace.yaml file found")
 
 
-def create_pipeline_structure(pipeline_name: str, base_path: Path) -> Path:
+def create_pipeline_structure(pipeline_name: str, base_path: Path, workspace: str, workflow_mode: str = None) -> Path:
     """Create the structure of a pipeline in the provided directory based on a skeleton.
 
     Args
     -----
         pipeline_name (str): Name of the pipeline.
         base_path (Path): Base directory of the pipeline.
+        workspace (str): Slug of the workspace.
+        workflow_mode (str): If provided, a GitHub workflow will be created in the pipeline directory. Accepted values are "push", "manual" and "release".
 
     Returns
     -------
         Path: Path to the created pipeline directory.
     """
     output_directory = base_path / stringcase.snakecase(pipeline_name.lower())
-    sample_directory_path = get_skeleton_dir()
 
     if output_directory.exists():
         raise ValueError(f"Directory {output_directory} already exists")
-    with open(sample_directory_path / Path(".gitignore")) as sample_ignore_file:
-        sample_ignore_content = sample_ignore_file.read()
-    with open(sample_directory_path / Path("pipeline.py")) as sample_pipeline_file:
-        sample_pipeline_content = (
-            sample_pipeline_file.read()
-            .replace("skeleton-pipeline-code", stringcase.spinalcase(pipeline_name.lower()))
-            .replace("skeleton_pipeline_name", stringcase.snakecase(pipeline_name.lower()))
-            .replace("Skeleton pipeline name", pipeline_name)
-        )
-    with open(sample_directory_path / Path("workspace.yaml")) as sample_workspace_file:
-        sample_workspace_content = sample_workspace_file.read()
 
-    # Create directory
-    output_directory.mkdir(exist_ok=False)
-    (output_directory / "workspace").mkdir(exist_ok=False)
-    with open(output_directory / ".gitignore", "w") as ignore_file:
-        ignore_file.write(sample_ignore_content)
-    with open(output_directory / "pipeline.py", "w") as pipeline_file:
-        pipeline_file.write(sample_pipeline_content)
-    with open(output_directory / "workspace.yaml", "w") as workspace_file:
-        workspace_file.write(sample_workspace_content)
+    sample_directory_path = get_skeleton_dir()
+    templates = ["pipeline.py.j2", "workspace.yaml", ".gitignore"]
+    if workflow_mode is not None:
+        templates.append(".github/workflows/push-pipeline.yml.j2")
 
+    vars = {
+        "pipeline_code": stringcase.spinalcase(pipeline_name.lower()),
+        "pipeline_human_name": pipeline_name,
+        "pipeline_snake_name": stringcase.snakecase(pipeline_name.lower()),
+        "workspace_slug": workspace,
+        "workflow_mode": workflow_mode,
+    }
+    jinja_options = {
+        "variable_start_string": "[[",
+        "variable_end_string": "]]",
+    }
+
+    for tpl_file in templates:
+        out_path = output_directory / Path(tpl_file.rstrip(".j2"))
+        template = Template(open(sample_directory_path / Path(tpl_file)).read(), **jinja_options)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(out_path, "w") as f:
+            f.write(template.render(**vars))
+
+    (output_directory / "workspace").mkdir(parents=True, exist_ok=True)
     return output_directory
 
 

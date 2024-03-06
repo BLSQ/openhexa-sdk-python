@@ -10,10 +10,34 @@ from zipfile import ZipFile
 from openhexa.cli.api import create_pipeline_structure, upload_pipeline
 
 
+def test_create_pipeline_structure(settings):
+    """Test create_pipeline_structure function."""
+    with tempfile.TemporaryDirectory() as temp_dir:
+        pipeline_dir = create_pipeline_structure(
+            "My pipeline", Path(temp_dir), workspace=settings.current_workspace, workflow_mode="manual"
+        )
+
+        assert (pipeline_dir / "pipeline.py").exists()
+        assert (pipeline_dir / "workspace").exists()
+        assert (pipeline_dir / "workspace.yaml").exists()
+
+        assert (
+            "name: Push pipeline on OpenHEXA"
+            in (pipeline_dir / ".github" / "workflows" / "push-pipeline.yml").read_text()
+        )
+        assert "workflow_dispatch" in (pipeline_dir / ".github" / "workflows" / "push-pipeline.yml").read_text()
+
+        assert "def my_pipeline(" in (pipeline_dir / "pipeline.py").read_text()
+
+
 def test_upload_pipeline_success(settings):
     """Test upload API call."""
     with tempfile.TemporaryDirectory() as temp_dir:
-        pipeline_dir = create_pipeline_structure("my_pipeline", Path(temp_dir))
+        pipeline_dir = create_pipeline_structure(
+            "my_pipeline",
+            Path(temp_dir),
+            workspace="workspace-slug",
+        )
 
         # create a sample file inside workspace dir
         assert (Path(temp_dir) / "my_pipeline").exists()
