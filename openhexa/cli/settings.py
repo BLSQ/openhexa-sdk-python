@@ -1,6 +1,9 @@
 """User settings for the OpenHexa CLI."""
+import logging
 import os
 from configparser import ConfigParser
+
+import click
 
 CONFIGFILE_PATH = os.path.expanduser("~") + "/.openhexa.ini"
 
@@ -119,6 +122,33 @@ class Settings:
     def __repr__(self):
         """Return a string representation of the object."""
         return f"<Config(url={self.api_url}, current_workspace={self.current_workspace}, debug={self.debug})>"
+
+
+class ClickEchoHandler(logging.Handler):
+    """Custom logging handler that uses click.echo to print logs."""
+
+    def emit(self, record):
+        """Emit the log record."""
+        msg = self.format(record)
+        click.echo(msg)
+
+
+def setup_logging():
+    """Set up the logging for the CLI."""
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+
+    # Create a formatter
+    formatter = logging.Formatter("%(message)s")
+
+    # Create an instance of the custom handler
+    click_handler = ClickEchoHandler()
+
+    # Set the formatter for the handler
+    click_handler.setFormatter(formatter)
+
+    # Add the handler to the logger
+    logger.addHandler(click_handler)
 
 
 settings = Settings()

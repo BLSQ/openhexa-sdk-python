@@ -56,25 +56,28 @@ class CliRunTest(TestCase):
                 f.write("")
 
             self.assertFalse((Path(tmp) / "workspace.yaml").exists())
-            with patch("subprocess.Popen") as mock_popen:
-                mock_process = MagicMock()
-                mock_process.wait.return_value = MagicMock()
+            with patch("openhexa.cli.api.docker") as mock_docker:
+                docker_client_mock = MagicMock()
+                mock_docker.from_env.return_value = docker_client_mock
+                container_mock = MagicMock()
 
-                mock_popen.return_value = mock_process
+                docker_client_mock.images.get.return_value = True
+                docker_client_mock.containers.run.return_value = container_mock
+                container_mock.wait.return_value = {"StatusCode": 0}
 
                 # First without accepting the config creation
                 mock_ask_config.return_value = False
                 result = self.runner.invoke(pipelines_run, [tmp])
                 self.assertEqual(result.exit_code, 1)
                 self.assertFalse((Path(tmp) / "workspace.yaml").exists())
-                mock_popen.assert_not_called()
+                docker_client_mock.containers.run.assert_not_called()
 
                 # This time we accept the config creation
                 mock_ask_config.return_value = True
                 result = self.runner.invoke(pipelines_run, [tmp])
                 self.assertEqual(result.exit_code, 0)
                 self.assertTrue((Path(tmp) / "workspace.yaml").exists())
-                mock_popen.assert_called_once()
+                docker_client_mock.containers.run.assert_called()
 
     @patch("openhexa.cli.api.graphql")
     def test_download_pipeline_no_pipeline(self, mock_graphql):
