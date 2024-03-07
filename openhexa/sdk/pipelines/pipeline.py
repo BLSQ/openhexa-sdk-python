@@ -21,11 +21,7 @@ from multiprocess import get_context  # NOQA
 
 from openhexa.sdk.utils import Environment, get_environment
 
-from .parameter import (
-    FunctionWithParameter,
-    Parameter,
-    ParameterValueError,
-)
+from .parameter import FunctionWithParameter, Parameter, ParameterValueError
 from .task import PipelineWithTask, Task
 from .utils import get_local_workspace_config
 
@@ -94,7 +90,7 @@ class Pipeline:
         config : typing.Dict[str, typing.Any]
             The parameter values to use for this pipeline run.
         """
-        now = datetime.datetime.utcnow().replace(microsecond=0).isoformat()
+        now = datetime.datetime.now(tz=datetime.timezone.utc).replace(microsecond=0).isoformat()
         print(f'{now} Starting pipeline "{self.code}"')
 
         # Validate / default parameters
@@ -126,7 +122,7 @@ class Pipeline:
                 break
 
             for task in tasks:
-                now = datetime.datetime.utcnow().replace(microsecond=0).isoformat()
+                now = datetime.datetime.now(tz=datetime.timezone.utc).replace(microsecond=0).isoformat()
                 print(f'{now} Started task "{task.compute.__name__}"')
                 result = pool.apply_async(task.run)
                 result_list.append((result, task))
@@ -165,6 +161,7 @@ class Pipeline:
         pool.close()
         pool.join()
 
+        now = datetime.datetime.now(tz=datetime.timezone.utc).replace(microsecond=0).isoformat()
         print(f'{now} Successfully completed pipeline "{self.code}"')
 
     def parameters_spec(self) -> list[dict[str, typing.Any]]:
