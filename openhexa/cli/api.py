@@ -1,8 +1,9 @@
 """Collection of functions that interacts with the OpenHEXA API."""
-
 import base64
 import enum
 import io
+import json
+import logging
 import os
 import typing
 from dataclasses import asdict
@@ -11,8 +12,10 @@ from pathlib import Path
 from zipfile import ZipFile
 
 import click
+import docker
 import requests
 import stringcase
+from docker.models.containers import Container
 from jinja2 import Template
 
 from openhexa.cli.settings import settings
@@ -52,6 +55,18 @@ class InvalidTokenError(APIError):
 
 class GraphQLError(APIError):
     """Raised when a GraphQL request returns an error."""
+
+    pass
+
+
+class PipelineDirectoryError(Exception):
+    """Raised when the pipeline directory is not a directory or does not exist."""
+
+    pass
+
+
+class DockerError(Exception):
+    """Raised when Docker is not running or is not installed."""
 
     pass
 
@@ -264,13 +279,63 @@ def delete_pipeline(pipeline_id: str):
 def ensure_is_pipeline_dir(pipeline_path: str):
     """Ensure that there is a pipeline.py file in the directory."""
     if not os.path.isdir(pipeline_path):
-        raise Exception(f"Path {pipeline_path} is not a directory")
+        raise PipelineDirectoryError(f"Path {pipeline_path} is not a directory")
     if not os.path.exists(pipeline_path):
-        raise Exception(f"Directory {pipeline_path} does not exist")
+        raise PipelineDirectoryError(f"Directory {pipeline_path} does not exist")
     if not os.path.exists(os.path.join(pipeline_path, "pipeline.py")):
-        raise Exception(f"Directory {pipeline_path} does not contain a pipeline.py file")
+        raise PipelineDirectoryError(f"Directory {pipeline_path} does not contain a pipeline.py file")
 
     return True
+
+
+def run_pipeline(path: Path, config: dict, image: str = None) -> Container:
+    """Run a pipeline using the provided configuration."""
+    ensure_is_pipeline_dir(path)
+    ensure_pipeline_config_exists(path)
+    env_vars = get_local_workspace_config(path)
+    # # Prepare the mount for the workspace's files
+    mount_files_path = Path(env_vars["WORKSPACE_FILES_PATH"]).absolute()
+    try:
+        docker_client = docker.from_env()
+        docker_client.ping()
+    except docker.errors.DockerException:
+        raise DockerError(
+            "Docker is not running or is not installed. Please install Docker Desktop and start the service."
+        )
+
+    if image is None:
+        image = env_vars.get("WORKSPACE_DOCKER_IMAGE", "blsq/openhexa-blsq-environment:latest")
+    volumes = {
+        Path(path).absolute(): {"bind": "/home/hexa/pipeline", "mode": "rw"},
+        mount_files_path: {
+            "bind": "/home/hexa/workspace",
+            "mode": "rw",
+        },
+    }
+    environment = {"HEXA_ENVIRONMENT": "local_pipeline", "HEXA_WORKSPACE": settings.current_workspace, **env_vars}
+    command = f"pipeline run --config {base64.b64encode(json.dumps(config).encode('utf-8')).decode('utf-8')}"
+    try:
+        docker_client.images.get(image)
+    except docker.errors.ImageNotFound:
+        logging.info("Pulling image %s...", image)
+        docker_client.images.pull(image)
+        logging.info("Image %s pulled", image)
+    try:
+        logging.info("Creating pipeline container...")
+        return docker_client.containers.run(
+            image,
+            command,
+            remove=True,
+            auto_remove=True,
+            platform="linux/amd64",
+            volumes=volumes,
+            environment=environment,
+            detach=True,
+        )
+    except docker.errors.ContainerError as e:
+        raise DockerError(f"Error while running the pipeline: {e}")
+    except docker.errors.ImageNotFound:
+        raise DockerError("Docker image not found")
 
 
 # This is easier to mock in the tests than trying to mock click.confirm
@@ -448,4 +513,5 @@ def upload_pipeline(pipeline_directory_path: typing.Union[str, Path]):
         else:
             raise Exception(data["uploadPipeline"]["errors"])
 
+    return data["uploadPipeline"]["version"]
     return data["uploadPipeline"]["version"]

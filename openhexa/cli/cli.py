@@ -1,7 +1,6 @@
 """CLI module, with click."""
-
-import base64
 import json
+import signal
 from importlib.metadata import version
 from pathlib import Path
 
@@ -9,22 +8,23 @@ import click
 
 from openhexa.cli.api import (
     APIError,
+    DockerError,
     InvalidDefinitionError,
     NoActiveWorkspaceError,
     OutputDirectoryError,
+    PipelineDirectoryError,
     create_pipeline,
     create_pipeline_structure,
     delete_pipeline,
     download_pipeline_sourcecode,
     ensure_is_pipeline_dir,
-    ensure_pipeline_config_exists,
     get_pipeline,
     get_workspace,
     list_pipelines,
+    run_pipeline,
     upload_pipeline,
 )
-from openhexa.cli.settings import settings
-from openhexa.sdk.pipelines import get_local_workspace_config
+from openhexa.cli.settings import settings, setup_logging
 from openhexa.sdk.pipelines.exceptions import PipelineNotFound
 from openhexa.sdk.pipelines.runtime import get_pipeline_metadata
 
@@ -36,6 +36,7 @@ def app(ctx):
     """OpenHEXA CLI."""
     # ensure that ctx.obj exists and is a dict (in case `cli()` is called
     # by means other than the `if` block below)
+    setup_logging()
     ctx.ensure_object(dict)
 
 
@@ -344,69 +345,42 @@ def pipelines_delete(code: str):
     "--image",
     type=str,
     help="Docker image to use",
-    default="blsq/openhexa-blsq-environment:latest",
 )
 def pipelines_run(
     path: str,
-    image: str,
+    image: str = None,
     config_str: str = "{}",
     config_file: click.File = None,
 ):
     """Run a pipeline locally."""
-    from subprocess import Popen
-
-    ensure_is_pipeline_dir(path)
-    ensure_pipeline_config_exists(path)
-    env_vars = get_local_workspace_config(path)
-
-    # # Prepare the mount for the workspace's files
-    mount_files_path = Path(env_vars["WORKSPACE_FILES_PATH"]).absolute()
-    cmd = [
-        "docker",
-        "run",
-        "--mount",
-        f"type=bind,source={Path(path).absolute()},target=/home/hexa/pipeline",
-        "--mount",
-        f"type=bind,source={mount_files_path},target=/home/hexa/workspace",
-        "--env",
-        "HEXA_ENVIRONMENT=local_pipeline",
-        "--env",
-        f"HEXA_WORKSPACE={settings.current_workspace}",
-        "--platform",
-        "linux/amd64",
-        "--rm",
-        "--pull",
-        "always",
-    ]
-
-    image = env_vars["WORKSPACE_DOCKER_IMAGE"] if env_vars.get("WORKSPACE_DOCKER_IMAGE") else image
-
-    cmd.extend(
-        [
-            image,
-            "pipeline",
-            "run",
-        ]
-    )
-
     if config_str and config_file:
-        click.echo("❌ You can't specify both -c and -f", err=True)
-        return click.Abort()
+        _terminate("❌ You can't specify both -c and -f", err=True)
+    config = None
+    try:
+        if config_file:
+            config = json.loads(config_file.read(), strict=False)
+        else:
+            config = json.loads(config_str or "{}", strict=False)
+        container = run_pipeline(path, config, image)
+        # Listen to ctrl+c to stop the container
+        signal.signal(signal.SIGINT, lambda sig, frame: container.kill())
 
-    config = config_str or "{}"
-    if config_file:
-        config = json.dumps(json.loads(config_file.read(), strict=False))
+        click.secho("\nRun logs:", underline=True)
+        for line in container.logs(stream=True):
+            click.echo(line.decode("utf-8").strip())
 
-    cmd.extend(["--config", base64.b64encode(config.encode("utf-8")).decode("utf-8")])
-
-    if settings.debug:
-        print(" ".join(cmd))
-
-    proc = Popen(
-        cmd,
-        close_fds=True,
-    )
-    return proc.wait()
+        result = container.wait()
+        click.echo()
+        if result["StatusCode"] != 0:
+            _terminate("❌ Error in pipeline", err=True)
+        else:
+            click.echo(click.style("✅ Pipeline finished successfully", fg="green"))
+    except json.JSONDecodeError as e:
+        _terminate(f"❌ Error while parsing JSON: {e}", err=True, exception=e)
+    except PipelineDirectoryError:
+        _terminate(f"❌ No pipeline found in {path}", err=True)
+    except DockerError as e:
+        _terminate(f"❌ Error while running pipeline: {e}", err=True, exception=e)
 
 
 @pipelines.command("list")
@@ -433,4 +407,5 @@ def _terminate(message: str, exception: Exception = None, err: bool = False):
     click.echo(click.style(message, fg="red"), err=err)
     if settings.debug and exception:
         raise exception
+    click.Abort()
     click.Abort()
