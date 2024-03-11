@@ -36,6 +36,6 @@ jobs:
           token: ${{ secrets.OH_TOKEN }}
       - name: Push pipeline to OpenHEXA
         run: |
-          openhexa pipelines push .
+          openhexa pipelines push . --yes
         
 
