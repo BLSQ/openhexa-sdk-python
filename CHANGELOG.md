@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.40](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.39...0.1.40) (2024-03-11)
+
+
+### Features
+
+* Check that docker exists and is running ([#136](https://github.com/BLSQ/openhexa-sdk-python/issues/136)) ([3d4d75f](https://github.com/BLSQ/openhexa-sdk-python/commit/3d4d75f5b79d0fd7b5288b5447c4e538a5a7844a))
+
+
+### Bug Fixes
+
+* **Skeleton:** Add '--yes' to the push action to create the pipeline by default ([0013039](https://github.com/BLSQ/openhexa-sdk-python/commit/0013039bcb61288e567f13aba8a3b42659f9721f))
+
 ## [0.1.39](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.38...0.1.39) (2024-03-06)
 
 
