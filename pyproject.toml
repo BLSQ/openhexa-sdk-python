@@ -35,7 +35,7 @@ openhexa = "openhexa.cli:app"
 dev = [
     "ruff~=0.1.11",
     "pytest>=7.3,<8.1",
-    "build>=0.10,<1.1",
+    "build>=0.10,<1.2",
     "pytest-cov>=4.0,<4.2",
     "pre-commit",
     "httmock",
