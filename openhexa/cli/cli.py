@@ -408,4 +408,3 @@ def _terminate(message: str, exception: Exception = None, err: bool = False):
     if settings.debug and exception:
         raise exception
     click.Abort()
-    click.Abort()
