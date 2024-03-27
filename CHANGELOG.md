@@ -1,5 +1,51 @@
 # Changelog
 
+## [0.1.40](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.39...0.1.40) (2024-03-11)
+
+
+### Features
+
+* Check that docker exists and is running ([#136](https://github.com/BLSQ/openhexa-sdk-python/issues/136)) ([3d4d75f](https://github.com/BLSQ/openhexa-sdk-python/commit/3d4d75f5b79d0fd7b5288b5447c4e538a5a7844a))
+
+
+### Bug Fixes
+
+* **Skeleton:** Add '--yes' to the push action to create the pipeline by default ([0013039](https://github.com/BLSQ/openhexa-sdk-python/commit/0013039bcb61288e567f13aba8a3b42659f9721f))
+
+## [0.1.39](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.38...0.1.39) (2024-03-06)
+
+
+### Features
+
+* Add jinja2 templates, add github workflow ([7f53c6a](https://github.com/BLSQ/openhexa-sdk-python/commit/7f53c6a281eab59d3e559c50f57f283844300252))
+
+
+### Bug Fixes
+
+* **ci:** Fix python3.9 tests ([3d9aa95](https://github.com/BLSQ/openhexa-sdk-python/commit/3d9aa955262e19ba549d160d2f650a7ac7403ddb))
+
+## [0.1.38](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.37...0.1.38) (2024-03-05)
+
+
+### Features
+
+* **Pipeline:** Use the AST to get the specs of the pipeline and its parameters ([#130](https://github.com/BLSQ/openhexa-sdk-python/issues/130)) ([9515499](https://github.com/BLSQ/openhexa-sdk-python/commit/951549925fae7ace4bf26a1922dea7f7738c6982))
+* Use a new way to load settings ([#131](https://github.com/BLSQ/openhexa-sdk-python/issues/131)) ([9619673](https://github.com/BLSQ/openhexa-sdk-python/commit/9619673f226149915afb73387ed8e0f8891ed520))
+
+## [0.1.37](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.36...0.1.37) (2024-02-20)
+
+
+### Features
+
+* **Parameter:** add support for Dataset parameter type ([#120](https://github.com/BLSQ/openhexa-sdk-python/issues/120)) ([783b672](https://github.com/BLSQ/openhexa-sdk-python/commit/783b67208d21f5a226ebb6f65d1f35dfe6da6d3d))
+* **Pipelines:** Allow user to download the latest version of a pipeline ([#128](https://github.com/BLSQ/openhexa-sdk-python/issues/128)) ([2dae69d](https://github.com/BLSQ/openhexa-sdk-python/commit/2dae69da69d4742b844f4b8e0c0e5b4e999da41d))
+
+
+### Bug Fixes
+
+* **CLI:** Running a pipeline should not require an active workspace ([#126](https://github.com/BLSQ/openhexa-sdk-python/issues/126)) ([7618d91](https://github.com/BLSQ/openhexa-sdk-python/commit/7618d918ebe701de41191dfe58196c3118f0bd9f))
+* **Parameter:** check if default value is in choices ([#123](https://github.com/BLSQ/openhexa-sdk-python/issues/123)) ([726df4e](https://github.com/BLSQ/openhexa-sdk-python/commit/726df4ef94a556552778baa09262aad0537e4f49))
+
 ## [0.1.36](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.35...0.1.36) (2024-01-30)
 
 

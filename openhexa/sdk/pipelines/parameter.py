@@ -2,10 +2,11 @@
 
 See https://github.com/BLSQ/openhexa/wiki/Writing-OpenHEXA-pipelines#pipeline-parameters for more information.
 """
-import re
 import typing
 
 from openhexa.sdk.datasets import Dataset
+from openhexa.sdk.pipelines.exceptions import InvalidParameterError, ParameterValueError
+from openhexa.sdk.pipelines.utils import validate_pipeline_parameter_code
 from openhexa.sdk.workspaces import workspace
 from openhexa.sdk.workspaces.connection import (
     Connection,
@@ -343,17 +344,17 @@ class DatasetType(ParameterType):
 
 
 TYPES_BY_PYTHON_TYPE = {
-    str: StringType,
-    bool: Boolean,
-    int: Integer,
-    float: Float,
-    DHIS2Connection: DHIS2ConnectionType,
-    PostgreSQLConnection: PostgreSQLConnectionType,
-    IASOConnection: IASOConnectionType,
-    S3Connection: S3ConnectionType,
-    GCSConnection: GCSConnectionType,
-    CustomConnection: CustomConnectionType,
-    Dataset: DatasetType,
+    "str": StringType,
+    "bool": Boolean,
+    "int": Integer,
+    "float": Float,
+    "DHIS2Connection": DHIS2ConnectionType,
+    "PostgreSQLConnection": PostgreSQLConnectionType,
+    "IASOConnection": IASOConnectionType,
+    "S3Connection": S3ConnectionType,
+    "GCSConnection": GCSConnectionType,
+    "CustomConnection": CustomConnectionType,
+    "Dataset": DatasetType,
 }
 
 
@@ -372,18 +373,14 @@ class Parameter:
         required: bool = True,
         multiple: bool = False,
     ):
-        if re.match("^[a-z_][a-z_0-9]+$", code) is None:
-            raise InvalidParameterError(
-                f"Invalid parameter code provided ({code}). Parameter must start with a letter or an underscore, "
-                f"and can only contain lower case letters, numbers and underscores."
-            )
+        validate_pipeline_parameter_code(code)
 
         self.code = code
 
         try:
-            self.type = TYPES_BY_PYTHON_TYPE[type]()
-        except KeyError:
-            valid_parameter_types = [str(k) for k in TYPES_BY_PYTHON_TYPE.keys()]
+            self.type = TYPES_BY_PYTHON_TYPE[type.__name__]()
+        except (KeyError, AttributeError):
+            valid_parameter_types = [k for k in TYPES_BY_PYTHON_TYPE.keys()]
             raise InvalidParameterError(
                 f"Invalid parameter type provided ({type}). "
                 f"Valid parameter types are {', '.join(valid_parameter_types)}"
@@ -585,15 +582,3 @@ class FunctionWithParameter:
     def __call__(self, *args, **kwargs):
         """Call the decorated pipeline function."""
         return self.function(*args, **kwargs)
-
-
-class InvalidParameterError(Exception):
-    """Raised whenever parameter options (usually passed to the @parameter decorator) are invalid."""
-
-    pass
-
-
-class ParameterValueError(Exception):
-    """Raised whenever values for a parameter provided for a pipeline run are invalid."""
-
-    pass
