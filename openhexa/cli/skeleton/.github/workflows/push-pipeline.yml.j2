@@ -1,0 +1,41 @@
+name: Push pipeline on OpenHEXA
+
+on: 
+{%- if workflow_mode == 'release' %}
+  release:
+    types: [published]
+
+{%- elif workflow_mode == 'push' %}
+  push:
+    branches:
+      - main
+{%- elif workflow_mode == 'manual' %}
+  workflow_dispatch:
+    inputs:
+      message:
+        description: Commit message
+        required: false
+{% endif %}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.11'
+      
+      - name: Configure OpenHEXA CLI
+        uses: blsq/openhexa-cli-action@v1
+        with:
+          workspace: "[[ workspace_slug ]]"
+          token: ${{ secrets.OH_TOKEN }}
+      - name: Push pipeline to OpenHEXA
+        run: |
+          openhexa pipelines push . --yes
+        
+
