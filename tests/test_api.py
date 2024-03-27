@@ -14,7 +14,10 @@ def test_create_pipeline_structure(settings):
     """Test create_pipeline_structure function."""
     with tempfile.TemporaryDirectory() as temp_dir:
         pipeline_dir = create_pipeline_structure(
-            "My pipeline", Path(temp_dir), workspace=settings.current_workspace, workflow_mode="manual"
+            "My pipeline",
+            Path(temp_dir),
+            workspace=settings.current_workspace,
+            workflow_mode="manual",
         )
 
         assert (pipeline_dir / "pipeline.py").exists()
