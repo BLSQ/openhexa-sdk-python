@@ -34,7 +34,7 @@ openhexa = "openhexa.cli:app"
 [project.optional-dependencies]
 dev = [
     "ruff>=0.1.11,<0.4.0",
-    "pytest>=7.3,<8.1",
+    "pytest>=7.3,<8.2",
     "build>=0.10,<1.2",
     "pytest-cov>=4.0,<4.2",
     "pre-commit",
