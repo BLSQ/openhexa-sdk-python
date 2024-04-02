@@ -1,4 +1,5 @@
 """CLI module, with click."""
+
 import json
 import signal
 from importlib.metadata import version
@@ -50,7 +51,13 @@ def workspaces(ctx):
 
 @workspaces.command(name="add")
 @click.argument("slug")
-@click.option("--token", prompt=True, hide_input=True, confirmation_prompt=False, envvar="HEXA_TOKEN")
+@click.option(
+    "--token",
+    prompt=True,
+    hide_input=True,
+    confirmation_prompt=False,
+    envvar="HEXA_TOKEN",
+)
 def workspaces_add(slug, token):
     """Add a workspace to the configuration and activate it. The access token is required to access the workspace."""
     if slug in settings.workspaces:
@@ -143,7 +150,10 @@ def pipelines_init(name: str):
         ("release", "Push the pipeline when a git tag is created"),
         ("manual", "Push the pipeline manually from GitHub actions"),
     ]
-    if click.confirm("Do you want to create a workflow to publish the pipeline to OpenHEXA from GitHub?", default=True):
+    if click.confirm(
+        "Do you want to create a workflow to publish the pipeline to OpenHEXA from GitHub?",
+        default=True,
+    ):
         if settings.current_workspace is None:
             _terminate(
                 "No workspace activated. Use openhexa workspaces add or openhexa workspaces activate to "
@@ -158,7 +168,10 @@ def pipelines_init(name: str):
         workflow_mode = modes[mode_choice - 1][0]
     try:
         pipeline_directory = create_pipeline_structure(
-            name, Path.cwd(), workspace=settings.current_workspace, workflow_mode=workflow_mode
+            name,
+            Path.cwd(),
+            workspace=settings.current_workspace,
+            workflow_mode=workflow_mode,
         )
 
         if workflow_mode:
@@ -318,7 +331,12 @@ def pipelines_delete(code: str):
 
         try:
             if delete_pipeline(pipeline["id"]):
-                click.echo(click.style(f"✅ Pipeline {click.style(code, bold=True)} deleted.", fg="green"))
+                click.echo(
+                    click.style(
+                        f"✅ Pipeline {click.style(code, bold=True)} deleted.",
+                        fg="green",
+                    )
+                )
 
         except Exception as e:
             _terminate(
@@ -329,7 +347,11 @@ def pipelines_delete(code: str):
 
 
 @pipelines.command("run")
-@click.argument("path", default=".", type=click.Path(exists=True, file_okay=False, dir_okay=True, path_type=Path))
+@click.argument(
+    "path",
+    default=".",
+    type=click.Path(exists=True, file_okay=False, dir_okay=True, path_type=Path),
+)
 @click.option("-c", "config_str", type=str, help="Configuration JSON as a string")
 @click.option(
     "-f",
@@ -404,4 +426,4 @@ def _terminate(message: str, exception: Exception = None, err: bool = False):
     click.echo(click.style(message, fg="red"), err=err)
     if settings.debug and exception:
         raise exception
-    click.Abort()
+    raise click.Abort()

@@ -1,4 +1,5 @@
 """Collection of functions that interacts with the OpenHEXA API."""
+
 import base64
 import enum
 import io
@@ -76,6 +77,12 @@ class PipelineDefinitionErrorCode(enum.Enum):
 
     PIPELINE_DOES_NOT_SUPPORT_PARAMETERS = "PIPELINE_DOES_NOT_SUPPORT_PARAMETERS"
     INVALID_TIMEOUT_VALUE = "INVALID_TIMEOUT_VALUE"
+
+
+class PermissionDenied(Exception):
+    """Raised whenever an operation on a pipeline is denied by the backend."""
+
+    pass
 
 
 def graphql(query: str, variables=None, token=None):
@@ -271,6 +278,11 @@ def delete_pipeline(pipeline_id: str):
     )
 
     if not data["deletePipeline"]["success"]:
+        if "PERMISSION_DENIED" in data["deletePipeline"]["errors"]:
+            raise Exception(
+                "Check that you have the correct permission or the pipeline is not in a queued/running state."
+            )
+
         raise Exception(data["deletePipeline"]["errors"])
 
     return data["deletePipeline"]["success"]
@@ -312,7 +324,11 @@ def run_pipeline(path: Path, config: dict, image: str = None) -> Container:
             "mode": "rw",
         },
     }
-    environment = {"HEXA_ENVIRONMENT": "local_pipeline", "HEXA_WORKSPACE": settings.current_workspace, **env_vars}
+    environment = {
+        "HEXA_ENVIRONMENT": "local_pipeline",
+        "HEXA_WORKSPACE": settings.current_workspace,
+        **env_vars,
+    }
     command = f"pipeline run --config {base64.b64encode(json.dumps(config).encode('utf-8')).decode('utf-8')}"
     try:
         docker_client.images.get(image)
