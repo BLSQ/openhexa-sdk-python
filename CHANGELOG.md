@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.1.41](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.40...0.1.41) (2024-04-02)
+
+
+### Bug Fixes
+
+* **Build:** Manifest.in was missing the .github folder ([8afa0eb](https://github.com/BLSQ/openhexa-sdk-python/commit/8afa0eb4560f3ca4663850b4fb7860fa995dbe5f))
+* remove duplicated instruction ([137a90d](https://github.com/BLSQ/openhexa-sdk-python/commit/137a90df0e9d2bd6db01161d285414e1eaa67d2d))
+
+
+### Miscellaneous
+
+* **deps-dev:** bump jinja2 from 3.0.3 to 3.1.3 ([#138](https://github.com/BLSQ/openhexa-sdk-python/issues/138)) ([50d7843](https://github.com/BLSQ/openhexa-sdk-python/commit/50d7843614100b44090b65117afebbbbbbcc1c13))
+* **deps-dev:** update build requirement ([#133](https://github.com/BLSQ/openhexa-sdk-python/issues/133)) ([182c3dd](https://github.com/BLSQ/openhexa-sdk-python/commit/182c3dd52cb39a3752631b9f38564d6bb748ece2))
+* **deps-dev:** update ruff requirement ([#132](https://github.com/BLSQ/openhexa-sdk-python/issues/132)) ([bc96de1](https://github.com/BLSQ/openhexa-sdk-python/commit/bc96de11d5acb22698109fb6ec0d1ef00c22480a))
+* **deps-dev:** update setuptools requirement ([#140](https://github.com/BLSQ/openhexa-sdk-python/issues/140)) ([96ae76e](https://github.com/BLSQ/openhexa-sdk-python/commit/96ae76ef65f047283be9bfef9585596cf2d74160))
+
 ## [0.1.40](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.39...0.1.40) (2024-03-11)
 
 
