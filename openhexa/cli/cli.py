@@ -111,10 +111,7 @@ def config(ctx):
     if ctx.invoked_subcommand is None:
         click.echo("Debug: " + ("True" if settings.debug else "False"))
         click.echo(f"Backend URL: {settings.api_url}")
-        try:
-            click.echo(f"Current workspace: {settings.current_workspace}")
-        except KeyError:
-            click.echo("No current workspace")
+        click.echo(f"Current workspace: {settings.current_workspace}")
         click.echo("\nWorkspaces:")
         click.echo("\n".join(settings.workspaces.keys()))
 
