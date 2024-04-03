@@ -530,4 +530,3 @@ def upload_pipeline(pipeline_directory_path: typing.Union[str, Path]):
             raise Exception(data["uploadPipeline"]["errors"])
 
     return data["uploadPipeline"]["version"]
-    return data["uploadPipeline"]["version"]

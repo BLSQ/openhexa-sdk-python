@@ -46,6 +46,14 @@ class PipelineParameterSpecs:
 
 
 @dataclass
+class Argument:
+    """Argument of a decorator."""
+
+    name: string
+    types: list[typing.Any] = field(default_factory=list)
+
+
+@dataclass
 class PipelineSpecs:
     """Specification of a pipeline."""
 
@@ -100,28 +108,30 @@ def _get_decorators_by_name(node, name):
     return [dec for dec in node.decorator_list if isinstance(dec, ast.Call) and dec.func.id == name]
 
 
-def _get_decorator_arg_value(decorator, key=None, index=None):
+def _get_decorator_arg_value(decorator, arg: Argument, index: int):
     for keyword in decorator.keywords:
-        if key and keyword.arg == key:
+        if keyword.arg == arg.name:
+            if type(keyword.value) not in arg.types:
+                raise ValueError(
+                    f"Unsupported argument type for {arg.name}: {type(keyword.value)}. Expected {arg.types}"
+                )
             if isinstance(keyword.value, ast.Constant):
                 return keyword.value.value
             elif isinstance(keyword.value, ast.Name):
                 return keyword.value.id
             elif isinstance(keyword.value, ast.List):
                 return [el.value for el in keyword.value.elts]
-            else:
-                return keyword.value
     try:
         return decorator.args[index].value
     except IndexError:
         return None
 
 
-def _get_decorator_spec(decorator, keys):
+def _get_decorator_spec(decorator, args: tuple[Argument], key=None):
     d = {"name": decorator.func.id, "args": {}}
 
-    for i, key in enumerate(keys):
-        d["args"][key] = _get_decorator_arg_value(decorator, index=i, key=key)
+    for i, arg in enumerate(args):
+        d["args"][arg.name] = _get_decorator_arg_value(decorator, arg, i)
 
     return d
 
@@ -136,6 +146,7 @@ def get_pipeline_metadata(pipeline_path: Path) -> PipelineSpecs:
     ------
         PipelineNotFound: If no function with openhexa.sdk pipeline decorator is found.
         InvalidParameterError: If the parameter type is invalid/unknown.
+        ValueError: If the value of an argument is not a primitive type.
 
     Returns
     -------
@@ -151,12 +162,28 @@ def get_pipeline_metadata(pipeline_path: Path) -> PipelineSpecs:
         except IndexError:
             continue
         else:
-            pipeline_decorator_spec = _get_decorator_spec(pipeline_decorator, ["code", "name", "timeout"])
+            pipeline_decorator_spec = _get_decorator_spec(
+                pipeline_decorator,
+                (
+                    Argument("code", [ast.Constant]),
+                    Argument("name", [ast.Constant]),
+                    Argument("timeout", [ast.Constant]),
+                ),
+            )
             pipeline = PipelineSpecs(**pipeline_decorator_spec["args"])
             for parameter_decorator in _get_decorators_by_name(node, "parameter"):
                 param_decorator_spec = _get_decorator_spec(
                     parameter_decorator,
-                    ["code", "type", "name", "choices", "help", "default", "required", "multiple"],
+                    (
+                        Argument("code", [ast.Constant]),
+                        Argument("type", [ast.Name]),
+                        Argument("name", [ast.Constant]),
+                        Argument("choices", [ast.List]),
+                        Argument("help", [ast.Constant]),
+                        Argument("default", [ast.Constant]),
+                        Argument("required", [ast.Constant]),
+                        Argument("multiple", [ast.Constant]),
+                    ),
                 )
                 try:
                     args = param_decorator_spec["args"]
