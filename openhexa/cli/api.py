@@ -162,7 +162,8 @@ def list_pipelines():
                 code
                 name
                 currentVersion {
-                    number
+                    id
+                    name
                 }
             }
         }
@@ -184,7 +185,8 @@ def get_pipeline(pipeline_code: str) -> dict[str, typing.Any]:
             id
             code
             currentVersion {
-                number
+                id
+                name
             }
         }
     }
@@ -434,7 +436,9 @@ def create_pipeline_structure(pipeline_name: str, base_path: Path, workspace: st
     return output_directory
 
 
-def upload_pipeline(pipeline_directory_path: typing.Union[str, Path]):
+def upload_pipeline(
+    pipeline_directory_path: typing.Union[str, Path], name: str, description: str = None, link: str = None
+):
     """Upload the pipeline contained in the provided directory using the GraphQL API.
 
     The pipeline code will be zipped and base64-encoded before being sent to the backend.
@@ -501,7 +505,10 @@ def upload_pipeline(pipeline_directory_path: typing.Union[str, Path]):
                 uploadPipeline(input: $input) {
                     success
                     errors
-                    version
+                    version {
+                        id
+                        name
+                    }
                 }
             }
         """,
@@ -509,6 +516,9 @@ def upload_pipeline(pipeline_directory_path: typing.Union[str, Path]):
             "input": {
                 "workspaceSlug": settings.current_workspace,
                 "code": pipeline.code,
+                "name": name,
+                "description": description,
+                "externalLink": link,
                 "zipfile": base64_content,
                 "parameters": [asdict(p) for p in pipeline.parameters],
                 "timeout": pipeline.timeout,
@@ -529,5 +539,4 @@ def upload_pipeline(pipeline_directory_path: typing.Union[str, Path]):
         else:
             raise Exception(data["uploadPipeline"]["errors"])
 
-    return data["uploadPipeline"]["version"]
     return data["uploadPipeline"]["version"]

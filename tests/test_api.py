@@ -57,12 +57,15 @@ def test_upload_pipeline_success(settings):
 
         with mock.patch("openhexa.cli.api.graphql") as mocked_graphql_client:
             mocked_graphql_client.return_value = {"uploadPipeline": {"version": 1, "success": True, "errors": []}}
-            upload_pipeline(pipeline_dir)
+            upload_pipeline(pipeline_dir, "version-name", "My description", "https://github.com/")
             args_input = mocked_graphql_client.call_args[0][1]["input"]
             assert args_input["code"] == "my-pipeline"
             assert args_input["workspaceSlug"] == "workspace-slug"
             assert args_input["timeout"] is None
             assert args_input["parameters"] == []
+            assert args_input["name"] == "version-name"
+            assert args_input["description"] == "My description"
+            assert args_input["externalLink"] == "https://github.com/"
 
             # Check if the zipfile is correctly created
             with ZipFile(io.BytesIO(base64.b64decode(args_input["zipfile"]))) as zip_file:

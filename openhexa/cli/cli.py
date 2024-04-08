@@ -4,6 +4,7 @@ import json
 import signal
 from importlib.metadata import version
 from pathlib import Path
+from urllib.parse import urlparse
 
 import click
 
@@ -28,6 +29,16 @@ from openhexa.cli.api import (
 from openhexa.cli.settings import settings, setup_logging
 from openhexa.sdk.pipelines.exceptions import PipelineNotFound
 from openhexa.sdk.pipelines.runtime import get_pipeline_metadata
+
+
+def validate_url(ctx, param, value):
+    """Validate URL format."""
+    if value is not None:
+        parsed_url = urlparse(value)
+        if parsed_url.scheme in ("http", "https") and parsed_url.netloc:
+            return value
+        else:
+            raise click.BadParameter("Invalid URL format. Please provide a valid HTTP or HTTPS URL.")
 
 
 @click.group()
@@ -205,8 +216,33 @@ def pipelines_init(name: str):
         dir_okay=True,
     ),
 )
+@click.option("--name", "-n", type=str, help="Name of the version", prompt="Name of the version", required=True)
+@click.option(
+    "--description",
+    "-d",
+    default=None,
+    type=str,
+    help="Description of the version",
+    prompt="Description of the version",
+    prompt_required=False,
+)
+@click.option(
+    "--link",
+    "-l",
+    type=str,
+    callback=validate_url,
+    help="Link to the version commit",
+    prompt="Link of the version release",
+    prompt_required=False,
+)
 @click.option("--yes", is_flag=True, help="Skip confirmation")
-def pipelines_push(path: str, yes: bool = False):
+def pipelines_push(
+    path: str,
+    name: str,
+    description: str = None,
+    link: str = None,
+    yes: bool = False,
+):
     """Push a pipeline to the backend. If the pipeline already exists, it will be updated otherwise it will be created.
 
     PATH is the path to the pipeline file.
@@ -253,10 +289,10 @@ def pipelines_push(path: str, yes: bool = False):
         )
 
         try:
-            new_version = upload_pipeline(path)
+            upload_pipeline(path, name, description=description, link=link)
             click.echo(
                 click.style(
-                    f"✅ New version '{new_version}' created! You can view the pipeline in OpenHEXA on {click.style(f'{settings.public_api_url}/workspaces/{workspace}/pipelines/{pipeline.code}', fg='bright_blue', underline=True)}",
+                    f"✅ New version '{name}' created! You can view the pipeline in OpenHEXA on {click.style(f'{settings.public_api_url}/workspaces/{workspace}/pipelines/{pipeline.code}', fg='bright_blue', underline=True)}",
                     fg="green",
                 )
             )
