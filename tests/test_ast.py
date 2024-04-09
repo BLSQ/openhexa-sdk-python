@@ -60,6 +60,45 @@ class AstTest(TestCase):
                 asdict(pipeline), {"code": "test", "name": "Test pipeline", "parameters": [], "timeout": None}
             )
 
+    def test_pipeline_with_invalid_parameter_args(self):
+        """The file contains a @parameter decorator with a BinOp as default value."""
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            with open(f"{tmpdirname}/pipeline.py", "w") as f:
+                f.write(
+                    "\n".join(
+                        [
+                            "from openhexa.sdk.pipelines import pipeline, parameter",
+                            "",
+                            "@pipeline('test', 'Test pipeline')",
+                            "@parameter('test_param', name='Test Param', type=int, default=42 * 30, help='Param help')",
+                            "def test_pipeline(test_param):",
+                            "    pass",
+                        ]
+                    )
+                )
+            with self.assertRaises(ValueError):
+                get_pipeline_metadata(tmpdirname)
+
+    def test_pipeline_with_invalid_pipeline_args(self):
+        """The file contains a @pipeline decorator with invalid value."""
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            with open(f"{tmpdirname}/pipeline.py", "w") as f:
+                f.write(
+                    "\n".join(
+                        [
+                            "from openhexa.sdk.pipelines import pipeline, parameter",
+                            "",
+                            "timeout = 60 * 60",
+                            "@pipeline('test', 'Test pipeline', timeout=timeout)",
+                            "@parameter('test_param', name='Test Param', type=int, help='Param help')",
+                            "def test_pipeline(test_param):",
+                            "    pass",
+                        ]
+                    )
+                )
+            with self.assertRaises(ValueError):
+                get_pipeline_metadata(tmpdirname)
+
     def test_pipeline_with_int_param(self):
         """The file contains a @pipeline decorator and a @parameter decorator with an int."""
         with tempfile.TemporaryDirectory() as tmpdirname:
