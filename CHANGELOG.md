@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.1.42](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.41...0.1.42) (2024-04-09)
+
+
+### Features
+
+* **CLI:** check if permission_denied is thrown ([#129](https://github.com/BLSQ/openhexa-sdk-python/issues/129)) ([2f856fe](https://github.com/BLSQ/openhexa-sdk-python/commit/2f856fe5927e7fe30456b9ff7fee57a12491c827))
+* **CLI:** User can provide a name, description and link of the pipel… ([#142](https://github.com/BLSQ/openhexa-sdk-python/issues/142)) ([45fd2e7](https://github.com/BLSQ/openhexa-sdk-python/commit/45fd2e7cd70ebc1000509ab50eb4d31a5c567200))
+
+
+### Bug Fixes
+
+* **CLI:** Check if args of decorators are of a primitive type ([#146](https://github.com/BLSQ/openhexa-sdk-python/issues/146)) ([3ca0f51](https://github.com/BLSQ/openhexa-sdk-python/commit/3ca0f51af415680da7c31188c9340e09fcfefc2b))
+
+
+### Miscellaneous
+
+* **deps-dev:** update build requirement ([#144](https://github.com/BLSQ/openhexa-sdk-python/issues/144)) ([38ce2c3](https://github.com/BLSQ/openhexa-sdk-python/commit/38ce2c355b4ac8b5002976a549b22805cb836fd6))
+* **deps-dev:** update pytest requirement from &lt;8.1,&gt;=7.3 to >=7.3,<8.2 ([#139](https://github.com/BLSQ/openhexa-sdk-python/issues/139)) ([51938c8](https://github.com/BLSQ/openhexa-sdk-python/commit/51938c80c83a72a1bc5cd6473271fcacc0df9696))
+* **deps-dev:** update pytest-cov requirement ([#143](https://github.com/BLSQ/openhexa-sdk-python/issues/143)) ([c4ea0ef](https://github.com/BLSQ/openhexa-sdk-python/commit/c4ea0ef377b786f462ec6344085d999b405672fd))
+
 ## [0.1.41](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.40...0.1.41) (2024-04-02)
 
 
