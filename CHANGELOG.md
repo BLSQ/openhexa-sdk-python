@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.43](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.42...0.1.43) (2024-04-10)
+
+
+### Bug Fixes
+
+* **API:** uploading a version now returns a pipelineVersion instead of a version ([5f89738](https://github.com/BLSQ/openhexa-sdk-python/commit/5f89738f803a391dd39f3a88a4e3ae7bb19f2860))
+* **typing:** Add all accepted types ([96d4170](https://github.com/BLSQ/openhexa-sdk-python/commit/96d4170fe7301e6931bf98826fe49e90fe4bfc2b))
+
+
+### Miscellaneous
+
+* Check if a new version of the library is available and inform the user. ([495cda8](https://github.com/BLSQ/openhexa-sdk-python/commit/495cda8d6fb853f2bfad4265d1d10f868ec5bcca))
+
 ## [0.1.42](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.41...0.1.42) (2024-04-09)
 
 
