@@ -110,6 +110,20 @@ class Settings:
             return os.getenv("HEXA_TOKEN")
         return self._file_config["workspaces"].get(self.current_workspace)
 
+    @property
+    def last_version_check(self):
+        """Return the last version check timestamp from the settings file."""
+        val = self._file_config["openhexa"].get("last_version_check", None)
+        if val is not None:
+            return int(val)
+
+    @last_version_check.setter
+    def last_version_check(self, value: int):
+        """Set the last version check timestamp in the settings file."""
+        assert isinstance(value, int), "last_version_check must be an integer."
+        self._file_config["openhexa"]["last_version_check"] = str(value)
+        self.save()
+
     def save(self):
         """Save the settings to disk."""
         _save_config(self._file_config)

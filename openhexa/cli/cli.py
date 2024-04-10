@@ -2,6 +2,7 @@
 
 import json
 import signal
+from datetime import datetime
 from importlib.metadata import version
 from pathlib import Path
 from urllib.parse import urlparse
@@ -20,6 +21,7 @@ from openhexa.cli.api import (
     delete_pipeline,
     download_pipeline_sourcecode,
     ensure_is_pipeline_dir,
+    get_library_versions,
     get_pipeline,
     get_workspace,
     list_pipelines,
@@ -50,6 +52,26 @@ def app(ctx):
     # by means other than the `if` block below)
     setup_logging()
     ctx.ensure_object(dict)
+
+    # Check if the version is outdated and warns the user if it's the case
+    ONE_HOUR = 60 * 60
+    now_timestamp = int(datetime.now().timestamp())
+    if settings.last_version_check is None or now_timestamp - settings.last_version_check > ONE_HOUR:
+        installed_version, latest_version = get_library_versions()
+        settings.last_version_check = now_timestamp
+        if installed_version != latest_version or True:
+            click.secho(
+                "\n".join(
+                    (
+                        "╔════════════════════════════════════════════════════════════════════════════════════════╗",
+                        f"║ 🚨 Your OpenHEXA CLI version is outdated. Please update to the latest version ({latest_version}) ║",
+                        "║ $ pip install --upgrade openhexa.sdk                                                   ║",
+                        "╚════════════════════════════════════════════════════════════════════════════════════════╝",
+                        "",
+                    )
+                ),
+                fg="yellow",
+            )
 
 
 @app.group(invoke_without_command=True)

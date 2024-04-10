@@ -85,6 +85,21 @@ class PermissionDenied(Exception):
     pass
 
 
+def get_library_versions() -> tuple[str, str]:
+    """Return the current version and the one on PyPi."""
+    # Get the currently installed version
+    installed_version = version("openhexa.sdk")
+
+    # Get the latest version available on PyPI
+    try:
+        response = requests.get("https://pypi.org/pypi/openhexa.sdk/json")
+        latest_version = response.json()["info"]["version"]
+        return installed_version, latest_version
+    except requests.RequestException:
+        logging.error("Could not check for the latest version of the openhexa.sdk package.", exc_info=True)
+        return installed_version, installed_version
+
+
 def graphql(query: str, variables=None, token=None):
     """Perform a GraphQL request."""
     url = settings.api_url + "/graphql/"
