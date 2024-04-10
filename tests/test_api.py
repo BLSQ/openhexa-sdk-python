@@ -56,7 +56,9 @@ def test_upload_pipeline_success(settings):
             test_file.write("# README")
 
         with mock.patch("openhexa.cli.api.graphql") as mocked_graphql_client:
-            mocked_graphql_client.return_value = {"uploadPipeline": {"version": 1, "success": True, "errors": []}}
+            mocked_graphql_client.return_value = {
+                "uploadPipeline": {"pipelineVersion": {"name": "1"}, "success": True, "errors": []}
+            }
             upload_pipeline(pipeline_dir, "version-name", "My description", "https://github.com/")
             args_input = mocked_graphql_client.call_args[0][1]["input"]
             assert args_input["code"] == "my-pipeline"

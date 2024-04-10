@@ -520,7 +520,7 @@ def upload_pipeline(
                 uploadPipeline(input: $input) {
                     success
                     errors
-                    version {
+                    pipelineVersion {
                         id
                         name
                     }
@@ -554,4 +554,4 @@ def upload_pipeline(
         else:
             raise Exception(data["uploadPipeline"]["errors"])
 
-    return data["uploadPipeline"]["version"]
+    return data["uploadPipeline"]["pipelineVersion"]
