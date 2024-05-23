@@ -10,7 +10,6 @@ from urllib.parse import urlparse
 import click
 
 from openhexa.cli.api import (
-    APIError,
     DockerError,
     InvalidDefinitionError,
     NoActiveWorkspaceError,
@@ -97,13 +96,11 @@ def workspaces_add(slug, token):
         click.echo(f"Workspace {slug} already exists. We will only update its token.")
     else:
         click.echo(f"Adding workspace {slug}")
-    try:
-        get_workspace(slug, token)
+    if get_workspace(slug, token):
         settings.add_workspace(slug, token)
-    except APIError as e:
+    else:
         _terminate(
             f"Workspace {slug} does not exist on {settings.api_url}.",
-            exception=e,
             err=True,
         )
 
@@ -238,7 +235,14 @@ def pipelines_init(name: str):
         dir_okay=True,
     ),
 )
-@click.option("--name", "-n", type=str, help="Name of the version", prompt="Name of the version", required=True)
+@click.option(
+    "--name",
+    "-n",
+    type=str,
+    help="Name of the version",
+    prompt="Name of the version",
+    required=True,
+)
 @click.option(
     "--description",
     "-d",
