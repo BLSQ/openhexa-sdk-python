@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.1.44](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.43...0.1.44) (2024-05-27)
+
+
+### Bug Fixes
+
+* **Docker:** Disable healthchecks when running the pipeline locally ([c1b8535](https://github.com/BLSQ/openhexa-sdk-python/commit/c1b853598c8086200166edc63cb93b78860dab40))
+
+
+### Miscellaneous
+
+* **deps:** bump jinja2 from 3.1.3 to 3.1.4 ([#151](https://github.com/BLSQ/openhexa-sdk-python/issues/151)) ([bee0be0](https://github.com/BLSQ/openhexa-sdk-python/commit/bee0be04536b35d5f7f43d9be6838a3e1ddd3c04))
+* **deps:** update pytest requirement from &lt;8.2,&gt;=7.3 to >=7.3,<8.3 ([#150](https://github.com/BLSQ/openhexa-sdk-python/issues/150)) ([2536198](https://github.com/BLSQ/openhexa-sdk-python/commit/253619825113c2607bb683a9f59857f5b5ff3aa5))
+* **deps:** update requests requirement from ~=2.31.0 to &gt;=2.31,&lt;2.33 ([#152](https://github.com/BLSQ/openhexa-sdk-python/issues/152)) ([0500b97](https://github.com/BLSQ/openhexa-sdk-python/commit/0500b97257aa150548ca4f6d79bee0f8b62a61de))
+* **deps:** update setuptools requirement ([#148](https://github.com/BLSQ/openhexa-sdk-python/issues/148)) ([2c97d6f](https://github.com/BLSQ/openhexa-sdk-python/commit/2c97d6fcfb7f49765fd5ef4821e7c205e1741ee2))
+
 ## [0.1.43](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.42...0.1.43) (2024-04-10)
 
 
