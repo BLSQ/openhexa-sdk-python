@@ -363,6 +363,9 @@ def run_pipeline(path: Path, config: dict, image: str = None) -> Container:
             platform="linux/amd64",
             volumes=volumes,
             environment=environment,
+            healthcheck={
+                "test": ["NONE"]  # Disable health checks
+            },
             detach=True,
         )
     except docker.errors.ContainerError as e:
