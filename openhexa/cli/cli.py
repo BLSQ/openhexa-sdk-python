@@ -230,7 +230,6 @@ def pipelines_init(name: str):
 @pipelines.command("push")
 @click.argument(
     "path",
-    default=".",
     type=click.Path(
         exists=True,
         path_type=Path,
@@ -305,10 +304,12 @@ def pipelines_push(
                     abort=True,
                 )
             create_pipeline(pipeline.code, pipeline.name)
-
-        click.echo(
-            f"Pushing pipeline {click.style(pipeline.code, bold=True)} to workspace {click.style(workspace, bold=True)}"
-        )
+        else:
+            click.confirm(
+                f"Pushing pipeline {click.style(pipeline.code, bold=True)} to workspace {click.style(workspace, bold=True)} with name {click.style(name, bold=True)}?",
+                True,
+                abort=True,
+            )
 
         try:
             upload_pipeline(path, name, description=description, link=link)
@@ -337,7 +338,6 @@ def pipelines_push(
 @click.argument(
     "output",
     type=click.Path(path_type=Path),
-    default=".",
 )
 def pipelines_download(code: str, output: Path):
     """Download a pipeline and unzip it at the output path given."""
@@ -407,7 +407,6 @@ def pipelines_delete(code: str):
 @pipelines.command("run")
 @click.argument(
     "path",
-    default=".",
     type=click.Path(exists=True, file_okay=False, dir_okay=True, path_type=Path),
 )
 @click.option("-c", "config_str", type=str, help="Configuration JSON as a string")
@@ -423,11 +422,13 @@ def pipelines_delete(code: str):
     type=str,
     help="Docker image to use",
 )
+@click.option("--debug", "-d", is_flag=True, help="Run the pipeline in debug mode (with debugpy)")
 def pipelines_run(
     path: str,
     image: str = None,
     config_str: str = "{}",
     config_file: click.File = None,
+    debug: bool = False,
 ):
     """Run a pipeline locally."""
     if config_str and config_file:
@@ -438,13 +439,24 @@ def pipelines_run(
             config = json.loads(config_file.read(), strict=False)
         else:
             config = json.loads(config_str or "{}", strict=False)
-        container = run_pipeline(path, config, image)
-        # Listen to ctrl+c to stop the container
-        signal.signal(signal.SIGINT, lambda sig, frame: container.kill())
 
-        click.secho("\nRun logs:", underline=True)
+        container = run_pipeline(path, config, image, debug=debug)
+        # Listen to ctrl+c to stop the container
+        signal.signal(signal.SIGINT, lambda _, __: container.kill())
+
+        if debug:
+            if not (Path(path) / ".vscode" / "launch.json").exists():
+                click.secho("\nA launch.json is required in order to debug the pipeline", fg="red")
+
+            click.secho("Open your pipeline directory with VSCode and start the debugging session")
+            click.secho(
+                "Visit the wiki for more information: https://github.com/BLSQ/openhexa/wiki/Writing-OpenHEXA-pipelines#debugging-and-troubleshooting-your-pipelines",
+                fg="blue",
+            )
+
+        click.secho("\nRun logs", underline=True)
         for line in container.logs(stream=True):
-            click.echo(line.decode("utf-8").strip())
+            click.echo(line.decode("utf-8"))
 
         result = container.wait()
         click.echo()

@@ -6,6 +6,8 @@ import io
 import json
 import logging
 import os
+import shutil
+import tempfile
 import typing
 from dataclasses import asdict
 from importlib.metadata import version
@@ -317,7 +319,7 @@ def ensure_is_pipeline_dir(pipeline_path: str):
     return True
 
 
-def run_pipeline(path: Path, config: dict, image: str = None) -> Container:
+def run_pipeline(path: Path, config: dict, image: str = None, debug: bool = False) -> Container:
     """Run a pipeline using the provided configuration."""
     ensure_is_pipeline_dir(path)
     ensure_pipeline_config_exists(path)
@@ -334,18 +336,28 @@ def run_pipeline(path: Path, config: dict, image: str = None) -> Container:
 
     if image is None:
         image = env_vars.get("WORKSPACE_DOCKER_IMAGE", "blsq/openhexa-blsq-environment:latest")
+
+    # Create temporary directory with the files to mount
+    tmp_dir = tempfile.tempfile.mkdtemp()
+    for file_path in path.glob("**/*"):
+        if file_path.suffix in (".py", ".ipynb", ".txt", ".md", ".yaml"):
+            shutil.copy(file_path, tmp_dir)
+
     volumes = {
-        Path(path).absolute(): {"bind": "/home/hexa/pipeline", "mode": "rw"},
+        tmp_dir: {"bind": "/home/hexa/pipeline", "mode": "rw"},
         mount_files_path: {
             "bind": "/home/hexa/workspace",
             "mode": "rw",
         },
     }
+
     environment = {
         "HEXA_ENVIRONMENT": "local_pipeline",
         "HEXA_WORKSPACE": settings.current_workspace,
+        "REMOTE_DEBUGGER": "true" if debug else None,
         **env_vars,
     }
+
     command = f"pipeline run --config {base64.b64encode(json.dumps(config).encode('utf-8')).decode('utf-8')}"
     try:
         docker_client.images.get(image)
@@ -354,14 +366,17 @@ def run_pipeline(path: Path, config: dict, image: str = None) -> Container:
         docker_client.images.pull(image)
         logging.info("Image %s pulled", image)
     try:
-        logging.info("Creating pipeline container...")
+        logging.info(f"Creating pipeline container with image '{image}'...")
         return docker_client.containers.run(
             image,
             command,
             remove=True,
             auto_remove=True,
+            tty=debug,
+            stdin_open=True,
             platform="linux/amd64",
             volumes=volumes,
+            ports={"5678": 5678},
             environment=environment,
             healthcheck={
                 "test": ["NONE"]  # Disable health checks
@@ -427,7 +442,7 @@ def create_pipeline_structure(pipeline_name: str, base_path: Path, workspace: st
         raise ValueError(f"Directory {output_directory} already exists")
 
     sample_directory_path = get_skeleton_dir()
-    templates = ["pipeline.py.j2", "workspace.yaml", ".gitignore"]
+    templates = ["pipeline.py.j2", "workspace.yaml", ".gitignore", ".vscode/launch.json.j2"]
     if workflow_mode is not None:
         templates.append(".github/workflows/push-pipeline.yml.j2")
 
