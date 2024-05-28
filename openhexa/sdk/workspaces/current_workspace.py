@@ -4,6 +4,7 @@ See https://github.com/BLSQ/openhexa/wiki/User-manual#about-workspaces for more 
 """
 
 import os
+import typing
 from dataclasses import make_dataclass
 from warnings import warn
 
@@ -12,6 +13,7 @@ import stringcase
 from ..datasets import Dataset
 from ..utils import graphql
 from .connection import (
+    ConnectionType,
     CustomConnection,
     DHIS2Connection,
     GCSConnection,
@@ -147,8 +149,87 @@ class CurrentWorkspace:
         # We can remove this once we deprecate this way of running pipelines
         return os.environ["WORKSPACE_TMP_PATH"] if "WORKSPACE_TMP_PATH" in os.environ else "/home/hexa/tmp"
 
-    @staticmethod
-    def dhis2_connection(identifier: str = None, slug: str = None) -> DHIS2Connection:
+    def get_connection(
+        self, identifier: str
+    ) -> typing.Union[
+        DHIS2Connection,
+        PostgreSQLConnection,
+        IASOConnection,
+        S3Connection,
+        S3Connection,
+        CustomConnection,
+    ]:
+        """Get a connection by its identifier.
+
+        Parameters
+        ----------
+        identifier : str
+            The identifier of the connection in the OpenHEXA backend
+
+        Returns
+        -------
+        Connection
+            The connection
+
+        Raises
+        ------
+        ValueError
+            If the connection does not exist
+        """
+        response = graphql(
+            """
+            query getConnection($slug: String!) {
+                connectionBySlug(slug: $slug) {
+                    type
+                    fields {
+                        code
+                        value
+                    }
+                }
+            }
+        """,
+            {"slug": identifier},
+        )
+
+        data = response["connectionBySlug"]
+        if data is None:
+            raise ValueError(f"Connection {identifier} does not exist.")
+
+        fields = {}
+        for d in data["fields"]:
+            fields[d.get("code")] = d.get("value")
+
+        connection_type = data["type"]
+
+        if connection_type == ConnectionType.DHIS2.value:
+            return DHIS2Connection(**fields)
+
+        if connection_type == ConnectionType.GCS.value:
+            return GCSConnection(**fields)
+
+        if connection_type == ConnectionType.IASO.value:
+            return IASOConnection(**fields)
+
+        if connection_type == ConnectionType.S3.value:
+            secret_access_key = fields.pop("access_key_secret")
+            return S3Connection(secret_access_key=secret_access_key, **fields)
+
+        if connection_type == ConnectionType.POSTGRESQL.value:
+            db_name = fields.pop("db_name")
+            port = int(fields.pop("port"))
+            return PostgreSQLConnection(database_name=db_name, port=port, **fields)
+
+        if connection_type == ConnectionType.CUSTOM.value:
+            dataclass = make_dataclass(
+                stringcase.pascalcase(identifier),
+                fields.keys(),
+                bases=(CustomConnection,),
+                repr=False,
+            )
+
+            return dataclass(**fields)
+
+    def dhis2_connection(self, identifier: str = None, slug: str = None) -> DHIS2Connection:
         """Get a DHIS2 connection by its identifier.
 
         Parameters
@@ -166,17 +247,15 @@ class CurrentWorkspace:
                 stacklevel=2,
             )
         try:
-            env_variable_prefix = stringcase.constcase(identifier.lower())
-            url = os.environ[f"{env_variable_prefix}_URL"]
-            username = os.environ[f"{env_variable_prefix}_USERNAME"]
-            password = os.environ[f"{env_variable_prefix}_PASSWORD"]
-        except KeyError:
+            connection = self.get_connection(identifier=identifier.lower())
+            if not isinstance(connection, DHIS2Connection):
+                raise ValueError
+
+            return connection
+        except ValueError:
             raise ConnectionDoesNotExist(f'No DHIS2 connection for "{identifier}"')
 
-        return DHIS2Connection(url=url, username=username, password=password)
-
-    @staticmethod
-    def postgresql_connection(identifier: str = None, slug: str = None) -> PostgreSQLConnection:
+    def postgresql_connection(self, identifier: str = None, slug: str = None) -> PostgreSQLConnection:
         """Get a PostgreSQL connection by its identifier.
 
         Parameters
@@ -194,25 +273,15 @@ class CurrentWorkspace:
                 stacklevel=2,
             )
         try:
-            env_variable_prefix = stringcase.constcase(identifier.lower())
-            host = os.environ[f"{env_variable_prefix}_HOST"]
-            port = int(os.environ[f"{env_variable_prefix}_PORT"])
-            username = os.environ[f"{env_variable_prefix}_USERNAME"]
-            password = os.environ[f"{env_variable_prefix}_PASSWORD"]
-            dbname = os.environ[f"{env_variable_prefix}_DB_NAME"]
-        except KeyError:
+            connection = self.get_connection(identifier=identifier.lower())
+            if not isinstance(connection, PostgreSQLConnection):
+                raise ValueError
+
+            return connection
+        except ValueError:
             raise ConnectionDoesNotExist(f'No PostgreSQL connection for "{identifier}"')
 
-        return PostgreSQLConnection(
-            host=host,
-            port=port,
-            username=username,
-            password=password,
-            database_name=dbname,
-        )
-
-    @staticmethod
-    def s3_connection(identifier: str = None, slug: str = None) -> S3Connection:
+    def s3_connection(self, identifier: str = None, slug: str = None) -> S3Connection:
         """Get an AWS S3 connection by its identifier.
 
         Parameters
@@ -230,21 +299,15 @@ class CurrentWorkspace:
                 stacklevel=2,
             )
         try:
-            env_variable_prefix = stringcase.constcase(identifier.lower())
-            secret_access_key = os.environ[f"{env_variable_prefix}_SECRET_ACCESS_KEY"]
-            access_key_id = os.environ[f"{env_variable_prefix}_ACCESS_KEY_ID"]
-            bucket_name = os.environ[f"{env_variable_prefix}_BUCKET_NAME"]
-        except KeyError:
+            connection = self.get_connection(identifier=identifier.lower())
+            if not isinstance(connection, S3Connection):
+                raise ValueError
+
+            return connection
+        except ValueError:
             raise ConnectionDoesNotExist(f'No S3 connection for "{identifier}"')
 
-        return S3Connection(
-            access_key_id=access_key_id,
-            secret_access_key=secret_access_key,
-            bucket_name=bucket_name,
-        )
-
-    @staticmethod
-    def gcs_connection(identifier: str = None, slug: str = None) -> GCSConnection:
+    def gcs_connection(self, identifier: str = None, slug: str = None) -> GCSConnection:
         """Get a Google Cloud Storage connection by its identifier.
 
         Parameters
@@ -262,19 +325,15 @@ class CurrentWorkspace:
                 stacklevel=2,
             )
         try:
-            env_variable_prefix = stringcase.constcase(identifier.lower())
-            service_account_key = os.environ[f"{env_variable_prefix}_SERVICE_ACCOUNT_KEY"]
-            bucket_name = os.environ[f"{env_variable_prefix}_BUCKET_NAME"]
-        except KeyError:
+            connection = self.get_connection(identifier=identifier.lower())
+            if not isinstance(connection, GCSConnection):
+                raise ValueError
+
+            return connection
+        except ValueError:
             raise ConnectionDoesNotExist(f'No GCS connection for "{identifier}"')
 
-        return GCSConnection(
-            service_account_key=service_account_key,
-            bucket_name=bucket_name,
-        )
-
-    @staticmethod
-    def iaso_connection(identifier: str = None, slug: str = None) -> IASOConnection:
+    def iaso_connection(self, identifier: str = None, slug: str = None) -> IASOConnection:
         """Get a IASO connection by it identifier.
 
         Parameters
@@ -292,17 +351,15 @@ class CurrentWorkspace:
                 stacklevel=2,
             )
         try:
-            env_variable_prefix = stringcase.constcase(identifier.lower())
-            url = os.environ[f"{env_variable_prefix}_URL"]
-            username = os.environ[f"{env_variable_prefix}_USERNAME"]
-            password = os.environ[f"{env_variable_prefix}_PASSWORD"]
-        except KeyError:
+            connection = self.get_connection(identifier=identifier.lower())
+            if not isinstance(connection, IASOConnection):
+                raise ValueError
+
+            return connection
+        except ValueError:
             raise ConnectionDoesNotExist(f'No IASO connection for "{identifier}"')
 
-        return IASOConnection(url=url, username=username, password=password)
-
-    @staticmethod
-    def custom_connection(identifier: str = None, slug: str = None) -> CustomConnection:
+    def custom_connection(self, identifier: str = None, slug: str = None) -> CustomConnection:
         """Get a custom connection by its identifier.
 
         Parameters
@@ -319,24 +376,15 @@ class CurrentWorkspace:
                 DeprecationWarning,
                 stacklevel=2,
             )
-        env_variable_prefix = stringcase.constcase(identifier.lower())
-        fields = {}
-        for key, value in os.environ.items():
-            if key.startswith(env_variable_prefix):
-                field_key = key[len(f"{env_variable_prefix}_") :].lower()
-                fields[field_key] = value
 
-        if len(fields) == 0:
-            raise ConnectionDoesNotExist(f'No custom connection for "{identifier}"')
+        try:
+            connection = self.get_connection(identifier=identifier.lower())
+            if not isinstance(connection, CustomConnection):
+                raise ValueError
 
-        dataclass = make_dataclass(
-            stringcase.pascalcase(identifier),
-            fields.keys(),
-            bases=(CustomConnection,),
-            repr=False,
-        )
-
-        return dataclass(**fields)
+            return connection
+        except ValueError:
+            raise ConnectionDoesNotExist(f'No Custom connection for "{identifier}"')
 
     def create_dataset(self, name: str, description: str):
         """Create a new dataset.
@@ -480,8 +528,3 @@ class CurrentWorkspace:
         ]
 
         return datasets
-
-
-# Once we deprecate the `python pipeline.py` command, we can enhance this to only load the workspace
-# if we're in a pipeline/jupyter context
-workspace = CurrentWorkspace()

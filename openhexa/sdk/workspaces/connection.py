@@ -1,6 +1,7 @@
 """Connection test module."""
 
 import dataclasses
+import enum
 
 
 @dataclasses.dataclass
@@ -113,3 +114,14 @@ class IASOConnection:
     def __repr__(self):
         """Safe representation of the IASO connection (no credentials)."""
         return f"IASOConnection(url='{self.url}', username='{self.username}')"
+
+
+class ConnectionType(enum.Enum):
+    """EnumType for connection."""
+
+    S3 = "S3"
+    GCS = "GCS"
+    POSTGRESQL = "POSTGRESQL"
+    DHIS2 = "DHIS2"
+    IASO = "IASO"
+    CUSTOM = "CUSTOM"
