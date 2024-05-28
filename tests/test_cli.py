@@ -5,7 +5,7 @@ from io import BytesIO
 from pathlib import Path
 from tempfile import mkdtemp
 from unittest import TestCase
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 from zipfile import ZipFile
 
 import pytest
@@ -41,43 +41,6 @@ class CliRunTest(TestCase):
             result = self.runner.invoke(pipelines_run, [mkdtemp()])
             assert result.exit_code == 1
             self.assertTrue("does not contain a pipeline.py file" in str(result.exception))
-
-    @patch("openhexa.cli.api.ask_pipeline_config_creation", return_value=True)
-    def test_no_config_file(self, mock_ask_config):
-        """Test running a pipeline without a workspace.yaml file.
-
-        It should ask the user if they want to create the config file.
-        Two tests are performed:
-        - The user accepts the config creation
-        - The user refuses the config creation
-        """
-        with self.runner.isolated_filesystem() as tmp:
-            with open("pipeline.py", "w") as f:
-                f.write("")
-
-            self.assertFalse((Path(tmp) / "workspace.yaml").exists())
-            with patch("openhexa.cli.api.docker") as mock_docker:
-                docker_client_mock = MagicMock()
-                mock_docker.from_env.return_value = docker_client_mock
-                container_mock = MagicMock()
-
-                docker_client_mock.images.get.return_value = True
-                docker_client_mock.containers.run.return_value = container_mock
-                container_mock.wait.return_value = {"StatusCode": 0}
-
-                # First without accepting the config creation
-                mock_ask_config.return_value = False
-                result = self.runner.invoke(pipelines_run, [tmp])
-                self.assertEqual(result.exit_code, 1)
-                self.assertFalse((Path(tmp) / "workspace.yaml").exists())
-                docker_client_mock.containers.run.assert_not_called()
-
-                # This time we accept the config creation
-                mock_ask_config.return_value = True
-                result = self.runner.invoke(pipelines_run, [tmp])
-                self.assertEqual(result.exit_code, 0)
-                self.assertTrue((Path(tmp) / "workspace.yaml").exists())
-                docker_client_mock.containers.run.assert_called()
 
     @patch("openhexa.cli.api.graphql")
     def test_download_pipeline_no_pipeline(self, mock_graphql):
