@@ -338,7 +338,7 @@ def run_pipeline(path: Path, config: dict, image: str = None, debug: bool = Fals
         image = env_vars.get("WORKSPACE_DOCKER_IMAGE", "blsq/openhexa-blsq-environment:latest")
 
     # Create temporary directory with the files to mount
-    tmp_dir = tempfile.tempfile.mkdtemp()
+    tmp_dir = tempfile.mkdtemp()
     for file_path in path.glob("**/*"):
         if file_path.suffix in (".py", ".ipynb", ".txt", ".md", ".yaml"):
             shutil.copy(file_path, tmp_dir)
