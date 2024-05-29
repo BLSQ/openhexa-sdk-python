@@ -2,6 +2,7 @@
 
 See https://github.com/BLSQ/openhexa/wiki/Writing-OpenHEXA-pipelines#pipeline-parameters for more information.
 """
+
 import typing
 
 from openhexa.sdk.datasets import Dataset
@@ -17,7 +18,7 @@ from openhexa.sdk.workspaces.connection import (
     PostgreSQLConnection,
     S3Connection,
 )
-from openhexa.sdk.workspaces.workspace import ConnectionDoesNotExist
+from openhexa.sdk.workspaces.current_workspace import ConnectionDoesNotExist
 
 
 class ParameterType:

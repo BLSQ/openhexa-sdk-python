@@ -13,7 +13,7 @@ import stringcase
 from ..datasets import Dataset
 from ..utils import graphql
 from .connection import (
-    ConnectionType,
+    ConnectionClasses,
     CustomConnection,
     DHIS2Connection,
     GCSConnection,
@@ -158,6 +158,7 @@ class CurrentWorkspace:
         S3Connection,
         S3Connection,
         CustomConnection,
+        None,
     ]:
         """Get a connection by its identifier.
 
@@ -199,35 +200,27 @@ class CurrentWorkspace:
         for d in data["fields"]:
             fields[d.get("code")] = d.get("value")
 
-        connection_type = data["type"]
+        connection_type = data["type"].upper()
+        if connection_type in ConnectionClasses.keys():
+            if connection_type == "S3":
+                secret_access_key = fields.pop("access_key_secret")
+                return S3Connection(secret_access_key=secret_access_key, **fields)
 
-        if connection_type == ConnectionType.DHIS2.value:
-            return DHIS2Connection(**fields)
+            if connection_type == "POSTGRESQL":
+                db_name = fields.pop("db_name")
+                port = int(fields.pop("port"))
+                return PostgreSQLConnection(database_name=db_name, port=port, **fields)
 
-        if connection_type == ConnectionType.GCS.value:
-            return GCSConnection(**fields)
+            if connection_type == "CUSTOM":
+                dataclass = make_dataclass(
+                    stringcase.pascalcase(identifier),
+                    fields.keys(),
+                    bases=(CustomConnection,),
+                    repr=False,
+                )
+                return dataclass(**fields)
 
-        if connection_type == ConnectionType.IASO.value:
-            return IASOConnection(**fields)
-
-        if connection_type == ConnectionType.S3.value:
-            secret_access_key = fields.pop("access_key_secret")
-            return S3Connection(secret_access_key=secret_access_key, **fields)
-
-        if connection_type == ConnectionType.POSTGRESQL.value:
-            db_name = fields.pop("db_name")
-            port = int(fields.pop("port"))
-            return PostgreSQLConnection(database_name=db_name, port=port, **fields)
-
-        if connection_type == ConnectionType.CUSTOM.value:
-            dataclass = make_dataclass(
-                stringcase.pascalcase(identifier),
-                fields.keys(),
-                bases=(CustomConnection,),
-                repr=False,
-            )
-
-            return dataclass(**fields)
+            return ConnectionClasses[connection_type](**fields)
 
     def dhis2_connection(self, identifier: str = None, slug: str = None) -> DHIS2Connection:
         """Get a DHIS2 connection by its identifier.

@@ -1,7 +1,6 @@
 """Connection test module."""
 
 import dataclasses
-import enum
 
 
 @dataclasses.dataclass
@@ -116,12 +115,11 @@ class IASOConnection:
         return f"IASOConnection(url='{self.url}', username='{self.username}')"
 
 
-class ConnectionType(enum.Enum):
-    """EnumType for connection."""
-
-    S3 = "S3"
-    GCS = "GCS"
-    POSTGRESQL = "POSTGRESQL"
-    DHIS2 = "DHIS2"
-    IASO = "IASO"
-    CUSTOM = "CUSTOM"
+ConnectionClasses = {
+    "S3": S3Connection,
+    "GCS": GCSConnection,
+    "POSTGRESQL": PostgreSQLConnection,
+    "DHIS2": DHIS2Connection,
+    "IASO": IASOConnection,
+    "CUSTOM": CustomConnection,
+}
