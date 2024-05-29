@@ -11,7 +11,7 @@ from zipfile import ZipFile
 import pytest
 from click.testing import CliRunner
 
-from openhexa.cli.cli import pipelines_download, pipelines_run
+from openhexa.cli.cli import pipelines_download, pipelines_run, workspaces_add
 
 
 @pytest.mark.usefixtures("settings")
@@ -100,3 +100,23 @@ class CliRunTest(TestCase):
             self.assertEqual(result.exit_code, 0)
             self.assertTrue((Path(tmp) / "pipeline.py").exists())
             self.assertEqual(open(tmp + "/pipeline.py").read(), "print('pipeline.py file')")
+
+    @patch("openhexa.cli.api.graphql")
+    def test_workspaces_add_not_found(self, mock_graphql):
+        """Test the add workspace command when the workspae doesn't exist on the current server."""
+        with self.runner.isolated_filesystem():
+            mock_graphql.return_value = {"workspace": None}
+            result = self.runner.invoke(workspaces_add, ["test_workspace"], input="random_token \n")
+            self.assertEqual(result.exit_code, 1)
+            self.assertIn(
+                "Workspace test_workspace does not exist",
+                str(result.stdout),
+            )
+
+    @patch("openhexa.cli.api.graphql")
+    def test_workspaces_add(self, mock_graphql):
+        """Test the add workspace command."""
+        with self.runner.isolated_filesystem():
+            mock_graphql.return_value = {"workspace": {"name": "test_workspace", "slug": "test_workspace_0000"}}
+            result = self.runner.invoke(workspaces_add, ["test_workspace"], input="random_token \n")
+            self.assertEqual(result.exit_code, 0)
