@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.1.45](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.44...0.1.45) (2024-05-30)
+
+
+### Features
+
+* **Run:** Run pipelines with the debugger ready to be used ([a67d0fe](https://github.com/BLSQ/openhexa-sdk-python/commit/a67d0fe6eeba0c97cb2513b5c9d6fb9a2b5d8690))
+* **Run:** Run pipelines with the debugger ready to be used ([#157](https://github.com/BLSQ/openhexa-sdk-python/issues/157)) ([754c21b](https://github.com/BLSQ/openhexa-sdk-python/commit/754c21b4888b69ee7feb6f80beaf672520539f52))
+* **Run:** Run pipelines with the debugger ready to be used ([#157](https://github.com/BLSQ/openhexa-sdk-python/issues/157)) ([6863173](https://github.com/BLSQ/openhexa-sdk-python/commit/686317301b7ec9e1c83ec8ce7bb2c58a0f9b4021))
+
+
+### Bug Fixes
+
+* **Cli:** no error is thrown when workspace doesn't exist ([#153](https://github.com/BLSQ/openhexa-sdk-python/issues/153)) ([fbbec07](https://github.com/BLSQ/openhexa-sdk-python/commit/fbbec07bc27ad6e53cd8f15bd68c701f4b702c76))
+* **Cli:** no error is thrown when workspace doesn't exist ([#153](https://github.com/BLSQ/openhexa-sdk-python/issues/153)) ([cefc69c](https://github.com/BLSQ/openhexa-sdk-python/commit/cefc69c15f8abd2b27e3e4d9ba3b88507537f296))
+
+
+### Miscellaneous
+
+* **deps:** bump docker from 7.0.0 to 7.1.0 ([#156](https://github.com/BLSQ/openhexa-sdk-python/issues/156)) ([e6cc226](https://github.com/BLSQ/openhexa-sdk-python/commit/e6cc226bae490bc1bb85453b6bed988464093c51))
+* **deps:** bump docker from 7.0.0 to 7.1.0 ([#156](https://github.com/BLSQ/openhexa-sdk-python/issues/156)) ([377fca6](https://github.com/BLSQ/openhexa-sdk-python/commit/377fca606d6c51665cf4e60e1a9cae3d491421d3))
+
 ## [0.1.44](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.43...0.1.44) (2024-05-27)
 
 
