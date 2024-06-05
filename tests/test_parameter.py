@@ -120,9 +120,7 @@ def test_validate_dhis2_connection():
     data = DHIS2Connection(url, username, password)
     with mock.patch.object(workspace, "dhis2_connection", return_value=data):
         dhis2_parameter_type = DHIS2ConnectionType()
-        assert dhis2_parameter_type.validate(identifier) == DHIS2Connection(
-            url, username, password
-        )
+        assert dhis2_parameter_type.validate(identifier) == DHIS2Connection(url, username, password)
         with pytest.raises(ParameterValueError):
             dhis2_parameter_type.validate(86)
 
@@ -138,9 +136,7 @@ def test_validate_iaso_connection():
     data = IASOConnection(url, username, password)
     with mock.patch.object(workspace, "iaso_connection", return_value=data):
         iaso_parameter_type = IASOConnectionType()
-        assert iaso_parameter_type.validate(identifier) == IASOConnection(
-            url, username, password
-        )
+        assert iaso_parameter_type.validate(identifier) == IASOConnection(url, username, password)
         with pytest.raises(ParameterValueError):
             iaso_parameter_type.validate(86)
 
@@ -154,9 +150,7 @@ def test_validate_gcs_connection():
     data = GCSConnection(service_account_key, bucket_name)
     with mock.patch.object(workspace, "gcs_connection", return_value=data):
         gcs_parameter_type = GCSConnectionType()
-        assert gcs_parameter_type.validate(identifier) == GCSConnection(
-            service_account_key, bucket_name
-        )
+        assert gcs_parameter_type.validate(identifier) == GCSConnection(service_account_key, bucket_name)
         with pytest.raises(ParameterValueError):
             gcs_parameter_type.validate(86)
 
@@ -172,9 +166,7 @@ def test_validate_s3_connection():
     data = S3Connection(access_key_id, secret_access_key, bucket_name)
     with mock.patch.object(workspace, "s3_connection", return_value=data):
         s3_parameter_type = S3ConnectionType()
-        assert s3_parameter_type.validate(identifier) == S3Connection(
-            access_key_id, secret_access_key, bucket_name
-        )
+        assert s3_parameter_type.validate(identifier) == S3Connection(access_key_id, secret_access_key, bucket_name)
         with pytest.raises(ParameterValueError):
             s3_parameter_type.validate(86)
 
@@ -193,9 +185,7 @@ def test_validate_custom_connection(monkeypatch):
         repr=False,
     )
     monkeypatch.setenv("HEXA_SERVER_URL", "http://app.openhexa.test")
-    with mock.patch.object(
-        workspace, "get_connection", return_value=dataclass(field_1, field_2)
-    ):
+    with mock.patch.object(workspace, "get_connection", return_value=dataclass(field_1, field_2)):
         custom_co_type = CustomConnectionType()
 
         custom_co = custom_co_type.validate(identifier)

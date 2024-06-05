@@ -1,9 +1,9 @@
 """Pipeline test module."""
 
+import os
 from unittest.mock import Mock, patch
 
 import pytest
-import os
 
 from openhexa.sdk import (
     DHIS2Connection,
@@ -22,9 +22,7 @@ def test_pipeline_run_valid_config():
     parameter_1 = Parameter("arg1", type=str)
     parameter_2 = Parameter("arg2", type=str, multiple=True)
     parameter_3 = Parameter("arg3", type=int, default=33)
-    pipeline = Pipeline(
-        "code", "pipeline", pipeline_func, [parameter_1, parameter_2, parameter_3]
-    )
+    pipeline = Pipeline("code", "pipeline", pipeline_func, [parameter_1, parameter_2, parameter_3])
     pipeline.run({"arg1": "ab", "arg2": ["cd", "ef"]})
 
     assert pipeline.name == "pipeline"
@@ -73,9 +71,7 @@ def test_pipeline_run_connection_dhis2_parameter_config(workspace):
     with patch.object(workspace, "get_connection", return_value=data):
         pipeline.run({"connection_param": identifier})
         assert pipeline.name == "pipeline"
-        pipeline_func.assert_called_once_with(
-            connection_param=DHIS2Connection(url, username, password)
-        )
+        pipeline_func.assert_called_once_with(connection_param=DHIS2Connection(url, username, password))
 
 
 @patch.dict(
@@ -102,9 +98,7 @@ def test_pipeline_run_connection_iaso_parameter_config(workspace):
     with patch.object(workspace, "get_connection", return_value=data):
         pipeline.run({"connection_param": identifier})
         assert pipeline.name == "pipeline"
-        pipeline_func.assert_called_once_with(
-            connection_param=IASOConnection(url, username, password)
-        )
+        pipeline_func.assert_called_once_with(connection_param=IASOConnection(url, username, password))
 
 
 @patch.dict(
@@ -131,9 +125,7 @@ def test_pipeline_run_connection_gcs_parameter_config(workspace):
     with patch.object(workspace, "get_connection", return_value=data):
         pipeline.run({"connection_param": identifier})
         assert pipeline.name == "pipeline"
-        pipeline_func.assert_called_once_with(
-            connection_param=GCSConnection(service_account_key, bucket_name)
-        )
+        pipeline_func.assert_called_once_with(connection_param=GCSConnection(service_account_key, bucket_name))
 
 
 @patch.dict(
@@ -193,9 +185,7 @@ def test_pipeline_run_connection_postgres_parameter_config(workspace):
         pipeline.run({"connection_param": identifier})
         assert pipeline.name == "pipeline"
         pipeline_func.assert_called_once_with(
-            connection_param=PostgreSQLConnection(
-                host, port, username, password, database_name
-            )
+            connection_param=PostgreSQLConnection(host, port, username, password, database_name)
         )
 
 

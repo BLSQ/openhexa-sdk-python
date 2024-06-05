@@ -92,6 +92,7 @@ def get_local_workspace_config(path: Path):
                 # DHIS2 connection
                 if connection_config["type"] == "dhis2":
                     try:
+                        env_vars[f"{stringcase.constcase(slug)}"] = connection_config["type"]
                         env_vars[f"{stringcase.constcase(slug)}_URL"] = connection_config["url"]
                         env_vars[f"{stringcase.constcase(slug)}_USERNAME"] = connection_config["username"]
                         env_vars[f"{stringcase.constcase(slug)}_PASSWORD"] = connection_config["password"]
@@ -104,6 +105,7 @@ def get_local_workspace_config(path: Path):
                 # PostgreSQL connection
                 elif connection_config["type"] == "postgresql":
                     try:
+                        env_vars[f"{stringcase.constcase(slug)}"] = connection_config["type"]
                         env_vars[f"{stringcase.constcase(slug)}_HOST"] = connection_config["host"]
                         env_vars[f"{stringcase.constcase(slug)}_PORT"] = str(connection_config["port"])
                         env_vars[f"{stringcase.constcase(slug)}_USERNAME"] = str(connection_config["username"])
@@ -118,7 +120,8 @@ def get_local_workspace_config(path: Path):
                 # S3 connection
                 elif connection_config["type"] == "s3":
                     try:
-                        env_vars[f"{stringcase.constcase(slug)}_SECRET_ACCESS_KEY"] = connection_config[
+                        env_vars[f"{stringcase.constcase(slug)}"] = connection_config["type"]
+                        env_vars[f"{stringcase.constcase(slug)}_ACCESS_KEY_SECRET"] = connection_config[
                             "secret_access_key"
                         ]
                         env_vars[f"{stringcase.constcase(slug)}_ACCESS_KEY_ID"] = str(
@@ -134,6 +137,7 @@ def get_local_workspace_config(path: Path):
                 # GCS connection
                 elif connection_config["type"] == "gcs":
                     try:
+                        env_vars[f"{stringcase.constcase(slug)}"] = connection_config["type"]
                         env_vars[f"{stringcase.constcase(slug)}_SERVICE_ACCOUNT_KEY"] = connection_config[
                             "service_account_key"
                         ]
@@ -147,6 +151,7 @@ def get_local_workspace_config(path: Path):
                     # IASO connection
                 elif connection_config["type"] == "iaso":
                     try:
+                        env_vars[f"{stringcase.constcase(slug)}"] = connection_config["type"]
                         env_vars[f"{stringcase.constcase(slug)}_URL"] = connection_config["url"]
                         env_vars[f"{stringcase.constcase(slug)}_USERNAME"] = connection_config["username"]
                         env_vars[f"{stringcase.constcase(slug)}_PASSWORD"] = connection_config["password"]
@@ -161,6 +166,8 @@ def get_local_workspace_config(path: Path):
                     for key, value in connection_config.items():
                         if key != "type":
                             env_vars[stringcase.constcase(f"{slug}_{key.lower()}")] = str(value)
+                    env_vars[f"{stringcase.constcase(slug)}"] = connection_config["type"]
+
         # Workspace docker image
         if "image" in local_workspace_config:
             env_vars["WORKSPACE_DOCKER_IMAGE"] = local_workspace_config["image"]

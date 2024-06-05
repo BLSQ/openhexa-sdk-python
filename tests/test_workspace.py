@@ -1,7 +1,7 @@
 """Workspace test module."""
 
-import re
 import os
+import re
 from dataclasses import make_dataclass
 from tempfile import mkdtemp
 from unittest import mock
@@ -21,14 +21,13 @@ from openhexa.sdk.workspaces.current_workspace import ConnectionDoesNotExist
 
 
 class TestWorkspace:
+    """Test class for Workspace."""
 
     def test_workspace_files_path(self, monkeypatch, workspace):
         """Basic checks for the Workspace.files_path() method."""
         assert workspace.files_path == "/home/hexa/workspace"
 
-        monkeypatch.setenv(
-            "WORKSPACE_FILES_PATH", "/Users/John/openhexa/project-1/workspace"
-        )
+        monkeypatch.setenv("WORKSPACE_FILES_PATH", "/Users/John/openhexa/project-1/workspace")
         assert workspace.files_path == "/Users/John/openhexa/project-1/workspace"
 
     def test_workspace_tmp_path(self, monkeypatch, workspace):
@@ -55,6 +54,7 @@ class TestWorkspace:
         with mock.patch.dict(
             os.environ,
             {
+                f"{env_variable_prefix}": "dhis2",
                 f"{env_variable_prefix}_URL": url,
                 f"{env_variable_prefix}_USERNAME": username,
                 f"{env_variable_prefix}_PASSWORD": password,
@@ -86,6 +86,7 @@ class TestWorkspace:
         with mock.patch.dict(
             os.environ,
             {
+                f"{env_variable_prefix}": "postgresql",
                 f"{env_variable_prefix}_HOST": host,
                 f"{env_variable_prefix}_USERNAME": username,
                 f"{env_variable_prefix}_PASSWORD": password,
@@ -100,12 +101,8 @@ class TestWorkspace:
             assert postgres_connection.port == int(port)
             assert postgres_connection.database_name == database_name
             assert postgres_connection.url == url
-            assert (
-                re.search("password", repr(postgres_connection), re.IGNORECASE) is None
-            )
-            assert (
-                re.search("password", str(postgres_connection), re.IGNORECASE) is None
-            )
+            assert re.search("password", repr(postgres_connection), re.IGNORECASE) is None
+            assert re.search("password", str(postgres_connection), re.IGNORECASE) is None
 
     def test_workspace_S3_connection_not_exist(self, workspace):
         """Does not exist test case for S3 connections."""
@@ -124,7 +121,8 @@ class TestWorkspace:
         with mock.patch.dict(
             os.environ,
             {
-                f"{env_variable_prefix}_SECRET_ACCESS_KEY": secret_access_key,
+                f"{env_variable_prefix}": "s3",
+                f"{env_variable_prefix}_ACCESS_KEY_SECRET": secret_access_key,
                 f"{env_variable_prefix}_ACCESS_KEY_ID": access_key_id,
                 f"{env_variable_prefix}_BUCKET_NAME": bucket_name,
             },
@@ -133,17 +131,9 @@ class TestWorkspace:
             assert s3_connection.secret_access_key == secret_access_key
             assert s3_connection.access_key_id == access_key_id
             assert s3_connection.bucket_name == bucket_name
-            assert (
-                re.search("secret_access_key", repr(s3_connection), re.IGNORECASE)
-                is None
-            )
-            assert (
-                re.search("secret_access_key", str(s3_connection), re.IGNORECASE)
-                is None
-            )
-            assert (
-                re.search("access_key_id", repr(s3_connection), re.IGNORECASE) is None
-            )
+            assert re.search("secret_access_key", repr(s3_connection), re.IGNORECASE) is None
+            assert re.search("secret_access_key", str(s3_connection), re.IGNORECASE) is None
+            assert re.search("access_key_id", repr(s3_connection), re.IGNORECASE) is None
             assert re.search("access_key_id", str(s3_connection), re.IGNORECASE) is None
 
     def test_workspace_gcs_connection_not_exist(self, workspace):
@@ -162,6 +152,7 @@ class TestWorkspace:
         with mock.patch.dict(
             os.environ,
             {
+                f"{env_variable_prefix}": "gcs",
                 f"{env_variable_prefix}_SERVICE_ACCOUNT_KEY": service_account_key,
                 f"{env_variable_prefix}_BUCKET_NAME": bucket_name,
             },
@@ -169,14 +160,8 @@ class TestWorkspace:
             s3_connection = workspace.gcs_connection(identifier=identifier)
             assert s3_connection.service_account_key == service_account_key
             assert s3_connection.bucket_name == bucket_name
-            assert (
-                re.search("service_account_key", repr(s3_connection), re.IGNORECASE)
-                is None
-            )
-            assert (
-                re.search("service_account_key", str(s3_connection), re.IGNORECASE)
-                is None
-            )
+            assert re.search("service_account_key", repr(s3_connection), re.IGNORECASE) is None
+            assert re.search("service_account_key", str(s3_connection), re.IGNORECASE) is None
 
     def test_workspace_iaso_connection_not_exist(self, workspace):
         """Does not exist test case for IASO connections."""
@@ -195,6 +180,7 @@ class TestWorkspace:
         with mock.patch.dict(
             os.environ,
             {
+                f"{env_variable_prefix}": "iaso",
                 f"{env_variable_prefix}_URL": url,
                 f"{env_variable_prefix}_USERNAME": username,
                 f"{env_variable_prefix}_PASSWORD": password,
@@ -223,6 +209,7 @@ class TestWorkspace:
         with mock.patch.dict(
             os.environ,
             {
+                f"{env_variable_prefix}": "custom",
                 f"{env_variable_prefix}_USERNAME": username,
                 f"{env_variable_prefix}_PASSWORD": password,
             },
@@ -243,6 +230,7 @@ class TestWorkspace:
         with mock.patch.dict(
             os.environ,
             {
+                f"{env_variable_prefix}": "dhis2",
                 f"{env_variable_prefix}_URL": url,
                 f"{env_variable_prefix}_USERNAME": username,
                 f"{env_variable_prefix}_PASSWORD": password,
@@ -262,6 +250,7 @@ class TestWorkspace:
         with mock.patch.dict(
             os.environ,
             {
+                f"{env_variable_prefix}": "dhis2",
                 f"{env_variable_prefix}_URL": url,
                 f"{env_variable_prefix}_USERNAME": username,
                 f"{env_variable_prefix}_PASSWORD": password,
@@ -273,9 +262,11 @@ class TestWorkspace:
 
 
 class TestConnectedWorkspace:
+    """Test class for workspace that rely the graphl API."""
 
     @pytest.fixture(autouse=True)
     def setup_method(self, monkeypatch):
+        """Basics setup for the TestConnectedWorkspace."""
         # Mock the class variable
         monkeypatch.setenv("HEXA_SERVER_URL", "http://app.openhexa.test")
 
@@ -283,9 +274,7 @@ class TestConnectedWorkspace:
         """Basic checks for the Workspace.files_path() method."""
         assert workspace.files_path == "/home/hexa/workspace"
 
-        monkeypatch.setenv(
-            "WORKSPACE_FILES_PATH", "/Users/John/openhexa/project-1/workspace"
-        )
+        monkeypatch.setenv("WORKSPACE_FILES_PATH", "/Users/John/openhexa/project-1/workspace")
         assert workspace.files_path == "/Users/John/openhexa/project-1/workspace"
 
     def test_workspace_tmp_path(self, monkeypatch, workspace):
@@ -375,12 +364,8 @@ class TestConnectedWorkspace:
             assert postgres_connection.port == port
             assert postgres_connection.database_name == database_name
             assert postgres_connection.url == url
-            assert (
-                re.search("password", repr(postgres_connection), re.IGNORECASE) is None
-            )
-            assert (
-                re.search("password", str(postgres_connection), re.IGNORECASE) is None
-            )
+            assert re.search("password", repr(postgres_connection), re.IGNORECASE) is None
+            assert re.search("password", str(postgres_connection), re.IGNORECASE) is None
 
     def test_workspace_S3_connection_not_exist(self, workspace):
         """Does not exist test case for S3 connections."""
@@ -403,17 +388,9 @@ class TestConnectedWorkspace:
             assert s3_connection.secret_access_key == secret_access_key
             assert s3_connection.access_key_id == access_key_id
             assert s3_connection.bucket_name == bucket_name
-            assert (
-                re.search("secret_access_key", repr(s3_connection), re.IGNORECASE)
-                is None
-            )
-            assert (
-                re.search("secret_access_key", str(s3_connection), re.IGNORECASE)
-                is None
-            )
-            assert (
-                re.search("access_key_id", repr(s3_connection), re.IGNORECASE) is None
-            )
+            assert re.search("secret_access_key", repr(s3_connection), re.IGNORECASE) is None
+            assert re.search("secret_access_key", str(s3_connection), re.IGNORECASE) is None
+            assert re.search("access_key_id", repr(s3_connection), re.IGNORECASE) is None
             assert re.search("access_key_id", str(s3_connection), re.IGNORECASE) is None
 
     def test_workspace_gcs_connection_not_exist(self, workspace):
@@ -435,14 +412,8 @@ class TestConnectedWorkspace:
             s3_connection = workspace.gcs_connection(identifier=identifier)
             assert s3_connection.service_account_key == service_account_key
             assert s3_connection.bucket_name == bucket_name
-            assert (
-                re.search("service_account_key", repr(s3_connection), re.IGNORECASE)
-                is None
-            )
-            assert (
-                re.search("service_account_key", str(s3_connection), re.IGNORECASE)
-                is None
-            )
+            assert re.search("service_account_key", repr(s3_connection), re.IGNORECASE) is None
+            assert re.search("service_account_key", str(s3_connection), re.IGNORECASE) is None
 
     def test_workspace_iaso_connection_not_exist(self, workspace):
         """Does not exist test case for IASO connections."""
@@ -488,9 +459,7 @@ class TestConnectedWorkspace:
             bases=(CustomConnection,),
             repr=False,
         )
-        with mock.patch.object(
-            workspace, "get_connection", return_value=dataclass(username, password)
-        ):
+        with mock.patch.object(workspace, "get_connection", return_value=dataclass(username, password)):
             custom_connection = workspace.custom_connection(identifier=identifier)
             assert custom_connection.username == username
             assert custom_connection.password == password
