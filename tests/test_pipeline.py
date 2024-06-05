@@ -3,6 +3,7 @@
 from unittest.mock import Mock, patch
 
 import pytest
+import os
 
 from openhexa.sdk import (
     DHIS2Connection,
@@ -21,7 +22,9 @@ def test_pipeline_run_valid_config():
     parameter_1 = Parameter("arg1", type=str)
     parameter_2 = Parameter("arg2", type=str, multiple=True)
     parameter_3 = Parameter("arg3", type=int, default=33)
-    pipeline = Pipeline("code", "pipeline", pipeline_func, [parameter_1, parameter_2, parameter_3])
+    pipeline = Pipeline(
+        "code", "pipeline", pipeline_func, [parameter_1, parameter_2, parameter_3]
+    )
     pipeline.run({"arg1": "ab", "arg2": ["cd", "ef"]})
 
     assert pipeline.name == "pipeline"
@@ -46,7 +49,11 @@ def test_pipeline_run_extra_config():
         pipeline.run({"arg1": "ok", "arg2": "extra"})
 
 
-def test_pipeline_run_connection_dhis2_parameter_config():
+@patch.dict(
+    os.environ,
+    {"HEXA_SERVER_URL": "https://test.openhexa.org"},
+)
+def test_pipeline_run_connection_dhis2_parameter_config(workspace):
     """Ensure that DHIS2 connection parameter values are built properly."""
     identifier = "dhis2-connection-id"
 
@@ -63,13 +70,19 @@ def test_pipeline_run_connection_dhis2_parameter_config():
     pipeline = Pipeline("code", "pipeline", pipeline_func, [parameter_1])
 
     data = DHIS2Connection(url, username, password)
-    with patch.object(parameter_1, "validate", return_value=data):
+    with patch.object(workspace, "get_connection", return_value=data):
         pipeline.run({"connection_param": identifier})
         assert pipeline.name == "pipeline"
-        pipeline_func.assert_called_once_with(connection_param=DHIS2Connection(url, username, password))
+        pipeline_func.assert_called_once_with(
+            connection_param=DHIS2Connection(url, username, password)
+        )
 
 
-def test_pipeline_run_connection_iaso_parameter_config():
+@patch.dict(
+    os.environ,
+    {"HEXA_SERVER_URL": "https://test.openhexa.org"},
+)
+def test_pipeline_run_connection_iaso_parameter_config(workspace):
     """Ensure that IASO connection parameter values are built properly."""
     identifier = "iaso-connection-id"
 
@@ -86,13 +99,19 @@ def test_pipeline_run_connection_iaso_parameter_config():
     pipeline = Pipeline("code", "pipeline", pipeline_func, [parameter_1])
 
     data = IASOConnection(url, username, password)
-    with patch.object(parameter_1, "validate", return_value=data):
+    with patch.object(workspace, "get_connection", return_value=data):
         pipeline.run({"connection_param": identifier})
         assert pipeline.name == "pipeline"
-        pipeline_func.assert_called_once_with(connection_param=IASOConnection(url, username, password))
+        pipeline_func.assert_called_once_with(
+            connection_param=IASOConnection(url, username, password)
+        )
 
 
-def test_pipeline_run_connection_gcs_parameter_config():
+@patch.dict(
+    os.environ,
+    {"HEXA_SERVER_URL": "https://test.openhexa.org"},
+)
+def test_pipeline_run_connection_gcs_parameter_config(workspace):
     """Ensure that GCS connection parameter values are built properly."""
     identifier = "gcs-connection-id"
 
@@ -109,13 +128,19 @@ def test_pipeline_run_connection_gcs_parameter_config():
 
     data = GCSConnection(service_account_key, bucket_name)
 
-    with patch.object(parameter_1, "validate", return_value=data):
+    with patch.object(workspace, "get_connection", return_value=data):
         pipeline.run({"connection_param": identifier})
         assert pipeline.name == "pipeline"
-        pipeline_func.assert_called_once_with(connection_param=GCSConnection(service_account_key, bucket_name))
+        pipeline_func.assert_called_once_with(
+            connection_param=GCSConnection(service_account_key, bucket_name)
+        )
 
 
-def test_pipeline_run_connection_s3_parameter_config():
+@patch.dict(
+    os.environ,
+    {"HEXA_SERVER_URL": "https://test.openhexa.org"},
+)
+def test_pipeline_run_connection_s3_parameter_config(workspace):
     """Ensure that S3 connection parameter values are built properly."""
     identifier = "s3-connection-id"
 
@@ -132,7 +157,7 @@ def test_pipeline_run_connection_s3_parameter_config():
     pipeline = Pipeline("code", "pipeline", pipeline_func, [parameter_1])
 
     data = S3Connection(access_key_id, secret_access_key, bucket_name)
-    with patch.object(parameter_1, "validate", return_value=data):
+    with patch.object(workspace, "get_connection", return_value=data):
         pipeline.run({"connection_param": identifier})
         assert pipeline.name == "pipeline"
         pipeline_func.assert_called_once_with(
@@ -140,7 +165,11 @@ def test_pipeline_run_connection_s3_parameter_config():
         )
 
 
-def test_pipeline_run_connection_postgres_parameter_config():
+@patch.dict(
+    os.environ,
+    {"HEXA_SERVER_URL": "https://test.openhexa.org"},
+)
+def test_pipeline_run_connection_postgres_parameter_config(workspace):
     """Ensure that postgreSQL connection parameter values are built properly."""
     identifier = "postgres-connection-id"
 
@@ -160,11 +189,13 @@ def test_pipeline_run_connection_postgres_parameter_config():
     pipeline = Pipeline("code", "pipeline", pipeline_func, [parameter_1])
 
     data = PostgreSQLConnection(host, port, username, password, database_name)
-    with patch.object(parameter_1, "validate", return_value=data):
+    with patch.object(workspace, "get_connection", return_value=data):
         pipeline.run({"connection_param": identifier})
         assert pipeline.name == "pipeline"
         pipeline_func.assert_called_once_with(
-            connection_param=PostgreSQLConnection(host, port, username, password, database_name)
+            connection_param=PostgreSQLConnection(
+                host, port, username, password, database_name
+            )
         )
 
 
