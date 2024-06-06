@@ -18,6 +18,7 @@ classifiers = [
 ]
 requires-python = ">=3.9,<3.13" # the main constraint for supported Python versions is the multiprocess library
 dependencies = [
+    "urllib3<2",
     "multiprocess~=0.70.15",
     "requests>=2.31,<2.33",
     "PyYAML~=6.0",
