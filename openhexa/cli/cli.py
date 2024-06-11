@@ -308,7 +308,7 @@ def pipelines_push(
                     abort=True,
                 )
             create_pipeline(pipeline.code, pipeline.name)
-        else:
+        elif not yes:
             click.confirm(
                 f"Pushing pipeline {click.style(pipeline.code, bold=True)} to workspace {click.style(workspace, bold=True)} with name {click.style(name, bold=True)}?",
                 True,
