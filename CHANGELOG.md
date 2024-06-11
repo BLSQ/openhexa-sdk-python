@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.46](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.45...0.1.46) (2024-06-11)
+
+
+### Bug Fixes
+
+* **CLI:** Do not ask to create the pipeline if the user has said yes as param ([6597876](https://github.com/BLSQ/openhexa-sdk-python/commit/6597876ded1e900599d33fbe17083e307805d39f))
+* **urllib:** Use urllib &lt; 2 to avoid problemw with openssl being not uptodate ([#160](https://github.com/BLSQ/openhexa-sdk-python/issues/160)) ([bb0c98a](https://github.com/BLSQ/openhexa-sdk-python/commit/bb0c98a51a36671019611f1f9d92a3f428a83525))
+
 ## [0.1.45](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.44...0.1.45) (2024-05-30)
 
 
