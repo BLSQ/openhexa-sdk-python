@@ -376,7 +376,7 @@ def run_pipeline(path: Path, config: dict, image: str = None, debug: bool = Fals
             stdin_open=True,
             platform="linux/amd64",
             volumes=volumes,
-            ports={"5678": 5678},
+            ports={"5678": 5678} if debug else None,
             environment=environment,
             healthcheck={
                 "test": ["NONE"]  # Disable health checks
