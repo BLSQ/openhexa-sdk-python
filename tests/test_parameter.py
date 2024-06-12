@@ -1,12 +1,13 @@
 """Parameter test module."""
 
-import os
+from dataclasses import make_dataclass
 from unittest import mock
 
 import pytest
 import stringcase
 
 from openhexa.sdk import (
+    CustomConnection,
     Dataset,
     DHIS2Connection,
     GCSConnection,
@@ -92,25 +93,17 @@ def test_parameter_types_validate():
 def test_validate_postgres_connection():
     """Check PostgreSQL connection validation."""
     identifier = "polio-ff3a0d"
-    env_variable_prefix = stringcase.constcase(identifier)
+
     host = "https://172.17.0.1"
-    port = "5432"
+    port = 5432
     username = "dhis2"
     password = "dhis2_pwd"
     database_name = "polio"
-    with mock.patch.dict(
-        os.environ,
-        {
-            f"{env_variable_prefix}_HOST": host,
-            f"{env_variable_prefix}_USERNAME": username,
-            f"{env_variable_prefix}_PASSWORD": password,
-            f"{env_variable_prefix}_PORT": port,
-            f"{env_variable_prefix}_DB_NAME": database_name,
-        },
-    ):
+    data = PostgreSQLConnection(host, port, username, password, database_name)
+    with mock.patch.object(workspace, "postgresql_connection", return_value=data):
         postgres_parameter_type = PostgreSQLConnectionType()
         assert postgres_parameter_type.validate(identifier) == PostgreSQLConnection(
-            host, int(port), username, password, database_name
+            host, port, username, password, database_name
         )
         with pytest.raises(ParameterValueError):
             postgres_parameter_type.validate(86)
@@ -119,19 +112,13 @@ def test_validate_postgres_connection():
 def test_validate_dhis2_connection():
     """Check DHIS2 connection validation."""
     identifier = "dhis2-connection-id"
-    env_variable_prefix = stringcase.constcase(identifier)
+
     url = "https://test.dhis2.org/"
     username = "dhis2"
     password = "dhis2_pwd"
 
-    with mock.patch.dict(
-        os.environ,
-        {
-            f"{env_variable_prefix}_URL": url,
-            f"{env_variable_prefix}_USERNAME": username,
-            f"{env_variable_prefix}_PASSWORD": password,
-        },
-    ):
+    data = DHIS2Connection(url, username, password)
+    with mock.patch.object(workspace, "dhis2_connection", return_value=data):
         dhis2_parameter_type = DHIS2ConnectionType()
         assert dhis2_parameter_type.validate(identifier) == DHIS2Connection(url, username, password)
         with pytest.raises(ParameterValueError):
@@ -141,19 +128,13 @@ def test_validate_dhis2_connection():
 def test_validate_iaso_connection():
     """Check IASO connection validation."""
     identifier = "iaso-connection-id"
-    env_variable_prefix = stringcase.constcase(identifier)
+
     url = "https://test.iaso.org/"
     username = "iaso"
     password = "iaso_pwd"
 
-    with mock.patch.dict(
-        os.environ,
-        {
-            f"{env_variable_prefix}_URL": url,
-            f"{env_variable_prefix}_USERNAME": username,
-            f"{env_variable_prefix}_PASSWORD": password,
-        },
-    ):
+    data = IASOConnection(url, username, password)
+    with mock.patch.object(workspace, "iaso_connection", return_value=data):
         iaso_parameter_type = IASOConnectionType()
         assert iaso_parameter_type.validate(identifier) == IASOConnection(url, username, password)
         with pytest.raises(ParameterValueError):
@@ -163,17 +144,11 @@ def test_validate_iaso_connection():
 def test_validate_gcs_connection():
     """Check GCS connection validation."""
     identifier = "gcs-connection-id"
-    env_variable_prefix = stringcase.constcase(identifier)
     service_account_key = "HqQBxH0BAI3zF7kANUNlGg"
     bucket_name = "test"
 
-    with mock.patch.dict(
-        os.environ,
-        {
-            f"{env_variable_prefix}_SERVICE_ACCOUNT_KEY": service_account_key,
-            f"{env_variable_prefix}_BUCKET_NAME": bucket_name,
-        },
-    ):
+    data = GCSConnection(service_account_key, bucket_name)
+    with mock.patch.object(workspace, "gcs_connection", return_value=data):
         gcs_parameter_type = GCSConnectionType()
         assert gcs_parameter_type.validate(identifier) == GCSConnection(service_account_key, bucket_name)
         with pytest.raises(ParameterValueError):
@@ -183,39 +158,34 @@ def test_validate_gcs_connection():
 def test_validate_s3_connection():
     """Check S3 connection validation."""
     identifier = "s3-connection-id"
-    env_variable_prefix = stringcase.constcase(identifier)
+
     secret_access_key = "HqQBxH0BAI3zF7kANUNlGg"
     access_key_id = "84hVntMaMSYP/RSW9ex04w"
     bucket_name = "test"
 
-    with mock.patch.dict(
-        os.environ,
-        {
-            f"{env_variable_prefix}_SECRET_ACCESS_KEY": secret_access_key,
-            f"{env_variable_prefix}_ACCESS_KEY_ID": access_key_id,
-            f"{env_variable_prefix}_BUCKET_NAME": bucket_name,
-        },
-    ):
+    data = S3Connection(access_key_id, secret_access_key, bucket_name)
+    with mock.patch.object(workspace, "s3_connection", return_value=data):
         s3_parameter_type = S3ConnectionType()
         assert s3_parameter_type.validate(identifier) == S3Connection(access_key_id, secret_access_key, bucket_name)
         with pytest.raises(ParameterValueError):
             s3_parameter_type.validate(86)
 
 
-def test_validate_custom_connection():
+def test_validate_custom_connection(monkeypatch):
     """Check Custom connection validation."""
     identifier = "custom-connection-id"
-    env_variable_prefix = stringcase.constcase(identifier)
+
     field_1 = "field_1"
     field_2 = "field_2"
 
-    with mock.patch.dict(
-        os.environ,
-        {
-            f"{env_variable_prefix}_FIELD_1": field_1,
-            f"{env_variable_prefix}_FIELD_2": field_2,
-        },
-    ):
+    dataclass = make_dataclass(
+        stringcase.pascalcase(identifier),
+        [field_1, field_2],
+        bases=(CustomConnection,),
+        repr=False,
+    )
+    monkeypatch.setenv("HEXA_SERVER_URL", "http://app.openhexa.test")
+    with mock.patch.object(workspace, "get_connection", return_value=dataclass(field_1, field_2)):
         custom_co_type = CustomConnectionType()
 
         custom_co = custom_co_type.validate(identifier)

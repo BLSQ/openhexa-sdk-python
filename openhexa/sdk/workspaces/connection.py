@@ -113,3 +113,13 @@ class IASOConnection:
     def __repr__(self):
         """Safe representation of the IASO connection (no credentials)."""
         return f"IASOConnection(url='{self.url}', username='{self.username}')"
+
+
+ConnectionClasses = {
+    "S3": S3Connection,
+    "GCS": GCSConnection,
+    "POSTGRESQL": PostgreSQLConnection,
+    "DHIS2": DHIS2Connection,
+    "IASO": IASOConnection,
+    "CUSTOM": CustomConnection,
+}
