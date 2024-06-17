@@ -92,6 +92,7 @@ class DatasetTest(TestCase):
         mock_graphql.return_value = {
             "createDatasetVersion": {
                 "success": True,
+                "uploadUrl": "http://pre-signed-url.example.com/my-dataset/version-id/test",
                 "version": {
                     "id": "<newVersionId>",
                     "name": "Second version",
@@ -101,7 +102,7 @@ class DatasetTest(TestCase):
             }
         }
 
-        v = d.create_version("Second version")
+        v = d.create_version("Second version", "test.csv")
         self.assertEqual(v.id, "<newVersionId>")
-        v = d.create_version("Second version")
+        v = d.create_version("Second version", "test.csv")
         self.assertEqual(v.id, "<newVersionId>")

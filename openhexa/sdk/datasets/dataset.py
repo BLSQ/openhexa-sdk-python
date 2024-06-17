@@ -156,9 +156,11 @@ class DatasetVersion:
 
     dataset = None
 
-    def __init__(self, dataset: any, id: str, name: str, created_at: str):
+    def __init__(self, dataset: any, id: str, name: str, content_type: str, created_at: str, filename:str = None):
         self.id = id
         self.name = name
+        self.filename = filename
+        self.content_type =content_type
         self.dataset = dataset
         self.created_at = created_at
 
@@ -203,27 +205,20 @@ class DatasetVersion:
 
     def add_file(
         self,
+        upload_url: str,
         source: typing.Union[str, PathLike[str], typing.IO, bytes],
         filename: typing.Optional[str] = None,
     ) -> DatasetFile:
+        filename, mime_type = get_mimetype_from_path(filename, source)
+        with read_content(source) as content:
+            response = requests.put(upload_url, data=content, headers={"Content-Type": mime_type})
+        response.raise_for_status()
+
         """Create a new dataset file and add it to the dataset version."""
-        mime_type = None
-        if isinstance(source, (str, PathLike)):
-            path = Path(source)
-            filename = path.name if filename is None else filename
-            mime_type, _ = mimetypes.guess_type(path)
-        else:
-            if filename is None:
-                raise ValueError("A file name is required when you pass a buffer")
-
-        if mime_type is None:
-            mime_type = "application/octet-stream"
-
         data = graphql(
             """
                 mutation CreateDatasetVersionFile ($input: CreateDatasetVersionFileInput!) {
                     createDatasetVersionFile(input: $input) {
-                        uploadUrl
                         file {
                             id
                             filename
@@ -245,15 +240,13 @@ class DatasetVersion:
                 raise ValueError("This dataset version is locked. You can only add files to the latest version")
             elif "PERMISSION_DENIED" in errors:
                 raise ValueError("You do not have permission to add files to this dataset version")
+            elif "FILE_NOT_FOUND" in errors:
+                raise ValueError("File was not uploaded to the bucket")
             elif "ALREADY_EXISTS" in errors:
                 raise ValueError("A file with this name already exists in this dataset version")
             else:
                 raise Exception(errors)
         result = data["createDatasetVersionFile"]
-        upload_url = result["uploadUrl"]
-        with read_content(source) as content:
-            response = requests.put(upload_url, data=content, headers={"Content-Type": mime_type})
-        response.raise_for_status()
         return DatasetFile(
             version=self,
             id=result["file"]["id"],
@@ -262,6 +255,20 @@ class DatasetVersion:
             uri=result["file"]["uri"],
             created_at=result["file"]["createdAt"],
         )
+
+
+def get_mimetype_from_path(filename, source):
+    mime_type = None
+    if isinstance(source, (str, PathLike)):
+        path = Path(source)
+        filename = path.name if filename is None else filename
+        mime_type, _ = mimetypes.guess_type(path)
+    else:
+        if filename is None:
+            raise ValueError("A file name is required when you pass a buffer")
+    if mime_type is None:
+        mime_type = "application/octet-stream"
+    return filename, mime_type
 
 
 class Dataset:
@@ -284,15 +291,23 @@ class Dataset:
         self.name = name
         self.description = description
 
-    def create_version(self, name: typing.Any) -> DatasetVersion:
+    def create_version(self, name: typing.Any,
+                       source: typing.Union[str, PathLike[str], typing.IO, bytes],
+                       filename: typing.Optional[str] = None, upload_file: bool = False) -> DatasetVersion:
+
+        filename, mime_type = get_mimetype_from_path(filename, source)
+
         """Build a dataset version, save it and return it."""
         response = graphql(
             """
             mutation createDatasetVersion($input: CreateDatasetVersionInput!) {
                 createDatasetVersion(input: $input) {
+                    uploadUrl
                     version {
                         id
                         name
+                        contentType
+                        filename
                         description
                         createdAt
                     }
@@ -305,6 +320,8 @@ class Dataset:
                 "input": {
                     "datasetId": self.id,
                     "name": str(name),
+                    "filename": filename,
+                    "contentType": mime_type,
                 }
             },
         )
@@ -316,9 +333,10 @@ class Dataset:
 
         version = data["version"]
         self._latest_version = DatasetVersion(
-            dataset=self, id=version["id"], name=version["name"], created_at=version["createdAt"]
+            dataset=self, id=version["id"], name=version["name"], created_at=version["createdAt"], content_type=version["contentType"], filename=version["filename"],
         )
-
+        if upload_file:
+            self._latest_version.add_file(upload_url=data["uploadUrl"], source=source, filename=filename)
         return self.latest_version
 
     @property
