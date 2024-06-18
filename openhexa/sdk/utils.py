@@ -6,7 +6,7 @@ import enum
 import os
 import typing
 
-import requests
+from openhexa.utils import create_requests_session
 
 
 class Environment(enum.Enum):
@@ -34,8 +34,9 @@ def graphql(operation: str, variables: typing.Optional[dict[str, typing.Any]] = 
         "HEXA_TOKEN"
     ]  # Works for notebooks with the membership token and pipelines with the run token
     headers = {"Authorization": f"Bearer {auth_token}"}
+    session = create_requests_session()
 
-    req = requests.post(
+    req = session.post(
         f"{os.environ['HEXA_SERVER_URL'].rstrip('/')}/graphql/",
         headers=headers,
         json={

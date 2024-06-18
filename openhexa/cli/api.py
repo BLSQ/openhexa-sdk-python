@@ -23,7 +23,7 @@ from jinja2 import Template
 from openhexa.cli.settings import settings
 from openhexa.sdk.pipelines import get_local_workspace_config
 from openhexa.sdk.pipelines.runtime import get_pipeline_metadata
-from openhexa.utils import stringcase
+from openhexa.utils import create_requests_session, stringcase
 
 
 class InvalidDefinitionError(Exception):
@@ -98,7 +98,10 @@ def get_library_versions() -> tuple[str, str]:
         latest_version = response.json()["info"]["version"]
         return installed_version, latest_version
     except requests.RequestException:
-        logging.error("Could not check for the latest version of the openhexa.sdk package.", exc_info=True)
+        logging.error(
+            "Could not check for the latest version of the openhexa.sdk package.",
+            exc_info=True,
+        )
         return installed_version, installed_version
 
 
@@ -118,7 +121,8 @@ def graphql(query: str, variables=None, token=None):
         click.echo(f"Query: {query}")
         click.echo(f"Variables: {variables}")
 
-    response = requests.post(
+    session = create_requests_session()
+    response = session.post(
         url,
         headers={
             "User-Agent": f"openhexa-cli/{version('openhexa.sdk')}",
@@ -378,9 +382,7 @@ def run_pipeline(path: Path, config: dict, image: str = None, debug: bool = Fals
             volumes=volumes,
             ports={"5678": 5678} if debug else None,
             environment=environment,
-            healthcheck={
-                "test": ["NONE"]  # Disable health checks
-            },
+            healthcheck={"test": ["NONE"]},  # Disable health checks
             detach=True,
         )
     except docker.errors.ContainerError as e:
@@ -442,7 +444,12 @@ def create_pipeline_structure(pipeline_name: str, base_path: Path, workspace: st
         raise ValueError(f"Directory {output_directory} already exists")
 
     sample_directory_path = get_skeleton_dir()
-    templates = ["pipeline.py.j2", "workspace.yaml", ".gitignore", ".vscode/launch.json.j2"]
+    templates = [
+        "pipeline.py.j2",
+        "workspace.yaml",
+        ".gitignore",
+        ".vscode/launch.json.j2",
+    ]
     if workflow_mode is not None:
         templates.append(".github/workflows/push-pipeline.yml.j2")
 
@@ -470,7 +477,10 @@ def create_pipeline_structure(pipeline_name: str, base_path: Path, workspace: st
 
 
 def upload_pipeline(
-    pipeline_directory_path: typing.Union[str, Path], name: str, description: str = None, link: str = None
+    pipeline_directory_path: typing.Union[str, Path],
+    name: str,
+    description: str = None,
+    link: str = None,
 ):
     """Upload the pipeline contained in the provided directory using the GraphQL API.
 
