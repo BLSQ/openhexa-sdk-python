@@ -7,7 +7,6 @@ from tempfile import mkdtemp
 from unittest import mock
 
 import pytest
-import stringcase
 
 from openhexa.sdk.workspaces.connection import (
     CustomConnection,
@@ -18,6 +17,7 @@ from openhexa.sdk.workspaces.connection import (
     S3Connection,
 )
 from openhexa.sdk.workspaces.current_workspace import ConnectionDoesNotExist
+from openhexa.utils import stringcase
 
 
 class TestWorkspace:

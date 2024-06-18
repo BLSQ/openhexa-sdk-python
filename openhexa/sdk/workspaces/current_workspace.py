@@ -8,7 +8,7 @@ import typing
 from dataclasses import make_dataclass
 from warnings import warn
 
-import stringcase
+from openhexa.utils import stringcase
 
 from ..datasets import Dataset
 from ..utils import graphql

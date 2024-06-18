@@ -4,7 +4,6 @@ from dataclasses import make_dataclass
 from unittest import mock
 
 import pytest
-import stringcase
 
 from openhexa.sdk import (
     CustomConnection,
@@ -34,6 +33,7 @@ from openhexa.sdk.pipelines.parameter import (
     StringType,
     parameter,
 )
+from openhexa.utils import stringcase
 
 
 def test_parameter_types_normalize():

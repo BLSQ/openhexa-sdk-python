@@ -4,10 +4,10 @@ import re
 from pathlib import Path
 from tempfile import mkdtemp
 
-import stringcase
 import yaml
 
 from openhexa.sdk.pipelines.exceptions import InvalidParameterError
+from openhexa.utils import stringcase
 
 
 class LocalWorkspaceConfigError(Exception):
