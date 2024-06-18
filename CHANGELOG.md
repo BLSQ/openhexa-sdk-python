@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.47](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.46...0.1.47) (2024-06-18)
+
+
+### Features
+
+* **Workspaces:** get connections from graphql API ([#158](https://github.com/BLSQ/openhexa-sdk-python/issues/158)) ([bba409b](https://github.com/BLSQ/openhexa-sdk-python/commit/bba409b7d241993c124100f34b7b64b899fa423b))
+
+
+### Bug Fixes
+
+* **Conda:** Copy stringcase package into our repo ([e6345b2](https://github.com/BLSQ/openhexa-sdk-python/commit/e6345b23b60260c5db957faa70caf606ea623476))
+* Only add debugging ports when it's enabled ([4a9f17d](https://github.com/BLSQ/openhexa-sdk-python/commit/4a9f17d862225f8c66742bf39c1ee8c3442ac140))
+
 ## [0.1.46](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.45...0.1.46) (2024-06-11)
 
 
