@@ -219,11 +219,31 @@ class DatasetVersion:
         if mime_type is None:
             mime_type = "application/octet-stream"
 
+        upload_url_result = graphql(
+            """
+            mutation generateUploadUrl ($input: GenerateUploadUrlInput!) {
+                generateUploadUrl(input: $input) {
+                    uploadUrl
+                    success
+                    errors
+                }
+            }
+            """,
+            {"input": {"versionId": self.id, "contentType": mime_type, "uri": filename}},
+        )
+        if upload_url_result["generateUploadUrl"]["success"] is False:
+            errors = upload_url_result["generateUploadUrl"]["errors"]
+            self.raise_upload_exception(errors)
+
+        upload_url = upload_url_result["generateUploadUrl"]["uploadUrl"]
+        with read_content(source) as content:
+            response = requests.put(upload_url, data=content, headers={"Content-Type": mime_type})
+        response.raise_for_status()
+
         data = graphql(
             """
                 mutation CreateDatasetVersionFile ($input: CreateDatasetVersionFileInput!) {
                     createDatasetVersionFile(input: $input) {
-                        uploadUrl
                         file {
                             id
                             filename
@@ -241,19 +261,9 @@ class DatasetVersion:
 
         if data["createDatasetVersionFile"]["success"] is False:
             errors = data["createDatasetVersionFile"]["errors"]
-            if "LOCKED_VERSION" in errors:
-                raise ValueError("This dataset version is locked. You can only add files to the latest version")
-            elif "PERMISSION_DENIED" in errors:
-                raise ValueError("You do not have permission to add files to this dataset version")
-            elif "ALREADY_EXISTS" in errors:
-                raise ValueError("A file with this name already exists in this dataset version")
-            else:
-                raise Exception(errors)
+            self.raise_dataset_file_creation_exception(errors)
         result = data["createDatasetVersionFile"]
-        upload_url = result["uploadUrl"]
-        with read_content(source) as content:
-            response = requests.put(upload_url, data=content, headers={"Content-Type": mime_type})
-        response.raise_for_status()
+
         return DatasetFile(
             version=self,
             id=result["file"]["id"],
@@ -262,6 +272,26 @@ class DatasetVersion:
             uri=result["file"]["uri"],
             created_at=result["file"]["createdAt"],
         )
+
+    def raise_upload_exception(self, errors):
+        """Raise an exception if an error occurs on upload."""
+        if "LOCKED_VERSION" in errors:
+            raise ValueError("This dataset version is locked. You can only add files to the latest version")
+        elif "ALREADY_EXISTS" in errors:
+            raise ValueError("A file with this name already exists in this dataset version")
+        else:
+            raise Exception(errors)
+
+    def raise_dataset_file_creation_exception(self, errors):
+        """Raise an exception if an error occurs on upload."""
+        if "LOCKED_VERSION" in errors:
+            raise ValueError("This dataset version is locked. You can only add files to the latest version")
+        elif "PERMISSION_DENIED" in errors:
+            raise ValueError("You do not have permission to add files to this dataset version")
+        elif "ALREADY_EXISTS" in errors:
+            raise ValueError("A file with this name already exists in this dataset version")
+        else:
+            raise Exception(errors)
 
 
 class Dataset:

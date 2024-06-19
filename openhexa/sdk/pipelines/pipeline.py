@@ -4,7 +4,6 @@ See https://github.com/BLSQ/openhexa/wiki/User-manual#using-pipelines and
 https://github.com/BLSQ/openhexa/wiki/Writing-OpenHEXA-pipelines for more information about OpenHEXA pipelines.
 """
 
-
 import argparse
 import datetime
 import json
