@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.48](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.47...0.1.48) (2024-06-19)
+
+
+### Bug Fixes
+
+* **Conda:** Update requirements conditions ([7d01ad3](https://github.com/BLSQ/openhexa-sdk-python/commit/7d01ad36988862dda64b5e9913cd0c87e53a42b9))
+
 ## [0.1.47](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.46...0.1.47) (2024-06-18)
 
 
