@@ -1,0 +1,50 @@
+{% set name = "openhexa.sdk" %}
+{% set version = "0.1.47" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/openhexa_sdk-{{ version }}.tar.gz
+
+build:
+  entry_points:
+    - openhexa = openhexa.cli:app
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  number: 0
+
+requirements:
+  host:
+    - python >=3.9,<3.13
+    - setuptools
+    - wheel
+    - pip
+  run:
+    - python >=3.9,<3.13
+    - urllib3 <2
+    - multiprocess >=0.70.15,<0.71.dev0
+    - requests >=2.31
+    - pyyaml
+    - click >=8.1.3,<8.2.dev0
+    - jinja2 ==3.1.4  
+    - docker-py==7.1.0
+
+test:
+  imports:
+    - openhexa.sdk
+  commands:
+    - pip check
+    - openhexa --help
+  requires:
+    - pip
+
+about:
+  summary: OpenHEXA SDK
+  license: ''
+  license_file: ./LICENCE
+
+extra:
+  recipe-maintainers:
+    - qgerome
