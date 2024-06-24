@@ -41,7 +41,7 @@ dev = [
     "httmock",
 ]
 examples = [
-    "geopandas>=0.12.2,<0.15.0",
+    "geopandas>=0.12.2,<1.1.0",
     "pandas>=2.0,<2.3",
     "rasterio~=1.3.6",
     "rasterstats>=0.18,<0.20",
