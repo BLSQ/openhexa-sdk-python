@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.49](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.48...0.1.49) (2024-06-25)
+
+
+### Bug Fixes
+
+* **Connections:** specify connection workspace ([#170](https://github.com/BLSQ/openhexa-sdk-python/issues/170)) ([f8b2dda](https://github.com/BLSQ/openhexa-sdk-python/commit/f8b2ddabf17022661418ca3ec7d22dab51b3aa51))
+
 ## [0.1.48](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.47...0.1.48) (2024-06-19)
 
 
