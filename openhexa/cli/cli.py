@@ -488,11 +488,14 @@ def pipelines_list():
         return
     click.echo("Pipelines:")
     for pipeline in workspace_pipelines:
-        current_version = pipeline["currentVersion"].get("number")
-        if current_version is not None:
-            current_version = f"v{current_version}"
+        if pipeline["type"] == "zipFile":
+            current_version = pipeline["currentVersion"].get("number")
+            if current_version is not None:
+                current_version = f"v{current_version}"
+            else:
+                current_version = "N/A"
         else:
-            current_version = "N/A"
+            current_version = "Jupyter notebook"
         click.echo(f"* {pipeline['code']} - {pipeline['name']} ({current_version})")
 
 

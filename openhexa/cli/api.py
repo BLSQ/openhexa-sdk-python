@@ -178,6 +178,7 @@ def list_pipelines():
                 id
                 code
                 name
+                type
                 currentVersion {
                     id
                     name
