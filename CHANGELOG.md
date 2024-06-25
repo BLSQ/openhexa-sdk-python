@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.1.50](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.49...0.1.50) (2024-06-25)
+
+
+### Bug Fixes
+
+* **CLI:** Notebook pipelines make the pipelines list to crash ([374c8fb](https://github.com/BLSQ/openhexa-sdk-python/commit/374c8fbfe332cb4c1876d1497b8b6f098ced9573))
+* Do not crash the CLI when some pipelines do not have a current version ([3b8cd5c](https://github.com/BLSQ/openhexa-sdk-python/commit/3b8cd5ce0d9bc03fbbc308db21394eb48a061eb9))
+
+
+### Miscellaneous
+
+* Add renovate.json ([#172](https://github.com/BLSQ/openhexa-sdk-python/issues/172)) ([3571a43](https://github.com/BLSQ/openhexa-sdk-python/commit/3571a434ab094fcff6860e8cbc0e5dccdef446c5))
+* **deps:** update actions/checkout action to v4 ([#175](https://github.com/BLSQ/openhexa-sdk-python/issues/175)) ([d1e3e9d](https://github.com/BLSQ/openhexa-sdk-python/commit/d1e3e9d38e9b428d573599ed3a605a0b18f9fe19))
+* **deps:** update dependency dev/ruff to &gt;=0.4.10,&lt;0.5.0 ([#174](https://github.com/BLSQ/openhexa-sdk-python/issues/174)) ([f11a4bb](https://github.com/BLSQ/openhexa-sdk-python/commit/f11a4bb888863c21130d143d7550e03446b85120))
+* **release-please:** Stop release-please workflows when a new one is created ([2e87701](https://github.com/BLSQ/openhexa-sdk-python/commit/2e87701d1b12a1cf437ea3ce1859527b1fbe1fe4))
+
 ## [0.1.49](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.48...0.1.49) (2024-06-25)
 
 
