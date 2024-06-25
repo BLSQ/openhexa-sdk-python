@@ -489,7 +489,7 @@ def pipelines_list():
     click.echo("Pipelines:")
     for pipeline in workspace_pipelines:
         if pipeline["type"] == "zipFile":
-            current_version = pipeline["currentVersion"].get("number")
+            current_version = pipeline["currentVersion"].get("number") if pipeline["currentVersion"] else None
             if current_version is not None:
                 current_version = f"v{current_version}"
             else:
