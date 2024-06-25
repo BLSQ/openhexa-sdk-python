@@ -186,8 +186,8 @@ class CurrentWorkspace:
         if self._connected:
             response = graphql(
                 """
-                query getConnection($slug: String!) {
-                    connectionBySlug(slug: $slug) {
+                query getConnection($workspaceSlug:String!, $connectionSlug: String!) {
+                    connectionBySlug(workspaceSlug:$workspaceSlug, connectionSlug: $connectionSlug) {
                         type
                         fields {
                             code
@@ -196,7 +196,7 @@ class CurrentWorkspace:
                     }
                 }
             """,
-                {"slug": identifier},
+                {"workspaceSlug": self.slug, "connectionSlug": identifier},
             )
             data = response["connectionBySlug"]
             if data is None:

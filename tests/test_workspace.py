@@ -269,6 +269,7 @@ class TestConnectedWorkspace:
         """Basics setup for the TestConnectedWorkspace."""
         # Mock the class variable
         monkeypatch.setenv("HEXA_SERVER_URL", "http://app.openhexa.test")
+        monkeypatch.setenv("HEXA_WORKSPACE", "workspace")
 
     def test_workspace_files_path(self, monkeypatch, workspace):
         """Basic checks for the Workspace.files_path() method."""
