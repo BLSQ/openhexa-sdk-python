@@ -196,7 +196,7 @@ class CurrentWorkspace:
                     }
                 }
             """,
-                {"workspaceSlug": self.slug, "connectionSlug": identifier},
+                {"workspaceSlug": self.slug, "connectionSlug": identifier.lower()},
             )
             data = response["connectionBySlug"]
             if data is None:

@@ -297,6 +297,21 @@ class TestConnectedWorkspace:
             with pytest.raises(ValueError):
                 workspace.get_connection("random")
 
+    def test_workspace_get_connection_case_insensitive(self, workspace):
+        """Test get connection."""
+        data = {
+            "connectionBySlug": {
+                "type": "CUSTOM",
+                "fields": [{"code": "field_1", "value": "field_1_value"}],
+            }
+        }
+        with mock.patch(
+            "openhexa.sdk.workspaces.current_workspace.graphql",
+            return_value=data,
+        ):
+            connection = workspace.get_connection("RaNDom")
+            assert isinstance(connection, CustomConnection)
+
     def test_workspace_get_connection(self, workspace):
         """Test get connection."""
         data = {
