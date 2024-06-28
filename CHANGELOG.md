@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.1.51](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.50...0.1.51) (2024-06-28)
+
+
+### Features
+
+* add a retry mechanism for API call ([#166](https://github.com/BLSQ/openhexa-sdk-python/issues/166)) ([3d89da3](https://github.com/BLSQ/openhexa-sdk-python/commit/3d89da3f5efd690b1505b0130ec23b70ac3f455d))
+
+
+### Bug Fixes
+
+* **Connections:** use lowercase for identifier ([#184](https://github.com/BLSQ/openhexa-sdk-python/issues/184)) ([a864629](https://github.com/BLSQ/openhexa-sdk-python/commit/a864629fd21cabb1ea0918cee974ae71e36a42b7))
+
+
+### Miscellaneous
+
+* **deps:** update actions/setup-python action to v5 ([#177](https://github.com/BLSQ/openhexa-sdk-python/issues/177)) ([efc4253](https://github.com/BLSQ/openhexa-sdk-python/commit/efc42534aba155f08bcb3dd9c41d7c5925352e67))
+* **deps:** update dependency dev/ruff to &gt;=0.5.0,&lt;0.6.0 ([#185](https://github.com/BLSQ/openhexa-sdk-python/issues/185)) ([a7d0657](https://github.com/BLSQ/openhexa-sdk-python/commit/a7d0657d2df7bd3b211cd0e310225bc422c53588))
+* **deps:** update dependency examples/geopandas to v1 ([#178](https://github.com/BLSQ/openhexa-sdk-python/issues/178)) ([a580ba8](https://github.com/BLSQ/openhexa-sdk-python/commit/a580ba89a1394b344aae8c0b3b320dfd01a067d5))
+* **deps:** update pre-commit/action action to v3 ([#183](https://github.com/BLSQ/openhexa-sdk-python/issues/183)) ([b48cb83](https://github.com/BLSQ/openhexa-sdk-python/commit/b48cb8398f38b26823902d02b8e3b4ff91354fcf))
+
 ## [0.1.50](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.49...0.1.50) (2024-06-25)
 
 
