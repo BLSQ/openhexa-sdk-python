@@ -20,7 +20,15 @@ class DatasetFile:
     _download_url = None
     version = None
 
-    def __init__(self, version: any, id: str, uri: str, filename: str, content_type: str, created_at: str):
+    def __init__(
+        self,
+        version: any,
+        id: str,
+        uri: str,
+        filename: str,
+        content_type: str,
+        created_at: str,
+    ):
         self.version = version
         self.id = id
         self.uri = uri
@@ -91,7 +99,11 @@ class VersionsIterator(Iterator):
                 }
             }
             """,
-            {"datasetId": self.dataset.id, "page": self.page_number + 1, "perPage": self.per_page},
+            {
+                "datasetId": self.dataset.id,
+                "page": self.page_number + 1,
+                "perPage": self.per_page,
+            },
         )
         if res["dataset"] is None:
             raise ValueError(f"Dataset {self.dataset.id} does not exist")
@@ -99,7 +111,11 @@ class VersionsIterator(Iterator):
         if res["dataset"]["versions"]["totalPages"] == self.page_number + 1:
             self.has_next_page = False
 
-        return Page(parent=self, items=res["dataset"]["versions"]["items"], item_to_value=self.item_to_value)
+        return Page(
+            parent=self,
+            items=res["dataset"]["versions"]["items"],
+            item_to_value=self.item_to_value,
+        )
 
 
 class VersionFilesIterator(Iterator):
@@ -140,7 +156,11 @@ class VersionFilesIterator(Iterator):
                 }
             }
             """,
-            {"versionId": self.version.id, "page": self.page_number + 1, "perPage": self.per_page},
+            {
+                "versionId": self.version.id,
+                "page": self.page_number + 1,
+                "perPage": self.per_page,
+            },
         )
         if res["datasetVersion"] is None:
             raise ValueError(f"Dataset version {self.version.id} does not exist")
@@ -148,7 +168,11 @@ class VersionFilesIterator(Iterator):
         if res["datasetVersion"]["files"]["totalPages"] == self.page_number + 1:
             self.has_next_page = False
 
-        return Page(parent=self, items=res["datasetVersion"]["files"]["items"], item_to_value=self.item_to_value)
+        return Page(
+            parent=self,
+            items=res["datasetVersion"]["files"]["items"],
+            item_to_value=self.item_to_value,
+        )
 
 
 class DatasetVersion:
@@ -256,7 +280,13 @@ class DatasetVersion:
                     }
                 }
         """,
-            {"input": {"versionId": self.id, "contentType": mime_type, "uri": filename}},
+            {
+                "input": {
+                    "versionId": self.id,
+                    "contentType": mime_type,
+                    "uri": filename,
+                }
+            },
         )
 
         if data["createDatasetVersionFile"]["success"] is False:
@@ -272,6 +302,38 @@ class DatasetVersion:
             uri=result["file"]["uri"],
             created_at=result["file"]["createdAt"],
         )
+
+    def exists(self, objectKey: str):
+        """
+        Check if an object with the specified key exists.
+
+        This method checks if an object identified by `objectKey` exists in the dataset.
+
+        Args:
+            objectKey (str): The key of the object to check for existence.
+
+        Returns
+        -------
+            bool: True if the object exists, False otherwise.
+        """
+        data = graphql(
+            """
+            query getDatasetFile($versionId: ID!, $filename: String!) {
+                datasetVersion(id: $versionId) {
+                    fileByName(name: $filename) {
+                        id
+                        uri
+                        filename
+                        contentType
+                        createdAt
+                    }
+                }
+            }
+            """,
+            {"versionId": self.id, "filename": objectKey},
+        )
+
+        return data["datasetVersion"]["fileByName"] is not None
 
     def raise_upload_exception(self, errors):
         """Raise an exception if an error occurs on upload."""
@@ -346,7 +408,10 @@ class Dataset:
 
         version = data["version"]
         self._latest_version = DatasetVersion(
-            dataset=self, id=version["id"], name=version["name"], created_at=version["createdAt"]
+            dataset=self,
+            id=version["id"],
+            name=version["name"],
+            created_at=version["createdAt"],
         )
 
         return self.latest_version
