@@ -1,4 +1,5 @@
 """User settings for the OpenHexa CLI."""
+
 import logging
 import os
 from configparser import ConfigParser

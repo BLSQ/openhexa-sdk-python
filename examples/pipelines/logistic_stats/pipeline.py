@@ -116,6 +116,7 @@ def model(dhis2_data: dict[str, typing.Any], gadm_data, worldpop_data):
     corrected_population_df.loc[
         corrected_population_df["District"].str.startswith("Western"), "District"
     ] = "Western Area"
+
     corrected_population_df = corrected_population_df.groupby("District").sum()
 
     print(f"Built population DF - {len(population_df)} rows")
