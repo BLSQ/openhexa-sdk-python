@@ -1,5 +1,86 @@
 # Changelog
 
+## [0.3.0](https://github.com/BLSQ/openhexa-sdk-python/compare/0.2.0...v0.3.0) (2024-07-30)
+
+
+### Features
+
+* add a retry mechanism for API call ([#166](https://github.com/BLSQ/openhexa-sdk-python/issues/166)) ([3d89da3](https://github.com/BLSQ/openhexa-sdk-python/commit/3d89da3f5efd690b1505b0130ec23b70ac3f455d))
+* Add jinja2 templates, add github workflow ([7f53c6a](https://github.com/BLSQ/openhexa-sdk-python/commit/7f53c6a281eab59d3e559c50f57f283844300252))
+* Add support for Python 3.11 ([#87](https://github.com/BLSQ/openhexa-sdk-python/issues/87)) ([03aa815](https://github.com/BLSQ/openhexa-sdk-python/commit/03aa8157896f92afdd5eadf7eeae3ad73741b633))
+* Add tmp_path property on workspace ([#83](https://github.com/BLSQ/openhexa-sdk-python/issues/83)) ([c944b6d](https://github.com/BLSQ/openhexa-sdk-python/commit/c944b6d8d6cea6bfcb1e1e1974ec06c8f47609c2))
+* Check that docker exists and is running ([#136](https://github.com/BLSQ/openhexa-sdk-python/issues/136)) ([3d4d75f](https://github.com/BLSQ/openhexa-sdk-python/commit/3d4d75f5b79d0fd7b5288b5447c4e538a5a7844a))
+* **CI/CD:** adds github action v4 config ([ce8f848](https://github.com/BLSQ/openhexa-sdk-python/commit/ce8f8487dee48c2df32c2eab81723fa2cc514529))
+* **CLI:** check if permission_denied is thrown ([#129](https://github.com/BLSQ/openhexa-sdk-python/issues/129)) ([2f856fe](https://github.com/BLSQ/openhexa-sdk-python/commit/2f856fe5927e7fe30456b9ff7fee57a12491c827))
+* **CLI:** Use blsq/openhexa-blsq-environment as the image to run the pipeline ([#115](https://github.com/BLSQ/openhexa-sdk-python/issues/115)) ([c813e3a](https://github.com/BLSQ/openhexa-sdk-python/commit/c813e3a1bc44a3ad8524326bfc3cdf4abca92cde))
+* **CLI:** User can add --yes to the  command to not have to confirm the creation of the pipeline ([85a9098](https://github.com/BLSQ/openhexa-sdk-python/commit/85a9098e72a3889879ad4723ffea94c773a6178b))
+* **CLI:** User can provide a name, description and link of the pipel… ([#142](https://github.com/BLSQ/openhexa-sdk-python/issues/142)) ([45fd2e7](https://github.com/BLSQ/openhexa-sdk-python/commit/45fd2e7cd70ebc1000509ab50eb4d31a5c567200))
+* **Connections:** add support for IASO connection ([#82](https://github.com/BLSQ/openhexa-sdk-python/issues/82)) ([707b798](https://github.com/BLSQ/openhexa-sdk-python/commit/707b798ac6e8fc7846a241f3d05ef760b224ce45))
+* **Connections:** import and re-export connection classes in openhexa.sdk ([#93](https://github.com/BLSQ/openhexa-sdk-python/issues/93)) ([2e3db63](https://github.com/BLSQ/openhexa-sdk-python/commit/2e3db639d2a2ef0b6b27e15eca0970457e6822bb))
+* **Dataset:** Create dataset with the SDK ([#110](https://github.com/BLSQ/openhexa-sdk-python/issues/110)) ([cba3e7e](https://github.com/BLSQ/openhexa-sdk-python/commit/cba3e7e861487204a534295492ee93e3c118387c))
+* **DatasetFiles:** add helper to check if file exists ([c76d890](https://github.com/BLSQ/openhexa-sdk-python/commit/c76d8905a5e21785107257361c843a2be60da895))
+* **Datasets:** Add datasets support to SDK ([#77](https://github.com/BLSQ/openhexa-sdk-python/issues/77)) ([d8eb50e](https://github.com/BLSQ/openhexa-sdk-python/commit/d8eb50e9210f7f610fd4e210dc17daf5331b8e97))
+* delete pipeline ([#91](https://github.com/BLSQ/openhexa-sdk-python/issues/91)) ([549f73d](https://github.com/BLSQ/openhexa-sdk-python/commit/549f73d55cf3ddab6e1788ec78d484c4078ea85f))
+* **Parameter:** add support for Dataset parameter type ([#120](https://github.com/BLSQ/openhexa-sdk-python/issues/120)) ([783b672](https://github.com/BLSQ/openhexa-sdk-python/commit/783b67208d21f5a226ebb6f65d1f35dfe6da6d3d))
+* **Pipelines:** allow user to define a timeout for pipelines ([0eeab40](https://github.com/BLSQ/openhexa-sdk-python/commit/0eeab4064d38422b38f31a4cf70d3d8b823d2702))
+* **Pipelines:** Allow user to download the latest version of a pipeline ([#128](https://github.com/BLSQ/openhexa-sdk-python/issues/128)) ([2dae69d](https://github.com/BLSQ/openhexa-sdk-python/commit/2dae69da69d4742b844f4b8e0c0e5b4e999da41d))
+* **Pipelines:** prevent push of version  with params for scheduled pipeline. ([#55](https://github.com/BLSQ/openhexa-sdk-python/issues/55)) ([b9de756](https://github.com/BLSQ/openhexa-sdk-python/commit/b9de756f4dc94296bc427b2dd3337740909399ed))
+* **Pipeline:** Use the AST to get the specs of the pipeline and its parameters ([#130](https://github.com/BLSQ/openhexa-sdk-python/issues/130)) ([9515499](https://github.com/BLSQ/openhexa-sdk-python/commit/951549925fae7ace4bf26a1922dea7f7738c6982))
+* **Run:** Run pipelines with the debugger ready to be used ([a67d0fe](https://github.com/BLSQ/openhexa-sdk-python/commit/a67d0fe6eeba0c97cb2513b5c9d6fb9a2b5d8690))
+* **Run:** Run pipelines with the debugger ready to be used ([#157](https://github.com/BLSQ/openhexa-sdk-python/issues/157)) ([754c21b](https://github.com/BLSQ/openhexa-sdk-python/commit/754c21b4888b69ee7feb6f80beaf672520539f52))
+* **Run:** Run pipelines with the debugger ready to be used ([#157](https://github.com/BLSQ/openhexa-sdk-python/issues/157)) ([6863173](https://github.com/BLSQ/openhexa-sdk-python/commit/686317301b7ec9e1c83ec8ce7bb2c58a0f9b4021))
+* Update SDK version in Dockerfile ([#57](https://github.com/BLSQ/openhexa-sdk-python/issues/57)) ([208d7ea](https://github.com/BLSQ/openhexa-sdk-python/commit/208d7ea561417bf9dc106d3b545254ecbde863db))
+* Use a new way to load settings ([#131](https://github.com/BLSQ/openhexa-sdk-python/issues/131)) ([9619673](https://github.com/BLSQ/openhexa-sdk-python/commit/9619673f226149915afb73387ed8e0f8891ed520))
+* **Workspaces:** allow user to specify workspace docker image ([#95](https://github.com/BLSQ/openhexa-sdk-python/issues/95)) ([2455a3e](https://github.com/BLSQ/openhexa-sdk-python/commit/2455a3e2eb136e94e543e8b1c8a44fa329bf9769))
+* **Workspaces:** get connections from graphql API ([#158](https://github.com/BLSQ/openhexa-sdk-python/issues/158)) ([bba409b](https://github.com/BLSQ/openhexa-sdk-python/commit/bba409b7d241993c124100f34b7b64b899fa423b))
+* **Workspaces:** list datasets in a workspace ([#112](https://github.com/BLSQ/openhexa-sdk-python/issues/112)) ([916832a](https://github.com/BLSQ/openhexa-sdk-python/commit/916832a44bae906cfe0a2706bf90c8057ab1b43f))
+
+
+### Bug Fixes
+
+* **API:** uploading a version now returns a pipelineVersion instead of a version ([5f89738](https://github.com/BLSQ/openhexa-sdk-python/commit/5f89738f803a391dd39f3a88a4e3ae7bb19f2860))
+* **Build:** Manifest.in was missing the .github folder ([8afa0eb](https://github.com/BLSQ/openhexa-sdk-python/commit/8afa0eb4560f3ca4663850b4fb7860fa995dbe5f))
+* **ci:** Fix python3.9 tests ([3d9aa95](https://github.com/BLSQ/openhexa-sdk-python/commit/3d9aa955262e19ba549d160d2f650a7ac7403ddb))
+* **CLI:** Ask the user to create the workspace.yaml if not found ([#109](https://github.com/BLSQ/openhexa-sdk-python/issues/109)) ([1da1a04](https://github.com/BLSQ/openhexa-sdk-python/commit/1da1a049f1c91fa8ff0e8389528b0a904f31c661))
+* **CLI:** Check if args of decorators are of a primitive type ([#146](https://github.com/BLSQ/openhexa-sdk-python/issues/146)) ([3ca0f51](https://github.com/BLSQ/openhexa-sdk-python/commit/3ca0f51af415680da7c31188c9340e09fcfefc2b))
+* **CLI:** Do not ask to create the pipeline if the user has said yes as param ([6597876](https://github.com/BLSQ/openhexa-sdk-python/commit/6597876ded1e900599d33fbe17083e307805d39f))
+* **CLI:** Do not require a config even if it's empty ([#50](https://github.com/BLSQ/openhexa-sdk-python/issues/50)) ([8e1098f](https://github.com/BLSQ/openhexa-sdk-python/commit/8e1098fc544918aaf78e1eb821e2b5540ba6c42e))
+* **Cli:** no error is thrown when workspace doesn't exist ([#153](https://github.com/BLSQ/openhexa-sdk-python/issues/153)) ([fbbec07](https://github.com/BLSQ/openhexa-sdk-python/commit/fbbec07bc27ad6e53cd8f15bd68c701f4b702c76))
+* **Cli:** no error is thrown when workspace doesn't exist ([#153](https://github.com/BLSQ/openhexa-sdk-python/issues/153)) ([cefc69c](https://github.com/BLSQ/openhexa-sdk-python/commit/cefc69c15f8abd2b27e3e4d9ba3b88507537f296))
+* **CLI:** Notebook pipelines make the pipelines list to crash ([374c8fb](https://github.com/BLSQ/openhexa-sdk-python/commit/374c8fbfe332cb4c1876d1497b8b6f098ced9573))
+* **CLI:** Running a pipeline should not require an active workspace ([#126](https://github.com/BLSQ/openhexa-sdk-python/issues/126)) ([7618d91](https://github.com/BLSQ/openhexa-sdk-python/commit/7618d918ebe701de41191dfe58196c3118f0bd9f))
+* **Conda:** Copy stringcase package into our repo ([e6345b2](https://github.com/BLSQ/openhexa-sdk-python/commit/e6345b23b60260c5db957faa70caf606ea623476))
+* **Conda:** Update requirements conditions ([7d01ad3](https://github.com/BLSQ/openhexa-sdk-python/commit/7d01ad36988862dda64b5e9913cd0c87e53a42b9))
+* **Connections:** hide sensitive informations when printing  connection ([#79](https://github.com/BLSQ/openhexa-sdk-python/issues/79)) ([db749a3](https://github.com/BLSQ/openhexa-sdk-python/commit/db749a3d1d9119c95013030d390d8ecf568d5b26))
+* **Connections:** Rename 'slug' to 'identifier' ([7f52ce4](https://github.com/BLSQ/openhexa-sdk-python/commit/7f52ce43309546a614bb71041146d42aa3c0e92a))
+* **Connections:** Set the slug to lowercase before building the env var ([7f52ce4](https://github.com/BLSQ/openhexa-sdk-python/commit/7f52ce43309546a614bb71041146d42aa3c0e92a))
+* **Connections:** specify connection workspace ([#170](https://github.com/BLSQ/openhexa-sdk-python/issues/170)) ([f8b2dda](https://github.com/BLSQ/openhexa-sdk-python/commit/f8b2ddabf17022661418ca3ec7d22dab51b3aa51))
+* **Connections:** use lowercase for identifier ([#184](https://github.com/BLSQ/openhexa-sdk-python/issues/184)) ([a864629](https://github.com/BLSQ/openhexa-sdk-python/commit/a864629fd21cabb1ea0918cee974ae71e36a42b7))
+* **CurrentRun:** check if file exist when adding output ([#114](https://github.com/BLSQ/openhexa-sdk-python/issues/114)) ([4dfe8d1](https://github.com/BLSQ/openhexa-sdk-python/commit/4dfe8d12d56ed2d66007a90b48372adb0b5ac3d3))
+* **dataset:** Support bytes directly in read_content ([#111](https://github.com/BLSQ/openhexa-sdk-python/issues/111)) ([e83eefb](https://github.com/BLSQ/openhexa-sdk-python/commit/e83eefba04713db3c38749395a043e6dfb58a977))
+* Do not crash the CLI when some pipelines do not have a current version ([3b8cd5c](https://github.com/BLSQ/openhexa-sdk-python/commit/3b8cd5ce0d9bc03fbbc308db21394eb48a061eb9))
+* Do not make two requests to the server to check if the pipeline exists ([#94](https://github.com/BLSQ/openhexa-sdk-python/issues/94)) ([4501bda](https://github.com/BLSQ/openhexa-sdk-python/commit/4501bdadf2ba6627f9c718a15c7036df5783044b))
+* **Docker:** Always force pull the image ([#103](https://github.com/BLSQ/openhexa-sdk-python/issues/103)) ([c538e10](https://github.com/BLSQ/openhexa-sdk-python/commit/c538e109e05b541d0e70dec8196e564338afd6db))
+* **Docker:** Disable healthchecks when running the pipeline locally ([c1b8535](https://github.com/BLSQ/openhexa-sdk-python/commit/c1b853598c8086200166edc63cb93b78860dab40))
+* Only add debugging ports when it's enabled ([4a9f17d](https://github.com/BLSQ/openhexa-sdk-python/commit/4a9f17d862225f8c66742bf39c1ee8c3442ac140))
+* **Parameter:** check if default value is in choices ([#123](https://github.com/BLSQ/openhexa-sdk-python/issues/123)) ([726df4e](https://github.com/BLSQ/openhexa-sdk-python/commit/726df4ef94a556552778baa09262aad0537e4f49))
+* **Parameters:** add support for custom connection ([#116](https://github.com/BLSQ/openhexa-sdk-python/issues/116)) ([65db931](https://github.com/BLSQ/openhexa-sdk-python/commit/65db93107d1c6a46d4f5af46171490b39722521f))
+* **Pipelines:** prevent upload of workspace folder content ([#68](https://github.com/BLSQ/openhexa-sdk-python/issues/68)) ([957c277](https://github.com/BLSQ/openhexa-sdk-python/commit/957c277b5348ac07dd7594879703ce0b0b3b09c0))
+* **Pipelines:** set timeout when uploading a version ([#72](https://github.com/BLSQ/openhexa-sdk-python/issues/72)) ([7703794](https://github.com/BLSQ/openhexa-sdk-python/commit/77037943405406673ab5e2612fb1287fa3e19742))
+* Proper error messages for arguments and missing config file ([#51](https://github.com/BLSQ/openhexa-sdk-python/issues/51)) ([07a5027](https://github.com/BLSQ/openhexa-sdk-python/commit/07a5027fb6be317d6f3e666dd6b0d145b8573358))
+* **read_content:** bineary files do not take an encoding ([5448287](https://github.com/BLSQ/openhexa-sdk-python/commit/5448287a0e373ffa422028c6288d475c029faa29))
+* remove duplicated instruction ([137a90d](https://github.com/BLSQ/openhexa-sdk-python/commit/137a90df0e9d2bd6db01161d285414e1eaa67d2d))
+* **Skeleton:** Add '--yes' to the push action to create the pipeline by default ([0013039](https://github.com/BLSQ/openhexa-sdk-python/commit/0013039bcb61288e567f13aba8a3b42659f9721f))
+* **typing:** Add all accepted types ([96d4170](https://github.com/BLSQ/openhexa-sdk-python/commit/96d4170fe7301e6931bf98826fe49e90fe4bfc2b))
+* **urllib:** Use urllib &lt; 2 to avoid problemw with openssl being not uptodate ([#160](https://github.com/BLSQ/openhexa-sdk-python/issues/160)) ([bb0c98a](https://github.com/BLSQ/openhexa-sdk-python/commit/bb0c98a51a36671019611f1f9d92a3f428a83525))
+* use proper namespace package setup ([#53](https://github.com/BLSQ/openhexa-sdk-python/issues/53)) ([81fc51e](https://github.com/BLSQ/openhexa-sdk-python/commit/81fc51e9256d55ac68274c204432582490c37a3a))
+
+
+### Documentation
+
+* Add docstrings for [@pipeline](https://github.com/pipeline) and [@parameter](https://github.com/parameter) ([#70](https://github.com/BLSQ/openhexa-sdk-python/issues/70)) ([6282a50](https://github.com/BLSQ/openhexa-sdk-python/commit/6282a50328e2cb2f47c1c85c4105d5451f7e6477))
+* update parameter supported types ([#90](https://github.com/BLSQ/openhexa-sdk-python/issues/90)) ([b3b6740](https://github.com/BLSQ/openhexa-sdk-python/commit/b3b6740678833efe0959ff1bef94ae1d70be5b58))
+
 ## [0.1.51](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.50...0.1.51) (2024-06-28)
 
 
