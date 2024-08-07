@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.52](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.51...0.1.52) (2024-07-19)
+
+
+### Miscellaneous
+
+* **deps:** update setuptools requirement ([4547d32](https://github.com/BLSQ/openhexa-sdk-python/commit/4547d32ffac371fa8f2fed67031e30dd2db7582a))
+
 ## [0.1.51](https://github.com/BLSQ/openhexa-sdk-python/compare/0.1.50...0.1.51) (2024-06-28)
 
 
