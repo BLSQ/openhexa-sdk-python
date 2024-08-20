@@ -346,7 +346,10 @@ def run_pipeline(path: Path, config: dict, image: str = None, debug: bool = Fals
     tmp_dir = tempfile.mkdtemp()
     for file_path in path.glob("**/*"):
         if file_path.suffix in (".py", ".ipynb", ".txt", ".md", ".yaml"):
-            shutil.copy(file_path, tmp_dir)
+            relative_path = file_path.relative_to(path)
+            destination_path = Path(tmp_dir) / relative_path
+            destination_path.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy(file_path, destination_path)
 
     volumes = {
         tmp_dir: {"bind": "/home/hexa/pipeline", "mode": "rw"},
