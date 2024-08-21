@@ -351,7 +351,7 @@ def run_pipeline(path: Path, config: dict, image: str = None, debug: bool = Fals
     volumes = {
         tmp_dir: {"bind": "/home/hexa/pipeline", "mode": "rw"},
         mount_files_path: {
-            "bind": "/home/hexa/pipeline/workspace",
+            "bind": "/home/hexa/workspace",
             "mode": "rw",
         },
     }
