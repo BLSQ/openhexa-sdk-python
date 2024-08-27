@@ -68,10 +68,9 @@ def get_local_workspace_config(path: Path):
         if "files" in local_workspace_config:
             try:
                 files_path = path / Path(local_workspace_config["files"]["path"])
-                if not files_path.exists():
-                    # When we start the pipeline container, we mount the workspace folder,
-                    # if it doesn't exist, it means we don't provide the correct mount path, which is the case in local
-                    files_path = Path("/home/hexa/workspace")
+                if files_path.exists() is False:
+                    # Let's create the folder if it doesn't exist
+                    files_path.mkdir(parents=True)
                 env_vars["WORKSPACE_FILES_PATH"] = str(files_path.resolve())
             except KeyError:
                 exception_message = (

@@ -202,14 +202,10 @@ class Pipeline:
         This method can be called with an explicit configuration. If no configuration is provided, it will parse the
         command-line arguments to build it.
         """
-        # Handle local workspace config for dev / testing, if appropriate
-        if get_environment() == Environment.LOCAL_PIPELINE:
-            os.environ.update(get_local_workspace_config(Path("/home/hexa/pipeline")))
-
         # User can run their pipeline using `python pipeline.py`. It's considered as a standalone usage of the library.
         # Since we still support this use case for the moment, we'll try to load the workspace.yaml
         # at the path of the file
-        elif get_environment() == Environment.STANDALONE:
+        if get_environment() == Environment.STANDALONE:
             os.environ.update(get_local_workspace_config(Path(sys.argv[0]).parent))
 
         if config is None:  # Called without arguments, in the pipeline file itself

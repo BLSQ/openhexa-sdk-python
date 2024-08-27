@@ -137,8 +137,8 @@ class CurrentWorkspace:
         /home/hexa/workspace/some/path
         """
         # FIXME: This is a hack to make the SDK work in the context of the `python pipeline.py` command.
-        # We can remove this once we deprecate this way of running pipelines
-        return os.environ["WORKSPACE_FILES_PATH"] if "WORKSPACE_FILES_PATH" in os.environ else "/home/hexa/workspace"
+        # We can remove this once we deprecate this way of running pipelines and only use /home/hexa/workspace
+        return os.environ.get("WORKSPACE_FILES_PATH", "/home/hexa/workspace")
 
     @property
     def tmp_path(self) -> str:
