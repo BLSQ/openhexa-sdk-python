@@ -66,8 +66,7 @@ Great! As you can see in the console output, the OpenHEXA CLI has created a new 
 structure required for an OpenHEXA pipeline. You can now `cd` in the new pipeline directory and run the pipeline:
 
 ```shell
-cd my_awesome_pipeline
-python pipeline.py
+openhexa pipelines run ./my_awesome_pipeline
 ```
 
 Congratulations! You have successfully run your first pipeline locally.
