@@ -69,7 +69,7 @@ def get_local_workspace_config(path: Path):
             try:
                 files_path = path / Path(local_workspace_config["files"]["path"])
                 if files_path.exists() is False:
-                    # Let's create the folder if it doesn't exist
+                    # Let's create the folder if it doesn't exist (only needed when running the pipeline using `python pipeline.py`)
                     files_path.mkdir(parents=True)
                 env_vars["WORKSPACE_FILES_PATH"] = str(files_path.resolve())
             except KeyError:
