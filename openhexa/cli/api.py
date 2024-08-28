@@ -6,7 +6,6 @@ import io
 import json
 import logging
 import os
-import shutil
 import tempfile
 import typing
 from dataclasses import asdict
@@ -330,7 +329,7 @@ def run_pipeline(path: Path, config: dict, image: str = None, debug: bool = Fals
     ensure_pipeline_config_exists(path)
     env_vars = get_local_workspace_config(path)
     # # Prepare the mount for the workspace's files
-    mount_files_path = Path(env_vars["WORKSPACE_FILES_PATH"]).absolute()
+    mount_files_path = Path(env_vars.pop("WORKSPACE_FILES_PATH")).absolute()
     try:
         docker_client = docker.from_env()
         docker_client.ping()
@@ -342,11 +341,10 @@ def run_pipeline(path: Path, config: dict, image: str = None, debug: bool = Fals
     if image is None:
         image = env_vars.get("WORKSPACE_DOCKER_IMAGE", "blsq/openhexa-blsq-environment:latest")
 
-    # Create temporary directory with the files to mount
+    zip_file = generate_zip_file(path)
     tmp_dir = tempfile.mkdtemp()
-    for file_path in path.glob("**/*"):
-        if file_path.suffix in (".py", ".ipynb", ".txt", ".md", ".yaml"):
-            shutil.copy(file_path, tmp_dir)
+    with ZipFile(zip_file) as zf:
+        zf.extractall(tmp_dir)
 
     volumes = {
         tmp_dir: {"bind": "/home/hexa/pipeline", "mode": "rw"},
@@ -362,6 +360,8 @@ def run_pipeline(path: Path, config: dict, image: str = None, debug: bool = Fals
         "REMOTE_DEBUGGER": "true" if debug else None,
         **env_vars,
     }
+
+    print(environment)
 
     command = f"pipeline run --config {base64.b64encode(json.dumps(config).encode('utf-8')).decode('utf-8')}"
     try:
@@ -477,31 +477,24 @@ def create_pipeline_structure(pipeline_name: str, base_path: Path, workspace: st
     return output_directory
 
 
-def upload_pipeline(
-    pipeline_directory_path: typing.Union[str, Path],
-    name: str,
-    description: str = None,
-    link: str = None,
-):
-    """Upload the pipeline contained in the provided directory using the GraphQL API.
+def generate_zip_file(pipeline_directory_path: typing.Union[str, Path]) -> io.BytesIO:
+    """Generate a ZIP file containing the pipeline code.
 
-    The pipeline code will be zipped and base64-encoded before being sent to the backend.
+    Args:
+        pipeline_directory_path (typing.Union[str, Path]): The path to the pipeline directory.
+
+    Returns
+    -------
+        io.BytesIO: A BytesIO object containing the ZIP file.
     """
-    if settings.current_workspace is None:
-        raise NoActiveWorkspaceError
-
-    directory = pipeline_directory_path.absolute()
-    pipeline = get_pipeline_metadata(directory)
-
-    zip_file = io.BytesIO(b"")
-
     if settings.debug:
         click.echo("Generating ZIP file:")
+    zip_file = io.BytesIO(b"")
     files = []
 
     # We exclude the workspace directory since it can break the mount of the bucket on /home/hexa/workspace
     # This is also the default value of the WORKSPACE_FILES_PATH env var
-    excluded_paths = [directory / "workspace"]
+    excluded_paths = [pipeline_directory_path / "workspace"]
     try:
         env_vars = get_local_workspace_config(pipeline_directory_path)
         if env_vars.get("WORKSPACE_FILES_PATH") and Path(env_vars["WORKSPACE_FILES_PATH"]) not in excluded_paths:
@@ -509,9 +502,8 @@ def upload_pipeline(
     except FileNotFoundError:
         # No workspace.yaml file found, we can ignore this error and assume the default value of WORKSPACE_FILES_PATH
         pass
-
     with ZipFile(zip_file, "w") as zipObj:
-        for path in directory.glob("**/*"):
+        for path in pipeline_directory_path.glob("**/*"):
             if path.name == "python":
                 # We are in a virtual environment
                 excluded_paths.append(path.parent.parent)  # ./<venv>/bin/python -> ./<venv>
@@ -532,9 +524,27 @@ def upload_pipeline(
                 continue
             if settings.debug:
                 click.echo(f"\t{file_path.name}")
-            zipObj.write(file_path, file_path.relative_to(directory))
-
+            zipObj.write(file_path, file_path.relative_to(pipeline_directory_path))
     zip_file.seek(0)
+    return zip_file
+
+
+def upload_pipeline(
+    pipeline_directory_path: typing.Union[str, Path],
+    name: str,
+    description: str = None,
+    link: str = None,
+):
+    """Upload the pipeline contained in the provided directory using the GraphQL API.
+
+    The pipeline code will be zipped and base64-encoded before being sent to the backend.
+    """
+    if settings.current_workspace is None:
+        raise NoActiveWorkspaceError
+
+    directory = pipeline_directory_path.absolute()
+    pipeline = get_pipeline_metadata(directory)
+    zip_file = generate_zip_file(directory)
 
     if settings.debug:
         # Write zip_file to disk for debugging
