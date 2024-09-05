@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/BLSQ/openhexa-sdk-python/compare/v0.3.0...v0.3.1) (2024-09-05)
+
+
+### Bug Fixes
+
+* **Datasets:** Use the correct mutation to upload files in datasets : generateDatasetUploadUrl ([d4d56d6](https://github.com/BLSQ/openhexa-sdk-python/commit/d4d56d6600912653eddbcce5b230d9c81f7ab3a3))
+
 ## [0.3.0](https://github.com/BLSQ/openhexa-sdk-python/compare/0.2.0...v0.3.0) (2024-08-28)
 
 
