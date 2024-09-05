@@ -245,8 +245,8 @@ class DatasetVersion:
 
         upload_url_result = graphql(
             """
-            mutation generateUploadUrl ($input: GenerateUploadUrlInput!) {
-                generateUploadUrl(input: $input) {
+            mutation generateDatasetUploadUrl ($input: GenerateDatasetUploadUrlInput!) {
+                generateDatasetUploadUrl(input: $input) {
                     uploadUrl
                     success
                     errors
@@ -255,11 +255,11 @@ class DatasetVersion:
             """,
             {"input": {"versionId": self.id, "contentType": mime_type, "uri": filename}},
         )
-        if upload_url_result["generateUploadUrl"]["success"] is False:
-            errors = upload_url_result["generateUploadUrl"]["errors"]
+        if upload_url_result["generateDatasetUploadUrl"]["success"] is False:
+            errors = upload_url_result["generateDatasetUploadUrl"]["errors"]
             self.raise_upload_exception(errors)
 
-        upload_url = upload_url_result["generateUploadUrl"]["uploadUrl"]
+        upload_url = upload_url_result["generateDatasetUploadUrl"]["uploadUrl"]
         with read_content(source) as content:
             response = requests.put(upload_url, data=content, headers={"Content-Type": mime_type})
         response.raise_for_status()
