@@ -5,7 +5,7 @@ See https://github.com/BLSQ/openhexa/wiki/User-manual#about-workspaces for more 
 
 import os
 import typing
-from dataclasses import make_dataclass
+from dataclasses import fields, make_dataclass
 from warnings import warn
 
 from openhexa.utils import stringcase
@@ -153,6 +153,32 @@ class CurrentWorkspace:
         # We can remove this once we deprecate this way of running pipelines
         return os.environ["WORKSPACE_TMP_PATH"] if "WORKSPACE_TMP_PATH" in os.environ else "/home/hexa/tmp"
 
+    def _get_connection_fields(self, env_variable_prefix: str):
+        connection_fields = {}
+        connection_type = os.getenv(env_variable_prefix).upper()
+
+        # Get fields for the connection type
+        _fields = fields(ConnectionClasses[connection_type])
+
+        if _fields:
+            for field in _fields:
+                env_var = f"{env_variable_prefix}_{field.name.upper()}"
+                connection_fields[field.name] = os.getenv(env_var)
+        else:
+            #  custom connections
+            prefix = f"{env_variable_prefix}_"
+            connection_fields = {
+                key[len(prefix) :].lower(): val for key, val in os.environ.items() if key.startswith(prefix)
+            }
+
+        # need to map the correct name for s3 and postgres connection
+        if connection_type == "S3":
+            connection_fields["secret_access_key"] = os.getenv(f"{env_variable_prefix}_ACCESS_KEY_SECRET")
+        if connection_type == "POSTGRESQL":
+            connection_fields["database_name"] = os.getenv(f"{env_variable_prefix}_DB_NAME")
+
+        return connection_fields
+
     def get_connection(
         self, identifier: str
     ) -> typing.Union[
@@ -181,7 +207,7 @@ class CurrentWorkspace:
         ValueError
             If the connection does not exist
         """
-        fields = {}
+        connection_fields = {}
         connection_type = None
         if self._connected:
             response = graphql(
@@ -203,45 +229,34 @@ class CurrentWorkspace:
                 raise ValueError(f"Connection {identifier} does not exist.")
 
             for d in data["fields"]:
-                fields[d.get("code")] = d.get("value")
+                connection_fields[d.get("code")] = d.get("value")
 
-            connection_type = data["type"]
+            connection_type = data["type"].upper()
         else:
             try:
                 env_variable_prefix = stringcase.constcase(identifier.lower())
-                for key, val in os.environ.items():
-                    if key.startswith(f"{env_variable_prefix}_"):
-                        field_name = key[len(f"{env_variable_prefix}_") :].lower()
-                        fields[field_name] = val
-
-                connection_type = os.environ[f"{env_variable_prefix}"]
+                connection_type = os.environ[f"{env_variable_prefix}"].upper()
+                connection_fields = self._get_connection_fields(env_variable_prefix)
             except KeyError:
                 raise ValueError
 
         if not connection_type:
             raise ValueError(f"Connection {identifier} does not exist.")
 
-        connection_type = connection_type.upper()
-        if connection_type in ConnectionClasses.keys():
-            if connection_type == "S3":
-                secret_access_key = fields.pop("access_key_secret")
-                return S3Connection(secret_access_key=secret_access_key, **fields)
+        if connection_type == "POSTGRESQL":
+            port = int(connection_fields.pop("port"))
+            return PostgreSQLConnection(port=port, **connection_fields)
 
-            if connection_type == "POSTGRESQL":
-                db_name = fields.pop("db_name")
-                port = int(fields.pop("port"))
-                return PostgreSQLConnection(database_name=db_name, port=port, **fields)
+        if connection_type == "CUSTOM":
+            dataclass = make_dataclass(
+                stringcase.pascalcase(identifier),
+                connection_fields.keys(),
+                bases=(CustomConnection,),
+                repr=False,
+            )
+            return dataclass(**connection_fields)
 
-            if connection_type == "CUSTOM":
-                dataclass = make_dataclass(
-                    stringcase.pascalcase(identifier),
-                    fields.keys(),
-                    bases=(CustomConnection,),
-                    repr=False,
-                )
-                return dataclass(**fields)
-
-            return ConnectionClasses[connection_type](**fields)
+        return ConnectionClasses[connection_type](**connection_fields)
 
     def dhis2_connection(self, identifier: str = None, slug: str = None) -> DHIS2Connection:
         """Get a DHIS2 connection by its identifier.
