@@ -67,6 +67,36 @@ class TestWorkspace:
             assert re.search("password", repr(dhis2_connection), re.IGNORECASE) is None
             assert re.search("password", str(dhis2_connection), re.IGNORECASE) is None
 
+    def test_workspace_dhis2_connection_similar_prefix(self, workspace):
+        """Base test case for DHIS2 connections."""
+        identifier = "polio"
+        identifier_2 = "polio-test"
+
+        env_variable_prefix = stringcase.constcase(identifier)
+        env_variable_prefix_2 = stringcase.constcase(identifier_2)
+
+        url = "https://test.dhis2.org/"
+        username = "dhis2"
+        password = "dhis2_pwd"
+
+        with mock.patch.dict(
+            os.environ,
+            {
+                f"{env_variable_prefix}": "dhis2",
+                f"{env_variable_prefix}_URL": url,
+                f"{env_variable_prefix}_USERNAME": username,
+                f"{env_variable_prefix}_PASSWORD": password,
+                f"{env_variable_prefix_2}": "dhis2",
+                f"{env_variable_prefix_2}_URL": "url_2",
+                f"{env_variable_prefix_2}_USERNAME": "username_2",
+                f"{env_variable_prefix_2}_PASSWORD": "password_2",
+            },
+        ):
+            dhis2_connection = workspace.dhis2_connection(identifier=identifier)
+            assert dhis2_connection.url == url
+            assert dhis2_connection.username == username
+            assert dhis2_connection.password == password
+
     def test_workspace_postgresql_connection_not_exist(self, workspace):
         """Does not exist test case for PostgreSQL connections."""
         identifier = "polio-ff3a0d"
@@ -316,16 +346,21 @@ class TestConnectedWorkspace:
         """Test get connection."""
         data = {
             "connectionBySlug": {
-                "type": "CUSTOM",
-                "fields": [{"code": "field_1", "value": "field_1_value"}],
+                "type": "S3",
+                "fields": [
+                    {"code": "bucket_name", "value": "bucket_name"},
+                    {"code": "access_key_id", "value": "access_key_id"},
+                    {"code": "access_key_secret", "value": "secret_access_key"},
+                ],
             }
         }
+
         with mock.patch(
             "openhexa.sdk.workspaces.current_workspace.graphql",
             return_value=data,
         ):
-            connection = workspace.get_connection("random")
-            assert isinstance(connection, CustomConnection)
+            connection = workspace.get_connection("s3-connection")
+            assert isinstance(connection, S3Connection)
 
     def test_workspace_dhis2_connection_not_exist(self, workspace):
         """Does not exist test case for DHIS2 connections."""
@@ -401,6 +436,7 @@ class TestConnectedWorkspace:
         data = S3Connection(access_key_id, secret_access_key, bucket_name)
         with mock.patch.object(workspace, "get_connection", return_value=data):
             s3_connection = workspace.s3_connection(identifier=identifier)
+
             assert s3_connection.secret_access_key == secret_access_key
             assert s3_connection.access_key_id == access_key_id
             assert s3_connection.bucket_name == bucket_name
