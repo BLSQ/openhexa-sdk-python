@@ -36,8 +36,12 @@ class PipelineParameterSpecs:
 
     def __post_init__(self):
         """Validate the parameter and set default values."""
-        if self.default and self.choices and self.default not in self.choices:
-            raise ValueError(f"Default value '{self.default}' not in choices {self.choices}")
+        if self.default and self.choices:
+            if isinstance(self.default, list):
+                if not all(d in self.choices for d in self.default):
+                    raise ValueError(f"Default list of values {self.default} not in choices {self.choices}")
+            elif self.default not in self.choices:
+                raise ValueError(f"Default value '{self.default}' not in choices {self.choices}")
         validate_pipeline_parameter_code(self.code)
         if self.required is None:
             self.required = True
@@ -180,7 +184,7 @@ def get_pipeline_metadata(pipeline_path: Path) -> PipelineSpecs:
                         Argument("name", [ast.Constant]),
                         Argument("choices", [ast.List]),
                         Argument("help", [ast.Constant]),
-                        Argument("default", [ast.Constant]),
+                        Argument("default", [ast.Constant, ast.List]),
                         Argument("required", [ast.Constant]),
                         Argument("multiple", [ast.Constant]),
                     ),

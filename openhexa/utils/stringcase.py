@@ -2,6 +2,7 @@
 
 Coming from https://github.com/okunishinishi/python-stringcase
 """
+
 import re
 
 

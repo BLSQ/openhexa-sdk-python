@@ -307,7 +307,7 @@ def test_parameter_validate_multiple():
     assert parameter_3.validate([]) == []
 
     # choices
-    parameter_4 = Parameter("arg4", type=str, choices=["ab", "cd"], multiple=True)
+    parameter_4 = Parameter("arg4", type=str, default=["ab", "ef"], choices=["ab", "cd", "ef"], multiple=True)
     assert parameter_4.validate(["ab"]) == ["ab"]
     assert parameter_4.validate(["ab", "cd"]) == ["ab", "cd"]
     with pytest.raises(ParameterValueError):
