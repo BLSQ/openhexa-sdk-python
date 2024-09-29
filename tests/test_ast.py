@@ -38,7 +38,8 @@ class AstTest(TestCase):
                 )
             pipeline = get_pipeline(tmpdirname)
             self.assertEqual(
-                pipeline.to_dict(), {"code": "test", "name": "Test pipeline", "parameters": [], "timeout": None}
+                pipeline.to_dict(), {"code": "test", "name": "Test pipeline", "function": None,
+                                     "tasks": [], "parameters": [], "timeout": None}
             )
 
     def test_pipeline_with_args(self):
@@ -58,7 +59,8 @@ class AstTest(TestCase):
                 )
             pipeline = get_pipeline(tmpdirname)
             self.assertEqual(
-                pipeline.to_dict(), {"code": "test", "name": "Test pipeline", "parameters": [], "timeout": None}
+                pipeline.to_dict(), {"code": "test", "function": None,
+                                     "tasks": [], "name": "Test pipeline", "parameters": [], "timeout": None}
             )
 
     def test_pipeline_with_invalid_parameter_args(self):
@@ -123,6 +125,8 @@ class AstTest(TestCase):
                 {
                     "code": "test",
                     "name": "Test pipeline",
+                    "function": None,
+                    "tasks": [],
                     "parameters": [
                         {
                             "choices": None,
@@ -162,6 +166,8 @@ class AstTest(TestCase):
                 {
                     "code": "test",
                     "name": "Test pipeline",
+                    "function": None,
+                    "tasks": [],
                     "parameters": [
                         {
                             "choices": None,
@@ -243,6 +249,8 @@ class AstTest(TestCase):
                 {
                     "code": "test",
                     "name": "Test pipeline",
+                    "function": None,
+                    "tasks": [],
                     "parameters": [
                         {
                             "choices": ["a", "b"],
@@ -277,8 +285,14 @@ class AstTest(TestCase):
             pipeline = get_pipeline(tmpdirname)
             self.assertEqual(
                 pipeline.to_dict(),
-                {"code": "test", "function": None, "name": "Test pipeline", "parameters": [], "timeout": 42,
-                 "tasks": []}
+                {
+                    "code": "test",
+                    "name": "Test pipeline",
+                    "parameters": [],
+                    "timeout": 42,
+                    "function": None,
+                    "tasks": []
+                }
             )
 
     def test_pipeline_with_bool(self):
@@ -304,6 +318,8 @@ class AstTest(TestCase):
                 {
                     "code": "test",
                     "name": "Test pipeline",
+                    "function": None,
+                    "tasks": [],
                     "parameters": [
                         {
                             "choices": None,
@@ -344,6 +360,8 @@ class AstTest(TestCase):
                 {
                     "code": "test",
                     "name": "Test pipeline",
+                    "function": None,
+                    "tasks" : [],
                     "parameters": [
                         {
                             "choices": None,

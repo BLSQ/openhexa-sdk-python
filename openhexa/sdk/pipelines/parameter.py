@@ -431,7 +431,6 @@ class Parameter:
 
     def to_dict(self) -> dict[str, typing.Any]:
         """Return a dictionary representation of the Parameter instance."""
-        print(f"Multiple  : {self.required}, required: {self.required}")
         return {
             "code": self.code,
             "type": self.type.spec_type,

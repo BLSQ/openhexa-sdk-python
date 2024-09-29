@@ -173,6 +173,8 @@ class Pipeline:
             "name": self.name,
             "parameters": [p.to_dict() for p in self.parameters],
             "timeout": self.timeout,
+            "function": self.function.__name__ if self.function else None,
+            "tasks": [t.__dict__ for t in self.tasks],
         }
 
     def _get_available_tasks(self) -> list[Task]:
