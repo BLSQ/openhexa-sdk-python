@@ -167,6 +167,14 @@ class Pipeline:
         """Return the individual specifications of all the parameters of this pipeline."""
         return [arg.parameter_spec() for arg in self.parameters]
 
+    def to_dict(self):
+        return {
+            "code": self.code,
+            "name": self.name,
+            "parameters": [p.to_dict() for p in self.parameters],
+            "timeout": self.timeout,
+        }
+
     def _get_available_tasks(self) -> list[Task]:
         return [task for task in self.tasks if task.is_ready()]
 

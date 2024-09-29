@@ -15,7 +15,7 @@ from zipfile import ZipFile
 import requests
 
 from openhexa.sdk.pipelines.exceptions import InvalidParameterError, PipelineNotFound
-from openhexa.sdk.pipelines.parameter import TYPES_BY_PYTHON_TYPE
+from openhexa.sdk.pipelines.parameter import TYPES_BY_PYTHON_TYPE, Parameter
 from openhexa.sdk.pipelines.utils import validate_pipeline_parameter_code
 
 from .pipeline import Pipeline
@@ -55,16 +55,6 @@ class Argument:
 
     name: string
     types: list[typing.Any] = field(default_factory=list)
-
-
-@dataclass
-class PipelineSpecs:
-    """Specification of a pipeline."""
-
-    code: string
-    name: string
-    timeout: int = None
-    parameters: list[PipelineParameterSpecs] = field(default_factory=list)
 
 
 def import_pipeline(pipeline_dir_path: str):
@@ -131,7 +121,7 @@ def _get_decorator_arg_value(decorator, arg: Argument, index: int):
         return None
 
 
-def _get_decorator_spec(decorator, args: tuple[Argument], key=None):
+def _get_decorator_spec(decorator, args: tuple[Argument]):
     d = {"name": decorator.func.id, "args": {}}
 
     for i, arg in enumerate(args):
@@ -140,8 +130,8 @@ def _get_decorator_spec(decorator, args: tuple[Argument], key=None):
     return d
 
 
-def get_pipeline_metadata(pipeline_path: Path) -> PipelineSpecs:
-    """Return the pipeline metadata from the pipeline code.
+def get_pipeline(pipeline_path: Path) -> Pipeline:
+    """Return the pipeline with metadata and parameters from the pipeline code.
 
     Args:
         pipeline_path (Path): Path to the pipeline directory
@@ -154,7 +144,7 @@ def get_pipeline_metadata(pipeline_path: Path) -> PipelineSpecs:
 
     Returns
     -------
-        typing.Tuple[PipelineSpecs, typing.List[PipelineParameterSpecs]]: A tuple containing the pipeline specs and the list of parameters specs.
+        Pipeline: The pipeline object with parameters and metadata.
     """
     tree = ast.parse(open(Path(pipeline_path) / "pipeline.py").read())
     pipeline = None
@@ -174,7 +164,7 @@ def get_pipeline_metadata(pipeline_path: Path) -> PipelineSpecs:
                     Argument("timeout", [ast.Constant]),
                 ),
             )
-            pipeline = PipelineSpecs(**pipeline_decorator_spec["args"])
+            pipelines_parameters = []
             for parameter_decorator in _get_decorators_by_name(node, "parameter"):
                 param_decorator_spec = _get_decorator_spec(
                     parameter_decorator,
@@ -189,14 +179,21 @@ def get_pipeline_metadata(pipeline_path: Path) -> PipelineSpecs:
                         Argument("multiple", [ast.Constant]),
                     ),
                 )
-                try:
-                    args = param_decorator_spec["args"]
-                    inst = TYPES_BY_PYTHON_TYPE[args["type"]]()
-                    args["type"] = inst.spec_type
+                args = param_decorator_spec["args"]
+                inst = TYPES_BY_PYTHON_TYPE[args["type"]]()
+                args["type"] = inst.expected_type
+                parameter = Parameter(
+                    code=args.get("code"),
+                    name=args.get("name"),
+                    type=args.get("type"),
+                    choices=args.get("choices"),
+                    help=args.get("help"),
+                    default=args.get("default"),
+                    required=args.get("required") if args.get("required") is not None else True,
+                    multiple=args.get("multiple") if args.get("multiple") is not None else False,)
+                pipelines_parameters.append(parameter)
 
-                    pipeline.parameters.append(PipelineParameterSpecs(**args))
-                except KeyError:
-                    raise InvalidParameterError(f"Invalid parameter type {args['type']}")
+            pipeline = Pipeline(parameters=pipelines_parameters, function=None, **pipeline_decorator_spec["args"])
 
     if pipeline is None:
         raise PipelineNotFound("No function with openhexa.sdk pipeline decorator found.")

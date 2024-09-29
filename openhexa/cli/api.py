@@ -21,7 +21,7 @@ from jinja2 import Template
 
 from openhexa.cli.settings import settings
 from openhexa.sdk.pipelines import get_local_workspace_config
-from openhexa.sdk.pipelines.runtime import get_pipeline_metadata
+from openhexa.sdk.pipelines.runtime import get_pipeline
 from openhexa.utils import create_requests_session, stringcase
 
 
@@ -195,7 +195,7 @@ def list_pipelines():
     return data["pipelines"]["items"]
 
 
-def get_pipeline(pipeline_code: str) -> dict[str, typing.Any]:
+def get_pipeline_from_code(pipeline_code: str) -> dict[str, typing.Any]:
     """Get a single pipeline."""
     if settings.current_workspace is None:
         raise NoActiveWorkspaceError
@@ -543,7 +543,7 @@ def upload_pipeline(
         raise NoActiveWorkspaceError
 
     directory = pipeline_directory_path.absolute()
-    pipeline = get_pipeline_metadata(directory)
+    pipeline = get_pipeline(directory)
     zip_file = generate_zip_file(directory)
 
     if settings.debug:

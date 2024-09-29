@@ -429,6 +429,21 @@ class Parameter:
         else:
             return self._validate_single(value)
 
+    def to_dict(self) -> dict[str, typing.Any]:
+        """Return a dictionary representation of the Parameter instance."""
+        print(f"Multiple  : {self.required}, required: {self.required}")
+        return {
+            "code": self.code,
+            "type": self.type.spec_type,
+            "name": self.name,
+            "choices": self.choices,
+            "help": self.help,
+            "default": self.default,
+            "required": self.required,
+            "multiple": self.multiple,
+        }
+
+
     def _validate_single(self, value: typing.Any):
         # Normalize empty values to None and handles default
         normalized_value = self.type.normalize(value)

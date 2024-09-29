@@ -21,7 +21,7 @@ from openhexa.cli.api import (
     download_pipeline_sourcecode,
     ensure_is_pipeline_dir,
     get_library_versions,
-    get_pipeline,
+    get_pipeline_from_code,
     get_workspace,
     list_pipelines,
     run_pipeline,
@@ -29,7 +29,7 @@ from openhexa.cli.api import (
 )
 from openhexa.cli.settings import settings, setup_logging
 from openhexa.sdk.pipelines.exceptions import PipelineNotFound
-from openhexa.sdk.pipelines.runtime import get_pipeline_metadata
+from openhexa.sdk.pipelines.runtime import get_pipeline
 
 
 def validate_url(ctx, param, value):
@@ -283,7 +283,7 @@ def pipelines_push(
     ensure_is_pipeline_dir(path)
 
     try:
-        pipeline = get_pipeline_metadata(path)
+        pipeline = get_pipeline(path)
     except PipelineNotFound:
         _terminate(
             f"❌ No function with openhexa.sdk pipeline decorator found in {click.style(path, bold=True)}.",
@@ -296,7 +296,7 @@ def pipelines_push(
         if settings.debug:
             click.echo(workspace_pipelines)
 
-        if get_pipeline(pipeline.code) is None:
+        if get_pipeline_from_code(pipeline.code) is None:
             click.echo(
                 f"Pipeline {click.style(pipeline.code, bold=True)} does not exist in workspace {click.style(workspace, bold=True)}"
             )
@@ -374,7 +374,7 @@ def pipelines_delete(code: str):
             err=True,
         )
     else:
-        pipeline = get_pipeline(code)
+        pipeline = get_pipeline_from_code(code)
         if pipeline is None:
             _terminate(
                 f"❌  Pipeline {click.style(code, bold=True)} does not exist in workspace {click.style(settings.current_workspace, bold=True)}"
