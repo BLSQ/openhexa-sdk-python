@@ -16,37 +16,8 @@ import requests
 
 from openhexa.sdk.pipelines.exceptions import PipelineNotFound
 from openhexa.sdk.pipelines.parameter import TYPES_BY_PYTHON_TYPE, Parameter
-from openhexa.sdk.pipelines.utils import validate_pipeline_parameter_code
 
 from .pipeline import Pipeline
-
-
-@dataclass
-class PipelineParameterSpecs:
-    """Specification of a pipeline parameter."""
-
-    code: string
-    type: string
-    name: string
-    choices: list[typing.Union[str, int, float]]
-    help: string
-    default: typing.Any
-    required: bool = True
-    multiple: bool = False
-
-    def __post_init__(self):
-        """Validate the parameter and set default values."""
-        if self.default and self.choices:
-            if isinstance(self.default, list):
-                if not all(d in self.choices for d in self.default):
-                    raise ValueError(f"Default list of values {self.default} not in choices {self.choices}")
-            elif self.default not in self.choices:
-                raise ValueError(f"Default value '{self.default}' not in choices {self.choices}")
-        validate_pipeline_parameter_code(self.code)
-        if self.required is None:
-            self.required = True
-        if self.multiple is None:
-            self.multiple = False
 
 
 @dataclass
