@@ -1,11 +1,9 @@
 """Tests related to the parsing of the pipeline code."""
 
-import json
 import tempfile
-from dataclasses import asdict
 from unittest import TestCase
 
-from openhexa.sdk.pipelines.exceptions import InvalidParameterError, PipelineNotFound
+from openhexa.sdk.pipelines.exceptions import PipelineNotFound
 from openhexa.sdk.pipelines.runtime import get_pipeline
 
 
@@ -38,8 +36,15 @@ class AstTest(TestCase):
                 )
             pipeline = get_pipeline(tmpdirname)
             self.assertEqual(
-                pipeline.to_dict(), {"code": "test", "name": "Test pipeline", "function": None,
-                                     "tasks": [], "parameters": [], "timeout": None}
+                pipeline.to_dict(),
+                {
+                    "code": "test",
+                    "name": "Test pipeline",
+                    "function": None,
+                    "tasks": [],
+                    "parameters": [],
+                    "timeout": None,
+                },
             )
 
     def test_pipeline_with_args(self):
@@ -59,8 +64,15 @@ class AstTest(TestCase):
                 )
             pipeline = get_pipeline(tmpdirname)
             self.assertEqual(
-                pipeline.to_dict(), {"code": "test", "function": None,
-                                     "tasks": [], "name": "Test pipeline", "parameters": [], "timeout": None}
+                pipeline.to_dict(),
+                {
+                    "code": "test",
+                    "function": None,
+                    "tasks": [],
+                    "name": "Test pipeline",
+                    "parameters": [],
+                    "timeout": None,
+                },
             )
 
     def test_pipeline_with_invalid_parameter_args(self):
@@ -291,8 +303,8 @@ class AstTest(TestCase):
                     "parameters": [],
                     "timeout": 42,
                     "function": None,
-                    "tasks": []
-                }
+                    "tasks": [],
+                },
             )
 
     def test_pipeline_with_bool(self):
@@ -361,7 +373,7 @@ class AstTest(TestCase):
                     "code": "test",
                     "name": "Test pipeline",
                     "function": None,
-                    "tasks" : [],
+                    "tasks": [],
                     "parameters": [
                         {
                             "choices": None,

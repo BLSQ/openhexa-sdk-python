@@ -168,12 +168,13 @@ class Pipeline:
         return [arg.parameter_spec() for arg in self.parameters]
 
     def to_dict(self):
+        """Return a dictionary representation of the pipeline."""
         return {
             "code": self.code,
             "name": self.name,
             "parameters": [p.to_dict() for p in self.parameters],
             "timeout": self.timeout,
-            "function": self.function.__name__ if self.function else None,
+            "function": self.function.__dict__ if self.function else None,
             "tasks": [t.__dict__ for t in self.tasks],
         }
 

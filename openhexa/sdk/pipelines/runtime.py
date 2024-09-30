@@ -14,7 +14,7 @@ from zipfile import ZipFile
 
 import requests
 
-from openhexa.sdk.pipelines.exceptions import InvalidParameterError, PipelineNotFound
+from openhexa.sdk.pipelines.exceptions import PipelineNotFound
 from openhexa.sdk.pipelines.parameter import TYPES_BY_PYTHON_TYPE, Parameter
 from openhexa.sdk.pipelines.utils import validate_pipeline_parameter_code
 
@@ -190,7 +190,8 @@ def get_pipeline(pipeline_path: Path) -> Pipeline:
                     help=args.get("help"),
                     default=args.get("default"),
                     required=args.get("required") if args.get("required") is not None else True,
-                    multiple=args.get("multiple") if args.get("multiple") is not None else False,)
+                    multiple=args.get("multiple") if args.get("multiple") is not None else False,
+                )
                 pipelines_parameters.append(parameter)
 
             pipeline = Pipeline(parameters=pipelines_parameters, function=None, **pipeline_decorator_spec["args"])

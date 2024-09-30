@@ -442,7 +442,6 @@ class Parameter:
             "multiple": self.multiple,
         }
 
-
     def _validate_single(self, value: typing.Any):
         # Normalize empty values to None and handles default
         normalized_value = self.type.normalize(value)
