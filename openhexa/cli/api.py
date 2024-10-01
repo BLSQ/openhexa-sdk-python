@@ -8,7 +8,6 @@ import logging
 import os
 import tempfile
 import typing
-from dataclasses import asdict
 from importlib.metadata import version
 from pathlib import Path
 from zipfile import ZipFile
@@ -574,7 +573,7 @@ def upload_pipeline(
                 "description": description,
                 "externalLink": link,
                 "zipfile": base64_content,
-                "parameters": [asdict(p) for p in pipeline.parameters],
+                "parameters": [p.to_dict() for p in pipeline.parameters],
                 "timeout": pipeline.timeout,
             }
         },

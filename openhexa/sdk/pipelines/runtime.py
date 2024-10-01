@@ -154,7 +154,7 @@ def get_pipeline(pipeline_path: Path) -> Pipeline:
                 inst = TYPES_BY_PYTHON_TYPE[args["type"]]()
                 args["type"] = inst.expected_type
                 parameter = Parameter(
-                    code=args.get("code"),
+                    code=args["code"],
                     name=args.get("name"),
                     type=args.get("type"),
                     choices=args.get("choices"),
