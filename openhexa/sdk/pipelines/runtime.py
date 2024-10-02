@@ -151,19 +151,12 @@ def get_pipeline(pipeline_path: Path) -> Pipeline:
                         Argument("multiple", [ast.Constant], default_value=False),
                     ),
                 )
-                args = param_decorator_spec["args"]
-                inst = TYPES_BY_PYTHON_TYPE[args["type"]]()
-                args["type"] = inst.expected_type
-                parameter = Parameter(
-                    code=args["code"],
-                    type=args["type"],
-                    name=args.get("name"),
-                    choices=args.get("choices"),
-                    help=args.get("help"),
-                    default=args.get("default"),
-                    required=args.get("required"),
-                    multiple=args.get("multiple"),
-                )
+                parameter_args = param_decorator_spec["args"]
+                try:
+                    type_class = TYPES_BY_PYTHON_TYPE[parameter_args.pop("type")]()
+                except KeyError:
+                    raise ValueError(f"Unsupported parameter type: {parameter_args['type']}")
+                parameter = Parameter(type=type_class.expected_type, **parameter_args)
                 pipelines_parameters.append(parameter)
 
             pipeline = Pipeline(parameters=pipelines_parameters, function=None, **pipeline_decorator_spec["args"])
