@@ -26,6 +26,7 @@ class Argument:
 
     name: string
     types: list[typing.Any] = field(default_factory=list)
+    default_value: typing.Any = None
 
 
 def import_pipeline(pipeline_dir_path: str):
@@ -89,7 +90,7 @@ def _get_decorator_arg_value(decorator, arg: Argument, index: int):
     try:
         return decorator.args[index].value
     except IndexError:
-        return None
+        return arg.default_value
 
 
 def _get_decorator_spec(decorator, args: tuple[Argument]):
@@ -146,8 +147,8 @@ def get_pipeline(pipeline_path: Path) -> Pipeline:
                         Argument("choices", [ast.List]),
                         Argument("help", [ast.Constant]),
                         Argument("default", [ast.Constant, ast.List]),
-                        Argument("required", [ast.Constant]),
-                        Argument("multiple", [ast.Constant]),
+                        Argument("required", [ast.Constant], default_value=True),
+                        Argument("multiple", [ast.Constant], default_value=False),
                     ),
                 )
                 args = param_decorator_spec["args"]
@@ -155,13 +156,13 @@ def get_pipeline(pipeline_path: Path) -> Pipeline:
                 args["type"] = inst.expected_type
                 parameter = Parameter(
                     code=args["code"],
+                    type=args["type"],
                     name=args.get("name"),
-                    type=args.get("type"),
                     choices=args.get("choices"),
                     help=args.get("help"),
                     default=args.get("default"),
-                    required=args.get("required") if args.get("required") is not None else True,
-                    multiple=args.get("multiple") if args.get("multiple") is not None else False,
+                    required=args.get("required"),
+                    multiple=args.get("multiple"),
                 )
                 pipelines_parameters.append(parameter)
 
