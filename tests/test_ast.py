@@ -1,11 +1,10 @@
 """Tests related to the parsing of the pipeline code."""
 
 import tempfile
-from dataclasses import asdict
 from unittest import TestCase
 
-from openhexa.sdk.pipelines.exceptions import InvalidParameterError, PipelineNotFound
-from openhexa.sdk.pipelines.runtime import get_pipeline_metadata
+from openhexa.sdk.pipelines.exceptions import PipelineNotFound
+from openhexa.sdk.pipelines.runtime import get_pipeline
 
 
 class AstTest(TestCase):
@@ -18,7 +17,7 @@ class AstTest(TestCase):
                 f.write("print('hello')")
 
             with self.assertRaises(PipelineNotFound):
-                get_pipeline_metadata(tmpdirname)
+                get_pipeline(tmpdirname)
 
     def test_pipeline_no_parameters(self):
         """The file contains a @pipeline decorator but no parameters."""
@@ -35,9 +34,17 @@ class AstTest(TestCase):
                         ]
                     )
                 )
-            pipeline = get_pipeline_metadata(tmpdirname)
+            pipeline = get_pipeline(tmpdirname)
             self.assertEqual(
-                asdict(pipeline), {"code": "test", "name": "Test pipeline", "parameters": [], "timeout": None}
+                pipeline.to_dict(),
+                {
+                    "code": "test",
+                    "name": "Test pipeline",
+                    "function": None,
+                    "tasks": [],
+                    "parameters": [],
+                    "timeout": None,
+                },
             )
 
     def test_pipeline_with_args(self):
@@ -55,9 +62,17 @@ class AstTest(TestCase):
                         ]
                     )
                 )
-            pipeline = get_pipeline_metadata(tmpdirname)
+            pipeline = get_pipeline(tmpdirname)
             self.assertEqual(
-                asdict(pipeline), {"code": "test", "name": "Test pipeline", "parameters": [], "timeout": None}
+                pipeline.to_dict(),
+                {
+                    "code": "test",
+                    "function": None,
+                    "tasks": [],
+                    "name": "Test pipeline",
+                    "parameters": [],
+                    "timeout": None,
+                },
             )
 
     def test_pipeline_with_invalid_parameter_args(self):
@@ -77,7 +92,7 @@ class AstTest(TestCase):
                     )
                 )
             with self.assertRaises(ValueError):
-                get_pipeline_metadata(tmpdirname)
+                get_pipeline(tmpdirname)
 
     def test_pipeline_with_invalid_pipeline_args(self):
         """The file contains a @pipeline decorator with invalid value."""
@@ -97,7 +112,7 @@ class AstTest(TestCase):
                     )
                 )
             with self.assertRaises(ValueError):
-                get_pipeline_metadata(tmpdirname)
+                get_pipeline(tmpdirname)
 
     def test_pipeline_with_int_param(self):
         """The file contains a @pipeline decorator and a @parameter decorator with an int."""
@@ -116,12 +131,14 @@ class AstTest(TestCase):
                         ]
                     )
                 )
-            pipeline = get_pipeline_metadata(tmpdirname)
+            pipeline = get_pipeline(tmpdirname)
             self.assertEqual(
-                asdict(pipeline),
+                pipeline.to_dict(),
                 {
                     "code": "test",
                     "name": "Test pipeline",
+                    "function": None,
+                    "tasks": [],
                     "parameters": [
                         {
                             "choices": None,
@@ -147,7 +164,7 @@ class AstTest(TestCase):
                         [
                             "from openhexa.sdk.pipelines import pipeline, parameter",
                             "",
-                            "@parameter('test_param', name='Test Param', type=int, default=42, help='Param help', multiple=True)",
+                            "@parameter('test_param', name='Test Param', type=int, default=[42], help='Param help', multiple=True)",
                             "@pipeline('test', 'Test pipeline')",
                             "def test_pipeline():",
                             "    pass",
@@ -155,12 +172,14 @@ class AstTest(TestCase):
                         ]
                     )
                 )
-            pipeline = get_pipeline_metadata(tmpdirname)
+            pipeline = get_pipeline(tmpdirname)
             self.assertEqual(
-                asdict(pipeline),
+                pipeline.to_dict(),
                 {
                     "code": "test",
                     "name": "Test pipeline",
+                    "function": None,
+                    "tasks": [],
                     "parameters": [
                         {
                             "choices": None,
@@ -168,7 +187,7 @@ class AstTest(TestCase):
                             "code": "test_param",
                             "type": "int",
                             "name": "Test Param",
-                            "default": 42,
+                            "default": [42],
                             "help": "Param help",
                             "required": True,
                         }
@@ -195,12 +214,14 @@ class AstTest(TestCase):
                         ]
                     )
                 )
-            pipeline = get_pipeline_metadata(tmpdirname)
+            pipeline = get_pipeline(tmpdirname)
             self.assertEqual(
-                asdict(pipeline),
+                pipeline.to_dict(),
                 {
                     "code": "test",
+                    "function": None,
                     "name": "Test pipeline",
+                    "tasks": [],
                     "parameters": [
                         {
                             "choices": None,
@@ -234,12 +255,14 @@ class AstTest(TestCase):
                         ]
                     )
                 )
-            pipeline = get_pipeline_metadata(tmpdirname)
+            pipeline = get_pipeline(tmpdirname)
             self.assertEqual(
-                asdict(pipeline),
+                pipeline.to_dict(),
                 {
                     "code": "test",
                     "name": "Test pipeline",
+                    "function": None,
+                    "tasks": [],
                     "parameters": [
                         {
                             "choices": ["a", "b"],
@@ -271,9 +294,17 @@ class AstTest(TestCase):
                         ]
                     )
                 )
-            pipeline = get_pipeline_metadata(tmpdirname)
+            pipeline = get_pipeline(tmpdirname)
             self.assertEqual(
-                asdict(pipeline), {"code": "test", "name": "Test pipeline", "parameters": [], "timeout": 42}
+                pipeline.to_dict(),
+                {
+                    "code": "test",
+                    "name": "Test pipeline",
+                    "parameters": [],
+                    "timeout": 42,
+                    "function": None,
+                    "tasks": [],
+                },
             )
 
     def test_pipeline_with_bool(self):
@@ -293,12 +324,14 @@ class AstTest(TestCase):
                         ]
                     )
                 )
-            pipeline = get_pipeline_metadata(tmpdirname)
+            pipeline = get_pipeline(tmpdirname)
             self.assertEqual(
-                asdict(pipeline),
+                pipeline.to_dict(),
                 {
                     "code": "test",
                     "name": "Test pipeline",
+                    "function": None,
+                    "tasks": [],
                     "parameters": [
                         {
                             "choices": None,
@@ -333,12 +366,14 @@ class AstTest(TestCase):
                         ]
                     )
                 )
-            pipeline = get_pipeline_metadata(tmpdirname)
+            pipeline = get_pipeline(tmpdirname)
             self.assertEqual(
-                asdict(pipeline),
+                pipeline.to_dict(),
                 {
                     "code": "test",
                     "name": "Test pipeline",
+                    "function": None,
+                    "tasks": [],
                     "parameters": [
                         {
                             "choices": None,
@@ -382,5 +417,5 @@ class AstTest(TestCase):
                         ]
                     )
                 )
-            with self.assertRaises(InvalidParameterError):
-                get_pipeline_metadata(tmpdirname)
+            with self.assertRaises(KeyError):
+                get_pipeline(tmpdirname)

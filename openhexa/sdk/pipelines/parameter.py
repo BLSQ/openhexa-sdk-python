@@ -429,6 +429,19 @@ class Parameter:
         else:
             return self._validate_single(value)
 
+    def to_dict(self) -> dict[str, typing.Any]:
+        """Return a dictionary representation of the Parameter instance."""
+        return {
+            "code": self.code,
+            "type": self.type.spec_type,
+            "name": self.name,
+            "choices": self.choices,
+            "help": self.help,
+            "default": self.default,
+            "required": self.required,
+            "multiple": self.multiple,
+        }
+
     def _validate_single(self, value: typing.Any):
         # Normalize empty values to None and handles default
         normalized_value = self.type.normalize(value)
@@ -487,8 +500,16 @@ class Parameter:
         except ParameterValueError:
             raise InvalidParameterError(f"The default value for {self.code} is not valid.")
 
-        if self.choices is not None and default not in self.choices:
-            raise InvalidParameterError(f"The default value for {self.code} is not included in the provided choices.")
+        if self.choices is not None:
+            if isinstance(default, list):
+                if not all(d in self.choices for d in default):
+                    raise InvalidParameterError(
+                        f"The default list of values for {self.code} is not included in the provided choices."
+                    )
+            elif default not in self.choices:
+                raise InvalidParameterError(
+                    f"The default value for {self.code} is not included in the provided choices."
+                )
 
     def parameter_spec(self) -> dict[str, typing.Any]:
         """Build specification for this parameter, to be provided to the OpenHEXA backend."""
