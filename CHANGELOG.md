@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.2](https://github.com/BLSQ/openhexa-sdk-python/compare/v0.3.1...v0.3.2) (2024-10-02)
+
+
+### Bug Fixes
+
+* **Connections:** fix shallow matching when retrieving connection fields ([#209](https://github.com/BLSQ/openhexa-sdk-python/issues/209)) ([0bfd5f7](https://github.com/BLSQ/openhexa-sdk-python/commit/0bfd5f7d6f56f9e061551d85343e9389d827cf79))
+* fixes the default value to be of type list ([#211](https://github.com/BLSQ/openhexa-sdk-python/issues/211)) ([151e3af](https://github.com/BLSQ/openhexa-sdk-python/commit/151e3af419d5ea142781ce306c6c5bad3dc36239))
+
 ## [0.3.1](https://github.com/BLSQ/openhexa-sdk-python/compare/v0.3.0...v0.3.1) (2024-09-05)
 
 
