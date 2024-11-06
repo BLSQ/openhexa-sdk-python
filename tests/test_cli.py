@@ -6,7 +6,7 @@ from io import BytesIO
 from pathlib import Path
 from tempfile import mkdtemp
 from unittest import TestCase
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 from zipfile import ZipFile
 
 import pytest
@@ -22,7 +22,7 @@ pipeline_name = "MyPipeline"
 
 
 def create_zip_with_pipeline():
-    """Helper method to create a zip file containing the pipeline.py file."""
+    """Create a zip file containing the pipeline.py file."""
     zip_buffer = BytesIO()
     fake_zipfile = ZipFile(zip_buffer, "w")
     fake_zipfile.writestr(python_file_name, python_code)
@@ -30,15 +30,11 @@ def create_zip_with_pipeline():
     return zip_buffer
 
 
-def setup_graphql_response(zip_buffer = create_zip_with_pipeline()):
-    """Helper method to set up the mock GraphQL response pipelines."""
+def setup_graphql_response(zip_buffer=create_zip_with_pipeline()):
+    """Set up the mock GraphQL response pipelines."""
     return {
-        "pipelineByCode": {
-            "currentVersion": {
-                "zipfile": base64.b64encode(zip_buffer.getvalue()).decode()
-            }
-        },
-        "pipelines": {"items": []}  # (empty workspace initially)
+        "pipelineByCode": {"currentVersion": {"zipfile": base64.b64encode(zip_buffer.getvalue()).decode()}},
+        "pipelines": {"items": []},  # (empty workspace initially)
     }
 
 
@@ -120,7 +116,7 @@ class CliRunTest(TestCase):
     @patch("openhexa.cli.api.graphql")
     @patch("openhexa.cli.cli.get_pipeline")
     @patch("openhexa.cli.cli.upload_pipeline")
-    @patch.dict(os.environ, {"HEXA_API_URL": "https://www.bluesquarehub.com/","HEXA_WORKSPACE": "workspace"})
+    @patch.dict(os.environ, {"HEXA_API_URL": "https://www.bluesquarehub.com/", "HEXA_WORKSPACE": "workspace"})
     def test_push_pipeline(self, mock_upload_pipeline, mock_get_pipeline, mock_graphql):
         """Test pushing a pipeline."""
         with self.runner.isolated_filesystem() as tmp:
@@ -131,10 +127,15 @@ class CliRunTest(TestCase):
             mock_pipeline.code = pipeline_name
             mock_get_pipeline.return_value = mock_pipeline
 
-            result = self.runner.invoke(pipelines_push,  [tmp, '--name', version])
+            result = self.runner.invoke(pipelines_push, [tmp, "--name", version])
             self.assertEqual(result.exit_code, 0)
-            self.assertIn ((f'✅ New version \'{version}\' created! '
-                    f'You can view the pipeline in OpenHEXA on https://www.bluesquarehub.com/workspaces/workspace/pipelines/{pipeline_name}'), result.output)
+            self.assertIn(
+                (
+                    f"✅ New version '{version}' created! "
+                    f"You can view the pipeline in OpenHEXA on https://www.bluesquarehub.com/workspaces/workspace/pipelines/{pipeline_name}"
+                ),
+                result.output,
+            )
             self.assertTrue(mock_upload_pipeline.called)
 
     @patch("openhexa.cli.api.graphql")
