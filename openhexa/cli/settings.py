@@ -53,15 +53,13 @@ class Settings:
         """Return the API URL from the settings file or environment variables."""
         url_from_env = os.getenv("HEXA_API_URL") or os.getenv("HEXA_SERVER_URL")
         if url_from_env is None:
-            return self._file_config["openhexa"]["url"]
+            url_from_env = self._file_config["openhexa"]["url"]
+        return url_from_env.rstrip("/")
 
     @property
     def public_api_url(self):
         """Return the public API URL from the settings file or environment variables."""
-        url_from_env = os.getenv("HEXA_API_URL") or os.getenv("HEXA_SERVER_URL")
-        if url_from_env is not None:
-            return url_from_env
-        return self._file_config["openhexa"]["url"].replace("api", "app")
+        return self.api_url.replace("api", "app")
 
     @property
     def current_workspace(self):
