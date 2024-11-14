@@ -77,6 +77,7 @@ class PipelineDefinitionErrorCode(enum.Enum):
 
     PIPELINE_DOES_NOT_SUPPORT_PARAMETERS = "PIPELINE_DOES_NOT_SUPPORT_PARAMETERS"
     INVALID_TIMEOUT_VALUE = "INVALID_TIMEOUT_VALUE"
+    DUPLICATE_PIPELINE_VERSION_NAME = "DUPLICATE_PIPELINE_VERSION_NAME"
 
 
 class PermissionDenied(Exception):
@@ -589,6 +590,8 @@ def upload_pipeline(
             raise InvalidDefinitionError(
                 "Timeout value is invalid : ensure that it's no negative and inferior to 12 hours."
             )
+        elif PipelineDefinitionErrorCode.DUPLICATE_PIPELINE_VERSION_NAME.value in data["uploadPipeline"]["errors"]:
+            raise InvalidDefinitionError("The pipeline version name is already used. Please choose another name.")
         else:
             raise Exception(data["uploadPipeline"]["errors"])
 
