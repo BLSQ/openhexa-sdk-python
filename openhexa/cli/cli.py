@@ -313,7 +313,7 @@ def pipelines_push(
             name_text = f" with name {click.style(name, bold=True)}" if name else ""
             confirmation_message = (
                 f"Pushing pipeline {click.style(pipeline.code, bold=True)} "
-                f"to workspace {click.style(workspace, bold=True)}{name_text}?"
+                f"to workspace {click.style(workspace, bold=True)}{name_text} ?"
             )
             click.confirm(confirmation_message, default=True, abort=True)
 
