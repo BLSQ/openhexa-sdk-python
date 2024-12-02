@@ -1,8 +1,8 @@
 """Priority log levels for the pipeline runs."""
-from enum import Enum
+from enum import IntEnum
 
 
-class Priority(Enum):
+class Priority(IntEnum):
     """
     Enum representing different priority log levels.
 

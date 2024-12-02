@@ -67,6 +67,7 @@ include-package-data = true
 [tool.ruff]
 line-length = 120
 ignore = ["E501"]
+per-file-ignores = { "tests/**/test_*.py" = ["D100","D101","D102", "D103"] } # Ignore missing docstrings in tests
 
 [tool.ruff.lint]
 extend-select = [

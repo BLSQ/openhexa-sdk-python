@@ -4,7 +4,6 @@ import datetime
 import errno
 import os
 
-from openhexa.cli.settings import settings
 from openhexa.sdk.pipelines.priority import Priority
 from openhexa.sdk.utils import Environment, get_environment, graphql
 from openhexa.sdk.workspaces import workspace
@@ -100,6 +99,8 @@ class CurrentRun:
         priority: Priority,
         message: str,
     ):
+        from openhexa.cli.settings import settings
+
         if priority < settings.log_level:  # Ignore messages with lower priority than the log level
             return
         if self._connected:
