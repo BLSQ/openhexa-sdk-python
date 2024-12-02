@@ -15,20 +15,9 @@ def test_default_log_level(mock_graphql):
     mock_graphql.assert_any_call(ANY, {"input": {"priority": "INFO", "message": "This is an info message"}})
 
 
-@patch("openhexa.sdk.pipelines.run.graphql")
-def test_filtering_log_messages_based_on_settings(mock_graphql, settings):
-    settings.log_level = Priority.WARNING
-    current_run = CurrentRun()
-
-    current_run.log_debug("This is a debug message")
-    current_run.log_info("This is an info message")
-
-    mock_graphql.assert_not_called()
-
-
 @patch.object(CurrentRun, "_connected", True)
 @patch("openhexa.sdk.pipelines.run.graphql")
-def test_keeping_log_messages_based_on_settings(mock_graphql, settings):
+def test_filtering_log_messages_based_on_settings(mock_graphql, settings):
     settings.log_level = Priority.ERROR
     current_run = CurrentRun()
 
