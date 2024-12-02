@@ -6,6 +6,8 @@ from configparser import ConfigParser
 
 import click
 
+from openhexa.sdk.pipelines.priority import Priority
+
 CONFIGFILE_PATH = os.path.expanduser("~") + "/.openhexa.ini"
 
 
@@ -77,9 +79,9 @@ class Settings:
         return self._file_config["workspaces"]
 
     @property
-    def log_level(self):
+    def log_level(self) -> Priority:
         """Return the log level from the environment variables."""
-        return os.getenv("HEXA_LOG_LEVEL")
+        return os.getenv("HEXA_LOG_LEVEL") or (Priority.DEBUG if self.debug else Priority.INFO)
 
     def activate(self, workspace: str):
         """Set the current workspace in the settings file."""
