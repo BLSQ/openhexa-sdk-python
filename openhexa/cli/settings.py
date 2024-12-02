@@ -76,6 +76,11 @@ class Settings:
         """Return the workspaces from the settings file."""
         return self._file_config["workspaces"]
 
+    @property
+    def log_level(self):
+        """Return the log level from the environment variables."""
+        return os.getenv("HEXA_LOG_LEVEL")
+
     def activate(self, workspace: str):
         """Set the current workspace in the settings file."""
         if workspace not in self.workspaces:

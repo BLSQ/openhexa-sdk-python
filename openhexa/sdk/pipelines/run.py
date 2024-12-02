@@ -3,8 +3,9 @@
 import datetime
 import errno
 import os
-import typing
 
+from openhexa.cli.settings import settings
+from openhexa.sdk.pipelines.priority import Priority
 from openhexa.sdk.utils import Environment, get_environment, graphql
 from openhexa.sdk.workspaces import workspace
 
@@ -76,44 +77,42 @@ class CurrentRun:
 
     def log_debug(self, message: str):
         """Log a message with the DEBUG priority."""
-        self._log_message("DEBUG", message)
+        self._log_message(Priority.DEBUG, message)
 
     def log_info(self, message: str):
         """Log a message with the INFO priority."""
-        self._log_message("INFO", message)
+        self._log_message(Priority.INFO, message)
 
     def log_warning(self, message: str):
         """Log a message with the WARNING priority."""
-        self._log_message("WARNING", message)
+        self._log_message(Priority.WARNING, message)
 
     def log_error(self, message: str):
         """Log a message with the ERROR priority."""
-        self._log_message("ERROR", message)
+        self._log_message(Priority.ERROR, message)
 
     def log_critical(self, message: str):
         """Log a message with the CRITICAL priority."""
-        self._log_message("CRITICAL", message)
+        self._log_message(Priority.CRITICAL, message)
 
     def _log_message(
         self,
-        priority: typing.Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        priority: Priority,
         message: str,
     ):
-        valid_priorities = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
-        if priority not in valid_priorities:
-            raise ValueError(f"priority must be one of {', '.join(valid_priorities)}")
-
+        if priority < settings.log_level:  # Ignore messages with lower priority than the log level
+            return
         if self._connected:
             graphql(
                 """
                 mutation logPipelineMessage ($input: LogPipelineMessageInput!) {
                     logPipelineMessage(input: $input) { success errors }
                 }""",
-                {"input": {"priority": priority, "message": str(message)}},
+                {"input": {"priority": priority.name, "message": str(message)}},
             )
         else:
             now = datetime.datetime.now(tz=datetime.timezone.utc).replace(microsecond=0).isoformat()
-            print(now, priority, message)
+            print(now, priority.name, message)
 
 
 if get_environment() == Environment.CLOUD_JUPYTER:
