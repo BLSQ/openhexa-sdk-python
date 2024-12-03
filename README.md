@@ -112,7 +112,6 @@ python -m venv venv # Create a virtual environment for this project
 source venv/bin/activate # Activate the venv
 pip install -e ".[dev]"  # Necessary to be able to run the openhexa CLI
 ```
-
 ### Using a local installation of OpenHEXA to run pipelines
 
 While it is possible to run pipelines locally using only the SDK, if you want to run OpenHEXA in a more realistic 
@@ -126,6 +125,20 @@ openhexa config set_url http://localhost:8000
 ```
 
 Notes: you can monitor the status of your pipelines using http://localhost:8000/pipelines/status
+
+### Using a local version of the SDK to run pipelines
+
+If you want to use a local version of the SDK to run pipelines, you can build a docker image with the local version of the SDK installed in it :
+
+```shell    
+docker build --platform linux/amd64 -t local_image:v1 -f images/Dockerfile .
+```
+
+Then reference the image name and tag in the `.env` file of your OpenHexa app :
+
+```
+DEFAULT_WORKSPACE_IMAGE=local_image:v1
+```
 
 ### Running the tests
 
