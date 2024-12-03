@@ -1,6 +1,6 @@
 from unittest.mock import ANY, patch
 
-from openhexa.sdk.pipelines.run import CurrentRun, Priority
+from openhexa.sdk.pipelines.run import CurrentRun, LogLevel
 
 
 @patch.object(CurrentRun, "_connected", True)
@@ -18,7 +18,7 @@ def test_default_log_level(mock_graphql):
 @patch.object(CurrentRun, "_connected", True)
 @patch("openhexa.sdk.pipelines.run.graphql")
 def test_filtering_log_messages_based_on_settings(mock_graphql, settings):
-    settings.log_level = Priority.ERROR
+    settings.log_level = LogLevel.ERROR
     current_run = CurrentRun()
 
     current_run.log_warning("This is a warning message")

@@ -1,6 +1,7 @@
 """Pipeline test module."""
 
 import os
+from unittest import TestCase
 from unittest.mock import Mock, patch
 
 import pytest
@@ -12,6 +13,7 @@ from openhexa.sdk import (
     PostgreSQLConnection,
     S3Connection,
 )
+from openhexa.sdk.pipelines.log_level import LogLevel
 from openhexa.sdk.pipelines.parameter import Parameter, ParameterValueError
 from openhexa.sdk.pipelines.pipeline import Pipeline
 
@@ -218,3 +220,30 @@ def test_pipeline_parameters_spec():
             "default": None,
         },
     ]
+
+
+class TestLogLevel(TestCase):
+    def test_parse_log_level(self):
+        test_cases = [
+            (0, LogLevel.DEBUG),
+            (1, LogLevel.INFO),
+            (2, LogLevel.WARNING),
+            (3, LogLevel.ERROR),
+            (4, LogLevel.CRITICAL),
+            ("0", LogLevel.DEBUG),
+            ("1", LogLevel.INFO),
+            ("2", LogLevel.WARNING),
+            ("3", LogLevel.ERROR),
+            ("4", LogLevel.CRITICAL),
+            ("DEBUG", LogLevel.DEBUG),
+            ("INFO", LogLevel.INFO),
+            ("WARNING", LogLevel.WARNING),
+            ("ERROR", LogLevel.ERROR),
+            ("CRITICAL", LogLevel.CRITICAL),
+            ("invalid", LogLevel.INFO),
+            (6, LogLevel.INFO),
+            (-1, LogLevel.INFO),
+        ]
+        for input_value, expected in test_cases:
+            with self.subTest(input_value=input_value, expected=expected):
+                self.assertEqual(LogLevel.parse_log_level(input_value), expected)
