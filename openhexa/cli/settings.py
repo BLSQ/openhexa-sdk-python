@@ -81,7 +81,7 @@ class Settings:
     @property
     def log_level(self) -> Priority:
         """Return the log level from the environment variables."""
-        return os.getenv("HEXA_LOG_LEVEL") or (Priority.DEBUG if self.debug else Priority.INFO)
+        return Priority(int(os.getenv("HEXA_LOG_LEVEL", Priority.INFO)))
 
     def activate(self, workspace: str):
         """Set the current workspace in the settings file."""
