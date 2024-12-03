@@ -126,6 +126,7 @@ class CliRunTest(TestCase):
             mock_pipeline = MagicMock(spec=Pipeline)
             mock_pipeline.code = pipeline_name
             mock_get_pipeline.return_value = mock_pipeline
+            mock_upload_pipeline.return_value = {"versionName": version}
 
             result = self.runner.invoke(pipelines_push, [tmp, "--name", version])
             self.assertEqual(result.exit_code, 0)

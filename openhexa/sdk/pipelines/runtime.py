@@ -50,7 +50,7 @@ def download_pipeline(url: str, token: str, run_id: str, target_dir: str):
               pipelineRun(id: $id) {
                 id
                 version {
-                  number
+                  versionNumber
                 }
                 code
               }

@@ -237,10 +237,11 @@ def pipelines_init(name: str):
 @click.option(
     "--name",
     "-n",
+    default=None,
     type=str,
     help="Name of the version",
     prompt="Name of the version",
-    required=True,
+    prompt_required=False,
 )
 @click.option(
     "--description",
@@ -263,7 +264,7 @@ def pipelines_init(name: str):
 @click.option("--yes", is_flag=True, help="Skip confirmation")
 def pipelines_push(
     path: str,
-    name: str,
+    name: str = None,
     description: str = None,
     link: str = None,
     yes: bool = False,
@@ -309,17 +310,18 @@ def pipelines_push(
                 )
             create_pipeline(pipeline.code, pipeline.name)
         elif not yes:
-            click.confirm(
-                f"Pushing pipeline {click.style(pipeline.code, bold=True)} to workspace {click.style(workspace, bold=True)} with name {click.style(name, bold=True)}?",
-                True,
-                abort=True,
+            name_text = f" with name {click.style(name, bold=True)}" if name else ""
+            confirmation_message = (
+                f"Pushing pipeline {click.style(pipeline.code, bold=True)} "
+                f"to workspace {click.style(workspace, bold=True)}{name_text} ?"
             )
+            click.confirm(confirmation_message, default=True, abort=True)
 
         try:
-            upload_pipeline(path, name, description=description, link=link)
+            uploaded_pipeline = upload_pipeline(path, name, description=description, link=link)
             click.echo(
                 click.style(
-                    f"✅ New version '{name}' created! You can view the pipeline in OpenHEXA on {click.style(f'{settings.public_api_url}/workspaces/{workspace}/pipelines/{pipeline.code}', fg='bright_blue', underline=True)}",
+                    f"✅ New version '{uploaded_pipeline['versionName']}' created! You can view the pipeline in OpenHEXA on {click.style(f'{settings.public_api_url}/workspaces/{workspace}/pipelines/{pipeline.code}', fg='bright_blue', underline=True)}",
                     fg="green",
                 )
             )

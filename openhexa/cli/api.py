@@ -531,7 +531,7 @@ def generate_zip_file(pipeline_directory_path: typing.Union[str, Path]) -> io.By
 
 def upload_pipeline(
     pipeline_directory_path: typing.Union[str, Path],
-    name: str,
+    name: str = None,
     description: str = None,
     link: str = None,
 ):
@@ -561,7 +561,7 @@ def upload_pipeline(
                     errors
                     pipelineVersion {
                         id
-                        name
+                        versionName
                     }
                 }
             }
