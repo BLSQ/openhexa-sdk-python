@@ -7,6 +7,7 @@ import pytest
 
 import openhexa.cli
 import openhexa.sdk
+from openhexa.sdk.pipelines.log_level import LogLevel
 
 
 @pytest.fixture(scope="function")
@@ -40,4 +41,5 @@ def settings(monkeypatch):
     settings_mock.workspaces = {"workspace-slug": "token", "another-workspace-slug": "token"}
     settings_mock.debug = False
     settings_mock.access_token = "token"
+    settings_mock.log_level = LogLevel.INFO
     return settings_mock

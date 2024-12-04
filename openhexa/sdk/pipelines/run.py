@@ -3,8 +3,8 @@
 import datetime
 import errno
 import os
-import typing
 
+from openhexa.sdk.pipelines.log_level import LogLevel
 from openhexa.sdk.utils import Environment, get_environment, graphql
 from openhexa.sdk.workspaces import workspace
 
@@ -75,45 +75,45 @@ class CurrentRun:
             print(f"Sending output with table_name {table_name}")
 
     def log_debug(self, message: str):
-        """Log a message with the DEBUG priority."""
-        self._log_message("DEBUG", message)
+        """Log a message with the DEBUG level."""
+        self._log_message(LogLevel.DEBUG, message)
 
     def log_info(self, message: str):
-        """Log a message with the INFO priority."""
-        self._log_message("INFO", message)
+        """Log a message with the INFO level."""
+        self._log_message(LogLevel.INFO, message)
 
     def log_warning(self, message: str):
-        """Log a message with the WARNING priority."""
-        self._log_message("WARNING", message)
+        """Log a message with the WARNING level."""
+        self._log_message(LogLevel.WARNING, message)
 
     def log_error(self, message: str):
-        """Log a message with the ERROR priority."""
-        self._log_message("ERROR", message)
+        """Log a message with the ERROR level."""
+        self._log_message(LogLevel.ERROR, message)
 
     def log_critical(self, message: str):
-        """Log a message with the CRITICAL priority."""
-        self._log_message("CRITICAL", message)
+        """Log a message with the CRITICAL level."""
+        self._log_message(LogLevel.CRITICAL, message)
 
     def _log_message(
         self,
-        priority: typing.Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        log_level: LogLevel,
         message: str,
     ):
-        valid_priorities = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
-        if priority not in valid_priorities:
-            raise ValueError(f"priority must be one of {', '.join(valid_priorities)}")
+        from openhexa.cli.settings import settings
 
+        if log_level < settings.log_level:  # Ignore messages with lower log level than the settings
+            return
         if self._connected:
             graphql(
                 """
                 mutation logPipelineMessage ($input: LogPipelineMessageInput!) {
                     logPipelineMessage(input: $input) { success errors }
                 }""",
-                {"input": {"priority": priority, "message": str(message)}},
+                {"input": {"priority": log_level.name, "message": str(message)}},
             )
         else:
             now = datetime.datetime.now(tz=datetime.timezone.utc).replace(microsecond=0).isoformat()
-            print(now, priority, message)
+            print(now, log_level.name, message)
 
 
 if get_environment() == Environment.CLOUD_JUPYTER:
