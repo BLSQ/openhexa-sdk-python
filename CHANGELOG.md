@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.0.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v0.3.1...v1.0.0) (2024-12-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* Set a default version number for each pipeline version, make version name optional ([#221](https://github.com/BLSQ/openhexa-sdk-python/issues/221))
+
+### Features
+
+* conditionally run pipelines in debug mode ([#223](https://github.com/BLSQ/openhexa-sdk-python/issues/223)) ([6f495f7](https://github.com/BLSQ/openhexa-sdk-python/commit/6f495f79d90c64bf1b7729b4b570af1fa5bdb925))
+* Set a default version number for each pipeline version, make version name optional ([#221](https://github.com/BLSQ/openhexa-sdk-python/issues/221)) ([488b290](https://github.com/BLSQ/openhexa-sdk-python/commit/488b2906a3d9948d6c86de8cdf4d998ec8e8bc47))
+
+
+### Bug Fixes
+
+* **Connections:** fix shallow matching when retrieving connection fields ([#209](https://github.com/BLSQ/openhexa-sdk-python/issues/209)) ([0bfd5f7](https://github.com/BLSQ/openhexa-sdk-python/commit/0bfd5f7d6f56f9e061551d85343e9389d827cf79))
+* **deps:** update dependency pytest-cov to v6 ([#218](https://github.com/BLSQ/openhexa-sdk-python/issues/218)) ([47a78e5](https://github.com/BLSQ/openhexa-sdk-python/commit/47a78e5917ecab473c19f5b792bec94e1665f0c9))
+* fixes the default value to be of type list ([#211](https://github.com/BLSQ/openhexa-sdk-python/issues/211)) ([151e3af](https://github.com/BLSQ/openhexa-sdk-python/commit/151e3af419d5ea142781ce306c6c5bad3dc36239))
+* Prevent saving pipeline versions with the same name ([#220](https://github.com/BLSQ/openhexa-sdk-python/issues/220)) ([93e597e](https://github.com/BLSQ/openhexa-sdk-python/commit/93e597e2962b1901b01794a21c051127e02cf525))
+* Remove slash from api_url ([#219](https://github.com/BLSQ/openhexa-sdk-python/issues/219)) ([965ba0b](https://github.com/BLSQ/openhexa-sdk-python/commit/965ba0bfe970db30e3908e52ac3bb76f3aee7c9d))
+
 ## [0.3.1](https://github.com/BLSQ/openhexa-sdk-python/compare/v0.3.0...v0.3.1) (2024-09-05)
 
 
