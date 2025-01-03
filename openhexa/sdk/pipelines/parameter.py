@@ -382,6 +382,8 @@ class Parameter:
         choices: typing.Optional[typing.Sequence] = None,
         help: typing.Optional[str] = None,
         default: typing.Optional[typing.Any] = None,
+        widget: typing.Optional[str] = None,
+        validation_source: typing.Optional[str] = None,
         required: bool = True,
         multiple: bool = False,
     ):
@@ -419,6 +421,9 @@ class Parameter:
             raise InvalidParameterError(f"Parameters of type {self.type} can't have multiple values.")
         self.multiple = multiple
 
+        self.widget = widget
+        self.validation_source = validation_source
+
         self._validate_default(default, multiple)
         self.default = default
 
@@ -438,6 +443,8 @@ class Parameter:
             "choices": self.choices,
             "help": self.help,
             "default": self.default,
+            "widget": self.widget,
+            "validation_source": self.validation_source,
             "required": self.required,
             "multiple": self.multiple,
         }
@@ -510,19 +517,6 @@ class Parameter:
                 raise InvalidParameterError(
                     f"The default value for {self.code} is not included in the provided choices."
                 )
-
-    def parameter_spec(self) -> dict[str, typing.Any]:
-        """Build specification for this parameter, to be provided to the OpenHEXA backend."""
-        return {
-            "type": self.type.spec_type,
-            "required": self.required,
-            "choices": self.choices,
-            "code": self.code,
-            "name": self.name,
-            "help": self.help,
-            "multiple": self.multiple,
-            "default": self.default,
-        }
 
 
 def parameter(

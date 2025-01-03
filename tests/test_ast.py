@@ -147,6 +147,8 @@ class AstTest(TestCase):
                             "type": "int",
                             "name": "Test Param",
                             "default": 42,
+                            "widget": None,
+                            "validation_source": None,
                             "help": "Param help",
                             "required": True,
                         }
@@ -188,6 +190,8 @@ class AstTest(TestCase):
                             "type": "int",
                             "name": "Test Param",
                             "default": [42],
+                            "widget": None,
+                            "validation_source": None,
                             "help": "Param help",
                             "required": True,
                         }
@@ -230,6 +234,8 @@ class AstTest(TestCase):
                             "type": "dataset",
                             "name": "Dataset",
                             "default": None,
+                            "widget": None,
+                            "validation_source": None,
                             "help": "Dataset",
                             "required": False,
                         }
@@ -271,6 +277,8 @@ class AstTest(TestCase):
                             "type": "str",
                             "name": "Test Param",
                             "default": None,
+                            "widget": None,
+                            "validation_source": None,
                             "help": "Param help",
                             "required": True,
                         }
@@ -340,6 +348,8 @@ class AstTest(TestCase):
                             "type": "bool",
                             "name": "Test Param",
                             "default": True,
+                            "widget": None,
+                            "validation_source": None,
                             "help": "Param help",
                             "required": True,
                         }
@@ -382,6 +392,8 @@ class AstTest(TestCase):
                             "type": "int",
                             "name": "Test Param",
                             "default": 42,
+                            "widget": None,
+                            "validation_source": None,
                             "help": "Param help",
                             "required": True,
                         },
@@ -392,6 +404,8 @@ class AstTest(TestCase):
                             "type": "str",
                             "name": "Test Param 2",
                             "default": None,
+                            "widget": None,
+                            "validation_source": None,
                             "help": "Param help 2",
                             "required": True,
                         },

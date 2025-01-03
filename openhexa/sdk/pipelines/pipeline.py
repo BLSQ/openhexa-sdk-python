@@ -163,10 +163,6 @@ class Pipeline:
         now = datetime.datetime.now(tz=datetime.timezone.utc).replace(microsecond=0).isoformat()
         print(f'{now} Successfully completed pipeline "{self.code}"')
 
-    def parameters_spec(self) -> list[dict[str, typing.Any]]:
-        """Return the individual specifications of all the parameters of this pipeline."""
-        return [arg.parameter_spec() for arg in self.parameters]
-
     def to_dict(self):
         """Return a dictionary representation of the pipeline."""
         return {

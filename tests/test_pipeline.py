@@ -191,37 +191,6 @@ def test_pipeline_run_connection_postgres_parameter_config(workspace):
         )
 
 
-def test_pipeline_parameters_spec():
-    """Base checks for parameter specs building."""
-    pipeline_func = Mock()
-    parameter_1 = Parameter("arg1", type=str)
-    parameter_2 = Parameter("arg2", type=str, multiple=True)
-    pipeline = Pipeline("code", "pipeline", pipeline_func, [parameter_1, parameter_2])
-
-    assert pipeline.parameters_spec() == [
-        {
-            "code": "arg1",
-            "name": None,
-            "type": "str",
-            "required": True,
-            "choices": None,
-            "help": None,
-            "multiple": False,
-            "default": None,
-        },
-        {
-            "code": "arg2",
-            "name": None,
-            "type": "str",
-            "required": True,
-            "choices": None,
-            "help": None,
-            "multiple": True,
-            "default": None,
-        },
-    ]
-
-
 class TestLogLevel(TestCase):
     def test_parse_log_level(self):
         test_cases = [
