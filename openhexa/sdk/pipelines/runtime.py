@@ -147,6 +147,8 @@ def get_pipeline(pipeline_path: Path) -> Pipeline:
                         Argument("choices", [ast.List]),
                         Argument("help", [ast.Constant]),
                         Argument("default", [ast.Constant, ast.List]),
+                        Argument("widget", [ast.Constant]),
+                        Argument("validation_source", [ast.Constant]),
                         Argument("required", [ast.Constant], default_value=True),
                         Argument("multiple", [ast.Constant], default_value=False),
                     ),
