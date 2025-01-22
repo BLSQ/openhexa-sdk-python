@@ -3,7 +3,7 @@
 import tempfile
 from unittest import TestCase
 
-from openhexa.sdk.pipelines.exceptions import PipelineNotFound
+from openhexa.sdk.pipelines.exceptions import PipelineNotFound, InvalidParameterError
 from openhexa.sdk.pipelines.runtime import get_pipeline
 
 
@@ -148,7 +148,7 @@ class AstTest(TestCase):
                             "name": "Test Param",
                             "default": 42,
                             "widget": None,
-                            "validation_source": None,
+                            "connection": None,
                             "help": "Param help",
                             "required": True,
                         }
@@ -191,7 +191,7 @@ class AstTest(TestCase):
                             "name": "Test Param",
                             "default": [42],
                             "widget": None,
-                            "validation_source": None,
+                            "connection": None,
                             "help": "Param help",
                             "required": True,
                         }
@@ -235,7 +235,7 @@ class AstTest(TestCase):
                             "name": "Dataset",
                             "default": None,
                             "widget": None,
-                            "validation_source": None,
+                            "connection": None,
                             "help": "Dataset",
                             "required": False,
                         }
@@ -278,7 +278,7 @@ class AstTest(TestCase):
                             "name": "Test Param",
                             "default": None,
                             "widget": None,
-                            "validation_source": None,
+                            "connection": None,
                             "help": "Param help",
                             "required": True,
                         }
@@ -349,7 +349,7 @@ class AstTest(TestCase):
                             "name": "Test Param",
                             "default": True,
                             "widget": None,
-                            "validation_source": None,
+                            "connection": None,
                             "help": "Param help",
                             "required": True,
                         }
@@ -393,7 +393,7 @@ class AstTest(TestCase):
                             "name": "Test Param",
                             "default": 42,
                             "widget": None,
-                            "validation_source": None,
+                            "connection": None,
                             "help": "Param help",
                             "required": True,
                         },
@@ -405,7 +405,7 @@ class AstTest(TestCase):
                             "name": "Test Param 2",
                             "default": None,
                             "widget": None,
-                            "validation_source": None,
+                            "connection": None,
                             "help": "Param help 2",
                             "required": True,
                         },
@@ -433,3 +433,81 @@ class AstTest(TestCase):
                 )
             with self.assertRaises(KeyError):
                 get_pipeline(tmpdirname)
+
+    def test_pipeline_with_connection_parameter(self):
+        """The file contains a @pipeline decorator and a @parameter decorator with a connection type."""
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            with open(f"{tmpdirname}/pipeline.py", "w") as f:
+                f.write(
+                    "\n".join(
+                        [
+                            "from openhexa.sdk.pipelines import pipeline, parameter",
+                            "",
+                            "@parameter('dhis_con', name='DHIS2 Connection', type=DHIS2Connection, required=True)",
+                            "@parameter('data_element_ids', name='Data Elements id', type=str, widget='dhis2.data_elements.picker', connection='dhis_con', required=True)",
+                            "@pipeline('test', 'Test pipeline')",
+                            "def test_pipeline():",
+                            "    pass",
+                            "",
+                        ]
+                    )
+                )
+            pipeline = get_pipeline(tmpdirname)
+            self.maxDiff = None
+            self.assertEqual(
+                pipeline.to_dict(),
+                {
+                    "code": "test",
+                    "name": "Test pipeline",
+                    "function": None,
+                    "tasks": [],
+                    "parameters": [
+                        {
+                            "code": "dhis_con",
+                            "type": "dhis2",
+                            "name": "DHIS2 Connection",
+                            "default": None,
+                            "multiple": False,
+                            "choices": None,
+                            "widget": None,
+                            "connection": None,
+                            "help": None,
+                            "required": True,
+                        },
+                        {
+                            "code": "data_element_ids",
+                            "type": "str",
+                            "name": "Data Elements id",
+                            "widget": "dhis2.data_elements.picker",
+                            "connection": "dhis_con",
+                            "default": None,
+                            "multiple": False,
+                            "choices": None,
+                            "help": None,
+                            "required": True,
+                        },
+                    ],
+                    "timeout": None,
+                },
+            )
+
+    def test_pipeline_wit_wrong_connection_parameter(self):
+        """The file contains a @pipeline decorator and a @parameter decorator with a non-existing connection type."""
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            with open(f"{tmpdirname}/pipeline.py", "w") as f:
+                f.write(
+                    "\n".join(
+                        [
+                            "from openhexa.sdk.pipelines import pipeline, parameter",
+                            "",
+                            "@parameter('dhis_con', name='DHIS2 Connection', type=DHIS2Connection, required=True)",
+                            "@parameter('data_element_ids', name='Data Elements id', type=str, widget='dhis2.data_elements.picker', connection='sds_con', required=True)",
+                            "@pipeline('test', 'Test pipeline')",
+                            "def test_pipeline():",
+                            "    pass",
+                            "",
+                        ]
+                    )
+                )
+            with self.assertRaises(InvalidParameterError):
+                pipeline = get_pipeline(tmpdirname)

@@ -58,7 +58,6 @@ class ParameterType:
             raise ParameterValueError(
                 f"Invalid type for value {value} (expected {self.expected_type}, got {type(value)})"
             )
-
         return value
 
     def validate_default(self, value: typing.Optional[typing.Any]):
@@ -383,7 +382,7 @@ class Parameter:
         help: typing.Optional[str] = None,
         default: typing.Optional[typing.Any] = None,
         widget: typing.Optional[str] = None,
-        validation_source: typing.Optional[str] = None,
+        connection: typing.Optional[str] = None,
         required: bool = True,
         multiple: bool = False,
     ):
@@ -422,7 +421,7 @@ class Parameter:
         self.multiple = multiple
 
         self.widget = widget
-        self.validation_source = validation_source
+        self.connection = connection
 
         self._validate_default(default, multiple)
         self.default = default
@@ -434,6 +433,7 @@ class Parameter:
         else:
             return self._validate_single(value)
 
+
     def to_dict(self) -> dict[str, typing.Any]:
         """Return a dictionary representation of the Parameter instance."""
         return {
@@ -444,7 +444,7 @@ class Parameter:
             "help": self.help,
             "default": self.default,
             "widget": self.widget,
-            "validation_source": self.validation_source,
+            "connection": self.connection,
             "required": self.required,
             "multiple": self.multiple,
         }
@@ -518,6 +518,12 @@ class Parameter:
                     f"The default value for {self.code} is not included in the provided choices."
                 )
 
+def validate_connection_parameters(parameters : [Parameter]):
+    """Validate the provided connection parameters."""
+    for parameter in parameters:
+        if parameter.connection is not None:
+            if not any(p.code == parameter.connection for p in parameters):
+                raise InvalidParameterError(f"Connection parameter {parameter.code} references a non-existing parameter {parameter.connection}")
 
 def parameter(
     code: str,

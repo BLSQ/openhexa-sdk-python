@@ -15,7 +15,7 @@ from zipfile import ZipFile
 import requests
 
 from openhexa.sdk.pipelines.exceptions import PipelineNotFound
-from openhexa.sdk.pipelines.parameter import TYPES_BY_PYTHON_TYPE, Parameter
+from openhexa.sdk.pipelines.parameter import TYPES_BY_PYTHON_TYPE, Parameter, validate_connection_parameters
 
 from .pipeline import Pipeline
 
@@ -148,7 +148,7 @@ def get_pipeline(pipeline_path: Path) -> Pipeline:
                         Argument("help", [ast.Constant]),
                         Argument("default", [ast.Constant, ast.List]),
                         Argument("widget", [ast.Constant]),
-                        Argument("validation_source", [ast.Constant]),
+                        Argument("connection", [ast.Constant]),
                         Argument("required", [ast.Constant], default_value=True),
                         Argument("multiple", [ast.Constant], default_value=False),
                     ),
@@ -160,6 +160,8 @@ def get_pipeline(pipeline_path: Path) -> Pipeline:
                     raise ValueError(f"Unsupported parameter type: {parameter_args['type']}")
                 parameter = Parameter(type=type_class.expected_type, **parameter_args)
                 pipelines_parameters.append(parameter)
+
+            validate_connection_parameters(pipelines_parameters)
 
             pipeline = Pipeline(parameters=pipelines_parameters, function=None, **pipeline_decorator_spec["args"])
 
