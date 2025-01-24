@@ -15,7 +15,7 @@ from zipfile import ZipFile
 import requests
 
 from openhexa.sdk.pipelines.exceptions import PipelineNotFound
-from openhexa.sdk.pipelines.parameter import TYPES_BY_PYTHON_TYPE, Parameter, validate_connection_parameters
+from openhexa.sdk.pipelines.parameter import TYPES_BY_PYTHON_TYPE, Parameter, validate_parameters_with_connection
 
 from .pipeline import Pipeline
 
@@ -161,7 +161,7 @@ def get_pipeline(pipeline_path: Path) -> Pipeline:
                 parameter = Parameter(type=type_class.expected_type, **parameter_args)
                 pipelines_parameters.append(parameter)
 
-            validate_connection_parameters(pipelines_parameters)
+            validate_parameters_with_connection(pipelines_parameters)
 
             pipeline = Pipeline(parameters=pipelines_parameters, function=None, **pipeline_decorator_spec["args"])
 

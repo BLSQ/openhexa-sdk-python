@@ -433,7 +433,6 @@ class Parameter:
         else:
             return self._validate_single(value)
 
-
     def to_dict(self) -> dict[str, typing.Any]:
         """Return a dictionary representation of the Parameter instance."""
         return {
@@ -518,12 +517,16 @@ class Parameter:
                     f"The default value for {self.code} is not included in the provided choices."
                 )
 
-def validate_connection_parameters(parameters : [Parameter]):
-    """Validate the provided connection parameters."""
+
+def validate_parameters_with_connection(parameters: [Parameter]):
+    """Validate the provided connection parameters if they relate to existing connection parameter."""
     for parameter in parameters:
         if parameter.connection is not None:
             if not any(p.code == parameter.connection for p in parameters):
-                raise InvalidParameterError(f"Connection parameter {parameter.code} references a non-existing parameter {parameter.connection}")
+                raise InvalidParameterError(
+                    f"Connection parameter {parameter.code} references a non-existing parameter {parameter.connection}"
+                )
+
 
 def parameter(
     code: str,

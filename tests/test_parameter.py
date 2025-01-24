@@ -316,7 +316,6 @@ def test_parameter_validate_multiple():
         parameter_4.validate(["ab", "xy"])
 
 
-
 def test_parameter_decorator():
     """Ensure that the @parameter decorator behaves as expected (options and defaults)."""
 

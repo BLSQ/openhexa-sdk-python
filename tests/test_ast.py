@@ -3,7 +3,7 @@
 import tempfile
 from unittest import TestCase
 
-from openhexa.sdk.pipelines.exceptions import PipelineNotFound, InvalidParameterError
+from openhexa.sdk.pipelines.exceptions import InvalidParameterError, PipelineNotFound
 from openhexa.sdk.pipelines.runtime import get_pipeline
 
 
@@ -510,4 +510,4 @@ class AstTest(TestCase):
                     )
                 )
             with self.assertRaises(InvalidParameterError):
-                pipeline = get_pipeline(tmpdirname)
+                get_pipeline(tmpdirname)

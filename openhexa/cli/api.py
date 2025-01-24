@@ -530,10 +530,10 @@ def generate_zip_file(pipeline_directory_path: typing.Union[str, Path]) -> io.By
 
 
 def upload_pipeline(
-        pipeline_directory_path: typing.Union[str, Path],
-        name: str = None,
-        description: str = None,
-        link: str = None,
+    pipeline_directory_path: typing.Union[str, Path],
+    name: str = None,
+    description: str = None,
+    link: str = None,
 ):
     """Upload the pipeline contained in the provided directory using the GraphQL API.
 
@@ -611,8 +611,8 @@ def is_dhis2_connection_up(workspace_slug: str, connection_slug: str) -> bool:
         }
         """,
         variables={
-            "workspaceSlug": self.WORKSPACE.slug,
-            "connectionSlug": "dhis2-connection-1",
+            "workspaceSlug": workspace_slug,
+            "connectionSlug": connection_slug,
         },
     )
     response["data"]["connectionBySlug"]["status"] == "UP"
