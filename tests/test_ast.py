@@ -511,3 +511,21 @@ class AstTest(TestCase):
                 )
             with self.assertRaises(InvalidParameterError):
                 get_pipeline(tmpdirname)
+
+    def test_pipeline_with_widget_without_connection(self):
+        """The file contains a @pipeline decorator and a @parameter decorator with a widget parameter field."""
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            with open(f"{tmpdirname}/pipeline.py", "w") as f:
+                f.write(
+                    "\n".join(
+                        [
+                            "from openhexa.sdk.pipelines import pipeline, parameter",
+                            "",
+                            "@parameter('test_field_for_wdiget', name='Widget Param', type=str, widget='custom_picker' help='Param help')",
+                            "@pipeline('test', 'Test pipeline')",
+                            "def test_pipeline():",
+                            "    pass",
+                            "",
+                        ]
+                    )
+                )
