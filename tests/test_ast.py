@@ -521,7 +521,7 @@ class AstTest(TestCase):
                         [
                             "from openhexa.sdk.pipelines import pipeline, parameter",
                             "",
-                            "@parameter('test_field_for_wdiget', name='Widget Param', type=str, widget='custom_picker' help='Param help')",
+                            "@parameter('test_field_for_wdiget', name='Widget Param', type=str, widget='custom_picker', help='Param help')",
                             "@pipeline('test', 'Test pipeline')",
                             "def test_pipeline():",
                             "    pass",
@@ -529,3 +529,28 @@ class AstTest(TestCase):
                         ]
                     )
                 )
+            pipeline = get_pipeline(tmpdirname)
+            self.assertEqual(
+                pipeline.to_dict(),
+                {
+                    "code": "test",
+                    "name": "Test pipeline",
+                    "function": None,
+                    "tasks": [],
+                    "parameters": [
+                        {
+                            "code": "test_field_for_wdiget",
+                            "type": "str",
+                            "name": "Widget Param",
+                            "default": None,
+                            "multiple": False,
+                            "choices": None,
+                            "widget": "custom_picker",
+                            "connection": None,
+                            "help": "Param help",
+                            "required": True,
+                        }
+                    ],
+                    "timeout": None,
+                },
+            )
