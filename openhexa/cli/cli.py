@@ -17,6 +17,7 @@ from openhexa.cli.api import (
     PipelineDirectoryError,
     create_pipeline,
     create_pipeline_structure,
+    create_pipeline_template_version,
     delete_pipeline,
     download_pipeline_sourcecode,
     ensure_is_pipeline_dir,
@@ -317,11 +318,12 @@ def pipelines_push(
             )
             click.confirm(confirmation_message, default=True, abort=True)
 
+        uploaded_pipeline_version = None
         try:
-            uploaded_pipeline = upload_pipeline(path, name, description=description, link=link)
+            uploaded_pipeline_version = upload_pipeline(path, name, description=description, link=link)
             click.echo(
                 click.style(
-                    f"✅ New version '{uploaded_pipeline['versionName']}' created! You can view the pipeline in OpenHEXA on {click.style(f'{settings.public_api_url}/workspaces/{workspace}/pipelines/{pipeline.code}', fg='bright_blue', underline=True)}",
+                    f"✅ New version '{uploaded_pipeline_version['versionName']}' created! You can view the pipeline in OpenHEXA on {click.style(f'{settings.public_api_url}/workspaces/{workspace}/pipelines/{pipeline.code}', fg='bright_blue', underline=True)}",
                     fg="green",
                 )
             )
@@ -337,6 +339,32 @@ def pipelines_push(
                 err=True,
                 exception=e,
             )
+        uploaded_pipeline = uploaded_pipeline_version["pipeline"]
+        if uploaded_pipeline["template"] and uploaded_pipeline["permissions"]["createTemplateVersion"]:
+            click.confirm(
+                f"The template {click.style(uploaded_pipeline['template']['name'], bold=True)} is based on this pipeline, do you want to publish a new version of the template as well ?",
+                True,
+                abort=True,
+            )
+            click.echo("Please provide an optional changelog for the new version of the template:")
+            changelog = click.prompt("Changelog", type=str)
+            try:
+                # TODO : link
+                create_pipeline_template_version(
+                    workspace, uploaded_pipeline["id"], uploaded_pipeline_version["id"], changelog
+                )
+                click.echo(
+                    click.style(
+                        f"✅ New version of the template '{uploaded_pipeline['template']['name']}' created!",
+                        fg="green",
+                    )
+                )
+            except Exception as e:
+                _terminate(
+                    f'❌ Error while creating template version: "{e}"',
+                    err=True,
+                    exception=e,
+                )
 
 
 @pipelines.command("download")
