@@ -341,11 +341,12 @@ def pipelines_push(
             )
         uploaded_pipeline = uploaded_pipeline_version["pipeline"]
         if uploaded_pipeline["template"] and uploaded_pipeline["permissions"]["createTemplateVersion"]:
-            click.confirm(
-                f"The template {click.style(uploaded_pipeline['template']['name'], bold=True)} is based on this pipeline, do you want to publish a new version of the template as well ?",
-                True,
-                abort=True,
-            )
+            if not yes:
+                click.confirm(
+                    f"The template {click.style(uploaded_pipeline['template']['name'], bold=True)} is based on this pipeline, do you want to publish a new version of the template as well ?",
+                    True,
+                    abort=True,
+                )
             click.echo("Please provide an optional changelog for the new version of the template:")
             changelog = click.prompt("Changelog", type=str)
             try:
