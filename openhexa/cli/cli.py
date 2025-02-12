@@ -349,13 +349,12 @@ def pipelines_push(
             click.echo("Please provide an optional changelog for the new version of the template:")
             changelog = click.prompt("Changelog", type=str)
             try:
-                # TODO : link
-                create_pipeline_template_version(
+                template = create_pipeline_template_version(
                     workspace, uploaded_pipeline["id"], uploaded_pipeline_version["id"], changelog
                 )
                 click.echo(
                     click.style(
-                        f"✅ New version of the template '{uploaded_pipeline['template']['name']}' created!",
+                        f"✅ New version '{template['currentVersion']['versionNumber']}' of the template '{template['name']}' created! You can view the new template version in OpenHEXA on {click.style(f'{settings.public_api_url}/workspaces/{workspace}/templates/{template.code}/versions', fg='bright_blue', underline=True)}",
                         fg="green",
                     )
                 )

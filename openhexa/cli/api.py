@@ -625,9 +625,14 @@ def create_pipeline_template_version(
         createPipelineTemplateVersion(input: $input) {
             success
             errors
-            pipelineTemplateVersion {
+            pipelineTemplate {
                 id
-                versionName
+                name
+                code
+                currentVersion {
+                    id
+                    versionNumber
+                }
             }
         }
     }
@@ -665,4 +670,4 @@ def create_pipeline_template_version(
         else:
             raise Exception(data["createPipelineTemplateVersion"]["errors"])
 
-    return data["createPipelineTemplateVersion"]["pipelineTemplateVersion"]
+    return data["createPipelineTemplateVersion"]["pipelineTemplate"]
