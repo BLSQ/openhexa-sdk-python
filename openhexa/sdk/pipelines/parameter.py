@@ -520,9 +520,12 @@ class Parameter:
 
 def validate_parameters_with_connection(parameters: [Parameter]):
     """Validate the provided connection parameters if they relate to existing connection parameter."""
+    supported_parameter_types = [DHIS2ConnectionType]
+    supported_parameters = [p for p in parameters if type(p.type) in supported_parameter_types]
+
     for parameter in parameters:
         if parameter.connection is not None:
-            if not any(p.code == parameter.connection for p in parameters):
+            if not any(p.code == parameter.connection for p in supported_parameters):
                 raise InvalidParameterError(
                     f"Connection parameter {parameter.code} references a non-existing parameter {parameter.connection}"
                 )
