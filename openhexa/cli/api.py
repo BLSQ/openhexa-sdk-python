@@ -563,10 +563,13 @@ def upload_pipeline(
                         id
                         versionName
                         pipeline {
+                            id
                             permissions {
                                 createTemplateVersion
                             }
                             template {
+                                id
+                                code
                                 name
                             }
                         }

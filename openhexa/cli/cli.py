@@ -235,15 +235,20 @@ def handle_template_creation(workspace, uploaded_pipeline_version, yes):
                 True,
                 abort=True,
             )
-        click.echo("Please provide an optional changelog for the new version of the template:")
-        changelog = click.prompt("Changelog", type=str)
+        changelog = (
+            ""
+            if yes
+            else click.prompt(
+                f"{click.style("Changelog", bold=True)} (optional)", type=str, default="", show_default=False
+            )
+        )
         try:
             template = create_pipeline_template_version(
                 workspace, uploaded_pipeline["id"], uploaded_pipeline_version["id"], changelog
             )
             click.echo(
                 click.style(
-                    f"✅ New version '{template['currentVersion']['versionNumber']}' of the template '{template['name']}' created! You can view the new template version in OpenHEXA on {click.style(f'{settings.public_api_url}/workspaces/{workspace}/templates/{template.code}/versions', fg='bright_blue', underline=True)}",
+                    f"✅ New version '{template['currentVersion']['versionNumber']}' of the template '{template['name']}' created! You can view the new template version in OpenHEXA on {click.style(f'{settings.public_api_url}/workspaces/{workspace}/templates/{template['code']}/versions', fg='bright_blue', underline=True)}",
                     fg="green",
                 )
             )
@@ -255,43 +260,6 @@ def handle_template_creation(workspace, uploaded_pipeline_version, yes):
             )
 
 
-@pipelines.command("push")
-@click.argument(
-    "path",
-    type=click.Path(
-        exists=True,
-        path_type=Path,
-        file_okay=False,
-        dir_okay=True,
-    ),
-)
-@click.option(
-    "--name",
-    "-n",
-    default=None,
-    type=str,
-    help="Name of the version",
-    prompt="Name of the version",
-    prompt_required=False,
-)
-@click.option(
-    "--description",
-    "-d",
-    default=None,
-    type=str,
-    help="Description of the version",
-    prompt="Description of the version",
-    prompt_required=False,
-)
-@click.option(
-    "--link",
-    "-l",
-    type=str,
-    callback=validate_url,
-    help="Link to the version commit",
-    prompt="Link of the version release",
-    prompt_required=False,
-)
 @pipelines.command("push")
 @click.argument(
     "path",
