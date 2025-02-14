@@ -163,7 +163,7 @@ class CliRunTest(TestCase):
             self.assertIn(
                 (
                     f"✅ New version '{template['currentVersion']['versionNumber']}' of the template '{template['name']}' created! "
-                    f"You can view the new template version in OpenHEXA on https://www.bluesquarehub.com/workspaces/workspace/templates/{template["code"]}/versions"
+                    f"You can view the new template version in OpenHEXA on https://www.bluesquarehub.com/workspaces/workspace/templates/{template['code']}/versions"
                 ),
                 result.output,
             )
