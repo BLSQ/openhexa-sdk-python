@@ -240,7 +240,7 @@ def propose_to_create_template_version(workspace, pipeline_version, yes):
             ""
             if yes
             else click.prompt(
-                f"{click.style("Changelog", bold=True)} (optional)", type=str, default="", show_default=False
+                f"{click.style('Changelog', bold=True)} (optional)", type=str, default="", show_default=False
             )
         )
         try:
