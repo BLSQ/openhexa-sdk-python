@@ -596,3 +596,23 @@ def upload_pipeline(
             raise Exception(data["uploadPipeline"]["errors"])
 
     return data["uploadPipeline"]["pipelineVersion"]
+
+
+def is_dhis2_connection_up(workspace_slug: str, connection_slug: str) -> bool:
+    """DHIS2 connection status."""
+    response = graphql(
+        """
+        query getConnectionBySlug($workspaceSlug: String!, $connectionSlug: String!) {
+        connectionBySlug(workspaceSlug:$workspaceSlug, connectionSlug: $connectionSlug){
+            ... on DHIS2Connection {
+                    status
+                }
+        }
+        }
+        """,
+        variables={
+            "workspaceSlug": workspace_slug,
+            "connectionSlug": connection_slug,
+        },
+    )
+    response["data"]["connectionBySlug"]["status"] == "UP"

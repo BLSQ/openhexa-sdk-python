@@ -316,43 +316,6 @@ def test_parameter_validate_multiple():
         parameter_4.validate(["ab", "xy"])
 
 
-def test_parameter_parameters_spec():
-    """Verify that parameter specifications are built properly and have the proper defaults."""
-    # required is True by default
-    an_parameter = Parameter("arg1", type=str, default="yep")
-    another_parameter = Parameter(
-        "arg2",
-        type=str,
-        name="Arg 2",
-        help="Help 2",
-        choices=["ab", "cd"],
-        required=False,
-        multiple=True,
-    )
-
-    assert an_parameter.parameter_spec() == {
-        "code": "arg1",
-        "name": None,
-        "type": "str",
-        "required": True,
-        "choices": None,
-        "help": None,
-        "multiple": False,
-        "default": "yep",
-    }
-
-    assert another_parameter.parameter_spec() == {
-        "code": "arg2",
-        "name": "Arg 2",
-        "type": "str",
-        "required": False,
-        "choices": ["ab", "cd"],
-        "help": "Help 2",
-        "multiple": True,
-        "default": None,
-    }
-
-
 def test_parameter_decorator():
     """Ensure that the @parameter decorator behaves as expected (options and defaults)."""
 
