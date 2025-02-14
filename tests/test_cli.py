@@ -126,15 +126,13 @@ class CliRunTest(TestCase):
             mock_graphql.return_value = setup_graphql_response()
             mock_pipeline = MagicMock(spec=Pipeline)
             mock_pipeline.code = pipeline_name
-            mock_pipeline.template = {"name": "test_template"}
-            mock_pipeline.permissions = {"createTemplateVersion": True}
             mock_get_pipeline.return_value = mock_pipeline
             mock_upload_pipeline.return_value = {
                 "versionName": version,
                 "pipeline": {
-                    "template": {"name": "test_template"},
-                    "permissions": {"createTemplateVersion": True},
                     "id": "pipeline_id",
+                    "permissions": {"createTemplateVersion": True},
+                    "template": {"id": "template_id", "name": "test_template"},
                 },
                 "id": "pipeline_version_id",
             }
@@ -149,9 +147,7 @@ class CliRunTest(TestCase):
                 result.output,
             )
             self.assertTrue(mock_upload_pipeline.called)
-            mock_create_template.assert_called_with(
-                "workspace", mock_pipeline.id, mock_upload_pipeline.return_value["id"], ""
-            )
+            mock_create_template.assert_called_with("workspace", "pipeline_id", "pipeline_version_id", "")
 
     @patch("openhexa.cli.api.graphql")
     def test_workspaces_add_not_found(self, mock_graphql):
