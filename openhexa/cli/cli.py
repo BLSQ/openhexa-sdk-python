@@ -247,7 +247,7 @@ def propose_to_create_template_version(workspace, pipeline_version, yes):
             template = create_pipeline_template_version(workspace, pipeline["id"], pipeline_version["id"], changelog)
             click.echo(
                 click.style(
-                    f"✅ New version '{template['currentVersion']['versionNumber']}' of the template '{template['name']}' created! You can view the new template version in OpenHEXA on {click.style(f'{settings.public_api_url}/workspaces/{workspace}/templates/{urllib.parse.quote(template['code'])}/versions', fg='bright_blue', underline=True)}",
+                    f"✅ New version '{template['currentVersion']['versionNumber']}' of the template '{template['name']}' created! You can view the new template version in OpenHEXA on {click.style(f'{settings.public_api_url}/workspaces/{workspace}/templates/{urllib.parse.quote(template["code"])}/versions', fg='bright_blue', underline=True)}",
                     fg="green",
                 )
             )
