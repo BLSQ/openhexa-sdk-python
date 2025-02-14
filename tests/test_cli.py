@@ -19,6 +19,15 @@ python_file_name = "pipeline.py"
 python_code = "print('pipeline.py file')"
 version = "v1.0"
 pipeline_name = "MyPipeline"
+pipeline_id = "pipeline_id"
+pipeline_version_id = "pipeline_version_id"
+template = {
+    "id": "template_id",
+    "name": "test_template",
+    "code": "template_code",
+    "currentVersion": {"versionNumber": "1.0"},
+}
+changelog = "Changelog for the new version"
 
 
 def create_zip_with_pipeline():
@@ -127,24 +136,20 @@ class CliRunTest(TestCase):
             mock_pipeline = MagicMock(spec=Pipeline)
             mock_pipeline.code = pipeline_name
             mock_get_pipeline.return_value = mock_pipeline
-            template = {
-                "id": "template_id",
-                "name": "test_template",
-                "code": "template_code",
-                "currentVersion": {"versionNumber": "1.0"},
-            }
             mock_upload_pipeline.return_value = {
                 "versionName": version,
                 "pipeline": {
-                    "id": "pipeline_id",
+                    "id": pipeline_id,
                     "permissions": {"createTemplateVersion": True},
                     "template": template,
                 },
-                "id": "pipeline_version_id",
+                "id": pipeline_version_id,
             }
             mock_create_template.return_value = template
 
-            result = self.runner.invoke(pipelines_push, [tmp, "--name", version])
+            result = self.runner.invoke(
+                pipelines_push, [tmp, "--name", version], input="\n".join(["Y", "Y", changelog]) + "\n"
+            )
             self.assertEqual(result.exit_code, 0)
             self.assertIn(
                 (
@@ -154,11 +159,11 @@ class CliRunTest(TestCase):
                 result.output,
             )
             self.assertTrue(mock_upload_pipeline.called)
-            mock_create_template.assert_called_with("workspace", "pipeline_id", "pipeline_version_id", "")
+            mock_create_template.assert_called_with("workspace", pipeline_id, pipeline_version_id, changelog)
             self.assertIn(
                 (
-                    "✅ New version '1.0' of the template 'test_template' created! "
-                    "You can view the new template version in OpenHEXA on https://www.bluesquarehub.com/workspaces/workspace/templates/template_code/versions"
+                    f"✅ New version '{template['currentVersion']['versionNumber']}' of the template '{template['name']}' created! "
+                    f"You can view the new template version in OpenHEXA on https://www.bluesquarehub.com/workspaces/workspace/templates/{template["code"]}/versions"
                 ),
                 result.output,
             )
