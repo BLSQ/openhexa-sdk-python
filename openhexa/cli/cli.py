@@ -225,13 +225,13 @@ def pipelines_init(name: str):
         )
 
 
-def handle_template_creation(workspace, uploaded_pipeline_version, yes):
-    """Handle the creation of a new template version based on the uploaded pipeline."""
-    uploaded_pipeline = uploaded_pipeline_version["pipeline"]
-    if uploaded_pipeline["template"] and uploaded_pipeline["permissions"]["createTemplateVersion"]:
+def propose_to_create_template_version(workspace, pipeline_version, yes):
+    """Propose to create a new version of the template if the pipeline is based on a template."""
+    pipeline = pipeline_version["pipeline"]
+    if pipeline["template"] and pipeline["permissions"]["createTemplateVersion"]:
         if not yes:
             click.confirm(
-                f"The template {click.style(uploaded_pipeline['template']['name'], bold=True)} is based on this pipeline, do you want to publish a new version of the template as well?",
+                f"The template {click.style(pipeline['template']['name'], bold=True)} is based on this pipeline, do you want to publish a new version of the template as well?",
                 True,
                 abort=True,
             )
@@ -243,9 +243,7 @@ def handle_template_creation(workspace, uploaded_pipeline_version, yes):
             )
         )
         try:
-            template = create_pipeline_template_version(
-                workspace, uploaded_pipeline["id"], uploaded_pipeline_version["id"], changelog
-            )
+            template = create_pipeline_template_version(workspace, pipeline["id"], pipeline_version["id"], changelog)
             click.echo(
                 click.style(
                     f"✅ New version '{template['currentVersion']['versionNumber']}' of the template '{template['name']}' created! You can view the new template version in OpenHEXA on {click.style(f'{settings.public_api_url}/workspaces/{workspace}/templates/{template['code']}/versions', fg='bright_blue', underline=True)}",
@@ -374,7 +372,7 @@ def pipelines_push(
                 err=True,
                 exception=e,
             )
-        handle_template_creation(workspace, uploaded_pipeline_version, yes)
+        propose_to_create_template_version(workspace, uploaded_pipeline_version, yes)
 
 
 @pipelines.command("download")

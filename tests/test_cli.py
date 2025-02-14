@@ -116,8 +116,9 @@ class CliRunTest(TestCase):
     @patch("openhexa.cli.api.graphql")
     @patch("openhexa.cli.cli.get_pipeline")
     @patch("openhexa.cli.cli.upload_pipeline")
+    @patch("openhexa.cli.cli.create_pipeline_template_version")
     @patch.dict(os.environ, {"HEXA_API_URL": "https://www.bluesquarehub.com/", "HEXA_WORKSPACE": "workspace"})
-    def test_push_pipeline(self, mock_upload_pipeline, mock_get_pipeline, mock_graphql):
+    def test_push_pipeline(self, mock_create_template, mock_upload_pipeline, mock_get_pipeline, mock_graphql):
         """Test pushing a pipeline."""
         with self.runner.isolated_filesystem() as tmp:
             with open(Path(tmp) / python_file_name, "w") as f:
@@ -125,8 +126,18 @@ class CliRunTest(TestCase):
             mock_graphql.return_value = setup_graphql_response()
             mock_pipeline = MagicMock(spec=Pipeline)
             mock_pipeline.code = pipeline_name
+            mock_pipeline.template = {"name": "test_template"}
+            mock_pipeline.permissions = {"createTemplateVersion": True}
             mock_get_pipeline.return_value = mock_pipeline
-            mock_upload_pipeline.return_value = {"versionName": version}
+            mock_upload_pipeline.return_value = {
+                "versionName": version,
+                "pipeline": {
+                    "template": {"name": "test_template"},
+                    "permissions": {"createTemplateVersion": True},
+                    "id": "pipeline_id",
+                },
+                "id": "pipeline_version_id",
+            }
 
             result = self.runner.invoke(pipelines_push, [tmp, "--name", version])
             self.assertEqual(result.exit_code, 0)
@@ -138,6 +149,9 @@ class CliRunTest(TestCase):
                 result.output,
             )
             self.assertTrue(mock_upload_pipeline.called)
+            mock_create_template.assert_called_with(
+                "workspace", mock_pipeline.id, mock_upload_pipeline.return_value["id"], ""
+            )
 
     @patch("openhexa.cli.api.graphql")
     def test_workspaces_add_not_found(self, mock_graphql):
