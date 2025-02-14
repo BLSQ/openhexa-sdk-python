@@ -127,15 +127,22 @@ class CliRunTest(TestCase):
             mock_pipeline = MagicMock(spec=Pipeline)
             mock_pipeline.code = pipeline_name
             mock_get_pipeline.return_value = mock_pipeline
+            template = {
+                "id": "template_id",
+                "name": "test_template",
+                "code": "template_code",
+                "currentVersion": {"versionNumber": "1.0"},
+            }
             mock_upload_pipeline.return_value = {
                 "versionName": version,
                 "pipeline": {
                     "id": "pipeline_id",
                     "permissions": {"createTemplateVersion": True},
-                    "template": {"id": "template_id", "name": "test_template"},
+                    "template": template,
                 },
                 "id": "pipeline_version_id",
             }
+            mock_create_template.return_value = template
 
             result = self.runner.invoke(pipelines_push, [tmp, "--name", version])
             self.assertEqual(result.exit_code, 0)
@@ -148,6 +155,13 @@ class CliRunTest(TestCase):
             )
             self.assertTrue(mock_upload_pipeline.called)
             mock_create_template.assert_called_with("workspace", "pipeline_id", "pipeline_version_id", "")
+            self.assertIn(
+                (
+                    "✅ New version '1.0' of the template 'test_template' created! "
+                    "You can view the new template version in OpenHEXA on https://www.bluesquarehub.com/workspaces/workspace/templates/template_code/versions"
+                ),
+                result.output,
+            )
 
     @patch("openhexa.cli.api.graphql")
     def test_workspaces_add_not_found(self, mock_graphql):
