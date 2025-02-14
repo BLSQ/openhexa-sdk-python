@@ -1,4 +1,5 @@
 """Log levels for the pipeline runs."""
+
 from enum import IntEnum
 
 

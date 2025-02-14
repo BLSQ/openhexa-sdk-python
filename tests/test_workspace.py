@@ -387,7 +387,7 @@ class TestConnectedWorkspace:
             assert re.search("password", repr(dhis2_connection), re.IGNORECASE) is None
             assert re.search("password", str(dhis2_connection), re.IGNORECASE) is None
 
-    def test_workspace_posgres_connection_not_exist(self, workspace):
+    def test_workspace_postgres_connection_not_exist(self, workspace):
         """Does not exist test case for Postgres connections."""
         identifier = "pg_data_play"
 

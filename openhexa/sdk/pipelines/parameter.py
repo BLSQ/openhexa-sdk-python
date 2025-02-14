@@ -58,7 +58,6 @@ class ParameterType:
             raise ParameterValueError(
                 f"Invalid type for value {value} (expected {self.expected_type}, got {type(value)})"
             )
-
         return value
 
     def validate_default(self, value: typing.Optional[typing.Any]):
@@ -382,6 +381,8 @@ class Parameter:
         choices: typing.Optional[typing.Sequence] = None,
         help: typing.Optional[str] = None,
         default: typing.Optional[typing.Any] = None,
+        widget: typing.Optional[str] = None,
+        connection: typing.Optional[str] = None,
         required: bool = True,
         multiple: bool = False,
     ):
@@ -419,6 +420,9 @@ class Parameter:
             raise InvalidParameterError(f"Parameters of type {self.type} can't have multiple values.")
         self.multiple = multiple
 
+        self.widget = widget
+        self.connection = connection
+
         self._validate_default(default, multiple)
         self.default = default
 
@@ -438,6 +442,8 @@ class Parameter:
             "choices": self.choices,
             "help": self.help,
             "default": self.default,
+            "widget": self.widget,
+            "connection": self.connection,
             "required": self.required,
             "multiple": self.multiple,
         }
@@ -511,18 +517,17 @@ class Parameter:
                     f"The default value for {self.code} is not included in the provided choices."
                 )
 
-    def parameter_spec(self) -> dict[str, typing.Any]:
-        """Build specification for this parameter, to be provided to the OpenHEXA backend."""
-        return {
-            "type": self.type.spec_type,
-            "required": self.required,
-            "choices": self.choices,
-            "code": self.code,
-            "name": self.name,
-            "help": self.help,
-            "multiple": self.multiple,
-            "default": self.default,
-        }
+
+def validate_parameters_with_connection(parameters: [Parameter]):
+    """Validate the provided connection parameters if they relate to existing connection parameter."""
+    supported_connection_types = {DHIS2ConnectionType}
+    connection_parameters = {p.code for p in parameters if type(p.type) in supported_connection_types}
+
+    for parameter in parameters:
+        if parameter.connection and parameter.connection not in connection_parameters:
+            raise InvalidParameterError(
+                f"Connection field '{parameter.code}' references a non-existing connection parameter '{parameter.connection}'"
+            )
 
 
 def parameter(
