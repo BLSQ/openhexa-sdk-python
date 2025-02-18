@@ -333,32 +333,45 @@ def pipelines_push(
         if settings.debug:
             click.echo(workspace_pipelines)
 
-        if get_pipeline_from_code(pipeline.code) is None:
-            click.echo(
-                f"Pipeline {click.style(pipeline.code, bold=True)} does not exist in workspace {click.style(workspace, bold=True)}"
-            )
-            if not yes:
-                # Ask for confirmation
-                click.confirm(
-                    f"Create pipeline {click.style(pipeline.code, bold=True)} in workspace {click.style(workspace, bold=True)}?",
-                    True,
-                    abort=True,
+        selected_pipeline = None
+        workspace_pipelines.sort(key=lambda p: (p["name"], p["code"]))
+        choices = [
+            f"{click.style(p['name'], bold=True)} (code: {click.style(p['code'], italic=True)})"
+            for p in workspace_pipelines
+        ] + [f"Create a new {click.style(pipeline.name, bold=True)} pipeline"]
+        if not yes:
+            click.echo("Which pipeline do you want to update?")
+            for index, choice in enumerate(choices, start=1):
+                click.echo(f"[{index}] {choice}")
+
+            choice_idx = (
+                click.prompt(
+                    "Select an option",
+                    type=click.IntRange(1, len(choices)),
+                    default=1,
                 )
-            create_pipeline(pipeline.code, pipeline.name)
-        elif not yes:
+                - 1
+            )
+            if choice_idx != len(choices) - 1:
+                selected_pipeline = workspace_pipelines[choice_idx]
+
             name_text = f" with name {click.style(name, bold=True)}" if name else ""
             confirmation_message = (
-                f"Pushing pipeline {click.style(pipeline.code, bold=True)} "
+                f"Pushing pipeline {click.style(pipeline.name, bold=True)} "
                 f"to workspace {click.style(workspace, bold=True)}{name_text} ?"
             )
             click.confirm(confirmation_message, default=True, abort=True)
-
+        elif len(choices) > 1:
+            selected_pipeline = workspace_pipelines[0]
+        selected_pipeline = selected_pipeline or create_pipeline(pipeline.name)
         uploaded_pipeline_version = None
         try:
-            uploaded_pipeline_version = upload_pipeline(path, name, description=description, link=link)
+            uploaded_pipeline_version = upload_pipeline(
+                selected_pipeline["code"], path, name, description=description, link=link
+            )
             click.echo(
                 click.style(
-                    f"✅ New version '{uploaded_pipeline_version['versionName']}' created! You can view the pipeline in OpenHEXA on {click.style(f'{settings.public_api_url}/workspaces/{workspace}/pipelines/{pipeline.code}', fg='bright_blue', underline=True)}",
+                    f"✅ New version '{uploaded_pipeline_version['versionName']}' created! You can view the pipeline in OpenHEXA on {click.style(f'{settings.public_api_url}/workspaces/{workspace}/pipelines/{selected_pipeline['code']}', fg='bright_blue', underline=True)}",
                     fg="green",
                 )
             )
