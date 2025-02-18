@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.1.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v1.0.0...v1.1.0) (2025-02-18)
+
+
+### Features
+
+* **Parameter:** HEXA-1134 adds dhis2 parameters widget and connection fields plus validation ([#225](https://github.com/BLSQ/openhexa-sdk-python/issues/225)) ([c1b703c](https://github.com/BLSQ/openhexa-sdk-python/commit/c1b703cc0a942da000093eccd18edf26936afd6b))
+* Support template version creation on push (HEXA-1182) ([#226](https://github.com/BLSQ/openhexa-sdk-python/issues/226)) ([45a61be](https://github.com/BLSQ/openhexa-sdk-python/commit/45a61be06ca1e8333383b612eb384cd2d70203ad))
+
+
+### Bug Fixes
+
+* **deps:** update dependency urllib3 to v2 ([#217](https://github.com/BLSQ/openhexa-sdk-python/issues/217)) ([8d93d99](https://github.com/BLSQ/openhexa-sdk-python/commit/8d93d993a3fb2a6260bb1e5154fff9de12428749))
+
 ## [1.0.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v0.3.1...v1.0.0) (2024-12-09)
 
 
