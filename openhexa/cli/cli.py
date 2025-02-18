@@ -361,7 +361,7 @@ def pipelines_push(
                 f"to workspace {click.style(workspace, bold=True)}{name_text} ?"
             )
             click.confirm(confirmation_message, default=True, abort=True)
-        elif len(choices) > 1:
+        elif workspace_pipelines:
             selected_pipeline = workspace_pipelines[0]
         selected_pipeline = selected_pipeline or create_pipeline(pipeline.name)
         uploaded_pipeline_version = None
