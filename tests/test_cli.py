@@ -19,6 +19,15 @@ python_file_name = "pipeline.py"
 python_code = "print('pipeline.py file')"
 version = "v1.0"
 pipeline_name = "MyPipeline"
+pipeline_id = "pipeline_id"
+pipeline_version_id = "pipeline_version_id"
+template = {
+    "id": "template_id",
+    "name": "test_template",
+    "code": "template_code",
+    "currentVersion": {"versionNumber": "1.0"},
+}
+changelog = "Changelog for the new version"
 
 
 def create_zip_with_pipeline():
@@ -116,8 +125,9 @@ class CliRunTest(TestCase):
     @patch("openhexa.cli.api.graphql")
     @patch("openhexa.cli.cli.get_pipeline")
     @patch("openhexa.cli.cli.upload_pipeline")
+    @patch("openhexa.cli.cli.create_pipeline_template_version")
     @patch.dict(os.environ, {"HEXA_API_URL": "https://www.bluesquarehub.com/", "HEXA_WORKSPACE": "workspace"})
-    def test_push_pipeline(self, mock_upload_pipeline, mock_get_pipeline, mock_graphql):
+    def test_push_pipeline(self, mock_create_template, mock_upload_pipeline, mock_get_pipeline, mock_graphql):
         """Test pushing a pipeline."""
         with self.runner.isolated_filesystem() as tmp:
             with open(Path(tmp) / python_file_name, "w") as f:
@@ -126,9 +136,20 @@ class CliRunTest(TestCase):
             mock_pipeline = MagicMock(spec=Pipeline)
             mock_pipeline.code = pipeline_name
             mock_get_pipeline.return_value = mock_pipeline
-            mock_upload_pipeline.return_value = {"versionName": version}
+            mock_upload_pipeline.return_value = {
+                "versionName": version,
+                "pipeline": {
+                    "id": pipeline_id,
+                    "permissions": {"createTemplateVersion": True},
+                    "template": template,
+                },
+                "id": pipeline_version_id,
+            }
+            mock_create_template.return_value = template
 
-            result = self.runner.invoke(pipelines_push, [tmp, "--name", version])
+            result = self.runner.invoke(
+                pipelines_push, [tmp, "--name", version], input="\n".join(["Y", "Y", changelog]) + "\n"
+            )
             self.assertEqual(result.exit_code, 0)
             self.assertIn(
                 (
@@ -138,6 +159,14 @@ class CliRunTest(TestCase):
                 result.output,
             )
             self.assertTrue(mock_upload_pipeline.called)
+            mock_create_template.assert_called_with("workspace", pipeline_id, pipeline_version_id, changelog)
+            self.assertIn(
+                (
+                    f"✅ New version '{template['currentVersion']['versionNumber']}' of the template '{template['name']}' created! "
+                    f"You can view the new template version in OpenHEXA on https://www.bluesquarehub.com/workspaces/workspace/templates/{template['code']}/versions"
+                ),
+                result.output,
+            )
 
     @patch("openhexa.cli.api.graphql")
     def test_workspaces_add_not_found(self, mock_graphql):

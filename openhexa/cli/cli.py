@@ -2,6 +2,7 @@
 
 import json
 import signal
+import urllib
 from datetime import datetime
 from importlib.metadata import version
 from pathlib import Path
@@ -17,6 +18,7 @@ from openhexa.cli.api import (
     PipelineDirectoryError,
     create_pipeline,
     create_pipeline_structure,
+    create_pipeline_template_version,
     delete_pipeline,
     download_pipeline_sourcecode,
     ensure_is_pipeline_dir,
@@ -224,6 +226,40 @@ def pipelines_init(name: str):
         )
 
 
+def propose_to_create_template_version(workspace, pipeline_version, yes):
+    """Propose to create a new version of the template if the pipeline is based on a template."""
+    pipeline = pipeline_version["pipeline"]
+    if pipeline["template"] and pipeline["permissions"]["createTemplateVersion"]:
+        if not yes:
+            click.confirm(
+                f"The template {click.style(pipeline['template']['name'], bold=True)} is based on this pipeline, do you want to publish a new version of the template as well?",
+                True,
+                abort=True,
+            )
+        changelog = (
+            ""
+            if yes
+            else click.prompt(
+                f"{click.style('Changelog', bold=True)} (optional)", type=str, default="", show_default=False
+            )
+        )
+        try:
+            template = create_pipeline_template_version(workspace, pipeline["id"], pipeline_version["id"], changelog)
+            template_code_url = urllib.parse.quote(template["code"])
+            click.echo(
+                click.style(
+                    f"✅ New version '{template['currentVersion']['versionNumber']}' of the template '{template['name']}' created! You can view the new template version in OpenHEXA on {click.style(f'{settings.public_api_url}/workspaces/{workspace}/templates/{template_code_url}/versions', fg='bright_blue', underline=True)}",
+                    fg="green",
+                )
+            )
+        except Exception as e:
+            _terminate(
+                f'❌ Error while creating template version: "{e}"',
+                err=True,
+                exception=e,
+            )
+
+
 @pipelines.command("push")
 @click.argument(
     "path",
@@ -317,11 +353,12 @@ def pipelines_push(
             )
             click.confirm(confirmation_message, default=True, abort=True)
 
+        uploaded_pipeline_version = None
         try:
-            uploaded_pipeline = upload_pipeline(path, name, description=description, link=link)
+            uploaded_pipeline_version = upload_pipeline(path, name, description=description, link=link)
             click.echo(
                 click.style(
-                    f"✅ New version '{uploaded_pipeline['versionName']}' created! You can view the pipeline in OpenHEXA on {click.style(f'{settings.public_api_url}/workspaces/{workspace}/pipelines/{pipeline.code}', fg='bright_blue', underline=True)}",
+                    f"✅ New version '{uploaded_pipeline_version['versionName']}' created! You can view the pipeline in OpenHEXA on {click.style(f'{settings.public_api_url}/workspaces/{workspace}/pipelines/{pipeline.code}', fg='bright_blue', underline=True)}",
                     fg="green",
                 )
             )
@@ -337,6 +374,7 @@ def pipelines_push(
                 err=True,
                 exception=e,
             )
+        propose_to_create_template_version(workspace, uploaded_pipeline_version, yes)
 
 
 @pipelines.command("download")

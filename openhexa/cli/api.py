@@ -562,6 +562,17 @@ def upload_pipeline(
                     pipelineVersion {
                         id
                         versionName
+                        pipeline {
+                            id
+                            permissions {
+                                createTemplateVersion
+                            }
+                            template {
+                                id
+                                code
+                                name
+                            }
+                        }
                     }
                 }
             }
@@ -598,6 +609,73 @@ def upload_pipeline(
     return data["uploadPipeline"]["pipelineVersion"]
 
 
+class PipelineTemplateVersionCreateErrorCode(enum.Enum):
+    """Enumeration of possible pipeline template version create error codes."""
+
+    PERMISSION_DENIED = "PERMISSION_DENIED"
+    WORKSPACE_NOT_FOUND = "WORKSPACE_NOT_FOUND"
+    PIPELINE_NOT_FOUND = "PIPELINE_NOT_FOUND"
+    PIPELINE_VERSION_NOT_FOUND = "PIPELINE_VERSION_NOT_FOUND"
+
+
+def create_pipeline_template_version(
+    workspace_slug: str, pipeline_id: str, pipeline_version_id: str, changelog: str = None
+):
+    """Create a pipeline template version using the API."""
+    data = graphql(
+        """
+    mutation createPipelineTemplateVersion($input: CreatePipelineTemplateVersionInput!) {
+        createPipelineTemplateVersion(input: $input) {
+            success
+            errors
+            pipelineTemplate {
+                id
+                name
+                code
+                currentVersion {
+                    id
+                    versionNumber
+                }
+            }
+        }
+    }
+    """,
+        {
+            "input": {
+                "workspaceSlug": workspace_slug,
+                "pipelineId": pipeline_id,
+                "pipelineVersionId": pipeline_version_id,
+                "changelog": changelog,
+            }
+        },
+    )
+    if not data["createPipelineTemplateVersion"]["success"]:
+        if (
+            PipelineTemplateVersionCreateErrorCode.PERMISSION_DENIED.value
+            in data["createPipelineTemplateVersion"]["errors"]
+        ):
+            raise PermissionDenied("Permission denied")
+        elif (
+            PipelineTemplateVersionCreateErrorCode.WORKSPACE_NOT_FOUND.value
+            in data["createPipelineTemplateVersion"]["errors"]
+        ):
+            raise Exception("Workspace not found")
+        elif (
+            PipelineTemplateVersionCreateErrorCode.PIPELINE_NOT_FOUND.value
+            in data["createPipelineTemplateVersion"]["errors"]
+        ):
+            raise Exception("Pipeline not found")
+        elif (
+            PipelineTemplateVersionCreateErrorCode.PIPELINE_VERSION_NOT_FOUND.value
+            in data["createPipelineTemplateVersion"]["errors"]
+        ):
+            raise Exception("Pipeline version not found for this pipeline")
+        else:
+            raise Exception(data["createPipelineTemplateVersion"]["errors"])
+
+    return data["createPipelineTemplateVersion"]["pipelineTemplate"]
+
+
 def is_dhis2_connection_up(workspace_slug: str, connection_slug: str) -> bool:
     """DHIS2 connection status."""
     response = graphql(
@@ -615,4 +693,4 @@ def is_dhis2_connection_up(workspace_slug: str, connection_slug: str) -> bool:
             "connectionSlug": connection_slug,
         },
     )
-    response["data"]["connectionBySlug"]["status"] == "UP"
+    return response["data"]["connectionBySlug"]["status"] == "UP"
