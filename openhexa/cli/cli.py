@@ -261,39 +261,45 @@ def propose_to_create_template_version(workspace, pipeline_version, yes):
 
 
 def select_pipeline(workspace_pipelines, pipeline, yes):
-    """Select a pipeline from the list of workspace pipelines."""
-    workspace_pipelines.sort(
-        key=lambda p: (
-            p["name"] != pipeline.name,  # Exact match first
-            pipeline.name not in p["name"],  # Partial match second
-            p["name"],
-            p["code"],
-        )
-    )
-    choices = [
-        f"{click.style(p['name'], bold=True)} (code: {click.style(p['code'], italic=True)})"
-        for p in workspace_pipelines
-    ] + [f"Create a new {click.style(pipeline.name, bold=True)} pipeline"]
-    if not yes:
-        click.echo("Which pipeline do you want to update?")
-        for index, choice in enumerate(choices, start=1):
-            click.echo(f"[{index}] {choice}")
+    """Select a pipeline from the list of workspace pipelines or select creating a new one or select a pipeline from a code."""
+    enter_pipeline_code = f"Enter a {click.style("pipeline code", italic=True)}"
+    while True:
+        choices = [
+            f"{click.style(p['name'], bold=True)} (code: {click.style(p['code'], italic=True)})"
+            for p in workspace_pipelines
+        ] + [f"Create a new {click.style(pipeline.name, bold=True)} pipeline", enter_pipeline_code]
 
-        choice_idx = (
-            click.prompt(
-                "Select an option",
-                type=click.IntRange(1, len(choices)),
-                default=1,
+        if not yes:
+            click.echo("Which pipeline do you want to update?")
+            for index, choice in enumerate(choices, start=1):
+                click.echo(f"[{index}] {choice}")
+
+            choice_idx = (
+                click.prompt(
+                    "Select an option",
+                    type=click.IntRange(1, len(choices)),
+                    default=1,
+                )
+                - 1
             )
-            - 1
-        )
-        if choice_idx != len(choices) - 1:
-            return workspace_pipelines[choice_idx]
 
-    elif workspace_pipelines:
-        return workspace_pipelines[0]
-
-    return None
+            if choices[choice_idx].startswith("Create a new"):
+                return None
+            elif choices[choice_idx].startswith(enter_pipeline_code):
+                pipeline_code = click.prompt(enter_pipeline_code)
+                selected_pipeline = get_pipeline_from_code(pipeline_code)
+                if selected_pipeline:
+                    return selected_pipeline
+                else:
+                    click.echo(
+                        f"Pipeline with code {click.style(pipeline_code, italic=True)} not found. Please try again."
+                    )
+            else:
+                return workspace_pipelines[choice_idx]
+        elif workspace_pipelines:
+            return workspace_pipelines[0]
+        else:
+            return None
 
 
 @pipelines.command("push")
@@ -365,9 +371,11 @@ def pipelines_push(
     except Exception as e:
         _terminate(f'❌ Error while importing pipeline: "{e}"', exception=e, err=True)
     else:
-        workspace_pipelines = list_pipelines()
+        workspace_pipelines = list_pipelines(name=pipeline.name)
         if settings.debug:
             click.echo(workspace_pipelines)
+
+        selected_pipeline = select_pipeline(workspace_pipelines, pipeline, yes)
 
         if not yes:
             name_text = f" with name {click.style(name, bold=True)}" if name else ""
@@ -377,7 +385,7 @@ def pipelines_push(
             )
             click.confirm(confirmation_message, default=True, abort=True)
 
-        selected_pipeline = select_pipeline(workspace_pipelines, pipeline, yes) or create_pipeline(pipeline.name)
+        selected_pipeline = selected_pipeline or create_pipeline(pipeline.name)
         uploaded_pipeline_version = None
         try:
             uploaded_pipeline_version = upload_pipeline(
