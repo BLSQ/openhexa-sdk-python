@@ -12,7 +12,7 @@ from zipfile import ZipFile
 import pytest
 from click.testing import CliRunner
 
-from openhexa.cli.cli import pipelines_download, pipelines_push, pipelines_run, workspaces_add
+from openhexa.cli.cli import pipelines_download, pipelines_push, pipelines_run, select_pipeline, workspaces_add
 from openhexa.sdk.pipelines import Pipeline
 
 python_file_name = "pipeline.py"
@@ -181,6 +181,54 @@ class CliRunTest(TestCase):
                 ),
                 result.output,
             )
+
+    @patch("openhexa.cli.cli.click.prompt")
+    def test_select_pipeline(self, mock_prompt):
+        # Mock data
+        workspace_pipelines = [
+            {"name": "Pipeline1", "code": "code1"},
+            {"name": "Pipeline2", "code": "code2"},
+        ]
+        pipeline = MagicMock()
+        pipeline.name = "TestPipeline"
+        yes = False
+
+        mock_prompt.side_effect = [1]  # User selects the first pipeline
+
+        selected_pipeline = select_pipeline(workspace_pipelines, pipeline, yes)
+
+        self.assertEqual(selected_pipeline, workspace_pipelines[0])
+
+    @patch("openhexa.cli.cli.click.prompt")
+    def test_select_pipeline_create_new(self, mock_prompt):
+        workspace_pipelines = []
+        pipeline = MagicMock()
+        pipeline.name = "TestPipeline"
+        yes = False
+
+        mock_prompt.side_effect = [1]  # User selects to create a new pipeline
+
+        selected_pipeline = select_pipeline(workspace_pipelines, pipeline, yes)
+
+        self.assertIsNone(selected_pipeline)
+
+    @patch("openhexa.cli.cli.get_pipeline_from_code")
+    @patch("openhexa.cli.cli.click.prompt")
+    def test_select_pipeline_enter_code(self, mock_prompt, mock_get_pipeline_from_code):
+        workspace_pipelines = []
+        pipeline = MagicMock()
+        pipeline.name = "TestPipeline"
+        yes = False
+        pipeline = MagicMock()
+        pipeline.name = "Pipeline3"
+        pipeline.code = "code3"
+        mock_prompt.side_effect = [2, pipeline.code]  # User selects to enter a pipeline code and provides "code3"
+        mock_get_pipeline_from_code.return_value = pipeline
+
+        selected_pipeline = select_pipeline(workspace_pipelines, pipeline, yes)
+
+        self.assertEqual(selected_pipeline, pipeline)
+        mock_get_pipeline_from_code.assert_called_with(pipeline.code)
 
     @patch("openhexa.cli.api.graphql")
     def test_workspaces_add_not_found(self, mock_graphql):
