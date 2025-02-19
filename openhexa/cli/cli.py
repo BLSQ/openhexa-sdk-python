@@ -263,7 +263,7 @@ def propose_to_create_template_version(workspace, pipeline_version, yes):
 def select_pipeline(workspace_pipelines, pipeline, yes):
     """Select a pipeline from the list of workspace pipelines or select creating a new one or select a pipeline from a code."""
     create_new_pipeline = f"Create a new {click.style(pipeline.name, bold=True)} pipeline"
-    enter_pipeline_code = f"Insert a {click.style("pipeline code", italic=True)}"
+    enter_pipeline_code = f"Insert a {click.style('pipeline code', italic=True)}"
     while True:
         choices = [
             f"{click.style(p['name'], bold=True)} (code: {click.style(p['code'], italic=True)})"
