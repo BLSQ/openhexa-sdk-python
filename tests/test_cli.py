@@ -184,7 +184,6 @@ class CliRunTest(TestCase):
 
     @patch("openhexa.cli.cli.click.prompt")
     def test_select_pipeline(self, mock_prompt):
-        # Mock data
         workspace_pipelines = [
             {"name": "Pipeline1", "code": "code1"},
             {"name": "Pipeline2", "code": "code2"},
