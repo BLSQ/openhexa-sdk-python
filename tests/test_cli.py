@@ -42,7 +42,10 @@ def create_zip_with_pipeline():
 def setup_graphql_response(zip_buffer=create_zip_with_pipeline()):
     """Set up the mock GraphQL response pipelines."""
     return {
-        "pipelineByCode": {"currentVersion": {"zipfile": base64.b64encode(zip_buffer.getvalue()).decode()}},
+        "pipelineByCode": {
+            "code": "pipeline-1234",
+            "currentVersion": {"zipfile": base64.b64encode(zip_buffer.getvalue()).decode()},
+        },
         "pipelines": {"items": []},  # (empty workspace initially)
     }
 
@@ -124,18 +127,25 @@ class CliRunTest(TestCase):
 
     @patch("openhexa.cli.api.graphql")
     @patch("openhexa.cli.cli.get_pipeline")
+    @patch("openhexa.cli.cli.list_pipelines")
     @patch("openhexa.cli.cli.upload_pipeline")
     @patch("openhexa.cli.cli.create_pipeline_template_version")
     @patch.dict(os.environ, {"HEXA_API_URL": "https://www.bluesquarehub.com/", "HEXA_WORKSPACE": "workspace"})
-    def test_push_pipeline(self, mock_create_template, mock_upload_pipeline, mock_get_pipeline, mock_graphql):
+    def test_push_pipeline(
+        self, mock_create_template, mock_upload_pipeline, mock_list_pipelines, mock_get_pipeline, mock_graphql
+    ):
         """Test pushing a pipeline."""
         with self.runner.isolated_filesystem() as tmp:
             with open(Path(tmp) / python_file_name, "w") as f:
                 f.write(python_code)
             mock_graphql.return_value = setup_graphql_response()
             mock_pipeline = MagicMock(spec=Pipeline)
-            mock_pipeline.code = pipeline_name
+            mock_pipeline.name = pipeline_name
             mock_get_pipeline.return_value = mock_pipeline
+            mock_list_pipelines.return_value = [
+                {"name": "Pipeline1", "code": "code1"},
+                {"name": "Pipeline2", "code": "code2"},
+            ]
             mock_upload_pipeline.return_value = {
                 "versionName": version,
                 "pipeline": {
@@ -148,13 +158,17 @@ class CliRunTest(TestCase):
             mock_create_template.return_value = template
 
             result = self.runner.invoke(
-                pipelines_push, [tmp, "--name", version], input="\n".join(["Y", "Y", changelog]) + "\n"
+                pipelines_push,
+                [tmp, "--name", version],
+                input="\n".join(["4", "pipeline_code", "Y", "Y", changelog]) + "\n",
             )
             self.assertEqual(result.exit_code, 0)
+            self.assertIn("Which pipeline do you want to update?", result.output)
+            self.assertIn("Insert a pipeline code", result.output)
             self.assertIn(
                 (
                     f"✅ New version '{version}' created! "
-                    f"You can view the pipeline in OpenHEXA on https://www.bluesquarehub.com/workspaces/workspace/pipelines/{pipeline_name}"
+                    f"You can view the pipeline in OpenHEXA on https://www.bluesquarehub.com/workspaces/workspace/pipelines/pipeline-1234"
                 ),
                 result.output,
             )
