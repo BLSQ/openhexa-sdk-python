@@ -392,9 +392,14 @@ def pipelines_push(
             uploaded_pipeline_version = upload_pipeline(
                 selected_pipeline["code"], path, name, description=description, link=link
             )
+            version_url = click.style(
+                f"{settings.public_api_url}/workspaces/{workspace}/pipelines/{selected_pipeline['code']}",
+                fg="bright_blue",
+                underline=True,
+            )
             click.echo(
                 click.style(
-                    f"✅ New version '{uploaded_pipeline_version['versionName']}' created! You can view the pipeline in OpenHEXA on {click.style(f"{settings.public_api_url}/workspaces/{workspace}/pipelines/{selected_pipeline['code']}", fg='bright_blue', underline=True)}",
+                    f"✅ New version '{uploaded_pipeline_version['versionName']}' created! You can view the pipeline in OpenHEXA on {version_url}",
                     fg="green",
                 )
             )
