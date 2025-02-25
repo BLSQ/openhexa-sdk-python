@@ -127,12 +127,12 @@ class CliRunTest(TestCase):
 
     @patch("openhexa.cli.api.graphql")
     @patch("openhexa.cli.cli.get_pipeline")
-    @patch("openhexa.cli.cli.list_pipelines")
+    @patch("openhexa.cli.cli.list_pipelines_pages")
     @patch("openhexa.cli.cli.upload_pipeline")
     @patch("openhexa.cli.cli.create_pipeline_template_version")
     @patch.dict(os.environ, {"HEXA_API_URL": "https://www.bluesquarehub.com/", "HEXA_WORKSPACE": "workspace"})
     def test_push_pipeline(
-        self, mock_create_template, mock_upload_pipeline, mock_list_pipelines, mock_get_pipeline, mock_graphql
+        self, mock_create_template, mock_upload_pipeline, mock_list_pipelines_pages, mock_get_pipeline, mock_graphql
     ):
         """Test pushing a pipeline."""
         with self.runner.isolated_filesystem() as tmp:
@@ -142,10 +142,13 @@ class CliRunTest(TestCase):
             mock_pipeline = MagicMock(spec=Pipeline)
             mock_pipeline.name = pipeline_name
             mock_get_pipeline.return_value = mock_pipeline
-            mock_list_pipelines.return_value = [
-                {"name": "Pipeline1", "code": "code1"},
-                {"name": "Pipeline2", "code": "code2"},
-            ]
+            mock_list_pipelines_pages.return_value = {
+                "items": [
+                    {"name": "Pipeline1", "code": "code1"},
+                    {"name": "Pipeline2", "code": "code2"},
+                ],
+                "totalPages": 2,
+            }
             mock_upload_pipeline.return_value = {
                 "versionName": version,
                 "pipeline": {
@@ -194,7 +197,7 @@ class CliRunTest(TestCase):
 
         mock_prompt.side_effect = [1]  # User selects the first pipeline
 
-        selected_pipeline = select_pipeline(workspace_pipelines, pipeline, yes)
+        selected_pipeline = select_pipeline(workspace_pipelines, 1, pipeline, yes)
 
         self.assertEqual(selected_pipeline, workspace_pipelines[0])
 
@@ -207,7 +210,7 @@ class CliRunTest(TestCase):
 
         mock_prompt.side_effect = [1]  # User selects to create a new pipeline
 
-        selected_pipeline = select_pipeline(workspace_pipelines, pipeline, yes)
+        selected_pipeline = select_pipeline(workspace_pipelines, 1, pipeline, yes)
 
         self.assertIsNone(selected_pipeline)
 
@@ -224,7 +227,7 @@ class CliRunTest(TestCase):
         mock_prompt.side_effect = [2, pipeline.code]  # User selects to enter a pipeline code and provides "code3"
         mock_get_pipeline_from_code.return_value = pipeline
 
-        selected_pipeline = select_pipeline(workspace_pipelines, pipeline, yes)
+        selected_pipeline = select_pipeline(workspace_pipelines, 2, pipeline, yes)
 
         self.assertEqual(selected_pipeline, pipeline)
         mock_get_pipeline_from_code.assert_called_with(pipeline.code)

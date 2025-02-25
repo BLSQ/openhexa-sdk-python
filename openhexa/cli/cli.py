@@ -26,6 +26,7 @@ from openhexa.cli.api import (
     get_pipeline_from_code,
     get_workspace,
     list_pipelines,
+    list_pipelines_pages,
     run_pipeline,
     upload_pipeline,
 )
@@ -260,15 +261,19 @@ def propose_to_create_template_version(workspace, pipeline_version, yes):
             )
 
 
-def select_pipeline(workspace_pipelines, pipeline, yes):
+def select_pipeline(workspace_pipelines, number_of_pages: int, pipeline, yes):
     """Select a pipeline from the list of workspace pipelines or select creating a new one or select a pipeline from a code."""
     create_new_pipeline = f"Create a new {click.style(pipeline.name, bold=True)} pipeline"
     enter_pipeline_code = f"Insert a {click.style('pipeline code', italic=True)}"
     while True:
-        choices = [
-            f"{click.style(p['name'], bold=True)} (code: {click.style(p['code'], italic=True)})"
-            for p in workspace_pipelines
-        ] + [create_new_pipeline, enter_pipeline_code]
+        choices = (
+            [
+                f"{click.style(p['name'], bold=True)} (code: {click.style(p['code'], italic=True)})"
+                for p in workspace_pipelines
+            ]
+            + [create_new_pipeline]
+            + ([enter_pipeline_code] if number_of_pages > 1 else [])
+        )
 
         if not yes:
             click.echo("Which pipeline do you want to update?")
@@ -372,11 +377,13 @@ def pipelines_push(
     except Exception as e:
         _terminate(f'❌ Error while importing pipeline: "{e}"', exception=e, err=True)
     else:
-        workspace_pipelines = list_pipelines(name=pipeline.name)
+        pipeline_pages = list_pipelines_pages(name=pipeline.name)
+        workspace_pipelines = pipeline_pages["items"]
+        number_of_pages = pipeline_pages["totalPages"]
         if settings.debug:
             click.echo(workspace_pipelines)
 
-        selected_pipeline = select_pipeline(workspace_pipelines, pipeline, yes)
+        selected_pipeline = select_pipeline(workspace_pipelines, number_of_pages, pipeline, yes)
 
         if not yes:
             name_text = f" with name {click.style(name, bold=True)}" if name else ""

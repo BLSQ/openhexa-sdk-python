@@ -169,14 +169,15 @@ def get_workspace(slug: str, token: str):
     )["workspace"]
 
 
-def list_pipelines(name=None):
-    """List all pipelines in the workspace."""
+def list_pipelines_pages(name=None):
+    """List the first page of pipelines in the workspace."""
     if settings.current_workspace is None:
         raise NoActiveWorkspaceError
     data = graphql(
         """
     query getWorkspacePipelines($workspaceSlug: String!, $name: String) {
         pipelines(workspaceSlug: $workspaceSlug, name: $name) {
+            totalPages
             items {
                 id
                 code
@@ -192,7 +193,12 @@ def list_pipelines(name=None):
     """,
         {"workspaceSlug": settings.current_workspace, "name": name},
     )
-    return data["pipelines"]["items"]
+    return data["pipelines"]
+
+
+def list_pipelines(name=None):
+    """List the first page of pipelines in the workspace."""
+    return list_pipelines_pages(name)["items"]
 
 
 def get_pipeline_from_code(pipeline_code: str) -> dict[str, typing.Any]:
