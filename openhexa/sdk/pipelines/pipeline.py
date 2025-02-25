@@ -12,6 +12,7 @@ import string
 import sys
 import time
 import typing
+import warnings
 from logging import getLogger
 from pathlib import Path
 
@@ -246,16 +247,16 @@ class Pipeline:
 
 
 def pipeline(
-    code: str, *, name: str = None, timeout: int = None
+    code: str = None, *, name: str = None, timeout: int = None
 ) -> typing.Callable[[typing.Callable[..., typing.Any]], Pipeline]:
     """Decorate a Python function as an OpenHEXA pipeline.
 
     Parameters
     ----------
-    code : str
-        An identifier for the pipeline (should be unique within the workspace where the pipeline is deployed)
-    name : str, optional
-        An optional name for the pipeline (will be used instead of the code in the web interface)
+    code : str, optional
+        Deprecated identifier for the pipeline. A unique identifier will be auto-generated.
+    name : str
+        A name for the pipeline (will be shown in the web interface).
     timeout : int, optional
         An optional timeout, in seconds, after which the pipeline run will be terminated (if not provided, a default
         timeout will be applied by the OpenHEXA backend)
@@ -275,6 +276,13 @@ def pipeline(
     ... def a_task() -> int:
     ...     return 42
     """
+    if code:
+        warnings.warn(
+            f"The pipeline 'code' parameter (with value {code}) is deprecated and ignored and will be removed in future versions. The pipeline code is now auto-generated.",
+            DeprecationWarning,
+        )
+    name = name or code
+
     if any(c not in string.ascii_lowercase + string.digits + "_-" for c in code):
         raise Exception("Pipeline code should contains only lower case letters, digits, '_' and '-'")
 
