@@ -261,12 +261,14 @@ def propose_to_create_template_version(workspace, pipeline_version, yes):
             )
 
 
-def select_pipeline(workspace_pipelines, number_of_pages: int, pipeline, yes):
+def select_pipeline(workspace_pipelines, number_of_pages: int, pipeline):
     """Select a pipeline from the list of workspace pipelines or select creating a new one or select a pipeline from a code."""
     create_new_pipeline = f"Create a new {click.style(pipeline.name, bold=True)} pipeline"
     enter_pipeline_code = f"Insert a {click.style('pipeline code', italic=True)}"
-    while True:
-        choices = (
+
+    def _generate_choices():
+        """Generate the list of choices for the user."""
+        return (
             [
                 f"{click.style(p['name'], bold=True)} (code: {click.style(p['code'], italic=True)})"
                 for p in workspace_pipelines
@@ -275,37 +277,39 @@ def select_pipeline(workspace_pipelines, number_of_pages: int, pipeline, yes):
             + ([enter_pipeline_code] if number_of_pages > 1 else [])
         )
 
-        if not yes:
-            click.echo("Which pipeline do you want to update?")
-            for index, choice in enumerate(choices, start=1):
-                click.echo(f"[{index}] {choice}")
+    def _handle_user_selection(choices):
+        """Handle the user's selection from the list of choices."""
+        click.echo("Which pipeline do you want to update?")
+        for index, choice in enumerate(choices, start=1):
+            click.echo(f"[{index}] {choice}")
 
-            choice_idx = (
-                click.prompt(
-                    "Select an option",
-                    type=click.IntRange(1, len(choices)),
-                    default=1,
-                )
-                - 1
+        choice_idx = (
+            click.prompt(
+                "Select an option",
+                type=click.IntRange(1, len(choices)),
+                default=1,
             )
+            - 1
+        )
 
-            if choices[choice_idx] == create_new_pipeline:
-                return None
-            elif choices[choice_idx] == enter_pipeline_code:
-                pipeline_code = click.prompt(enter_pipeline_code)
-                selected_pipeline = get_pipeline_from_code(pipeline_code)
-                if selected_pipeline:
-                    return selected_pipeline
-                else:
-                    click.echo(
-                        f"Pipeline with code {click.style(pipeline_code, italic=True)} not found. Please try again."
-                    )
-            else:
-                return workspace_pipelines[choice_idx]
-        elif workspace_pipelines:
-            return workspace_pipelines[0]
-        else:
+        if choices[choice_idx] == create_new_pipeline:
             return None
+        elif choices[choice_idx] == enter_pipeline_code:
+            return _handle_enter_pipeline_code()
+        else:
+            return workspace_pipelines[choice_idx]
+
+    def _handle_enter_pipeline_code():
+        """Handle the case where the user wants to enter a pipeline code."""
+        pipeline_code = click.prompt(enter_pipeline_code)
+        selected_pipeline = get_pipeline_from_code(pipeline_code)
+        if selected_pipeline:
+            return selected_pipeline
+        else:
+            click.echo(f"Pipeline with code {click.style(pipeline_code, italic=True)} not found. Please try again.")
+            return _handle_enter_pipeline_code()
+
+    return _handle_user_selection(_generate_choices())
 
 
 @pipelines.command("push")
@@ -383,7 +387,10 @@ def pipelines_push(
         if settings.debug:
             click.echo(workspace_pipelines)
 
-        selected_pipeline = select_pipeline(workspace_pipelines, number_of_pages, pipeline, yes)
+        if yes:
+            selected_pipeline = workspace_pipelines[0] if workspace_pipelines else None
+        else:
+            selected_pipeline = select_pipeline(workspace_pipelines, number_of_pages, pipeline)
 
         if not yes:
             name_text = f" with name {click.style(name, bold=True)}" if name else ""
