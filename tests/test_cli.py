@@ -193,11 +193,10 @@ class CliRunTest(TestCase):
         ]
         pipeline = MagicMock()
         pipeline.name = "TestPipeline"
-        yes = False
 
         mock_prompt.side_effect = [1]  # User selects the first pipeline
 
-        selected_pipeline = select_pipeline(workspace_pipelines, 1, pipeline, yes)
+        selected_pipeline = select_pipeline(workspace_pipelines, 1, pipeline)
 
         self.assertEqual(selected_pipeline, workspace_pipelines[0])
 
@@ -206,11 +205,10 @@ class CliRunTest(TestCase):
         workspace_pipelines = []
         pipeline = MagicMock()
         pipeline.name = "TestPipeline"
-        yes = False
 
         mock_prompt.side_effect = [1]  # User selects to create a new pipeline
 
-        selected_pipeline = select_pipeline(workspace_pipelines, 1, pipeline, yes)
+        selected_pipeline = select_pipeline(workspace_pipelines, 1, pipeline)
 
         self.assertIsNone(selected_pipeline)
 
@@ -220,14 +218,13 @@ class CliRunTest(TestCase):
         workspace_pipelines = []
         pipeline = MagicMock()
         pipeline.name = "TestPipeline"
-        yes = False
         pipeline = MagicMock()
         pipeline.name = "Pipeline3"
         pipeline.code = "code3"
         mock_prompt.side_effect = [2, pipeline.code]  # User selects to enter a pipeline code and provides "code3"
         mock_get_pipeline_from_code.return_value = pipeline
 
-        selected_pipeline = select_pipeline(workspace_pipelines, 2, pipeline, yes)
+        selected_pipeline = select_pipeline(workspace_pipelines, 2, pipeline)
 
         self.assertEqual(selected_pipeline, pipeline)
         mock_get_pipeline_from_code.assert_called_with(pipeline.code)
