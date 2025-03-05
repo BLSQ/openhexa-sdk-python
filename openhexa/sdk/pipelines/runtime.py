@@ -87,6 +87,9 @@ def _get_decorator_arg_value(decorator, arg: Argument, index: int):
                 return keyword.value.id
             elif isinstance(keyword.value, ast.List):
                 return [el.value for el in keyword.value.elts]
+            elif isinstance(keyword.value, ast.Attribute):
+                return f"{keyword.value.value.id}.{keyword.value.attr}"
+
     try:
         return decorator.args[index].value
     except IndexError:
@@ -98,7 +101,6 @@ def _get_decorator_spec(decorator, args: tuple[Argument]):
 
     for i, arg in enumerate(args):
         d["args"][arg.name] = _get_decorator_arg_value(decorator, arg, i)
-
     return d
 
 
@@ -147,7 +149,7 @@ def get_pipeline(pipeline_path: Path) -> Pipeline:
                         Argument("choices", [ast.List]),
                         Argument("help", [ast.Constant]),
                         Argument("default", [ast.Constant, ast.List]),
-                        Argument("widget", [ast.Constant]),
+                        Argument("widget", [ast.Attribute]),
                         Argument("connection", [ast.Constant]),
                         Argument("required", [ast.Constant], default_value=True),
                         Argument("multiple", [ast.Constant], default_value=False),
