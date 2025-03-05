@@ -434,10 +434,11 @@ class AstTest(TestCase):
                     "\n".join(
                         [
                             "from openhexa.sdk.pipelines import pipeline, parameter",
+                            "from openhexa.sdk.pipelines.widgets import ParameterWidgets",
                             "",
                             "@parameter('dhis_con', name='DHIS2 Connection', type=DHIS2Connection, required=True)",
+                            "@parameter('data_element_ids', name='Data Elements id', type=str, widget=ParameterWidgets.ORG_UNITS, connection='dhis_con', required=True)",
                             "@pipeline('Test pipeline')",
-                            "@parameter('data_element_ids', name='Data Elements id', type=str, widget='ORG_UNITS', connection='dhis_con', required=True)",
                             "def test_pipeline():",
                             "    pass",
                             "",
@@ -490,10 +491,11 @@ class AstTest(TestCase):
                     "\n".join(
                         [
                             "from openhexa.sdk.pipelines import pipeline, parameter",
+                            "from openhexa.sdk.pipelines.parameter import ParameterWidgets",
                             "",
                             "@parameter('dhis_con', name='DHIS2 Connection', type=DHIS2Connection, required=True)",
-                            "@parameter('data_element_ids', name='Data Elements id', type=str, widget='ORG_UNITS', connection='sds_con', required=True)",
                             "@pipeline('Test pipeline')",
+                            "@parameter('data_element_ids', name='Data Elements id', type=str, widget=ParameterWidgets.ORG_UNITS, connection='sds_con', required=True)",
                             "def test_pipeline():",
                             "    pass",
                             "",
@@ -511,8 +513,9 @@ class AstTest(TestCase):
                     "\n".join(
                         [
                             "from openhexa.sdk.pipelines import pipeline, parameter",
+                            "from openhexa.sdk.pipelines.parameter import ParameterWidgets",
                             "",
-                            "@parameter('test_field_for_wdiget', name='Widget Param', type=str, widget='custom_picker', help='Param help')",
+                            "@parameter('test_field_for_widget', name='Widget Param', type=str, widget=ParameterWidgets.ORG_UNITS, help='Param help')",
                             "@pipeline('Test pipeline')",
                             "def test_pipeline():",
                             "    pass",
@@ -529,7 +532,7 @@ class AstTest(TestCase):
                     "tasks": [],
                     "parameters": [
                         {
-                            "code": "test_field_for_wdiget",
+                            "code": "test_field_for_widget",
                             "type": "str",
                             "name": "Widget Param",
                             "default": None,
