@@ -131,7 +131,6 @@ def get_pipeline(pipeline_path: Path) -> Pipeline:
             pipeline_decorator_spec = _get_decorator_spec(
                 pipeline_decorator,
                 (
-                    Argument("code", [ast.Constant]),
                     Argument("name", [ast.Constant]),
                     Argument("timeout", [ast.Constant]),
                 ),

@@ -38,7 +38,6 @@ class AstTest(TestCase):
             self.assertEqual(
                 pipeline.to_dict(),
                 {
-                    "code": "test",
                     "name": "Test pipeline",
                     "function": None,
                     "tasks": [],
@@ -66,7 +65,6 @@ class AstTest(TestCase):
             self.assertEqual(
                 pipeline.to_dict(),
                 {
-                    "code": "test",
                     "function": None,
                     "tasks": [],
                     "name": "Test pipeline",
@@ -135,7 +133,6 @@ class AstTest(TestCase):
             self.assertEqual(
                 pipeline.to_dict(),
                 {
-                    "code": "test",
                     "name": "Test pipeline",
                     "function": None,
                     "tasks": [],
@@ -178,7 +175,6 @@ class AstTest(TestCase):
             self.assertEqual(
                 pipeline.to_dict(),
                 {
-                    "code": "test",
                     "name": "Test pipeline",
                     "function": None,
                     "tasks": [],
@@ -222,7 +218,6 @@ class AstTest(TestCase):
             self.assertEqual(
                 pipeline.to_dict(),
                 {
-                    "code": "test",
                     "function": None,
                     "name": "Test pipeline",
                     "tasks": [],
@@ -265,7 +260,6 @@ class AstTest(TestCase):
             self.assertEqual(
                 pipeline.to_dict(),
                 {
-                    "code": "test",
                     "name": "Test pipeline",
                     "function": None,
                     "tasks": [],
@@ -306,7 +300,6 @@ class AstTest(TestCase):
             self.assertEqual(
                 pipeline.to_dict(),
                 {
-                    "code": "test",
                     "name": "Test pipeline",
                     "parameters": [],
                     "timeout": 42,
@@ -336,7 +329,6 @@ class AstTest(TestCase):
             self.assertEqual(
                 pipeline.to_dict(),
                 {
-                    "code": "test",
                     "name": "Test pipeline",
                     "function": None,
                     "tasks": [],
@@ -380,7 +372,6 @@ class AstTest(TestCase):
             self.assertEqual(
                 pipeline.to_dict(),
                 {
-                    "code": "test",
                     "name": "Test pipeline",
                     "function": None,
                     "tasks": [],
@@ -457,7 +448,6 @@ class AstTest(TestCase):
             self.assertEqual(
                 pipeline.to_dict(),
                 {
-                    "code": "test",
                     "name": "Test pipeline",
                     "function": None,
                     "tasks": [],
@@ -533,7 +523,6 @@ class AstTest(TestCase):
             self.assertEqual(
                 pipeline.to_dict(),
                 {
-                    "code": "test",
                     "name": "Test pipeline",
                     "function": None,
                     "tasks": [],

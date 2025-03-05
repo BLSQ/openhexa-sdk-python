@@ -127,12 +127,12 @@ class CliRunTest(TestCase):
 
     @patch("openhexa.cli.api.graphql")
     @patch("openhexa.cli.cli.get_pipeline")
-    @patch("openhexa.cli.cli.list_pipelines_pages")
+    @patch("openhexa.cli.cli.get_pipelines_pages")
     @patch("openhexa.cli.cli.upload_pipeline")
     @patch("openhexa.cli.cli.create_pipeline_template_version")
     @patch.dict(os.environ, {"HEXA_API_URL": "https://www.bluesquarehub.com/", "HEXA_WORKSPACE": "workspace"})
     def test_push_pipeline(
-        self, mock_create_template, mock_upload_pipeline, mock_list_pipelines_pages, mock_get_pipeline, mock_graphql
+        self, mock_create_template, mock_upload_pipeline, mock_get_pipelines_pages, mock_get_pipeline, mock_graphql
     ):
         """Test pushing a pipeline."""
         with self.runner.isolated_filesystem() as tmp:
@@ -142,7 +142,7 @@ class CliRunTest(TestCase):
             mock_pipeline = MagicMock(spec=Pipeline)
             mock_pipeline.name = pipeline_name
             mock_get_pipeline.return_value = mock_pipeline
-            mock_list_pipelines_pages.return_value = {
+            mock_get_pipelines_pages.return_value = {
                 "items": [
                     {"name": "Pipeline1", "code": "code1"},
                     {"name": "Pipeline2", "code": "code2"},
