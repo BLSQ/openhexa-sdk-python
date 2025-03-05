@@ -4,6 +4,7 @@ See https://github.com/BLSQ/openhexa/wiki/Writing-OpenHEXA-pipelines#pipeline-pa
 """
 
 import typing
+from enum import StrEnum
 
 from openhexa.sdk.datasets import Dataset
 from openhexa.sdk.pipelines.exceptions import InvalidParameterError, ParameterValueError
@@ -357,6 +358,15 @@ TYPES_BY_PYTHON_TYPE = {
     "Dataset": DatasetType,
 }
 
+class ParameterWidget(StrEnum):
+    ORG_UNITS = "ORG_UNITS"
+    ORG_UNIT_GROUPS = "ORG_UNIT_GROUPS"
+    ORG_UNIT_LEVELS = "ORG_UNIT_LEVELS"
+    DATASETS = "DATASETS"
+    DATA_ELEMENTS = "DATA_ELEMENTS"
+    DATA_ELEMENT_GROUPS = "DATA_ELEMENT_GROUPS"
+    INDICATORS = "INDICATORS"
+    INDICATOR_GROUPS = "INDICATOR_GROUPS"
 
 class Parameter:
     """Pipeline parameter class. Contains validation logic specs generation logic."""
@@ -381,7 +391,7 @@ class Parameter:
         choices: typing.Optional[typing.Sequence] = None,
         help: typing.Optional[str] = None,
         default: typing.Optional[typing.Any] = None,
-        widget: typing.Optional[str] = None,
+        widget: typing.Optional[ParameterWidget] = None,
         connection: typing.Optional[str] = None,
         required: bool = True,
         multiple: bool = False,
@@ -420,7 +430,7 @@ class Parameter:
             raise InvalidParameterError(f"Parameters of type {self.type} can't have multiple values.")
         self.multiple = multiple
 
-        self.widget = widget
+        self.widget = ParameterWidget(widget) if widget else None
         self.connection = connection
 
         self._validate_default(default, multiple)
@@ -601,6 +611,7 @@ def parameter(
         )
 
     return decorator
+
 
 
 class FunctionWithParameter:
