@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.0.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v1.1.0...v2.0.0) (2025-03-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* Deprecate pipeline code and allow to select the target pipeline when pushing(HEXA-1170) ([#227](https://github.com/BLSQ/openhexa-sdk-python/issues/227))
+
+### Features
+
+* Deprecate pipeline code and allow to select the target pipeline when pushing(HEXA-1170) ([#227](https://github.com/BLSQ/openhexa-sdk-python/issues/227)) ([fd5ccac](https://github.com/BLSQ/openhexa-sdk-python/commit/fd5ccace020fc00116d886b975a3fd70e972d03d))
+
 ## [1.1.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v1.0.0...v1.1.0) (2025-02-18)
 
 
