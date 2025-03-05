@@ -38,7 +38,6 @@ class AstTest(TestCase):
             self.assertEqual(
                 pipeline.to_dict(),
                 {
-                    "code": "test",
                     "name": "Test pipeline",
                     "function": None,
                     "tasks": [],
@@ -56,7 +55,7 @@ class AstTest(TestCase):
                         [
                             "from openhexa.sdk.pipelines import pipeline",
                             "",
-                            "@pipeline('test', 'Test pipeline')",
+                            "@pipeline('Test pipeline')",
                             "def test_pipeline():",
                             "    pass",
                         ]
@@ -66,7 +65,6 @@ class AstTest(TestCase):
             self.assertEqual(
                 pipeline.to_dict(),
                 {
-                    "code": "test",
                     "function": None,
                     "tasks": [],
                     "name": "Test pipeline",
@@ -104,7 +102,7 @@ class AstTest(TestCase):
                             "from openhexa.sdk.pipelines import pipeline, parameter",
                             "",
                             "timeout = 60 * 60",
-                            "@pipeline('test', 'Test pipeline', timeout=timeout)",
+                            "@pipeline('Test pipeline', timeout=timeout)",
                             "@parameter('test_param', name='Test Param', type=int, help='Param help')",
                             "def test_pipeline(test_param):",
                             "    pass",
@@ -124,7 +122,7 @@ class AstTest(TestCase):
                             "from openhexa.sdk.pipelines import pipeline, parameter",
                             "",
                             "@parameter('test_param', name='Test Param', type=int, default=42, help='Param help')",
-                            "@pipeline('test', 'Test pipeline')",
+                            "@pipeline('Test pipeline')",
                             "def test_pipeline():",
                             "    pass",
                             "",
@@ -135,7 +133,6 @@ class AstTest(TestCase):
             self.assertEqual(
                 pipeline.to_dict(),
                 {
-                    "code": "test",
                     "name": "Test pipeline",
                     "function": None,
                     "tasks": [],
@@ -167,7 +164,7 @@ class AstTest(TestCase):
                             "from openhexa.sdk.pipelines import pipeline, parameter",
                             "",
                             "@parameter('test_param', name='Test Param', type=int, default=[42], help='Param help', multiple=True)",
-                            "@pipeline('test', 'Test pipeline')",
+                            "@pipeline('Test pipeline')",
                             "def test_pipeline():",
                             "    pass",
                             "",
@@ -178,7 +175,6 @@ class AstTest(TestCase):
             self.assertEqual(
                 pipeline.to_dict(),
                 {
-                    "code": "test",
                     "name": "Test pipeline",
                     "function": None,
                     "tasks": [],
@@ -211,7 +207,7 @@ class AstTest(TestCase):
                             "from openhexa.sdk.pipelines.parameter import Dataset",
                             "",
                             "@parameter('dataset', name='Dataset', type=Dataset, help='Dataset', required=False)",
-                            "@pipeline('test', 'Test pipeline')",
+                            "@pipeline('Test pipeline')",
                             "def test_pipeline():",
                             "    pass",
                             "",
@@ -222,7 +218,6 @@ class AstTest(TestCase):
             self.assertEqual(
                 pipeline.to_dict(),
                 {
-                    "code": "test",
                     "function": None,
                     "name": "Test pipeline",
                     "tasks": [],
@@ -254,7 +249,7 @@ class AstTest(TestCase):
                             "from openhexa.sdk.pipelines import pipeline, parameter",
                             "",
                             "@parameter('test_param', name='Test Param', type=str, choices=['a', 'b'], help='Param help')",
-                            "@pipeline('test', 'Test pipeline')",
+                            "@pipeline('Test pipeline')",
                             "def test_pipeline():",
                             "    pass",
                             "",
@@ -265,7 +260,6 @@ class AstTest(TestCase):
             self.assertEqual(
                 pipeline.to_dict(),
                 {
-                    "code": "test",
                     "name": "Test pipeline",
                     "function": None,
                     "tasks": [],
@@ -296,7 +290,7 @@ class AstTest(TestCase):
                         [
                             "from openhexa.sdk.pipelines import pipeline",
                             "",
-                            "@pipeline('test', 'Test pipeline', timeout=42)",
+                            "@pipeline('Test pipeline', timeout=42)",
                             "def test_pipeline():",
                             "    pass",
                         ]
@@ -306,7 +300,6 @@ class AstTest(TestCase):
             self.assertEqual(
                 pipeline.to_dict(),
                 {
-                    "code": "test",
                     "name": "Test pipeline",
                     "parameters": [],
                     "timeout": 42,
@@ -325,7 +318,7 @@ class AstTest(TestCase):
                             "from openhexa.sdk.pipelines import pipeline, parameter",
                             "",
                             "@parameter('test_param', name='Test Param', type=bool, default=True, help='Param help')",
-                            "@pipeline('test', 'Test pipeline')",
+                            "@pipeline('Test pipeline')",
                             "def test_pipeline():",
                             "    pass",
                             "",
@@ -336,7 +329,6 @@ class AstTest(TestCase):
             self.assertEqual(
                 pipeline.to_dict(),
                 {
-                    "code": "test",
                     "name": "Test pipeline",
                     "function": None,
                     "tasks": [],
@@ -369,7 +361,7 @@ class AstTest(TestCase):
                             "",
                             "@parameter('test_param', name='Test Param', type=int, default=42, help='Param help')",
                             "@parameter('test_param2', name='Test Param 2', type=str, choices=['a', 'b'], help='Param help 2')",
-                            "@pipeline('test', 'Test pipeline')",
+                            "@pipeline('Test pipeline')",
                             "def test_pipeline():",
                             "    pass",
                             "",
@@ -380,7 +372,6 @@ class AstTest(TestCase):
             self.assertEqual(
                 pipeline.to_dict(),
                 {
-                    "code": "test",
                     "name": "Test pipeline",
                     "function": None,
                     "tasks": [],
@@ -424,7 +415,7 @@ class AstTest(TestCase):
                             "from openhexa.sdk.pipelines import pipeline, parameter",
                             "",
                             "@parameter('test_param', name='Test Param', type=object, default=42, help='Param help')",
-                            "@pipeline('test', 'Test pipeline')",
+                            "@pipeline('Test pipeline')",
                             "def test_pipeline():",
                             "    pass",
                             "",
@@ -445,7 +436,7 @@ class AstTest(TestCase):
                             "",
                             "@parameter('dhis_con', name='DHIS2 Connection', type=DHIS2Connection, required=True)",
                             "@parameter('data_element_ids', name='Data Elements id', type=str, widget='dhis2.data_elements.picker', connection='dhis_con', required=True)",
-                            "@pipeline('test', 'Test pipeline')",
+                            "@pipeline('Test pipeline')",
                             "def test_pipeline():",
                             "    pass",
                             "",
@@ -457,7 +448,6 @@ class AstTest(TestCase):
             self.assertEqual(
                 pipeline.to_dict(),
                 {
-                    "code": "test",
                     "name": "Test pipeline",
                     "function": None,
                     "tasks": [],
@@ -502,7 +492,7 @@ class AstTest(TestCase):
                             "",
                             "@parameter('dhis_con', name='DHIS2 Connection', type=DHIS2Connection, required=True)",
                             "@parameter('data_element_ids', name='Data Elements id', type=str, widget='dhis2.data_elements.picker', connection='sds_con', required=True)",
-                            "@pipeline('test', 'Test pipeline')",
+                            "@pipeline('Test pipeline')",
                             "def test_pipeline():",
                             "    pass",
                             "",
@@ -522,7 +512,7 @@ class AstTest(TestCase):
                             "from openhexa.sdk.pipelines import pipeline, parameter",
                             "",
                             "@parameter('test_field_for_wdiget', name='Widget Param', type=str, widget='custom_picker', help='Param help')",
-                            "@pipeline('test', 'Test pipeline')",
+                            "@pipeline('Test pipeline')",
                             "def test_pipeline():",
                             "    pass",
                             "",
@@ -533,7 +523,6 @@ class AstTest(TestCase):
             self.assertEqual(
                 pipeline.to_dict(),
                 {
-                    "code": "test",
                     "name": "Test pipeline",
                     "function": None,
                     "tasks": [],

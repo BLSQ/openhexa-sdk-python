@@ -8,7 +8,6 @@ import argparse
 import datetime
 import json
 import os
-import string
 import sys
 import time
 import typing
@@ -34,8 +33,6 @@ class Pipeline:
 
     Attributes
     ----------
-    code : str
-        A unique code to identify the pipeline within a workspace.
     name : str
         A user-friendly name for the pipeline (will be displayed in the web interface).
     function: typing.Callable
@@ -48,13 +45,11 @@ class Pipeline:
 
     def __init__(
         self,
-        code: str,
         name: str,
         function: typing.Callable,
         parameters: typing.Sequence[Parameter],
         timeout: int = None,
     ):
-        self.code = code
         self.name = name
         self.function = function
         self.parameters = parameters
@@ -90,7 +85,7 @@ class Pipeline:
             The parameter values to use for this pipeline run.
         """
         now = datetime.datetime.now(tz=datetime.timezone.utc).replace(microsecond=0).isoformat()
-        print(f'{now} Starting pipeline "{self.code}"')
+        print(f'{now} Starting pipeline "{self.name}"')
 
         # Validate / default parameters
         validated_config = {}
@@ -147,7 +142,7 @@ class Pipeline:
                         task.end_time = task_com_result.end_time
                         dag_step = True
                     except Exception as e:  # NOQA
-                        raise PipelineRunError(f"Pipeline {self.code} failed: {e}")
+                        raise PipelineRunError(f"Pipeline {self.name} failed: {e}")
 
                 if dag_step:
                     # remove finished tasks
@@ -161,12 +156,11 @@ class Pipeline:
         pool.join()
 
         now = datetime.datetime.now(tz=datetime.timezone.utc).replace(microsecond=0).isoformat()
-        print(f'{now} Successfully completed pipeline "{self.code}"')
+        print(f'{now} Successfully completed pipeline "{self.name}"')
 
     def to_dict(self):
         """Return a dictionary representation of the pipeline."""
         return {
-            "code": self.code,
             "name": self.name,
             "parameters": [p.to_dict() for p in self.parameters],
             "timeout": self.timeout,
@@ -246,16 +240,16 @@ class Pipeline:
 
 
 def pipeline(
-    code: str, *, name: str = None, timeout: int = None
+    code: str = None, *, name: str = None, timeout: int = None
 ) -> typing.Callable[[typing.Callable[..., typing.Any]], Pipeline]:
     """Decorate a Python function as an OpenHEXA pipeline.
 
     Parameters
     ----------
-    code : str
-        An identifier for the pipeline (should be unique within the workspace where the pipeline is deployed)
-    name : str, optional
-        An optional name for the pipeline (will be used instead of the code in the web interface)
+    code : str, optional
+        Deprecated identifier for the pipeline. A unique identifier will be auto-generated.
+    name : str
+        A name for the pipeline (will be shown in the web interface).
     timeout : int, optional
         An optional timeout, in seconds, after which the pipeline run will be terminated (if not provided, a default
         timeout will be applied by the OpenHEXA backend)
@@ -275,8 +269,7 @@ def pipeline(
     ... def a_task() -> int:
     ...     return 42
     """
-    if any(c not in string.ascii_lowercase + string.digits + "_-" for c in code):
-        raise Exception("Pipeline code should contains only lower case letters, digits, '_' and '-'")
+    name = name or code
 
     def decorator(fun):
         if isinstance(fun, FunctionWithParameter):
@@ -284,7 +277,7 @@ def pipeline(
         else:
             parameters = []
 
-        return Pipeline(code, name, fun, parameters, timeout)
+        return Pipeline(name, fun, parameters, timeout)
 
     return decorator
 

@@ -12,7 +12,7 @@ from zipfile import ZipFile
 import pytest
 from click.testing import CliRunner
 
-from openhexa.cli.cli import pipelines_download, pipelines_push, pipelines_run, workspaces_add
+from openhexa.cli.cli import pipelines_download, pipelines_push, pipelines_run, select_pipeline, workspaces_add
 from openhexa.sdk.pipelines import Pipeline
 
 python_file_name = "pipeline.py"
@@ -42,7 +42,10 @@ def create_zip_with_pipeline():
 def setup_graphql_response(zip_buffer=create_zip_with_pipeline()):
     """Set up the mock GraphQL response pipelines."""
     return {
-        "pipelineByCode": {"currentVersion": {"zipfile": base64.b64encode(zip_buffer.getvalue()).decode()}},
+        "pipelineByCode": {
+            "code": "pipeline-1234",
+            "currentVersion": {"zipfile": base64.b64encode(zip_buffer.getvalue()).decode()},
+        },
         "pipelines": {"items": []},  # (empty workspace initially)
     }
 
@@ -124,18 +127,28 @@ class CliRunTest(TestCase):
 
     @patch("openhexa.cli.api.graphql")
     @patch("openhexa.cli.cli.get_pipeline")
+    @patch("openhexa.cli.cli.get_pipelines_pages")
     @patch("openhexa.cli.cli.upload_pipeline")
     @patch("openhexa.cli.cli.create_pipeline_template_version")
     @patch.dict(os.environ, {"HEXA_API_URL": "https://www.bluesquarehub.com/", "HEXA_WORKSPACE": "workspace"})
-    def test_push_pipeline(self, mock_create_template, mock_upload_pipeline, mock_get_pipeline, mock_graphql):
+    def test_push_pipeline(
+        self, mock_create_template, mock_upload_pipeline, mock_get_pipelines_pages, mock_get_pipeline, mock_graphql
+    ):
         """Test pushing a pipeline."""
         with self.runner.isolated_filesystem() as tmp:
             with open(Path(tmp) / python_file_name, "w") as f:
                 f.write(python_code)
             mock_graphql.return_value = setup_graphql_response()
             mock_pipeline = MagicMock(spec=Pipeline)
-            mock_pipeline.code = pipeline_name
+            mock_pipeline.name = pipeline_name
             mock_get_pipeline.return_value = mock_pipeline
+            mock_get_pipelines_pages.return_value = {
+                "items": [
+                    {"name": "Pipeline1", "code": "code1"},
+                    {"name": "Pipeline2", "code": "code2"},
+                ],
+                "totalPages": 2,
+            }
             mock_upload_pipeline.return_value = {
                 "versionName": version,
                 "pipeline": {
@@ -148,13 +161,17 @@ class CliRunTest(TestCase):
             mock_create_template.return_value = template
 
             result = self.runner.invoke(
-                pipelines_push, [tmp, "--name", version], input="\n".join(["Y", "Y", changelog]) + "\n"
+                pipelines_push,
+                [tmp, "--name", version],
+                input="\n".join(["4", "pipeline_code", "Y", "Y", changelog]) + "\n",
             )
             self.assertEqual(result.exit_code, 0)
+            self.assertIn("Which pipeline do you want to update?", result.output)
+            self.assertIn("Insert a pipeline code", result.output)
             self.assertIn(
                 (
                     f"✅ New version '{version}' created! "
-                    f"You can view the pipeline in OpenHEXA on https://www.bluesquarehub.com/workspaces/workspace/pipelines/{pipeline_name}"
+                    f"You can view the pipeline in OpenHEXA on https://www.bluesquarehub.com/workspaces/workspace/pipelines/pipeline-1234"
                 ),
                 result.output,
             )
@@ -167,6 +184,50 @@ class CliRunTest(TestCase):
                 ),
                 result.output,
             )
+
+    @patch("openhexa.cli.cli.click.prompt")
+    def test_select_pipeline(self, mock_prompt):
+        workspace_pipelines = [
+            {"name": "Pipeline1", "code": "code1"},
+            {"name": "Pipeline2", "code": "code2"},
+        ]
+        pipeline = MagicMock()
+        pipeline.name = "TestPipeline"
+
+        mock_prompt.side_effect = [1]  # User selects the first pipeline
+
+        selected_pipeline = select_pipeline(workspace_pipelines, 1, pipeline)
+
+        self.assertEqual(selected_pipeline, workspace_pipelines[0])
+
+    @patch("openhexa.cli.cli.click.prompt")
+    def test_select_pipeline_create_new(self, mock_prompt):
+        workspace_pipelines = []
+        pipeline = MagicMock()
+        pipeline.name = "TestPipeline"
+
+        mock_prompt.side_effect = [1]  # User selects to create a new pipeline
+
+        selected_pipeline = select_pipeline(workspace_pipelines, 1, pipeline)
+
+        self.assertIsNone(selected_pipeline)
+
+    @patch("openhexa.cli.cli.get_pipeline_from_code")
+    @patch("openhexa.cli.cli.click.prompt")
+    def test_select_pipeline_enter_code(self, mock_prompt, mock_get_pipeline_from_code):
+        workspace_pipelines = []
+        pipeline = MagicMock()
+        pipeline.name = "TestPipeline"
+        pipeline = MagicMock()
+        pipeline.name = "Pipeline3"
+        pipeline.code = "code3"
+        mock_prompt.side_effect = [2, pipeline.code]  # User selects to enter a pipeline code and provides "code3"
+        mock_get_pipeline_from_code.return_value = pipeline
+
+        selected_pipeline = select_pipeline(workspace_pipelines, 2, pipeline)
+
+        self.assertEqual(selected_pipeline, pipeline)
+        mock_get_pipeline_from_code.assert_called_with(pipeline.code)
 
     @patch("openhexa.cli.api.graphql")
     def test_workspaces_add_not_found(self, mock_graphql):

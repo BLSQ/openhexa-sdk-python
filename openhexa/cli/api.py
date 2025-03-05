@@ -169,14 +169,15 @@ def get_workspace(slug: str, token: str):
     )["workspace"]
 
 
-def list_pipelines():
-    """List all pipelines in the workspace."""
+def get_pipelines_pages(name=None):
+    """Get the first page of pipelines in the workspace optionally ranked by name similarity."""
     if settings.current_workspace is None:
         raise NoActiveWorkspaceError
     data = graphql(
         """
-    query getWorkspacePipelines($workspaceSlug: String!) {
-        pipelines(workspaceSlug: $workspaceSlug) {
+    query getWorkspacePipelines($workspaceSlug: String!, $name: String, $page: Int = 1, $perPage: Int = 10) {
+        pipelines(workspaceSlug: $workspaceSlug, name: $name, page: $page, perPage: $perPage) {
+            totalPages
             items {
                 id
                 code
@@ -190,9 +191,14 @@ def list_pipelines():
         }
     }
     """,
-        {"workspaceSlug": settings.current_workspace},
+        {"workspaceSlug": settings.current_workspace, "name": name},
     )
-    return data["pipelines"]["items"]
+    return data["pipelines"]
+
+
+def get_pipelines(name=None):
+    """Get pipelines in the workspace optionally ranked by name similarity."""
+    return get_pipelines_pages(name)["items"]
 
 
 def get_pipeline_from_code(pipeline_code: str) -> dict[str, typing.Any]:
@@ -220,7 +226,7 @@ def get_pipeline_from_code(pipeline_code: str) -> dict[str, typing.Any]:
     return data["pipelineByCode"]
 
 
-def create_pipeline(pipeline_code: str, pipeline_name: str):
+def create_pipeline(pipeline_name: str):
     """Create a pipeline using the API."""
     if settings.current_workspace is None:
         raise NoActiveWorkspaceError
@@ -241,7 +247,6 @@ def create_pipeline(pipeline_code: str, pipeline_name: str):
         {
             "input": {
                 "workspaceSlug": settings.current_workspace,
-                "code": pipeline_code,
                 "name": pipeline_name,
             }
         },
@@ -530,6 +535,7 @@ def generate_zip_file(pipeline_directory_path: typing.Union[str, Path]) -> io.By
 
 
 def upload_pipeline(
+    target_pipeline_code: str,
     pipeline_directory_path: typing.Union[str, Path],
     name: str = None,
     description: str = None,
@@ -538,6 +544,7 @@ def upload_pipeline(
     """Upload the pipeline contained in the provided directory using the GraphQL API.
 
     The pipeline code will be zipped and base64-encoded before being sent to the backend.
+    The target pipeline will be updated with the new version.
     """
     if settings.current_workspace is None:
         raise NoActiveWorkspaceError
@@ -580,7 +587,7 @@ def upload_pipeline(
         {
             "input": {
                 "workspaceSlug": settings.current_workspace,
-                "code": pipeline.code,
+                "code": target_pipeline_code,
                 "name": name,
                 "description": description,
                 "externalLink": link,

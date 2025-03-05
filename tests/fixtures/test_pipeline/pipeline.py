@@ -3,7 +3,7 @@
 from openhexa.sdk import current_run, pipeline
 
 
-@pipeline("test-pipelines", name="test_pipelines")
+@pipeline("test_pipelines")
 def test_pipelines():
     """Write your pipeline orchestration here.
 

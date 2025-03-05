@@ -9,7 +9,7 @@ from sqlalchemy import create_engine
 from openhexa.sdk import current_run, pipeline, workspace
 
 
-@pipeline("simple-io", name="Simple IO")
+@pipeline("Simple IO")
 def simple_io():
     """Run a simple IO pipeline."""
     # Read and write from/to workspace files
