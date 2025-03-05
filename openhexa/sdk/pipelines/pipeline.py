@@ -12,7 +12,6 @@ import string
 import sys
 import time
 import typing
-import warnings
 from logging import getLogger
 from pathlib import Path
 
@@ -276,11 +275,6 @@ def pipeline(
     ... def a_task() -> int:
     ...     return 42
     """
-    if code:
-        warnings.warn(
-            f"The pipeline 'code' parameter (with value {code}) is deprecated and ignored and will be removed in future versions. The pipeline code is now auto-generated.",
-            DeprecationWarning,
-        )
     name = name or code
 
     if any(c not in string.ascii_lowercase + string.digits + "_-" for c in code):
