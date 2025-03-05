@@ -131,6 +131,7 @@ def get_pipeline(pipeline_path: Path) -> Pipeline:
             pipeline_decorator_spec = _get_decorator_spec(
                 pipeline_decorator,
                 (
+                    Argument("code", [ast.Constant]),
                     Argument("name", [ast.Constant]),
                     Argument("timeout", [ast.Constant]),
                 ),
@@ -162,6 +163,7 @@ def get_pipeline(pipeline_path: Path) -> Pipeline:
 
             validate_parameters_with_connection(pipelines_parameters)
 
+            pipeline_decorator_spec["args"].pop("code")  # No longer supported
             pipeline = Pipeline(parameters=pipelines_parameters, function=None, **pipeline_decorator_spec["args"])
 
     if pipeline is None:
