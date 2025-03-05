@@ -24,9 +24,9 @@ from openhexa.cli.api import (
     ensure_is_pipeline_dir,
     get_library_versions,
     get_pipeline_from_code,
+    get_pipelines,
+    get_pipelines_pages,
     get_workspace,
-    list_pipelines,
-    list_pipelines_pages,
     run_pipeline,
     upload_pipeline,
 )
@@ -381,7 +381,7 @@ def pipelines_push(
     except Exception as e:
         _terminate(f'❌ Error while importing pipeline: "{e}"', exception=e, err=True)
     else:
-        pipeline_pages = list_pipelines_pages(name=pipeline.name)
+        pipeline_pages = get_pipelines_pages(name=pipeline.name)
         workspace_pipelines = pipeline_pages["items"]
         number_of_pages = pipeline_pages["totalPages"]
         if settings.debug:
@@ -577,7 +577,7 @@ def pipelines_list():
     if settings.current_workspace is None:
         _terminate("No workspace activated", err=True)
 
-    workspace_pipelines = list_pipelines()
+    workspace_pipelines = get_pipelines()
     if len(workspace_pipelines) == 0:
         click.echo(f"No pipelines in workspace {settings.current_workspace}")
         return

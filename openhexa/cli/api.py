@@ -169,14 +169,14 @@ def get_workspace(slug: str, token: str):
     )["workspace"]
 
 
-def list_pipelines_pages(name=None):
-    """List the first page of pipelines in the workspace."""
+def get_pipelines_pages(name=None):
+    """Get the first page of pipelines in the workspace optionally ranked by name similarity."""
     if settings.current_workspace is None:
         raise NoActiveWorkspaceError
     data = graphql(
         """
-    query getWorkspacePipelines($workspaceSlug: String!, $name: String) {
-        pipelines(workspaceSlug: $workspaceSlug, name: $name) {
+    query getWorkspacePipelines($workspaceSlug: String!, $name: String, $page: Int = 1, $perPage: Int = 10) {
+        pipelines(workspaceSlug: $workspaceSlug, name: $name, page: $page, perPage: $perPage) {
             totalPages
             items {
                 id
@@ -196,9 +196,9 @@ def list_pipelines_pages(name=None):
     return data["pipelines"]
 
 
-def list_pipelines(name=None):
-    """List the first page of pipelines in the workspace."""
-    return list_pipelines_pages(name)["items"]
+def get_pipelines(name=None):
+    """Get pipelines in the workspace optionally ranked by name similarity."""
+    return get_pipelines_pages(name)["items"]
 
 
 def get_pipeline_from_code(pipeline_code: str) -> dict[str, typing.Any]:
