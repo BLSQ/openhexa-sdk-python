@@ -231,12 +231,12 @@ def propose_to_create_template_version(workspace, pipeline_version, yes):
     """Propose to create a new version of the template if the pipeline is based on a template."""
     pipeline = pipeline_version["pipeline"]
     if pipeline["template"] and pipeline["permissions"]["createTemplateVersion"]:
-        if not yes:
-            click.confirm(
-                f"The template {click.style(pipeline['template']['name'], bold=True)} is based on this pipeline, do you want to publish a new version of the template as well?",
-                True,
-                abort=True,
-            )
+        if not yes and not click.confirm(
+            f"The template {click.style(pipeline['template']['name'], bold=True)} is based on this pipeline, do you want to publish a new version of the template as well?",
+            True,
+        ):
+            # Return early when the user do not want to create a template version
+            return
         changelog = (
             ""
             if yes
