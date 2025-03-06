@@ -113,9 +113,9 @@ def model(dhis2_data: dict[str, typing.Any], gadm_data, worldpop_data):
     population_df = pd.Series(data=[stat["sum"] for stat in stats], index=administrative_areas.index)
     population_df = pd.DataFrame({"District": administrative_areas["NAME_2"], "Population": population_df})
     corrected_population_df = population_df.copy()
-    corrected_population_df.loc[corrected_population_df["District"].str.startswith("Western"), "District"] = (
-        "Western Area"
-    )
+    corrected_population_df.loc[
+        corrected_population_df["District"].str.startswith("Western"), "District"
+    ] = "Western Area"
 
     corrected_population_df = corrected_population_df.groupby("District").sum()
 
