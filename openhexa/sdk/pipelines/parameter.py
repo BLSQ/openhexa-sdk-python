@@ -358,6 +358,7 @@ TYPES_BY_PYTHON_TYPE = {
     "Dataset": DatasetType,
 }
 
+
 class ParameterWidgets(StrEnum):
     ORG_UNITS = "ORG_UNITS"
     ORG_UNIT_GROUPS = "ORG_UNIT_GROUPS"
@@ -367,6 +368,7 @@ class ParameterWidgets(StrEnum):
     DATA_ELEMENT_GROUPS = "DATA_ELEMENT_GROUPS"
     INDICATORS = "INDICATORS"
     INDICATOR_GROUPS = "INDICATOR_GROUPS"
+
 
 class Parameter:
     """Pipeline parameter class. Contains validation logic specs generation logic."""
@@ -611,7 +613,6 @@ def parameter(
         )
 
     return decorator
-
 
 
 class FunctionWithParameter:
