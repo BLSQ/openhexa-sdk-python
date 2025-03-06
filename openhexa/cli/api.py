@@ -366,8 +366,6 @@ def run_pipeline(path: Path, config: dict, image: str = None, debug: bool = Fals
         **env_vars,
     }
 
-    print(environment)
-
     command = f"pipeline run --config {base64.b64encode(json.dumps(config).encode('utf-8')).decode('utf-8')}"
     try:
         docker_client.images.get(image)

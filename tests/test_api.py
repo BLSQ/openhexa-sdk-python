@@ -63,7 +63,6 @@ def test_upload_pipeline_success(settings):
                 "target_pipeline_code", pipeline_dir, "version-name", "My description", "https://github.com/"
             )
             args_input = mocked_graphql_client.call_args[0][1]["input"]
-            assert args_input["code"] == "target_pipeline_code"
             assert args_input["workspaceSlug"] == "workspace-slug"
             assert args_input["timeout"] is None
             assert args_input["parameters"] == []

@@ -28,7 +28,7 @@ class AstTest(TestCase):
                         [
                             "from openhexa.sdk.pipelines import pipeline",
                             "",
-                            "@pipeline(code='test', name='Test pipeline')",
+                            "@pipeline(name='Test pipeline')",
                             "def test_pipeline():",
                             "    pass",
                         ]
@@ -82,7 +82,7 @@ class AstTest(TestCase):
                         [
                             "from openhexa.sdk.pipelines import pipeline, parameter",
                             "",
-                            "@pipeline('test', 'Test pipeline')",
+                            "@pipeline('Test pipeline')",
                             "@parameter('test_param', name='Test Param', type=int, default=42 * 30, help='Param help')",
                             "def test_pipeline(test_param):",
                             "    pass",
@@ -422,7 +422,7 @@ class AstTest(TestCase):
                         ]
                     )
                 )
-            with self.assertRaises(KeyError):
+            with self.assertRaises(InvalidParameterError):
                 get_pipeline(tmpdirname)
 
     def test_pipeline_with_connection_parameter(self):
@@ -543,3 +543,41 @@ class AstTest(TestCase):
                     "timeout": None,
                 },
             )
+
+    def test_pipeline_with_deprecated_code_argument_with_name(self):
+        """The file contains a @pipeline decorator with the deprecated 'code' argument."""
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            with open(f"{tmpdirname}/pipeline.py", "w") as f:
+                f.write(
+                    "\n".join(
+                        [
+                            "from openhexa.sdk.pipelines import pipeline",
+                            "",
+                            "@pipeline(code='test', name='Test pipeline')",
+                            "def test_pipeline():",
+                            "    pass",
+                            "",
+                        ]
+                    )
+                )
+            with self.assertRaises(DeprecationWarning):
+                get_pipeline(tmpdirname)
+
+    def test_pipeline_with_deprecated_code_as_arg(self):
+        """The file contains a @pipeline decorator with the deprecated 'code' argument."""
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            with open(f"{tmpdirname}/pipeline.py", "w") as f:
+                f.write(
+                    "\n".join(
+                        [
+                            "from openhexa.sdk.pipelines import pipeline",
+                            "",
+                            "@pipeline('test', name='Test pipeline')",
+                            "def test_pipeline():",
+                            "    pass",
+                            "",
+                        ]
+                    )
+                )
+            with self.assertRaises(DeprecationWarning):
+                get_pipeline(tmpdirname)

@@ -180,7 +180,7 @@ class Pipeline:
                                 updatePipelineProgress(input: $input) { success errors }
                             }"""
             r = requests.post(
-                f'{os.environ["HEXA_SERVER_URL"]}/graphql/',
+                f"{os.environ['HEXA_SERVER_URL']}/graphql/",
                 headers=headers,
                 json={
                     "query": query,
@@ -240,7 +240,7 @@ class Pipeline:
 
 
 def pipeline(
-    code: str = None, *, name: str = None, timeout: int = None
+    code: str = None, name: str = None, timeout: int = None
 ) -> typing.Callable[[typing.Callable[..., typing.Any]], Pipeline]:
     """Decorate a Python function as an OpenHEXA pipeline.
 
