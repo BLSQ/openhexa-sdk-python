@@ -360,15 +360,14 @@ TYPES_BY_PYTHON_TYPE = {
 
 
 class ParameterWidgets(StrEnum):
-    ORG_UNITS = "ORG_UNITS"
-    ORG_UNIT_GROUPS = "ORG_UNIT_GROUPS"
-    ORG_UNIT_LEVELS = "ORG_UNIT_LEVELS"
-    DATASETS = "DATASETS"
-    DATA_ELEMENTS = "DATA_ELEMENTS"
-    DATA_ELEMENT_GROUPS = "DATA_ELEMENT_GROUPS"
-    INDICATORS = "INDICATORS"
-    INDICATOR_GROUPS = "INDICATOR_GROUPS"
-
+    DHIS2_ORG_UNIT = "DHIS2_ORG_UNIT"
+    DHIS2_ORG_UNIT_GROUP = "DHIS2_ORG_UNIT_GROUP"
+    DHIS2_ORG_UNIT_LEVEL = "DHIS2_ORG_UNIT_LEVEL"
+    DHIS2_DATASETS = "DHIS2_DATASETS"
+    DHIS2_DATA_ELEMENTS = "DHIS2_DATA_ELEMENTS"
+    DHIS2_DATA_ELEMENT_GROUPS = "DHIS2_DATA_ELEMENT_GROUPS"
+    DHIS2_INDICATORS = "DHIS2_INDICATORS"
+    DHIS2_INDICATOR_GROUPS = "DHIS2_INDICATOR_GROUPS"
 
 class Parameter:
     """Pipeline parameter class. Contains validation logic specs generation logic."""
@@ -432,7 +431,7 @@ class Parameter:
             raise InvalidParameterError(f"Parameters of type {self.type} can't have multiple values.")
         self.multiple = multiple
 
-        self.widget = ParameterWidgets(widget) if widget is not None else None
+        self.widget = widget
         self.connection = connection
 
         self._validate_default(default, multiple)
@@ -454,7 +453,7 @@ class Parameter:
             "choices": self.choices,
             "help": self.help,
             "default": self.default,
-            "widget": self.widget.value if self.widget is not None else None,
+            "widget": self.widget.value if self.widget else None,
             "connection": self.connection,
             "required": self.required,
             "multiple": self.multiple,
