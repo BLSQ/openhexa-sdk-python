@@ -359,7 +359,7 @@ TYPES_BY_PYTHON_TYPE = {
 }
 
 
-class ParameterWidgets(StrEnum):
+class ParameterWidget(StrEnum):
     DHIS2_ORG_UNIT = "DHIS2_ORG_UNIT"
     DHIS2_ORG_UNIT_GROUP = "DHIS2_ORG_UNIT_GROUP"
     DHIS2_ORG_UNIT_LEVEL = "DHIS2_ORG_UNIT_LEVEL"
@@ -392,7 +392,7 @@ class Parameter:
         choices: typing.Optional[typing.Sequence] = None,
         help: typing.Optional[str] = None,
         default: typing.Optional[typing.Any] = None,
-        widget: typing.Optional[ParameterWidgets] = None,
+        widget: typing.Optional[ParameterWidget] = None,
         connection: typing.Optional[str] = None,
         required: bool = True,
         multiple: bool = False,
