@@ -560,8 +560,8 @@ class AstTest(TestCase):
                         ]
                     )
                 )
-            with self.assertRaises(DeprecationWarning):
-                get_pipeline(tmpdirname)
+            pipeline = get_pipeline(tmpdirname)
+            self.assertEqual(pipeline.to_dict()["name"], "Test pipeline")
 
     def test_pipeline_with_deprecated_code_as_arg(self):
         """The file contains a @pipeline decorator with the deprecated 'code' argument."""
@@ -579,5 +579,5 @@ class AstTest(TestCase):
                         ]
                     )
                 )
-            with self.assertRaises(DeprecationWarning):
-                get_pipeline(tmpdirname)
+            pipeline = get_pipeline(tmpdirname)
+            self.assertEqual(pipeline.to_dict()["name"], "Test pipeline")
