@@ -358,7 +358,7 @@ TYPES_BY_PYTHON_TYPE = {
     "Dataset": DatasetType,
 }
 
-class ParameterWidget(StrEnum):
+class ParameterWidgets(StrEnum):
     ORG_UNITS = "ORG_UNITS"
     ORG_UNIT_GROUPS = "ORG_UNIT_GROUPS"
     ORG_UNIT_LEVELS = "ORG_UNIT_LEVELS"
@@ -391,7 +391,7 @@ class Parameter:
         choices: typing.Optional[typing.Sequence] = None,
         help: typing.Optional[str] = None,
         default: typing.Optional[typing.Any] = None,
-        widget: typing.Optional[ParameterWidget] = None,
+        widget: typing.Optional[ParameterWidgets] = None,
         connection: typing.Optional[str] = None,
         required: bool = True,
         multiple: bool = False,
@@ -430,7 +430,7 @@ class Parameter:
             raise InvalidParameterError(f"Parameters of type {self.type} can't have multiple values.")
         self.multiple = multiple
 
-        self.widget = ParameterWidget(widget) if widget else None
+        self.widget = ParameterWidgets(widget) if widget is not None else None
         self.connection = connection
 
         self._validate_default(default, multiple)
@@ -452,7 +452,7 @@ class Parameter:
             "choices": self.choices,
             "help": self.help,
             "default": self.default,
-            "widget": self.widget,
+            "widget": self.widget.value if self.widget is not None else None,
             "connection": self.connection,
             "required": self.required,
             "multiple": self.multiple,
