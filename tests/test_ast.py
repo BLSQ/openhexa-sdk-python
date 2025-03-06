@@ -6,6 +6,7 @@ from unittest import TestCase
 from unittest.mock import patch
 
 from openhexa.sdk.pipelines.exceptions import InvalidParameterError, PipelineNotFound
+from openhexa.sdk.pipelines.parameter import ParameterWidgets
 from openhexa.sdk.pipelines.runtime import get_pipeline
 
 
@@ -471,7 +472,7 @@ class AstTest(TestCase):
                             "code": "data_element_ids",
                             "type": "str",
                             "name": "Data Elements id",
-                            "widget": "ORG_UNITS",
+                            "widget": ParameterWidgets.ORG_UNITS.value,
                             "connection": "dhis_con",
                             "default": None,
                             "multiple": False,
@@ -539,7 +540,7 @@ class AstTest(TestCase):
                             "default": None,
                             "multiple": False,
                             "choices": None,
-                            "widget": "ORG_UNITS",
+                            "widget": ParameterWidgets.ORG_UNITS.value,
                             "connection": None,
                             "help": "Param help",
                             "required": True,
