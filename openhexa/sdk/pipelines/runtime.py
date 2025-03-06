@@ -239,7 +239,7 @@ def get_pipeline(pipeline_path: Path) -> Pipeline:
             if code_arg["is_keyword"]:
                 print(
                     "\n\033[93m",
-                    f"The 'code' argument is deprecated and should not be used as a keyword."
+                    f"The 'code' argument is deprecated and should not be used as a keyword. "
                     f"Replace 'code=\"{code_arg['value']}\"' by 'name=\"{code_arg['value']}\"'\033[0m",
                     "\n",
                     flush=True,
