@@ -1,7 +1,8 @@
 """Tests related to the parsing of the pipeline code."""
-
+import io
 import tempfile
 from unittest import TestCase
+from unittest.mock import patch
 
 from openhexa.sdk.pipelines.exceptions import InvalidParameterError, PipelineNotFound
 from openhexa.sdk.pipelines.runtime import get_pipeline
@@ -560,8 +561,12 @@ class AstTest(TestCase):
                         ]
                     )
                 )
-            with self.assertRaises(DeprecationWarning):
-                get_pipeline(tmpdirname)
+            with patch("sys.stdout", new=io.StringIO()) as fake_stdout:
+                pipeline = get_pipeline(tmpdirname)
+                self.assertEqual(pipeline.to_dict()["name"], "Test pipeline")
+                self.assertIn(
+                    "The 'code' argument is deprecated and should not be used as a keyword.", fake_stdout.getvalue()
+                )
 
     def test_pipeline_with_deprecated_code_as_arg(self):
         """The file contains a @pipeline decorator with the deprecated 'code' argument."""
@@ -579,5 +584,7 @@ class AstTest(TestCase):
                         ]
                     )
                 )
-            with self.assertRaises(DeprecationWarning):
-                get_pipeline(tmpdirname)
+            with patch("sys.stdout", new=io.StringIO()) as fake_stdout:
+                pipeline = get_pipeline(tmpdirname)
+                self.assertEqual(pipeline.to_dict()["name"], "Test pipeline")
+                self.assertIn("Providing both 'code' and 'name' is deprecated.", fake_stdout.getvalue())

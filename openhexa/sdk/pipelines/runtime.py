@@ -237,16 +237,22 @@ def get_pipeline(pipeline_path: Path) -> Pipeline:
         # Handle deprecated 'code' argument
         if code_arg["value"] is not None:
             if code_arg["is_keyword"]:
-                raise DeprecationWarning(
-                    f"The 'code' argument is deprecated and should not be used as a keyword."
-                    f"Replace 'code=\"{code_arg['value']}\"' by 'name=\"{code_arg['value']}\"'"
+                print(
+                    "\n\033[93m",
+                    f"The 'code' argument is deprecated and should not be used as a keyword. "
+                    f"Replace 'code=\"{code_arg['value']}\"' by 'name=\"{code_arg['value']}\"'\033[0m",
+                    "\n",
+                    flush=True,
                 )
 
             if name_arg["value"] is not None:
-                raise DeprecationWarning(
+                print(
+                    "\n\033[93m",
                     f"Providing both 'code' and 'name' is deprecated. "
                     f"Please remove 'code' and only use 'name' when decorating the pipeline: "
-                    f'@pipeline(name="{name_arg["value"]}")'
+                    f'@pipeline(name="{name_arg["value"]}")\033[0m',
+                    "\n",
+                    flush=True,
                 )
 
         # Determine the pipeline name (prefer 'name', fall back to 'code')

@@ -13,7 +13,7 @@ from rasterstats import zonal_stats
 from openhexa.sdk import parameter, pipeline, workspace
 
 
-@pipeline("Logistic stats")
+@pipeline("Logistic stats", "Test")
 @parameter(
     "deg",
     name="Data element group",
