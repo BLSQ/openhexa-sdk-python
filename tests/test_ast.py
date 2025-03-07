@@ -1,10 +1,12 @@
 """Tests related to the parsing of the pipeline code."""
+
 import io
 import tempfile
 from unittest import TestCase
 from unittest.mock import patch
 
 from openhexa.sdk.pipelines.exceptions import InvalidParameterError, PipelineNotFound
+from openhexa.sdk.pipelines.parameter import ParameterWidget
 from openhexa.sdk.pipelines.runtime import get_pipeline
 
 
@@ -434,9 +436,10 @@ class AstTest(TestCase):
                     "\n".join(
                         [
                             "from openhexa.sdk.pipelines import pipeline, parameter",
+                            "from openhexa.sdk.pipelines.widgets import ParameterWidget",
                             "",
                             "@parameter('dhis_con', name='DHIS2 Connection', type=DHIS2Connection, required=True)",
-                            "@parameter('data_element_ids', name='Data Elements id', type=str, widget='dhis2.data_elements.picker', connection='dhis_con', required=True)",
+                            "@parameter('data_element_ids', name='Data Elements id', type=str, widget=ParameterWidget.DHIS2_ORG_UNITS, connection='dhis_con', required=True)",
                             "@pipeline('Test pipeline')",
                             "def test_pipeline():",
                             "    pass",
@@ -469,7 +472,7 @@ class AstTest(TestCase):
                             "code": "data_element_ids",
                             "type": "str",
                             "name": "Data Elements id",
-                            "widget": "dhis2.data_elements.picker",
+                            "widget": ParameterWidget.DHIS2_ORG_UNITS.value,
                             "connection": "dhis_con",
                             "default": None,
                             "multiple": False,
@@ -490,10 +493,11 @@ class AstTest(TestCase):
                     "\n".join(
                         [
                             "from openhexa.sdk.pipelines import pipeline, parameter",
+                            "from openhexa.sdk.pipelines.parameter import ParameterWidget",
                             "",
                             "@parameter('dhis_con', name='DHIS2 Connection', type=DHIS2Connection, required=True)",
-                            "@parameter('data_element_ids', name='Data Elements id', type=str, widget='dhis2.data_elements.picker', connection='sds_con', required=True)",
                             "@pipeline('Test pipeline')",
+                            "@parameter('data_element_ids', name='Data Elements id', type=str, widget=ParameterWidget.DHIS2_ORG_UNITS, connection='sds_con', required=True)",
                             "def test_pipeline():",
                             "    pass",
                             "",
@@ -511,8 +515,9 @@ class AstTest(TestCase):
                     "\n".join(
                         [
                             "from openhexa.sdk.pipelines import pipeline, parameter",
+                            "from openhexa.sdk.pipelines.parameter import ParameterWidget",
                             "",
-                            "@parameter('test_field_for_wdiget', name='Widget Param', type=str, widget='custom_picker', help='Param help')",
+                            "@parameter('test_field_for_widget', name='Widget Param', type=str, widget=ParameterWidget.DHIS2_ORG_UNITS, help='Param help')",
                             "@pipeline('Test pipeline')",
                             "def test_pipeline():",
                             "    pass",
@@ -529,13 +534,13 @@ class AstTest(TestCase):
                     "tasks": [],
                     "parameters": [
                         {
-                            "code": "test_field_for_wdiget",
+                            "code": "test_field_for_widget",
                             "type": "str",
                             "name": "Widget Param",
                             "default": None,
                             "multiple": False,
                             "choices": None,
-                            "widget": "custom_picker",
+                            "widget": ParameterWidget.DHIS2_ORG_UNITS.value,
                             "connection": None,
                             "help": "Param help",
                             "required": True,

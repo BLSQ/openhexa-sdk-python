@@ -84,7 +84,7 @@ class Pipeline:
         config : typing.Dict[str, typing.Any]
             The parameter values to use for this pipeline run.
         """
-        now = datetime.datetime.now(tz=datetime.timezone.utc).replace(microsecond=0).isoformat()
+        now = datetime.datetime.now(tz=datetime.UTC).replace(microsecond=0).isoformat()
         print(f'{now} Starting pipeline "{self.name}"')
 
         # Validate / default parameters
@@ -116,7 +116,7 @@ class Pipeline:
                 break
 
             for task in tasks:
-                now = datetime.datetime.now(tz=datetime.timezone.utc).replace(microsecond=0).isoformat()
+                now = datetime.datetime.now(tz=datetime.UTC).replace(microsecond=0).isoformat()
                 print(f'{now} Started task "{task.compute.__name__}"')
                 result = pool.apply_async(task.run)
                 result_list.append((result, task))
@@ -128,7 +128,7 @@ class Pipeline:
                 for result, task in result_list:
                     if not result.ready():
                         continue
-                    now = datetime.datetime.now(tz=datetime.timezone.utc).replace(microsecond=0).isoformat()
+                    now = datetime.datetime.now(tz=datetime.UTC).replace(microsecond=0).isoformat()
 
                     completed += 1
                     progress = int(completed / total * 100)
@@ -155,7 +155,7 @@ class Pipeline:
         pool.close()
         pool.join()
 
-        now = datetime.datetime.now(tz=datetime.timezone.utc).replace(microsecond=0).isoformat()
+        now = datetime.datetime.now(tz=datetime.UTC).replace(microsecond=0).isoformat()
         print(f'{now} Successfully completed pipeline "{self.name}"')
 
     def to_dict(self):
@@ -197,7 +197,7 @@ class Pipeline:
 
         return env == Environment.CLOUD_PIPELINE and "HEXA_SERVER_URL" in os.environ
 
-    def __call__(self, config: typing.Optional[dict[str, typing.Any]] = None):
+    def __call__(self, config: dict[str | typing.Any] | None = None):
         """Call the pipeline by running it, after having configured the environment.
 
         This method can be called with an explicit configuration. If no configuration is provided, it will parse the

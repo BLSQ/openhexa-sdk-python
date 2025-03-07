@@ -14,7 +14,12 @@ from zipfile import ZipFile
 import requests
 
 from openhexa.sdk.pipelines.exceptions import InvalidParameterError, PipelineNotFound
-from openhexa.sdk.pipelines.parameter import TYPES_BY_PYTHON_TYPE, Parameter, validate_parameters_with_connection
+from openhexa.sdk.pipelines.parameter import (
+    TYPES_BY_PYTHON_TYPE,
+    Parameter,
+    ParameterWidget,
+    validate_parameters_with_connection,
+)
 
 from .pipeline import Pipeline
 
@@ -162,6 +167,8 @@ def _get_decorator_arg_value(decorator: ast.Call, arg: Argument, index: int) -> 
                 return (keyword.value.id, True)
             elif isinstance(keyword.value, ast.List):
                 return ([el.value for el in keyword.value.elts], True)
+            elif isinstance(keyword.value, ast.Attribute):
+                return (ParameterWidget(keyword.value.attr), True)
 
     # Then check for positional arguments
     try:
@@ -273,7 +280,7 @@ def get_pipeline(pipeline_path: Path) -> Pipeline:
                     Argument("choices", [ast.List]),
                     Argument("help", [ast.Constant]),
                     Argument("default", [ast.Constant, ast.List]),
-                    Argument("widget", [ast.Constant]),
+                    Argument("widget", [ast.Attribute]),
                     Argument("connection", [ast.Constant]),
                     Argument("required", [ast.Constant], default_value=True),
                     Argument("multiple", [ast.Constant], default_value=False),
