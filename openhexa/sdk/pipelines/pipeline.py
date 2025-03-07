@@ -197,7 +197,7 @@ class Pipeline:
 
         return env == Environment.CLOUD_PIPELINE and "HEXA_SERVER_URL" in os.environ
 
-    def __call__(self, config: typing.Optional[dict[str, typing.Any]] = None):
+    def __call__(self, config: dict[str | typing.Any] | None = None):
         """Call the pipeline by running it, after having configured the environment.
 
         This method can be called with an explicit configuration. If no configuration is provided, it will parse the
