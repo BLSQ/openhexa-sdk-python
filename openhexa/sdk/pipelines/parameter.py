@@ -53,7 +53,7 @@ class ParameterType:
         """
         return value
 
-    def validate(self, value: typing.Optional[typing.Any]) -> typing.Optional[typing.Any]:
+    def validate(self, value: typing.Any | None) -> typing.Any | None:
         """Validate the provided value for this type."""
         if not isinstance(value, self.expected_type):
             raise ParameterValueError(
@@ -61,7 +61,7 @@ class ParameterType:
             )
         return value
 
-    def validate_default(self, value: typing.Optional[typing.Any]):
+    def validate_default(self, value: typing.Any | None):
         """Validate the default value configured for this type."""
         self.validate(value)
 
@@ -84,7 +84,7 @@ class StringType(ParameterType):
         return str
 
     @staticmethod
-    def normalize(value: typing.Any) -> typing.Optional[str]:
+    def normalize(value: typing.Any) -> str | None:
         """Strip leading and trailing whitespaces and convert empty strings to None."""
         if isinstance(value, str):
             normalized_value = value.strip()
@@ -96,7 +96,7 @@ class StringType(ParameterType):
 
         return normalized_value
 
-    def validate_default(self, value: typing.Optional[typing.Any]):
+    def validate_default(self, value: typing.Any | None):
         """Validate the default value configured for this type."""
         if value == "":
             raise ParameterValueError("Empty values are not accepted.")
@@ -177,7 +177,7 @@ class ConnectionParameterType(ParameterType):
         """Return True only if the parameter type supports multiple values."""
         return False
 
-    def validate_default(self, value: typing.Optional[typing.Any]):
+    def validate_default(self, value: typing.Any | None):
         """Validate the default value configured for this type."""
         if value is None:
             return
@@ -187,7 +187,7 @@ class ConnectionParameterType(ParameterType):
         elif value == "":
             raise ParameterValueError("Empty values are not accepted.")
 
-    def validate(self, value: typing.Optional[typing.Any]) -> Connection:
+    def validate(self, value: typing.Any | None) -> Connection:
         """Validate the provided value for this type."""
         if not isinstance(value, str):
             raise ParameterValueError(f"Invalid type for value {value} (expected {str}, got {type(value)})")
@@ -323,7 +323,7 @@ class DatasetType(ParameterType):
         """Returns the python type expected for values."""
         return Dataset
 
-    def validate_default(self, value: typing.Optional[typing.Any]):
+    def validate_default(self, value: typing.Any | None):
         """Validate the default value configured for this type."""
         if value is None:
             return
@@ -333,7 +333,7 @@ class DatasetType(ParameterType):
         elif value == "":
             raise ParameterValueError("Empty values are not accepted.")
 
-    def validate(self, value: typing.Optional[typing.Any]) -> Dataset:
+    def validate(self, value: typing.Any | None) -> Dataset:
         """Validate the provided value for this type."""
         if not isinstance(value, str):
             raise ParameterValueError(f"Invalid type for value {value} (expected {str}, got {type(value)})")
@@ -360,6 +360,8 @@ TYPES_BY_PYTHON_TYPE = {
 
 
 class ParameterWidget(StrEnum):
+    """Enum for parameter available parameter widgets."""
+
     DHIS2_ORG_UNITS = "DHIS2_ORG_UNITS"
     DHIS2_ORG_UNIT_GROUPS = "DHIS2_ORG_UNIT_GROUPS"
     DHIS2_ORG_UNIT_LEVELS = "DHIS2_ORG_UNIT_LEVELS"
@@ -377,24 +379,22 @@ class Parameter:
         self,
         code: str,
         *,
-        type: typing.Union[
-            type[str],
-            type[int],
-            type[bool],
-            type[S3Connection],
-            type[CustomConnection],
-            type[DHIS2Connection],
-            type[IASOConnection],
-            type[PostgreSQLConnection],
-            type[GCSConnection],
-            type[Dataset],
-        ],
-        name: typing.Optional[str] = None,
-        choices: typing.Optional[typing.Sequence] = None,
-        help: typing.Optional[str] = None,
-        default: typing.Optional[typing.Any] = None,
-        widget: typing.Optional[ParameterWidget] = None,
-        connection: typing.Optional[str] = None,
+        type: str
+        | int
+        | bool
+        | S3Connection
+        | CustomConnection
+        | DHIS2Connection
+        | IASOConnection
+        | PostgreSQLConnection
+        | GCSConnection
+        | Dataset,
+        name: str | None = None,
+        choices: typing.Sequence | None = None,
+        help: str | None = None,
+        default: typing.Any | None = None,
+        widget: ParameterWidget | None = None,
+        connection: str | None = None,
         required: bool = True,
         multiple: bool = False,
     ):
@@ -545,23 +545,21 @@ def validate_parameters_with_connection(parameters: [Parameter]):
 def parameter(
     code: str,
     *,
-    type: typing.Union[
-        type[str],
-        type[int],
-        type[bool],
-        type[float],
-        type[DHIS2Connection],
-        type[IASOConnection],
-        type[PostgreSQLConnection],
-        type[GCSConnection],
-        type[S3Connection],
-        type[CustomConnection],
-        type[Dataset],
-    ],
-    name: typing.Optional[str] = None,
-    choices: typing.Optional[typing.Sequence] = None,
-    help: typing.Optional[str] = None,
-    default: typing.Optional[typing.Any] = None,
+    type: str
+    | int
+    | bool
+    | float
+    | DHIS2Connection
+    | IASOConnection
+    | PostgreSQLConnection
+    | GCSConnection
+    | S3Connection
+    | CustomConnection
+    | Dataset,
+    name: str | None = None,
+    choices: typing.Sequence | None = None,
+    help: str | None = None,
+    default: typing.Any | None = None,
     required: bool = True,
     multiple: bool = False,
 ):
