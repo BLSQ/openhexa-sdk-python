@@ -1,5 +1,23 @@
 # Changelog
 
+## [2.0.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v1.1.0...v2.0.0) (2025-03-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* Deprecate pipeline code and allow to select the target pipeline when pushing(HEXA-1170) ([#227](https://github.com/BLSQ/openhexa-sdk-python/issues/227))
+
+### Features
+
+* Deprecate pipeline code and allow to select the target pipeline when pushing(HEXA-1170) ([#227](https://github.com/BLSQ/openhexa-sdk-python/issues/227)) ([fd5ccac](https://github.com/BLSQ/openhexa-sdk-python/commit/fd5ccace020fc00116d886b975a3fd70e972d03d))
+
+
+### Bug Fixes
+
+* **code:** Inform users when they try to push a pipeline with a 'code' ([5b2f991](https://github.com/BLSQ/openhexa-sdk-python/commit/5b2f9910919ca310d0832eae3ba828ffff7f4884))
+* **Templates:** Do not abort when the user do not want to create a template version ([#229](https://github.com/BLSQ/openhexa-sdk-python/issues/229)) ([71d40b2](https://github.com/BLSQ/openhexa-sdk-python/commit/71d40b2c55e062accc8ea3bc6f8efe0ee2ac6806))
+* Users are warned when pushing a pipeline with a code and a name or 'code=' ([1bd0039](https://github.com/BLSQ/openhexa-sdk-python/commit/1bd0039ca79a9896f5c2a3cd932b22ad3882292f))
+
 ## [1.1.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v1.0.0...v1.1.0) (2025-02-18)
 
 
