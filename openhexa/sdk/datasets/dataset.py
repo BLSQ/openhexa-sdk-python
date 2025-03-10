@@ -227,12 +227,12 @@ class DatasetVersion:
 
     def add_file(
         self,
-        source: typing.Union[str, PathLike[str], typing.IO, bytes],
-        filename: typing.Optional[str] = None,
+        source: str | PathLike[str] | typing.IO | bytes,
+        filename: str | None,
     ) -> DatasetFile:
         """Create a new dataset file and add it to the dataset version."""
         mime_type = None
-        if isinstance(source, (str, PathLike)):
+        if isinstance(source, (str | PathLike)):
             path = Path(source)
             filename = path.name if filename is None else filename
             mime_type, _ = mimetypes.guess_type(path)
@@ -417,7 +417,7 @@ class Dataset:
         return self.latest_version
 
     @property
-    def latest_version(self) -> typing.Optional[DatasetVersion]:
+    def latest_version(self) -> DatasetVersion | None:
         """Return the latest version, if any.
 
         This property method will query the backend to try to fetch the latest version.
