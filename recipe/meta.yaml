@@ -13,12 +13,12 @@ build:
   number: 0
 requirements:
   host:
-    - python >=3.11,<3.15
+    - python >=3.9,<3.15
     - setuptools
     - wheel
     - pip
   run:
-    - python>=3.11,<3.15
+    - python>=3.9,<3.15
     - urllib3<2
     - multiprocess>=0.70.15,<0.71.dev0
     - requests>=2.31
