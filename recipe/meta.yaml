@@ -1,11 +1,13 @@
 package:
   name: "openhexa.sdk"
-  version: {{ GIT_DESCRIBE_TAG }}
+  version: {{ VERSION }}
 
 source:
   path: ..
 
 build:
+  script_env:
+   - VERSION
   entry_points:
     - openhexa = openhexa.cli:app
   noarch: python
