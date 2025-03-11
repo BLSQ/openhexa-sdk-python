@@ -4,7 +4,6 @@ See https://github.com/BLSQ/openhexa/wiki/User-manual#about-workspaces for more 
 """
 
 import os
-import typing
 from dataclasses import fields, make_dataclass
 from warnings import warn
 
@@ -184,15 +183,9 @@ class CurrentWorkspace:
 
     def get_connection(
         self, identifier: str
-    ) -> typing.Union[
-        DHIS2Connection,
-        PostgreSQLConnection,
-        IASOConnection,
-        S3Connection,
-        GCSConnection,
-        CustomConnection,
-        None,
-    ]:
+    ) -> (
+        DHIS2Connection | PostgreSQLConnection | IASOConnection | S3Connection | GCSConnection | CustomConnection | None
+    ):
         """Get a connection by its identifier.
 
         Parameters

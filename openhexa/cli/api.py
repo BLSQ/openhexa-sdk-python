@@ -480,11 +480,11 @@ def create_pipeline_structure(pipeline_name: str, base_path: Path, workspace: st
     return output_directory
 
 
-def generate_zip_file(pipeline_directory_path: typing.Union[str, Path]) -> io.BytesIO:
+def generate_zip_file(pipeline_directory_path: str | Path) -> io.BytesIO:
     """Generate a ZIP file containing the pipeline code.
 
     Args:
-        pipeline_directory_path (typing.Union[str, Path]): The path to the pipeline directory.
+        pipeline_directory_path (str | Path): The path to the pipeline directory.
 
     Returns
     -------
@@ -534,7 +534,7 @@ def generate_zip_file(pipeline_directory_path: typing.Union[str, Path]) -> io.By
 
 def upload_pipeline(
     target_pipeline_code: str,
-    pipeline_directory_path: typing.Union[str, Path],
+    pipeline_directory_path: str | Path,
     name: str = None,
     description: str = None,
     link: str = None,

@@ -16,7 +16,7 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
-requires-python = ">=3.9,<3.15" # the main constraint for supported Python versions is the multiprocess library
+requires-python = ">=3.11,<3.15" # the main constraint for supported Python versions is the multiprocess library
 dependencies = [
     "urllib3<3",
     "multiprocess~=0.70.15",

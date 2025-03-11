@@ -106,9 +106,9 @@ class Task:
                 r_task_kwargs[k] = a
 
         # execute the task
-        self.start_time = datetime.datetime.now(datetime.timezone.utc)
+        self.start_time = datetime.datetime.now(datetime.UTC)
         self.result = self.compute(*r_task_args, **r_task_kwargs)
-        self.end_time = datetime.datetime.now(datetime.timezone.utc)
+        self.end_time = datetime.datetime.now(datetime.UTC)
 
         # done!
         return TaskCom(self)

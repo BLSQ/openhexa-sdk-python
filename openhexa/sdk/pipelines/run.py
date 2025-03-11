@@ -112,7 +112,7 @@ class CurrentRun:
                 {"input": {"priority": log_level.name, "message": str(message)}},
             )
         else:
-            now = datetime.datetime.now(tz=datetime.timezone.utc).replace(microsecond=0).isoformat()
+            now = datetime.datetime.now(tz=datetime.UTC).replace(microsecond=0).isoformat()
             print(now, log_level.name, message)
 
 

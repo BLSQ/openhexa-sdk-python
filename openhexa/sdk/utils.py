@@ -28,7 +28,7 @@ def get_environment():
         raise ValueError(f"Invalid environment: {env}")
 
 
-def graphql(operation: str, variables: typing.Optional[dict[str, typing.Any]] = None) -> dict[str, typing.Any]:
+def graphql(operation: str, variables: dict[str | typing.Any] | None = None) -> dict[str | typing.Any]:
     """Performa GraphQL query."""
     auth_token = os.environ[
         "HEXA_TOKEN"
@@ -176,7 +176,7 @@ class Page:
 
 
 @contextlib.contextmanager
-def read_content(source: typing.Union[str, os.PathLike[str], typing.IO, bytes]):
+def read_content(source: str | os.PathLike[str] | typing.IO | bytes):
     """Read file content and return it as bytes."""
     try:
         if isinstance(source, bytes):
@@ -184,7 +184,7 @@ def read_content(source: typing.Union[str, os.PathLike[str], typing.IO, bytes]):
         elif hasattr(source, "read"):
             yield source
         # If source is a string or PathLike object
-        elif isinstance(source, (str, os.PathLike)):
+        elif isinstance(source, (str | os.PathLike)):
             with open(os.fspath(source), "rb") as f:
                 yield f
 
