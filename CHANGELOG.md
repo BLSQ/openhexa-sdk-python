@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.3](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.0.2...v2.0.3) (2025-03-11)
+
+
+### Miscellaneous Chores
+
+* Release 2.0.3 ([2cd0d5a](https://github.com/BLSQ/openhexa-sdk-python/commit/2cd0d5a2aaa6a74859a9c85ec0a5f1414d82b27f))
+
 ## [2.0.2](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.0.1...v2.0.2) (2025-03-11)
 
 
