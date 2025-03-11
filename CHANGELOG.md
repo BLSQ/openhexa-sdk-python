@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.4](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.0.3...v2.0.4) (2025-03-11)
+
+
+### Bug Fixes
+
+* We need to provide the version to anaconda to not have the v in front of the version ([74e240a](https://github.com/BLSQ/openhexa-sdk-python/commit/74e240ac695f32679aa899bc1274975e5f7c8049))
+
 ## [2.0.3](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.0.2...v2.0.3) (2025-03-11)
 
 
