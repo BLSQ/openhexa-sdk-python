@@ -360,7 +360,13 @@ TYPES_BY_PYTHON_TYPE = {
 
 
 class ParameterWidget(StrEnum):
-    """Enum for parameter available parameter widgets."""
+    """
+    Enum for parameter available parameter widgets.
+
+    The list of supported widgets can be found in the OpenHEXA documentation or GraphQL schema.
+    /graphql/ -> __schema -> types -> ParameterWidget
+    https://github.com/blsq/openhexa/wiki/Writing-OpenHEXA-pipelines#using-widget-parameters
+    """
 
     DHIS2_ORG_UNITS = "DHIS2_ORG_UNITS"
     DHIS2_ORG_UNIT_GROUPS = "DHIS2_ORG_UNIT_GROUPS"
