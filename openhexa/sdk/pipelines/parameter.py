@@ -565,6 +565,7 @@ def parameter(
     name: str | None = None,
     choices: typing.Sequence | None = None,
     help: str | None = None,
+    widget: ParameterWidget | None = None,
     default: typing.Any | None = None,
     required: bool = True,
     multiple: bool = False,
@@ -612,6 +613,7 @@ def parameter(
                 help=help,
                 default=default,
                 required=required,
+                widget=widget,
                 multiple=multiple,
             ),
         )
