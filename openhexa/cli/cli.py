@@ -400,7 +400,7 @@ def pipelines_push(
 
         if code:
             selected_pipeline = get_pipeline_from_code(code) or _terminate(
-                f"❌ Pipeline with code {click.style(code, bold=True)} not found.", err=True
+                f"❌ Pipeline with code '{code}' not found.", err=True
             )
         elif yes:
             selected_pipeline = workspace_pipelines[0] if workspace_pipelines else None
