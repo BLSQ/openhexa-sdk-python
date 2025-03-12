@@ -205,6 +205,37 @@ class CliRunTest(TestCase):
     @patch("openhexa.cli.api.graphql")
     @patch("openhexa.cli.cli.get_pipeline")
     @patch("openhexa.cli.cli.get_pipelines_pages")
+    @patch("openhexa.cli.cli.get_pipeline_from_code")
+    def test_push_pipeline_with_non_existing_code(
+        self, mock_get_pipeline_from_code, mock_get_pipelines_pages, mock_get_pipeline, mock_graphql
+    ):
+        """Test pushing a pipeline with a non-existing --code flag."""
+        with self.runner.isolated_filesystem() as tmp:
+            with open(Path(tmp) / python_file_name, "w") as f:
+                f.write(python_code)
+            mock_graphql.return_value = setup_graphql_response()
+            mock_pipeline = MagicMock(spec=Pipeline)
+            mock_pipeline.name = pipeline_name
+            mock_get_pipeline.return_value = mock_pipeline
+            mock_get_pipelines_pages.return_value = {
+                "items": [
+                    {"name": "Pipeline1", "code": "code1"},
+                    {"name": "Pipeline2", "code": "code2"},
+                ],
+                "totalPages": 2,
+            }
+            mock_get_pipeline_from_code.return_value = None  # Simulate non-existing pipeline code
+
+            result = self.runner.invoke(
+                pipelines_push,
+                [tmp, "--code", "non_existing_code"],
+            )
+            self.assertEqual(result.exit_code, 1)
+            self.assertIn("❌ Pipeline with code 'non_existing_code' not found.", result.output)
+
+    @patch("openhexa.cli.api.graphql")
+    @patch("openhexa.cli.cli.get_pipeline")
+    @patch("openhexa.cli.cli.get_pipelines_pages")
     @patch("openhexa.cli.cli.upload_pipeline")
     @patch.dict(os.environ, {"HEXA_API_URL": "https://www.bluesquarehub.com/", "HEXA_WORKSPACE": "workspace"})
     def test_push_pipeline_with_code_flag(
