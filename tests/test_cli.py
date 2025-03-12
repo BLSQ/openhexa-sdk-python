@@ -186,6 +186,7 @@ class CliRunTest(TestCase):
             )
 
     @patch("openhexa.cli.api.graphql")
+    @patch.dict(os.environ, {"HEXA_API_URL": "https://www.bluesquarehub.com/", "HEXA_WORKSPACE": "workspace"})
     def test_push_pipeline_with_yes_flag_without_code(self, mock_graphql):
         """Test pushing a pipeline with the --yes flag without providing a --code."""
         with self.runner.isolated_filesystem() as tmp:
@@ -206,6 +207,7 @@ class CliRunTest(TestCase):
     @patch("openhexa.cli.cli.get_pipeline")
     @patch("openhexa.cli.cli.get_pipelines_pages")
     @patch("openhexa.cli.cli.get_pipeline_from_code")
+    @patch.dict(os.environ, {"HEXA_API_URL": "https://www.bluesquarehub.com/", "HEXA_WORKSPACE": "workspace"})
     def test_push_pipeline_with_non_existing_code(
         self, mock_get_pipeline_from_code, mock_get_pipelines_pages, mock_get_pipeline, mock_graphql
     ):
