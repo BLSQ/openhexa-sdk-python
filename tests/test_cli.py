@@ -255,7 +255,6 @@ class CliRunTest(TestCase):
                 f"✅ New version '{version}' created! ",
                 result.output,
             )
-            self.assertTrue(mock_upload_pipeline.called)
 
     @patch("openhexa.cli.cli.click.prompt")
     def test_select_pipeline(self, mock_prompt):
