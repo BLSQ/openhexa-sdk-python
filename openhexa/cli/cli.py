@@ -323,6 +323,14 @@ def select_pipeline(workspace_pipelines, number_of_pages: int, pipeline):
     ),
 )
 @click.option(
+    "--code",
+    "-c",
+    type=str,
+    help="Code of the pipeline",
+    prompt="Code of the pipeline",
+    prompt_required=False,
+)
+@click.option(
     "--name",
     "-n",
     default=None,
@@ -352,6 +360,7 @@ def select_pipeline(workspace_pipelines, number_of_pages: int, pipeline):
 @click.option("--yes", is_flag=True, help="Skip confirmation")
 def pipelines_push(
     path: str,
+    code: str = None,
     name: str = None,
     description: str = None,
     link: str = None,
@@ -368,6 +377,8 @@ def pipelines_push(
             "activate a workspace.",
             err=True,
         )
+    if yes and not code:
+        _terminate("❌ You must provide a pipeline code (using -c or --code) when using the --yes flag.", err=True)
 
     ensure_is_pipeline_dir(path)
 
@@ -387,7 +398,11 @@ def pipelines_push(
         if settings.debug:
             click.echo(workspace_pipelines)
 
-        if yes:
+        if code:
+            selected_pipeline = get_pipeline_from_code(code) or _terminate(
+                f"❌ Pipeline with code {click.style(code, bold=True)} not found.", err=True
+            )
+        elif yes:
             selected_pipeline = workspace_pipelines[0] if workspace_pipelines else None
         else:
             selected_pipeline = select_pipeline(workspace_pipelines, number_of_pages, pipeline)
