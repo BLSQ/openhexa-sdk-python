@@ -265,6 +265,7 @@ def select_pipeline(workspace_pipelines, number_of_pages: int, pipeline):
     """Select a pipeline from the list of workspace pipelines or select creating a new one or select a pipeline from a code."""
     create_new_pipeline = f"Create a new {click.style(pipeline.name, bold=True)} pipeline"
     enter_pipeline_code = f"Insert a {click.style('pipeline code', italic=True)}"
+    cancel = "Cancel"
 
     def _generate_choices():
         """Generate the list of choices for the user."""
@@ -275,6 +276,7 @@ def select_pipeline(workspace_pipelines, number_of_pages: int, pipeline):
             ]
             + [create_new_pipeline]
             + ([enter_pipeline_code] if number_of_pages > 1 else [])
+            + [cancel]
         )
 
     def _handle_user_selection(choices):
@@ -296,6 +298,8 @@ def select_pipeline(workspace_pipelines, number_of_pages: int, pipeline):
             return None
         elif choices[choice_idx] == enter_pipeline_code:
             return _handle_enter_pipeline_code()
+        elif choices[choice_idx] == cancel:
+            raise click.Abort()
         else:
             return workspace_pipelines[choice_idx]
 
