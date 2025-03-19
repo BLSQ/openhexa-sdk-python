@@ -1,4 +1,4 @@
-"""Template for newly generated pipelines."""
+"""Example pipeline to get data elements from DHIS2."""
 
 from openhexa.sdk import current_run, parameter, pipeline
 from openhexa.sdk.pipelines.parameter import ParameterWidget
