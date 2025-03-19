@@ -405,7 +405,6 @@ class Parameter:
         multiple: bool = False,
     ):
         validate_pipeline_parameter_code(code)
-
         self.code = code
 
         try:
@@ -536,7 +535,7 @@ class Parameter:
                 )
 
 
-def validate_parameters_with_connection(parameters: [Parameter]):
+def validate_parameters(parameters: list[Parameter]):
     """Validate the provided connection parameters if they relate to existing connection parameter."""
     supported_connection_types = {DHIS2ConnectionType}
     connection_parameters = {p.code for p in parameters if type(p.type) in supported_connection_types}
@@ -545,6 +544,13 @@ def validate_parameters_with_connection(parameters: [Parameter]):
         if parameter.connection and parameter.connection not in connection_parameters:
             raise InvalidParameterError(
                 f"Connection field '{parameter.code}' references a non-existing connection parameter '{parameter.connection}'"
+            )
+        if parameter.widget and parameter.widget.startswith("DHIS2_") and not parameter.connection:
+            # As of now we only support DHIS2 widgets so it's an easy fix to assume that widgets
+            # that start with "DHIS2_" are DHIS2 widgets
+            raise InvalidParameterError(
+                f"DHIS2 widgets require a connection parameter. Please provide a connection parameter for {parameter.code}. "
+                f"Example: @parameter('{parameter.code}', type=str, widget=ParameterWidget.{parameter.widget}, connection='my_connection')"
             )
 
 

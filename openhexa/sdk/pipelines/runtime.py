@@ -18,7 +18,7 @@ from openhexa.sdk.pipelines.parameter import (
     TYPES_BY_PYTHON_TYPE,
     Parameter,
     ParameterWidget,
-    validate_parameters_with_connection,
+    validate_parameters,
 )
 
 from .pipeline import Pipeline
@@ -303,8 +303,7 @@ def get_pipeline(pipeline_path: Path) -> Pipeline:
             except KeyError as e:
                 raise InvalidParameterError(f"Missing required parameter attribute: {e}")
 
-        # Validate parameters with connections
-        validate_parameters_with_connection(pipeline_parameters)
+        validate_parameters(pipeline_parameters)
 
         # Create and return the pipeline
         return Pipeline(

@@ -507,7 +507,7 @@ class AstTest(TestCase):
             with self.assertRaises(InvalidParameterError):
                 get_pipeline(tmpdirname)
 
-    def test_pipeline_with_widget_without_connection(self):
+    def test_pipeline_with_dhis2_widget_without_connection(self):
         """The file contains a @pipeline decorator and a @parameter decorator with a widget parameter field."""
         with tempfile.TemporaryDirectory() as tmpdirname:
             with open(f"{tmpdirname}/pipeline.py", "w") as f:
@@ -525,30 +525,8 @@ class AstTest(TestCase):
                         ]
                     )
                 )
-            pipeline = get_pipeline(tmpdirname)
-            self.assertEqual(
-                pipeline.to_dict(),
-                {
-                    "name": "Test pipeline",
-                    "function": None,
-                    "tasks": [],
-                    "parameters": [
-                        {
-                            "code": "test_field_for_widget",
-                            "type": "str",
-                            "name": "Widget Param",
-                            "default": None,
-                            "multiple": False,
-                            "choices": None,
-                            "widget": ParameterWidget.DHIS2_ORG_UNITS.value,
-                            "connection": None,
-                            "help": "Param help",
-                            "required": True,
-                        }
-                    ],
-                    "timeout": None,
-                },
-            )
+            with self.assertRaises(InvalidParameterError):
+                get_pipeline(tmpdirname)
 
     def test_pipeline_with_deprecated_code_argument_with_name(self):
         """The file contains a @pipeline decorator with the deprecated 'code' argument."""
