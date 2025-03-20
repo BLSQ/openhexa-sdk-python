@@ -359,23 +359,17 @@ TYPES_BY_PYTHON_TYPE = {
 }
 
 
-class ParameterWidget(StrEnum):
-    """
-    Enum for parameter available parameter widgets.
+class DHIS2Widget(StrEnum):
+    """Enum for DHIS2 widgets."""
 
-    The list of supported widgets can be found in the OpenHEXA documentation or GraphQL schema.
-    /graphql/ -> __schema -> types -> ParameterWidget
-    https://github.com/blsq/openhexa/wiki/Writing-OpenHEXA-pipelines#using-widget-parameters
-    """
-
-    DHIS2_ORG_UNITS = "DHIS2_ORG_UNITS"
-    DHIS2_ORG_UNIT_GROUPS = "DHIS2_ORG_UNIT_GROUPS"
-    DHIS2_ORG_UNIT_LEVELS = "DHIS2_ORG_UNIT_LEVELS"
-    DHIS2_DATASETS = "DHIS2_DATASETS"
-    DHIS2_DATA_ELEMENTS = "DHIS2_DATA_ELEMENTS"
-    DHIS2_DATA_ELEMENT_GROUPS = "DHIS2_DATA_ELEMENT_GROUPS"
-    DHIS2_INDICATORS = "DHIS2_INDICATORS"
-    DHIS2_INDICATOR_GROUPS = "DHIS2_INDICATOR_GROUPS"
+    ORG_UNITS = "DHIS2_ORG_UNITS"
+    ORG_UNIT_GROUPS = "DHIS2_ORG_UNIT_GROUPS"
+    ORG_UNIT_LEVELS = "DHIS2_ORG_UNIT_LEVELS"
+    DATASETS = "DHIS2_DATASETS"
+    DATA_ELEMENTS = "DHIS2_DATA_ELEMENTS"
+    DATA_ELEMENT_GROUPS = "DHIS2_DATA_ELEMENT_GROUPS"
+    INDICATORS = "DHIS2_INDICATORS"
+    INDICATOR_GROUPS = "DHIS2_INDICATOR_GROUPS"
 
 
 class Parameter:
@@ -399,13 +393,12 @@ class Parameter:
         choices: typing.Sequence | None = None,
         help: str | None = None,
         default: typing.Any | None = None,
-        widget: ParameterWidget | None = None,
+        widget: DHIS2Widget | None = None,
         connection: str | None = None,
         required: bool = True,
         multiple: bool = False,
     ):
         validate_pipeline_parameter_code(code)
-
         self.code = code
 
         try:
@@ -460,7 +453,7 @@ class Parameter:
             "choices": self.choices,
             "help": self.help,
             "default": self.default,
-            "widget": self.widget.value if self.widget else None,
+            "widget": self.widget if self.widget else None,
             "connection": self.connection,
             "required": self.required,
             "multiple": self.multiple,
@@ -536,7 +529,7 @@ class Parameter:
                 )
 
 
-def validate_parameters_with_connection(parameters: [Parameter]):
+def validate_parameters(parameters: list[Parameter]):
     """Validate the provided connection parameters if they relate to existing connection parameter."""
     supported_connection_types = {DHIS2ConnectionType}
     connection_parameters = {p.code for p in parameters if type(p.type) in supported_connection_types}
@@ -545,6 +538,11 @@ def validate_parameters_with_connection(parameters: [Parameter]):
         if parameter.connection and parameter.connection not in connection_parameters:
             raise InvalidParameterError(
                 f"Connection field '{parameter.code}' references a non-existing connection parameter '{parameter.connection}'"
+            )
+        if parameter.widget and parameter.widget in DHIS2Widget and not parameter.connection:
+            raise InvalidParameterError(
+                f"DHIS2 widgets require a connection parameter. Please provide a connection parameter for {parameter.code}. "
+                f"Example: @parameter('{parameter.code}', type=str, widget=DHIS2Widget.{parameter.widget}, connection='my_connection')"
             )
 
 
@@ -565,7 +563,7 @@ def parameter(
     name: str | None = None,
     choices: typing.Sequence | None = None,
     help: str | None = None,
-    widget: ParameterWidget | None = None,
+    widget: DHIS2Widget | None = None,
     default: typing.Any | None = None,
     required: bool = True,
     multiple: bool = False,

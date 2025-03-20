@@ -6,7 +6,7 @@ from unittest import TestCase
 from unittest.mock import patch
 
 from openhexa.sdk.pipelines.exceptions import InvalidParameterError, PipelineNotFound
-from openhexa.sdk.pipelines.parameter import ParameterWidget
+from openhexa.sdk.pipelines.parameter import DHIS2Widget
 from openhexa.sdk.pipelines.runtime import get_pipeline
 
 
@@ -436,10 +436,10 @@ class AstTest(TestCase):
                     "\n".join(
                         [
                             "from openhexa.sdk.pipelines import pipeline, parameter",
-                            "from openhexa.sdk.pipelines.widgets import ParameterWidget",
+                            "from openhexa.sdk.pipelines.widgets import DHIS2Widget",
                             "",
                             "@parameter('dhis_con', name='DHIS2 Connection', type=DHIS2Connection, required=True)",
-                            "@parameter('data_element_ids', name='Data Elements id', type=str, widget=ParameterWidget.DHIS2_ORG_UNITS, connection='dhis_con', required=True)",
+                            "@parameter('data_element_ids', name='Data Elements id', type=str, widget=DHIS2Widget.ORG_UNITS, connection='dhis_con', required=True)",
                             "@pipeline('Test pipeline')",
                             "def test_pipeline():",
                             "    pass",
@@ -472,7 +472,7 @@ class AstTest(TestCase):
                             "code": "data_element_ids",
                             "type": "str",
                             "name": "Data Elements id",
-                            "widget": ParameterWidget.DHIS2_ORG_UNITS.value,
+                            "widget": DHIS2Widget.ORG_UNITS.value,
                             "connection": "dhis_con",
                             "default": None,
                             "multiple": False,
@@ -493,11 +493,11 @@ class AstTest(TestCase):
                     "\n".join(
                         [
                             "from openhexa.sdk.pipelines import pipeline, parameter",
-                            "from openhexa.sdk.pipelines.parameter import ParameterWidget",
+                            "from openhexa.sdk.pipelines.parameter import DHIS2Widget",
                             "",
                             "@parameter('dhis_con', name='DHIS2 Connection', type=DHIS2Connection, required=True)",
                             "@pipeline('Test pipeline')",
-                            "@parameter('data_element_ids', name='Data Elements id', type=str, widget=ParameterWidget.DHIS2_ORG_UNITS, connection='sds_con', required=True)",
+                            "@parameter('data_element_ids', name='Data Elements id', type=str, widget=DHIS2Widget.ORG_UNITS, connection='sds_con', required=True)",
                             "def test_pipeline():",
                             "    pass",
                             "",
@@ -507,7 +507,7 @@ class AstTest(TestCase):
             with self.assertRaises(InvalidParameterError):
                 get_pipeline(tmpdirname)
 
-    def test_pipeline_with_widget_without_connection(self):
+    def test_pipeline_with_dhis2_widget_without_connection(self):
         """The file contains a @pipeline decorator and a @parameter decorator with a widget parameter field."""
         with tempfile.TemporaryDirectory() as tmpdirname:
             with open(f"{tmpdirname}/pipeline.py", "w") as f:
@@ -515,9 +515,9 @@ class AstTest(TestCase):
                     "\n".join(
                         [
                             "from openhexa.sdk.pipelines import pipeline, parameter",
-                            "from openhexa.sdk.pipelines.parameter import ParameterWidget",
+                            "from openhexa.sdk.pipelines.parameter import DHIS2Widget",
                             "",
-                            "@parameter('test_field_for_widget', name='Widget Param', type=str, widget=ParameterWidget.DHIS2_ORG_UNITS, help='Param help')",
+                            "@parameter('test_field_for_widget', name='Widget Param', type=str, widget=DHIS2Widget.ORG_UNITS, help='Param help')",
                             "@pipeline('Test pipeline')",
                             "def test_pipeline():",
                             "    pass",
@@ -525,30 +525,8 @@ class AstTest(TestCase):
                         ]
                     )
                 )
-            pipeline = get_pipeline(tmpdirname)
-            self.assertEqual(
-                pipeline.to_dict(),
-                {
-                    "name": "Test pipeline",
-                    "function": None,
-                    "tasks": [],
-                    "parameters": [
-                        {
-                            "code": "test_field_for_widget",
-                            "type": "str",
-                            "name": "Widget Param",
-                            "default": None,
-                            "multiple": False,
-                            "choices": None,
-                            "widget": ParameterWidget.DHIS2_ORG_UNITS.value,
-                            "connection": None,
-                            "help": "Param help",
-                            "required": True,
-                        }
-                    ],
-                    "timeout": None,
-                },
-            )
+            with self.assertRaises(InvalidParameterError):
+                get_pipeline(tmpdirname)
 
     def test_pipeline_with_deprecated_code_argument_with_name(self):
         """The file contains a @pipeline decorator with the deprecated 'code' argument."""
