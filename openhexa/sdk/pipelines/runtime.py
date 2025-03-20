@@ -16,8 +16,8 @@ import requests
 from openhexa.sdk.pipelines.exceptions import InvalidParameterError, PipelineNotFound
 from openhexa.sdk.pipelines.parameter import (
     TYPES_BY_PYTHON_TYPE,
+    DHIS2Widget,
     Parameter,
-    ParameterWidget,
     validate_parameters,
 )
 
@@ -168,7 +168,10 @@ def _get_decorator_arg_value(decorator: ast.Call, arg: Argument, index: int) -> 
             elif isinstance(keyword.value, ast.List):
                 return ([el.value for el in keyword.value.elts], True)
             elif isinstance(keyword.value, ast.Attribute):
-                return (ParameterWidget(keyword.value.attr), True)
+                if keyword.value.attr in DHIS2Widget.__members__:
+                    return getattr(DHIS2Widget, keyword.value.attr), True
+                else:
+                    raise ValueError(f"Unsupported widget: {keyword.value.attr}")
 
     # Then check for positional arguments
     try:

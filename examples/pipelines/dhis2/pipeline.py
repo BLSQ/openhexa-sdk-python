@@ -1,7 +1,7 @@
 """Example pipeline to get data elements from DHIS2."""
 
 from openhexa.sdk import current_run, parameter, pipeline
-from openhexa.sdk.pipelines.parameter import ParameterWidget
+from openhexa.sdk.pipelines.parameter import DHIS2Widget
 from openhexa.sdk.workspaces.connection import DHIS2Connection
 
 
@@ -11,7 +11,7 @@ from openhexa.sdk.workspaces.connection import DHIS2Connection
     "data_elements",
     type=str,
     required=True,
-    widget=ParameterWidget.DHIS2_DATA_ELEMENTS,
+    widget=DHIS2Widget.DATA_ELEMENTS,
     multiple=True,
     connection="dhis2_con",
 )
