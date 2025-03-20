@@ -540,8 +540,6 @@ def validate_parameters(parameters: list[Parameter]):
                 f"Connection field '{parameter.code}' references a non-existing connection parameter '{parameter.connection}'"
             )
         if parameter.widget and parameter.widget in DHIS2Widget and not parameter.connection:
-            # As of now we only support DHIS2 widgets so it's an easy fix to assume that widgets
-            # that start with "DHIS2_" are DHIS2 widgets
             raise InvalidParameterError(
                 f"DHIS2 widgets require a connection parameter. Please provide a connection parameter for {parameter.code}. "
                 f"Example: @parameter('{parameter.code}', type=str, widget=DHIS2Widget.{parameter.widget}, connection='my_connection')"
