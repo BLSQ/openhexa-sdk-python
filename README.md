@@ -29,7 +29,7 @@ The OpenHEXA wiki has a section dedicated to the SDK:
 Requirements
 ------------
 
-The OpenHEXA SDK requires Python version 3.9 or newer, but it is not yet compatible with Python 3.12 or later versions.
+The OpenHEXA SDK requires Python version 3.11, 3.12 or 3.13.
 
 If you want to be able to run pipeline in a containerized environment on your machine, you will need 
 [Docker](https://www.docker.com/).
