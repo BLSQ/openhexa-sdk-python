@@ -453,7 +453,7 @@ class Parameter:
             "choices": self.choices,
             "help": self.help,
             "default": self.default,
-            "widget": self.widget if self.widget else None,
+            "widget": self.widget.value if self.widget else None,
             "connection": self.connection,
             "required": self.required,
             "multiple": self.multiple,

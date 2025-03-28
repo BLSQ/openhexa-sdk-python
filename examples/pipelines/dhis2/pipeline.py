@@ -5,7 +5,7 @@ from openhexa.sdk.pipelines.parameter import DHIS2Widget
 from openhexa.sdk.workspaces.connection import DHIS2Connection
 
 
-@pipeline("dhis2")
+@pipeline(name="DHIS2 Data Elements")
 @parameter("dhis2_con", type=DHIS2Connection, required=True)
 @parameter(
     "data_elements",
