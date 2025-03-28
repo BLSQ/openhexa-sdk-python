@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.1.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.0.5...v2.1.0) (2025-03-28)
+
+
+### Features
+
+* cli users should have a way to give a pipeline code in the command to upload a pipeline (HEXA-1216) ([#242](https://github.com/BLSQ/openhexa-sdk-python/issues/242)) ([69d1cb9](https://github.com/BLSQ/openhexa-sdk-python/commit/69d1cb963b38385d39d088beacdd876a1c1be2c3))
+
+
+### Bug Fixes
+
+* dictionary lapping for widget ([#248](https://github.com/BLSQ/openhexa-sdk-python/issues/248)) ([9b5224c](https://github.com/BLSQ/openhexa-sdk-python/commit/9b5224ce61acc732a1124fc347a9cfc0f0e49e9f))
+
 ## [2.0.5](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.0.4...v2.0.5) (2025-03-11)
 
 
