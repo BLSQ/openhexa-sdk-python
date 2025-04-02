@@ -570,7 +570,9 @@ def upload_pipeline(
                         pipeline {
                             id
                             permissions {
-                                createTemplateVersion
+                                createTemplateVersion {
+                                    isAllowed
+                                }
                             }
                             template {
                                 id

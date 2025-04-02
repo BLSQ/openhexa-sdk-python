@@ -153,7 +153,7 @@ class CliRunTest(TestCase):
                 "versionName": version,
                 "pipeline": {
                     "id": pipeline_id,
-                    "permissions": {"createTemplateVersion": True},
+                    "permissions": {"createTemplateVersion": {"isAllowed": True}},
                     "template": template,
                 },
                 "id": pipeline_version_id,
@@ -269,7 +269,7 @@ class CliRunTest(TestCase):
                 "versionName": version,
                 "pipeline": {
                     "id": pipeline_id,
-                    "permissions": {"createTemplateVersion": True},
+                    "permissions": {"createTemplateVersion": {"isAllowed": True}},
                     "template": template,
                 },
                 "id": pipeline_version_id,
