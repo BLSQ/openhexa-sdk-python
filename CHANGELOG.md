@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.1](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.1.0...v2.1.1) (2025-04-02)
+
+
+### Bug Fixes
+
+* getting permissions of create template version (HEXA-1228)([#249](https://github.com/BLSQ/openhexa-sdk-python/issues/249)) ([ce36728](https://github.com/BLSQ/openhexa-sdk-python/commit/ce3672821e9bea53251be0ffe90c0d7ee90c24cb))
+
 ## [2.1.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.0.5...v2.1.0) (2025-03-28)
 
 
