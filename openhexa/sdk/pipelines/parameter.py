@@ -564,6 +564,7 @@ def parameter(
     choices: typing.Sequence | None = None,
     help: str | None = None,
     widget: DHIS2Widget | None = None,
+    connection: str | None = None,
     default: typing.Any | None = None,
     required: bool = True,
     multiple: bool = False,
@@ -585,6 +586,11 @@ def parameter(
         interface)
     help : str, optional
         An optional help text to be displayed in the web interface
+    widget : DHIS2Widget, optional
+        An optional widget type for the parameter (only used if the parameter type is DHIS2Connection)
+    connection : str, optional
+        An optional connection parameter that will be used to fetch the list of choices for the parameter (only used
+        if the parameter type is DHIS2Connection)
     default : any, optional
         An optional default value for the parameter (should be of the type defined by the type parameter)
     required : bool, default=True
@@ -596,7 +602,7 @@ def parameter(
     Returns
     -------
     typing.Callable
-        A decorator that returns the Pipeline with the paramter attached
+        A decorator that returns the Pipeline with the parameter attached
 
     """
 
@@ -612,6 +618,7 @@ def parameter(
                 default=default,
                 required=required,
                 widget=widget,
+                connection=connection,
                 multiple=multiple,
             ),
         )
