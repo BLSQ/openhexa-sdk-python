@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.2](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.1.1...v2.1.2) (2025-04-07)
+
+
+### Bug Fixes
+
+* adds connection field to decorator ([#251](https://github.com/BLSQ/openhexa-sdk-python/issues/251)) ([2be9bd3](https://github.com/BLSQ/openhexa-sdk-python/commit/2be9bd38a1230467e56eb103bb425242f6809d1f))
+
 ## [2.1.1](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.1.0...v2.1.1) (2025-04-02)
 
 

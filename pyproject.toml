@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "openhexa.sdk"
-version = "2.1.1"
+version = "2.1.2"
 description = "OpenHEXA SDK"
 
 authors = [{ name = "Bluesquare", email = "dev@bluesquarehub.com" }]
