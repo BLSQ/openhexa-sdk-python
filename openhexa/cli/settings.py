@@ -23,7 +23,7 @@ def _open_config():
         config.read_string(
             """
         [openhexa]
-        url=https://api.openhexa.org
+        url=https://app.openhexa.org
 
         [workspaces]
         """
