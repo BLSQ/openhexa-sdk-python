@@ -2,6 +2,7 @@
 
 from .datasets import Dataset
 from .pipelines import current_run, parameter, pipeline
+from .pipelines.parameter import DHIS2Widget
 from .workspaces import workspace
 from .workspaces.connection import (
     CustomConnection,
@@ -18,6 +19,7 @@ __all__ = [
     "parameter",
     "current_run",
     "DHIS2Connection",
+    "DHIS2Widget",
     "IASOConnection",
     "PostgreSQLConnection",
     "GCSConnection",
