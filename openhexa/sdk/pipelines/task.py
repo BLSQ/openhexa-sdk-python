@@ -6,6 +6,7 @@ See https://github.com/BLSQ/openhexa/wiki/Writing-OpenHEXA-pipelines#pipelines-a
 from __future__ import annotations
 
 import datetime
+import traceback
 import typing
 
 import openhexa.sdk.pipelines.pipeline
@@ -107,7 +108,11 @@ class Task:
 
         # execute the task
         self.start_time = datetime.datetime.now(datetime.UTC)
-        self.result = self.compute(*r_task_args, **r_task_kwargs)
+        try:
+            self.result = self.compute(*r_task_args, **r_task_kwargs)
+        except Exception as e:
+            tb = traceback.format_exc()
+            raise RuntimeError(f"Task '{self.name}' failed with: {str(e)}\n{tb}") from None
         self.end_time = datetime.datetime.now(datetime.UTC)
 
         # done!
