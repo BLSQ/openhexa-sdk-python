@@ -17,8 +17,9 @@ from openhexa.sdk.pipelines.exceptions import InvalidParameterError, PipelineNot
 from openhexa.sdk.pipelines.parameter import (
     TYPES_BY_PYTHON_TYPE,
     DHIS2Widget,
+    IASOWidget,
     Parameter,
-    validate_parameters, IASOWidget,
+    validate_parameters,
 )
 
 from .pipeline import Pipeline

@@ -16,16 +16,16 @@ from openhexa.sdk.workspaces.connection import IASOConnection
     connection="iaso_con",
 )
 def iaso(iaso_con, forms):
-    """Get data elements from IASO."""
-    print_data_elements(iaso_con, forms)
+    """Get forms from IASO."""
+    print_forms(iaso_con, forms)
 
 
 @iaso.task
-def print_data_elements(iaso_con, forms):
-    """Print data elements."""
+def print_forms(iaso_con, forms):
+    """Print forms."""
     current_run.log_info("Printing forms")
 
-    current_run.log_info(f"Data elements: {forms}")
+    current_run.log_info(f"Forms: {forms}")
 
 
 if __name__ == "__main__":

@@ -541,6 +541,7 @@ class AstTest(TestCase):
                     "timeout": None,
                 },
             )
+
     def test_pipeline_wit_wrong_connection_parameter(self):
         """The file contains a @pipeline decorator and a @parameter decorator with a non-existing connection type."""
         with tempfile.TemporaryDirectory() as tmpdirname:

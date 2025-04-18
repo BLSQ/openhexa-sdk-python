@@ -361,9 +361,11 @@ TYPES_BY_PYTHON_TYPE = {
 
 class IASOWidget(StrEnum):
     """Enum for IASO widgets."""
+
     FORMS = "IASO_FORMS"
     ORG_UNITS = "IASO_ORG_UNITS"
     PROJECTS = "IASO_PROJECTS"
+
 
 class DHIS2Widget(StrEnum):
     """Enum for DHIS2 widgets."""
@@ -545,7 +547,11 @@ def validate_parameters(parameters: list[Parameter]):
             raise InvalidParameterError(
                 f"Connection field '{parameter.code}' references a non-existing connection parameter '{parameter.connection}'"
             )
-        if parameter.widget and (parameter.widget in DHIS2Widget or parameter.widget in DHIS2Widget) and not parameter.connection:
+        if (
+            parameter.widget
+            and (parameter.widget in DHIS2Widget or parameter.widget in IASOWidget)
+            and not parameter.connection
+        ):
             raise InvalidParameterError(
                 f"Widgets require a connection parameter. Please provide a connection parameter for {parameter.code}. "
                 f"Example: @parameter('my_connection', ...)"
@@ -570,7 +576,7 @@ def parameter(
     name: str | None = None,
     choices: typing.Sequence | None = None,
     help: str | None = None,
-    widget: DHIS2Widget| IASOWidget | None = None,
+    widget: DHIS2Widget | IASOWidget | None = None,
     connection: str | None = None,
     default: typing.Any | None = None,
     required: bool = True,
@@ -649,4 +655,3 @@ class FunctionWithParameter:
     def __call__(self, *args, **kwargs):
         """Call the decorated pipeline function."""
         return self.function(*args, **kwargs)
-
