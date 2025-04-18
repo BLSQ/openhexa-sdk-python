@@ -2,7 +2,7 @@
 
 from .datasets import Dataset
 from .pipelines import current_run, parameter, pipeline
-from .pipelines.parameter import DHIS2Widget
+from .pipelines.parameter import DHIS2Widget, IASOWidget
 from .workspaces import workspace
 from .workspaces.connection import (
     CustomConnection,
@@ -21,6 +21,7 @@ __all__ = [
     "DHIS2Connection",
     "DHIS2Widget",
     "IASOConnection",
+    "IASOWidget",
     "PostgreSQLConnection",
     "GCSConnection",
     "S3Connection",

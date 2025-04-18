@@ -6,7 +6,7 @@ from unittest import TestCase
 from unittest.mock import patch
 
 from openhexa.sdk.pipelines.exceptions import InvalidParameterError, PipelineNotFound
-from openhexa.sdk.pipelines.parameter import DHIS2Widget
+from openhexa.sdk.pipelines.parameter import DHIS2Widget, IASOWidget
 from openhexa.sdk.pipelines.runtime import get_pipeline
 
 
@@ -428,7 +428,7 @@ class AstTest(TestCase):
             with self.assertRaises(InvalidParameterError):
                 get_pipeline(tmpdirname)
 
-    def test_pipeline_with_connection_parameter(self):
+    def test_pipeline_with_connection_parameter_for_dhis2(self):
         """The file contains a @pipeline decorator and a @parameter decorator with a connection type."""
         with tempfile.TemporaryDirectory() as tmpdirname:
             with open(f"{tmpdirname}/pipeline.py", "w") as f:
@@ -485,6 +485,62 @@ class AstTest(TestCase):
                 },
             )
 
+    def test_pipeline_with_connection_parameter_for_iaso(self):
+        """The file contains a @pipeline decorator and a @parameter decorator with a connection type."""
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            with open(f"{tmpdirname}/pipeline.py", "w") as f:
+                f.write(
+                    "\n".join(
+                        [
+                            "from openhexa.sdk.pipelines import pipeline, parameter",
+                            "from openhexa.sdk.pipelines.widgets import IASOWidget",
+                            "",
+                            "@parameter('iaso_con', name='IASO Connection', type=IASOConnection, required=True)",
+                            "@parameter('forms', name='Forms', type=str, widget=IASOWidget.FORMS, connection='iaso_con', required=True)",
+                            "@pipeline('Test pipeline')",
+                            "def test_pipeline():",
+                            "    pass",
+                            "",
+                        ]
+                    )
+                )
+            pipeline = get_pipeline(tmpdirname)
+            self.maxDiff = None
+            self.assertEqual(
+                pipeline.to_dict(),
+                {
+                    "name": "Test pipeline",
+                    "function": None,
+                    "tasks": [],
+                    "parameters": [
+                        {
+                            "code": "iaso_con",
+                            "type": "iaso",
+                            "name": "IASO Connection",
+                            "default": None,
+                            "multiple": False,
+                            "choices": None,
+                            "widget": None,
+                            "connection": None,
+                            "help": None,
+                            "required": True,
+                        },
+                        {
+                            "code": "forms",
+                            "type": "str",
+                            "name": "Forms",
+                            "widget": IASOWidget.FORMS.value,
+                            "connection": "iaso_con",
+                            "default": None,
+                            "multiple": False,
+                            "choices": None,
+                            "help": None,
+                            "required": True,
+                        },
+                    ],
+                    "timeout": None,
+                },
+            )
     def test_pipeline_wit_wrong_connection_parameter(self):
         """The file contains a @pipeline decorator and a @parameter decorator with a non-existing connection type."""
         with tempfile.TemporaryDirectory() as tmpdirname:
