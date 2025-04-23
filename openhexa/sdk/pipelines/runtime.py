@@ -17,6 +17,7 @@ from openhexa.sdk.pipelines.exceptions import InvalidParameterError, PipelineNot
 from openhexa.sdk.pipelines.parameter import (
     TYPES_BY_PYTHON_TYPE,
     DHIS2Widget,
+    IASOWidget,
     Parameter,
     validate_parameters,
 )
@@ -170,6 +171,8 @@ def _get_decorator_arg_value(decorator: ast.Call, arg: Argument, index: int) -> 
             elif isinstance(keyword.value, ast.Attribute):
                 if keyword.value.attr in DHIS2Widget.__members__:
                     return getattr(DHIS2Widget, keyword.value.attr), True
+                elif keyword.value.attr in IASOWidget.__members__:
+                    return getattr(IASOWidget, keyword.value.attr), True
                 else:
                     raise ValueError(f"Unsupported widget: {keyword.value.attr}")
 

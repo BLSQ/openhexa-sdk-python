@@ -359,6 +359,14 @@ TYPES_BY_PYTHON_TYPE = {
 }
 
 
+class IASOWidget(StrEnum):
+    """Enum for IASO widgets."""
+
+    FORMS = "IASO_FORMS"
+    ORG_UNITS = "IASO_ORG_UNITS"
+    PROJECTS = "IASO_PROJECTS"
+
+
 class DHIS2Widget(StrEnum):
     """Enum for DHIS2 widgets."""
 
@@ -393,7 +401,7 @@ class Parameter:
         choices: typing.Sequence | None = None,
         help: str | None = None,
         default: typing.Any | None = None,
-        widget: DHIS2Widget | None = None,
+        widget: DHIS2Widget | IASOWidget | None = None,
         connection: str | None = None,
         required: bool = True,
         multiple: bool = False,
@@ -531,7 +539,7 @@ class Parameter:
 
 def validate_parameters(parameters: list[Parameter]):
     """Validate the provided connection parameters if they relate to existing connection parameter."""
-    supported_connection_types = {DHIS2ConnectionType}
+    supported_connection_types = {DHIS2ConnectionType, IASOConnectionType}
     connection_parameters = {p.code for p in parameters if type(p.type) in supported_connection_types}
 
     for parameter in parameters:
@@ -539,10 +547,15 @@ def validate_parameters(parameters: list[Parameter]):
             raise InvalidParameterError(
                 f"Connection field '{parameter.code}' references a non-existing connection parameter '{parameter.connection}'"
             )
-        if parameter.widget and parameter.widget in DHIS2Widget and not parameter.connection:
+        if (
+            parameter.widget
+            and (parameter.widget in DHIS2Widget or parameter.widget in IASOWidget)
+            and not parameter.connection
+        ):
             raise InvalidParameterError(
-                f"DHIS2 widgets require a connection parameter. Please provide a connection parameter for {parameter.code}. "
-                f"Example: @parameter('{parameter.code}', type=str, widget=DHIS2Widget.{parameter.widget}, connection='my_connection')"
+                f"Widgets require a connection parameter. Please provide a connection parameter for {parameter.code}. "
+                f"Example: @parameter('my_connection', ...)"
+                f"Example: @parameter('{parameter.code}', widget = ..., connection='my_connection')"
             )
 
 
@@ -563,7 +576,7 @@ def parameter(
     name: str | None = None,
     choices: typing.Sequence | None = None,
     help: str | None = None,
-    widget: DHIS2Widget | None = None,
+    widget: DHIS2Widget | IASOWidget | None = None,
     connection: str | None = None,
     default: typing.Any | None = None,
     required: bool = True,
@@ -586,11 +599,10 @@ def parameter(
         interface)
     help : str, optional
         An optional help text to be displayed in the web interface
-    widget : DHIS2Widget, optional
-        An optional widget type for the parameter (only used if the parameter type is DHIS2Connection)
+    widget : DHIS2Widget|IASOWidget, optional
+        An optional widget type for the parameter (only used if the parameter type is DHIS2Connection, IASOConnection)
     connection : str, optional
-        An optional connection parameter that will be used to fetch the list of choices for the parameter (only used
-        if the parameter type is DHIS2Connection)
+        An optional connection parameter that will be used to link widget to the connection.
     default : any, optional
         An optional default value for the parameter (should be of the type defined by the type parameter)
     required : bool, default=True
