@@ -104,6 +104,31 @@ def get_library_versions() -> tuple[str, str]:
         return installed_version, installed_version
 
 
+# TODO : cache
+# TODO : get the schema from the server
+# TODO : test
+def detect_graphql_breaking_changes():
+    """Detect breaking changes between the schema referenced in the SDK and the server using graphql-core."""
+    from graphql import build_schema
+    from graphql.utilities import find_breaking_changes
+
+    base_path = Path(__file__).parent / "graphql"
+    stored_schema_path = base_path / "schema.generated.graphql"
+    server_schema_path = base_path / "server_schema.generated.graphql"
+
+    stored_schema_obj = build_schema(stored_schema_path.open().read())
+    server_schema_obj = build_schema(server_schema_path.open().read())
+
+    breaking_changes = find_breaking_changes(stored_schema_obj, server_schema_obj)
+    if breaking_changes:
+        # TODO : add color
+        # TODO : show th current version of the SDK
+        click.echo("Breaking changes detected between the SDK and the server:")
+        for change in breaking_changes:
+            click.echo(f"- {change.description}")
+        click.echo("Please update the SDK to the latest version or contact the OpenHEXA team for assistance.")
+
+
 def graphql(query: str, variables=None, token=None):
     """Perform a GraphQL request."""
     url = settings.api_url + "/graphql/"
@@ -121,6 +146,9 @@ def graphql(query: str, variables=None, token=None):
         click.echo(f"Variables: {variables}")
 
     session = create_requests_session()
+
+    detect_graphql_breaking_changes()
+
     response = session.post(
         url,
         headers={
