@@ -121,12 +121,21 @@ def detect_graphql_breaking_changes():
 
     breaking_changes = find_breaking_changes(stored_schema_obj, server_schema_obj)
     if breaking_changes:
-        # TODO : add color
-        # TODO : show th current version of the SDK
-        click.echo("Breaking changes detected between the SDK and the server:")
+        sdk_version = version("openhexa.sdk")
+        click.echo(
+            click.style(
+                f"⚠️ Breaking changes detected between the SDK (version {sdk_version}) and the server:", fg="red"
+            )
+        )
         for change in breaking_changes:
-            click.echo(f"- {change.description}")
-        click.echo("Please update the SDK to the latest version or contact the OpenHEXA team for assistance.")
+            click.echo(click.style(f"- {change.description}", fg="yellow"))
+        click.echo(click.style("This could lead to unexpected results.", fg="red"))
+        click.echo(
+            click.style(
+                "Please update the SDK to the latest version or use a version of the SDK compatible with the server.",
+                fg="red",
+            )
+        )
 
 
 def graphql(query: str, variables=None, token=None):
