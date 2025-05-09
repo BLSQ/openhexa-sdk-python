@@ -104,7 +104,7 @@ def get_library_versions() -> tuple[str, str]:
         return installed_version, installed_version
 
 
-# TODO : deprecated and non enabled features are not included in the server schema
+# TODO : non enabled features are not included in the server schema
 # TODO : cache
 # TODO : test
 def detect_graphql_breaking_changes(token):
@@ -113,7 +113,9 @@ def detect_graphql_breaking_changes(token):
     from graphql.utilities import find_breaking_changes
 
     stored_schema_obj = build_schema((Path(__file__).parent / "graphql" / "schema.generated.graphql").open().read())
-    server_schema_obj = build_client_schema(query_graphql(get_introspection_query(), token=token))
+    server_schema_obj = build_client_schema(
+        query_graphql(get_introspection_query(input_value_deprecation=True), token=token)
+    )
 
     breaking_changes = find_breaking_changes(stored_schema_obj, server_schema_obj)
     if breaking_changes:
