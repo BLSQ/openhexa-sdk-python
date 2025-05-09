@@ -7,6 +7,7 @@ import json
 import logging
 import os
 import tempfile
+import time
 import typing
 from importlib.metadata import version
 from pathlib import Path
@@ -104,16 +105,15 @@ def get_library_versions() -> tuple[str, str]:
         return installed_version, installed_version
 
 
-# TODO : cache
 # TODO : test
-def detect_graphql_breaking_changes(token):
+def _detect_graphql_breaking_changes(token):
     """Detect breaking changes between the schema referenced in the SDK and the server using graphql-core."""
     from graphql import build_client_schema, build_schema, get_introspection_query
     from graphql.utilities import find_breaking_changes
 
     stored_schema_obj = build_schema((Path(__file__).parent / "graphql" / "schema.generated.graphql").open().read())
     server_schema_obj = build_client_schema(
-        query_graphql(get_introspection_query(input_value_deprecation=True), token=token)
+        _query_graphql(get_introspection_query(input_value_deprecation=True), token=token)
     )
 
     breaking_changes = find_breaking_changes(stored_schema_obj, server_schema_obj)
@@ -135,13 +135,21 @@ def detect_graphql_breaking_changes(token):
         )
 
 
+_last_checked = None
+_COOLDOWN_PERIOD = 10  # Cooldown period in seconds (e.g., 1 hour)
+
+
 def graphql(query: str, variables=None, token=None):
     """Check that there is no breaking change and perform a GraphQL request."""
-    detect_graphql_breaking_changes(token)
-    return query_graphql(query, variables, token)
+    global _last_checked
+    current_time = time.time()
+    if not _last_checked or (current_time - _last_checked) >= _COOLDOWN_PERIOD:
+        _detect_graphql_breaking_changes(token)
+        _last_checked = current_time
+    return _query_graphql(query, variables, token)
 
 
-def query_graphql(query: str, variables=None, token=None):
+def _query_graphql(query: str, variables=None, token=None):
     """Perform a GraphQL request."""
     url = settings.api_url + "/graphql/"
     if token is None:
