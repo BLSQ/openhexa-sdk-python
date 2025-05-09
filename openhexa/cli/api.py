@@ -119,10 +119,10 @@ def detect_graphql_breaking_changes(token):
 
     breaking_changes = find_breaking_changes(stored_schema_obj, server_schema_obj)
     if breaking_changes:
-        sdk_version = version("openhexa.sdk")
         click.echo(
             click.style(
-                f"⚠️ Breaking changes detected between the SDK (version {sdk_version}) and the server:", fg="red"
+                f"⚠️ Breaking changes detected between the SDK (version {version('openhexa.sdk')}) and the server:",
+                fg="red",
             )
         )
         for change in breaking_changes:
