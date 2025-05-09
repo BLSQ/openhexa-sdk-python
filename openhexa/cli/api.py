@@ -104,7 +104,6 @@ def get_library_versions() -> tuple[str, str]:
         return installed_version, installed_version
 
 
-# TODO : non enabled features are not included in the server schema
 # TODO : cache
 # TODO : test
 def detect_graphql_breaking_changes(token):
