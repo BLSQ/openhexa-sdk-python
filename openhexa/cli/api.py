@@ -135,17 +135,32 @@ def _detect_graphql_breaking_changes(token):
         )
 
 
-_last_checked = None
-_COOLDOWN_PERIOD = 10  # Cooldown period in seconds (e.g., 1 hour)
+_COOLDOWN_PERIOD = 3600  # Cooldown period in seconds
+_CACHE_FILE = Path.home() / f".openhexa_{version('openhexa.sdk')}"  # Cache file in the user's home directory
+
+
+def _get_last_checked():
+    """Retrieve the last checked timestamp from the cache file."""
+    if _CACHE_FILE.exists():
+        try:
+            return float(_CACHE_FILE.read_text().strip())
+        except ValueError:
+            pass
+    return None
+
+
+def _update_last_checked():
+    """Update the cache file with the current timestamp."""
+    _CACHE_FILE.write_text(str(time.time()))
 
 
 def graphql(query: str, variables=None, token=None):
     """Check that there is no breaking change and perform a GraphQL request."""
-    global _last_checked
+    last_checked = _get_last_checked()
     current_time = time.time()
-    if not _last_checked or (current_time - _last_checked) >= _COOLDOWN_PERIOD:
+    if not last_checked or (current_time - last_checked) >= _COOLDOWN_PERIOD:
         _detect_graphql_breaking_changes(token)
-        _last_checked = current_time
+        _update_last_checked()
     return _query_graphql(query, variables, token)
 
 
