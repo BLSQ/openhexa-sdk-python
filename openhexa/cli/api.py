@@ -130,7 +130,7 @@ def detect_graphql_breaking_changes(token):
         click.echo(click.style("This could lead to unexpected results.", fg="red"))
         click.echo(
             click.style(
-                "Please update the SDK to the latest version or use a version of the SDK compatible with the server.",
+                f"Please update the SDK to the latest version ({get_library_versions()[1]}) or use a version of the SDK compatible with the server.",
                 fg="red",
             )
         )
