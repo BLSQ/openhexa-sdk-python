@@ -104,20 +104,54 @@ def get_library_versions() -> tuple[str, str]:
         return installed_version, installed_version
 
 
+introspection_query = """
+    query IntrospectionQuery {
+      __schema {
+        queryType { name }
+        mutationType { name }
+        types {
+          name
+          kind
+          fields {
+            name
+            args {
+              name
+              type {
+                name
+                kind
+                ofType {
+                  name
+                  kind
+                }
+              }
+            }
+            type {
+              name
+              kind
+              ofType {
+                name
+                kind
+              }
+            }
+          }
+        }
+      }
+    }
+"""
+
+
 # TODO : cache
-# TODO : get the schema from the server
 # TODO : test
-def detect_graphql_breaking_changes():
+def detect_graphql_breaking_changes(token):
     """Detect breaking changes between the schema referenced in the SDK and the server using graphql-core."""
     from graphql import build_schema
     from graphql.utilities import find_breaking_changes
 
-    base_path = Path(__file__).parent / "graphql"
-    stored_schema_path = base_path / "schema.generated.graphql"
-    server_schema_path = base_path / "server_schema.generated.graphql"
+    server_schema_data = query_graphql(introspection_query, token=token)
+    server_schema_json = json.dumps(server_schema_data["__schema"])
 
-    stored_schema_obj = build_schema(stored_schema_path.open().read())
-    server_schema_obj = build_schema(server_schema_path.open().read())
+    stored_schema_obj = build_schema((Path(__file__).parent / "graphql" / "schema.generated.graphql").open().read())
+    server_schema_obj = build_schema(server_schema_json)
 
     breaking_changes = find_breaking_changes(stored_schema_obj, server_schema_obj)
     if breaking_changes:
@@ -139,6 +173,12 @@ def detect_graphql_breaking_changes():
 
 
 def graphql(query: str, variables=None, token=None):
+    """Check that there is no breaking change and perform a GraphQL request."""
+    detect_graphql_breaking_changes(token)
+    return query_graphql(query, variables, token)
+
+
+def query_graphql(query: str, variables=None, token=None):
     """Perform a GraphQL request."""
     url = settings.api_url + "/graphql/"
     if token is None:
@@ -155,8 +195,6 @@ def graphql(query: str, variables=None, token=None):
         click.echo(f"Variables: {variables}")
 
     session = create_requests_session()
-
-    detect_graphql_breaking_changes()
 
     response = session.post(
         url,
