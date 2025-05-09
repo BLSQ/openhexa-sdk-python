@@ -104,54 +104,15 @@ def get_library_versions() -> tuple[str, str]:
         return installed_version, installed_version
 
 
-introspection_query = """
-    query IntrospectionQuery {
-      __schema {
-        queryType { name }
-        mutationType { name }
-        types {
-          name
-          kind
-          fields {
-            name
-            args {
-              name
-              type {
-                name
-                kind
-                ofType {
-                  name
-                  kind
-                }
-              }
-            }
-            type {
-              name
-              kind
-              ofType {
-                name
-                kind
-              }
-            }
-          }
-        }
-      }
-    }
-"""
-
-
 # TODO : cache
 # TODO : test
 def detect_graphql_breaking_changes(token):
     """Detect breaking changes between the schema referenced in the SDK and the server using graphql-core."""
-    from graphql import build_schema
+    from graphql import build_client_schema, build_schema, get_introspection_query
     from graphql.utilities import find_breaking_changes
 
-    server_schema_data = query_graphql(introspection_query, token=token)
-    server_schema_json = json.dumps(server_schema_data["__schema"])
-
     stored_schema_obj = build_schema((Path(__file__).parent / "graphql" / "schema.generated.graphql").open().read())
-    server_schema_obj = build_schema(server_schema_json)
+    server_schema_obj = build_client_schema(query_graphql(get_introspection_query(), token=token))
 
     breaking_changes = find_breaking_changes(stored_schema_obj, server_schema_obj)
     if breaking_changes:
