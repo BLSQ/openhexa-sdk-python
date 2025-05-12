@@ -17,7 +17,6 @@ import click
 import docker
 import requests
 from docker.models.containers import Container
-
 from graphql import build_client_schema, build_schema, get_introspection_query
 from graphql.utilities import find_breaking_changes
 from jinja2 import Template
