@@ -1,7 +1,7 @@
 import time
 from unittest import TestCase, mock
 
-from openhexa.cli.api import _get_last_checked, _update_last_checked, detect_graphql_breaking_changes, graphql
+from openhexa.cli.api import detect_graphql_breaking_changes, get_last_checked, graphql, update_last_checked
 
 
 class TestGraphQLFunctions(TestCase):
@@ -59,19 +59,19 @@ class TestGraphQLFunctions(TestCase):
         """Test _get_last_checked function."""
         mock_cache_file.exists.return_value = True
         mock_cache_file.read_text.return_value = "1633024800.0"
-        self.assertEqual(_get_last_checked(), 1633024800.0)
+        self.assertEqual(get_last_checked(), 1633024800.0)
 
         mock_cache_file.read_text.return_value = "invalid"
-        self.assertIsNone(_get_last_checked())
+        self.assertIsNone(get_last_checked())
 
         mock_cache_file.exists.return_value = False
-        self.assertIsNone(_get_last_checked())
+        self.assertIsNone(get_last_checked())
 
     @mock.patch("openhexa.cli.api._CACHE_FILE")
     @mock.patch("time.time", return_value=1633024800.0)
     def test_update_last_checked(self, mock_time, mock_cache_file):
         """Test _update_last_checked function."""
-        _update_last_checked()
+        update_last_checked()
         mock_cache_file.write_text.assert_called_once_with("1633024800.0")
 
     @mock.patch("openhexa.cli.api._query_graphql")
