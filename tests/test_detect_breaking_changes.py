@@ -75,7 +75,7 @@ class TestGraphQLFunctions(TestCase):
 
     @mock.patch("openhexa.cli.api._query_graphql")
     @mock.patch("openhexa.cli.api._update_last_checked")
-    @mock.patch("openhexa.cli.api._detect_graphql_breaking_changes")
+    @mock.patch("openhexa.cli.api.detect_graphql_breaking_changes")
     @mock.patch("openhexa.cli.api._get_last_checked")
     @mock.patch("time.time", return_value=1633028400.0)
     def test_graphql(
