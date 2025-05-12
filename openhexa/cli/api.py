@@ -19,6 +19,8 @@ import requests
 from docker.models.containers import Container
 from jinja2 import Template
 
+from graphql import build_client_schema, build_schema, get_introspection_query
+from graphql.utilities import find_breaking_changes
 from openhexa.cli.settings import settings
 from openhexa.sdk.pipelines import get_local_workspace_config
 from openhexa.sdk.pipelines.runtime import get_pipeline
@@ -105,12 +107,8 @@ def get_library_versions() -> tuple[str, str]:
         return installed_version, installed_version
 
 
-# TODO : test
-def _detect_graphql_breaking_changes(token):
+def detect_graphql_breaking_changes(token):
     """Detect breaking changes between the schema referenced in the SDK and the server using graphql-core."""
-    from graphql import build_client_schema, build_schema, get_introspection_query
-    from graphql.utilities import find_breaking_changes
-
     stored_schema_obj = build_schema((Path(__file__).parent / "graphql" / "schema.generated.graphql").open().read())
     server_schema_obj = build_client_schema(
         _query_graphql(get_introspection_query(input_value_deprecation=True), token=token)
@@ -118,9 +116,10 @@ def _detect_graphql_breaking_changes(token):
 
     breaking_changes = find_breaking_changes(stored_schema_obj, server_schema_obj)
     if breaking_changes:
+        current_version, latest_version = get_library_versions()
         click.echo(
             click.style(
-                f"⚠️ Breaking changes detected between the SDK (version {version('openhexa.sdk')}) and the server:",
+                f"⚠️ Breaking changes detected between the SDK (version {current_version}) and the server:",
                 fg="red",
             )
         )
@@ -129,7 +128,7 @@ def _detect_graphql_breaking_changes(token):
         click.echo(click.style("This could lead to unexpected results.", fg="red"))
         click.echo(
             click.style(
-                f"Please update the SDK to the latest version ({get_library_versions()[1]}) or use a version of the SDK compatible with the server.",
+                f"Please update the SDK to the latest version ({latest_version}) or use a version of the SDK compatible with the server.",
                 fg="red",
             )
         )
@@ -159,7 +158,7 @@ def graphql(query: str, variables=None, token=None):
     last_checked = _get_last_checked()
     current_time = time.time()
     if not last_checked or (current_time - last_checked) >= _COOLDOWN_PERIOD:
-        _detect_graphql_breaking_changes(token)
+        detect_graphql_breaking_changes(token)
         _update_last_checked()
     return _query_graphql(query, variables, token)
 
