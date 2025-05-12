@@ -6,8 +6,9 @@ from openhexa.cli.api import _get_last_checked, _update_last_checked, detect_gra
 class TestGraphQLFunctions(TestCase):
     @mock.patch("openhexa.cli.api._query_graphql")
     @mock.patch("openhexa.cli.api.get_library_versions")
+    @mock.patch("click.style", side_effect=lambda text, fg=None: text)
     def test_detect_graphql_breaking_changes_with_mocked_server_schema(
-        self, mock_get_library_versions, mock_query_graphql
+        self, mock_click_style, mock_get_library_versions, mock_query_graphql
     ):
         """Test detect_graphql_breaking_changes with a mocked server schema."""
         mock_get_library_versions.return_value = ["1.2.3", "1000.1.2"]
@@ -49,9 +50,8 @@ class TestGraphQLFunctions(TestCase):
                 detect_graphql_breaking_changes("test_token")
                 mock_click_echo.assert_any_call(
                     "⚠️ Breaking changes detected between the SDK (version 1.2.3) and the server:",
-                    fg="red",
                 )
-                mock_click_echo.assert_any_call("- 'Query.testField changed type from Int to String.'", fg="yellow")
+                mock_click_echo.assert_any_call("- Query.testField changed type from Int to String.")
 
     @mock.patch("openhexa.cli.api._CACHE_FILE")
     def test_get_last_checked(self, mock_cache_file):
