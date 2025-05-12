@@ -17,10 +17,11 @@ import click
 import docker
 import requests
 from docker.models.containers import Container
-from jinja2 import Template
 
 from graphql import build_client_schema, build_schema, get_introspection_query
 from graphql.utilities import find_breaking_changes
+from jinja2 import Template
+
 from openhexa.cli.settings import settings
 from openhexa.sdk.pipelines import get_local_workspace_config
 from openhexa.sdk.pipelines.runtime import get_pipeline
