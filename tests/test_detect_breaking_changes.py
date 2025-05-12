@@ -75,9 +75,9 @@ class TestGraphQLFunctions(TestCase):
         mock_cache_file.write_text.assert_called_once_with("1633024800.0")
 
     @mock.patch("openhexa.cli.api._query_graphql")
-    @mock.patch("openhexa.cli.api._update_last_checked")
+    @mock.patch("openhexa.cli.api.update_last_checked")
     @mock.patch("openhexa.cli.api.detect_graphql_breaking_changes")
-    @mock.patch("openhexa.cli.api._get_last_checked")
+    @mock.patch("openhexa.cli.api.get_last_checked")
     def test_graphql(self, mock_get_last_checked, mock_detect_changes, mock_update_last_checked, mock_query_graphql):
         """Test that the graphql function is caching the breaking change detection for 1 hour."""
         mock_get_last_checked.return_value = time.time() - 59 * 60  # Last checked 59 minutes ago
