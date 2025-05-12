@@ -1,3 +1,4 @@
+import time
 from unittest import TestCase, mock
 
 from openhexa.cli.api import _get_last_checked, _update_last_checked, detect_graphql_breaking_changes, graphql
@@ -77,23 +78,18 @@ class TestGraphQLFunctions(TestCase):
     @mock.patch("openhexa.cli.api._update_last_checked")
     @mock.patch("openhexa.cli.api.detect_graphql_breaking_changes")
     @mock.patch("openhexa.cli.api._get_last_checked")
-    @mock.patch("time.time", return_value=1633028400.0)
-    def test_graphql(
-        self, mock_time, mock_get_last_checked, mock_detect_changes, mock_update_last_checked, mock_query_graphql
-    ):
-        """Test graphql function."""
-        mock_get_last_checked.return_value = 1633024800.0  # Last checked 1 hour ago
+    def test_graphql(self, mock_get_last_checked, mock_detect_changes, mock_update_last_checked, mock_query_graphql):
+        """Test that the graphql function is caching the breaking change detection for 1 hour."""
+        mock_get_last_checked.return_value = time.time() - 59 * 60  # Last checked 59 minutes ago
         mock_query_graphql.return_value = {"data": "response"}
 
-        # Case 1: Cooldown period not elapsed
         response = graphql("query", token="test_token")
         mock_detect_changes.assert_not_called()
         mock_update_last_checked.assert_not_called()
         mock_query_graphql.assert_called_once_with("query", None, "test_token")
         self.assertEqual(response, {"data": "response"})
 
-        # Case 2: Cooldown period elapsed
-        mock_get_last_checked.return_value = 1633020000.0  # Last checked 2 hours ago
+        mock_get_last_checked.return_value = time.time() - 3600  # Last checked 1 hour ago
         response = graphql("query", token="test_token")
         mock_detect_changes.assert_called_once_with("test_token")
         mock_update_last_checked.assert_called_once()
