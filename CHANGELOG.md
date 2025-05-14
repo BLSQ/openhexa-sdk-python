@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.2.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.1.2...v2.2.0) (2025-05-14)
+
+
+### Features
+
+* **pipeline:** add IASO widget implementation ([#255](https://github.com/BLSQ/openhexa-sdk-python/issues/255)) ([1d51228](https://github.com/BLSQ/openhexa-sdk-python/commit/1d512289df7a2b704d720fd3b6dff006913a0ec6))
+
+
+### Bug Fixes
+
+* dhis org_units and iaso org_units overlap ([#261](https://github.com/BLSQ/openhexa-sdk-python/issues/261)) ([5b256f1](https://github.com/BLSQ/openhexa-sdk-python/commit/5b256f1259440a16971091f381000242a59a2c7e))
+
 ## [2.1.2](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.1.1...v2.1.2) (2025-04-07)
 
 
