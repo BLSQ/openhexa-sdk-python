@@ -363,7 +363,7 @@ class IASOWidget(StrEnum):
     """Enum for IASO widgets."""
 
     FORMS = "IASO_FORMS"
-    ORG_UNITS = "IASO_ORG_UNITS"
+    IASO_ORG_UNITS = "IASO_ORG_UNITS"
     PROJECTS = "IASO_PROJECTS"
 
 
