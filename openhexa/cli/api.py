@@ -7,8 +7,8 @@ import json
 import logging
 import os
 import tempfile
-import time
 import typing
+from datetime import datetime
 from importlib.metadata import version
 from pathlib import Path
 from zipfile import ZipFile
@@ -17,10 +17,10 @@ import click
 import docker
 import requests
 from docker.models.containers import Container
-from jinja2 import Template
-
 from graphql import build_client_schema, build_schema, get_introspection_query
 from graphql.utilities import find_breaking_changes
+from jinja2 import Template
+
 from openhexa.cli.settings import settings
 from openhexa.sdk.pipelines import get_local_workspace_config
 from openhexa.sdk.pipelines.runtime import get_pipeline
@@ -126,7 +126,7 @@ def detect_graphql_breaking_changes(token):
         click.secho(
             "This could lead to unexpected results.\n"
             f"Please update the SDK to the latest version {latest_version} "
-            f"(using pip install openhexa-sdk=={latest_version}) or use a version of the SDK compatible with the server.",
+            f"(using `pip install openhexa-sdk=={latest_version}`) or use a version of the SDK compatible with the server.",
             fg="red",
         )
 
@@ -134,7 +134,7 @@ def detect_graphql_breaking_changes(token):
 def graphql(query: str, variables=None, token=None):
     """Check that there is no breaking change and perform a GraphQL request."""
     ONE_HOUR = 60 * 60
-    now_timestamp = time.time()
+    now_timestamp = int(datetime.now().timestamp())
     if not settings.last_breaking_change_check or now_timestamp - settings.last_breaking_change_check > ONE_HOUR:
         detect_graphql_breaking_changes(token)
         settings.last_breaking_change_check = now_timestamp
