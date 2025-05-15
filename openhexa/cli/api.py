@@ -107,8 +107,7 @@ def get_library_versions() -> tuple[str, str]:
         return installed_version, installed_version
 
 
-# TODO : combine this with the one in openhexa.sdk
-# TODO : secho instead of echo
+# TODO : use setting instead of local file
 def detect_graphql_breaking_changes(token):
     """Detect breaking changes between the schema referenced in the SDK and the server using graphql-core."""
     stored_schema_obj = build_schema((Path(__file__).parent / "graphql" / "schema.generated.graphql").open().read())
@@ -119,20 +118,17 @@ def detect_graphql_breaking_changes(token):
     breaking_changes = find_breaking_changes(stored_schema_obj, server_schema_obj)
     if breaking_changes:
         current_version, latest_version = get_library_versions()
-        click.echo(
-            click.style(
-                f"⚠️ Breaking changes detected between the SDK (version {current_version}) and the server:",
-                fg="red",
-            )
+        click.secho(
+            f"⚠️ Breaking changes detected between the SDK (version {current_version}) and the server:",
+            fg="red",
         )
         for change in breaking_changes:
-            click.echo(click.style(f"- {change.description}", fg="yellow"))
-        click.echo(click.style("This could lead to unexpected results.", fg="red"))
-        click.echo(
-            click.style(
-                f"Please update the SDK to the latest version {latest_version} (using pip install openhexa-sdk=={latest_version}) or use a version of the SDK compatible with the server.",
-                fg="red",
-            )
+            click.secho(f"- {change.description}", fg="yellow")
+        click.secho(
+            "This could lead to unexpected results.\n"
+            f"Please update the SDK to the latest version {latest_version} "
+            f"(using pip install openhexa-sdk=={latest_version}) or use a version of the SDK compatible with the server.",
+            fg="red",
         )
 
 
