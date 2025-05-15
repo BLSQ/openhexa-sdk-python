@@ -107,6 +107,8 @@ def get_library_versions() -> tuple[str, str]:
         return installed_version, installed_version
 
 
+# TODO : combine this with the one in openhexa.sdk
+# TODO : secho instead of echo
 def detect_graphql_breaking_changes(token):
     """Detect breaking changes between the schema referenced in the SDK and the server using graphql-core."""
     stored_schema_obj = build_schema((Path(__file__).parent / "graphql" / "schema.generated.graphql").open().read())
