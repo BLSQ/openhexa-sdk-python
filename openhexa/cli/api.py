@@ -8,6 +8,7 @@ import logging
 import os
 import tempfile
 import typing
+from datetime import datetime
 from importlib.metadata import version
 from pathlib import Path
 from zipfile import ZipFile
@@ -16,6 +17,8 @@ import click
 import docker
 import requests
 from docker.models.containers import Container
+from graphql import build_client_schema, build_schema, get_introspection_query
+from graphql.utilities import find_breaking_changes
 from jinja2 import Template
 
 from openhexa.cli.settings import settings
@@ -104,7 +107,41 @@ def get_library_versions() -> tuple[str, str]:
         return installed_version, installed_version
 
 
+def detect_graphql_breaking_changes(token):
+    """Detect breaking changes between the schema referenced in the SDK and the server using graphql-core."""
+    stored_schema_obj = build_schema((Path(__file__).parent / "graphql" / "schema.generated.graphql").open().read())
+    server_schema_obj = build_client_schema(
+        _query_graphql(get_introspection_query(input_value_deprecation=True), token=token)
+    )
+
+    breaking_changes = find_breaking_changes(stored_schema_obj, server_schema_obj)
+    if breaking_changes:
+        current_version, latest_version = get_library_versions()
+        click.secho(
+            f"⚠️ Breaking changes detected between the SDK (version {current_version}) and the server:",
+            fg="red",
+        )
+        for change in breaking_changes:
+            click.secho(f"- {change.description}", fg="yellow")
+        click.secho(
+            "This could lead to unexpected results.\n"
+            f"Please update the SDK to the latest version {latest_version} "
+            f"(using `pip install openhexa-sdk=={latest_version}`) or use a version of the SDK compatible with the server.",
+            fg="red",
+        )
+
+
 def graphql(query: str, variables=None, token=None):
+    """Check that there is no breaking change and perform a GraphQL request."""
+    ONE_HOUR = 60 * 60
+    now_timestamp = int(datetime.now().timestamp())
+    if not settings.last_breaking_change_check or now_timestamp - settings.last_breaking_change_check > ONE_HOUR:
+        detect_graphql_breaking_changes(token)
+        settings.last_breaking_change_check = now_timestamp
+    return _query_graphql(query, variables, token)
+
+
+def _query_graphql(query: str, variables=None, token=None):
     """Perform a GraphQL request."""
     url = settings.api_url + "/graphql/"
     if token is None:
@@ -121,6 +158,7 @@ def graphql(query: str, variables=None, token=None):
         click.echo(f"Variables: {variables}")
 
     session = create_requests_session()
+
     response = session.post(
         url,
         headers={
