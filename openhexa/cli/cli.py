@@ -20,6 +20,7 @@ from openhexa.cli.api import (
     create_pipeline_structure,
     create_pipeline_template_version,
     delete_pipeline,
+    detect_graphql_breaking_changes,
     download_pipeline_sourcecode,
     ensure_is_pipeline_dir,
     get_library_versions,
@@ -74,6 +75,7 @@ def app(ctx):
                 ),
                 fg="yellow",
             )
+        detect_graphql_breaking_changes()
 
 
 @app.group(invoke_without_command=True)
