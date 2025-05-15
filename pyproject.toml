@@ -30,6 +30,10 @@ dependencies = [
 
 [project.scripts]
 openhexa = "openhexa.cli:app"
+# TODO : add command
+# TODO : add to CI
+# TODO : add to deps
+# TODO : migrate exisitng queries
 
 
 [project.optional-dependencies]
