@@ -17,10 +17,10 @@ import click
 import docker
 import requests
 from docker.models.containers import Container
-from graphql import build_client_schema, build_schema, get_introspection_query
-from graphql.utilities import find_breaking_changes
 from jinja2 import Template
 
+from graphql import build_client_schema, build_schema, get_introspection_query
+from graphql.utilities import find_breaking_changes
 from openhexa.cli.settings import settings
 from openhexa.sdk.pipelines import get_local_workspace_config
 from openhexa.sdk.pipelines.runtime import get_pipeline
@@ -128,7 +128,7 @@ def detect_graphql_breaking_changes(token):
         click.echo(click.style("This could lead to unexpected results.", fg="red"))
         click.echo(
             click.style(
-                f"Please update the SDK to the latest version ({latest_version}) or use a version of the SDK compatible with the server.",
+                f"Please update the SDK to the latest version {latest_version} (using pip install openhexa-sdk=={latest_version}) or use a version of the SDK compatible with the server.",
                 fg="red",
             )
         )
