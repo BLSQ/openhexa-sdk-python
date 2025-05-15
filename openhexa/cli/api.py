@@ -107,7 +107,6 @@ def get_library_versions() -> tuple[str, str]:
         return installed_version, installed_version
 
 
-# TODO : use setting instead of local file
 def detect_graphql_breaking_changes(token):
     """Detect breaking changes between the schema referenced in the SDK and the server using graphql-core."""
     stored_schema_obj = build_schema((Path(__file__).parent / "graphql" / "schema.generated.graphql").open().read())
@@ -132,32 +131,13 @@ def detect_graphql_breaking_changes(token):
         )
 
 
-_COOLDOWN_PERIOD = 3600  # Cooldown period in seconds
-_CACHE_FILE = Path.home() / f".openhexa_{version('openhexa.sdk')}"  # Cache file in the user's home directory
-
-
-def get_last_checked():
-    """Retrieve the last checked timestamp from the cache file."""
-    if _CACHE_FILE.exists():
-        try:
-            return float(_CACHE_FILE.read_text().strip())
-        except ValueError:
-            pass
-    return None
-
-
-def update_last_checked():
-    """Update the cache file with the current timestamp."""
-    _CACHE_FILE.write_text(str(time.time()))
-
-
 def graphql(query: str, variables=None, token=None):
     """Check that there is no breaking change and perform a GraphQL request."""
-    last_checked = get_last_checked()
-    current_time = time.time()
-    if not last_checked or (current_time - last_checked) >= _COOLDOWN_PERIOD:
+    ONE_HOUR = 60 * 60
+    now_timestamp = time.time()
+    if not settings.last_breaking_change_check or now_timestamp - settings.last_breaking_change_check > ONE_HOUR:
         detect_graphql_breaking_changes(token)
-        update_last_checked()
+        settings.last_breaking_change_check = now_timestamp
     return _query_graphql(query, variables, token)
 
 
