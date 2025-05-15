@@ -54,22 +54,22 @@ class TestGraphQLFunctions(TestCase):
                 mock_click_secho.assert_any_call("- Query.testField changed type from Int to String.", fg="yellow")
 
     @mock.patch("openhexa.cli.api._query_graphql")
-    @mock.patch("openhexa.cli.api.update_last_checked")
     @mock.patch("openhexa.cli.api.detect_graphql_breaking_changes")
-    @mock.patch("openhexa.cli.api.get_last_checked")
-    def test_graphql(self, mock_get_last_checked, mock_detect_changes, mock_update_last_checked, mock_query_graphql):
+    def test_graphql(self, mock_detect_graphql_breaking_changes, mock_query_graphql):
         """Test that the graphql function is caching the breaking change detection for 1 hour."""
-        mock_get_last_checked.return_value = time.time() - 59 * 60  # Last checked 59 minutes ago
-        mock_query_graphql.return_value = {"data": "response"}
+        with mock.patch("openhexa.cli.api.settings") as mock_settings:
+            mock_settings.last_breaking_change_check = time.time() - 59 * 60  # Last checked 59 minutes ago
+            mock_query_graphql.return_value = {"data": "response"}
 
-        response = graphql("query", token="test_token")
-        mock_detect_changes.assert_not_called()
-        mock_update_last_checked.assert_not_called()
-        mock_query_graphql.assert_called_once_with("query", None, "test_token")
-        self.assertEqual(response, {"data": "response"})
+            response = graphql("query", token="test_token")
+            mock_detect_graphql_breaking_changes.assert_not_called()
+            mock_query_graphql.assert_called_once_with("query", None, "test_token")
+            self.assertEqual(response, {"data": "response"})
 
-        mock_get_last_checked.return_value = time.time() - 3600  # Last checked 1 hour ago
-        response = graphql("query", token="test_token")
-        mock_detect_changes.assert_called_once_with("test_token")
-        mock_update_last_checked.assert_called_once()
-        self.assertEqual(response, {"data": "response"})
+            time_in_the_past = time.time() - 61 * 60  # Last checked 61 minutes ago
+            mock_settings.last_breaking_change_check = time_in_the_past
+
+            response = graphql("query", token="test_token")
+            mock_detect_graphql_breaking_changes.assert_called_once_with("test_token")
+            self.assertGreater(mock_settings.last_breaking_change_check, time_in_the_past)
+            self.assertEqual(response, {"data": "response"})
