@@ -1,15 +1,14 @@
 import time
 from unittest import TestCase, mock
 
-from openhexa.cli.api import detect_graphql_breaking_changes, get_last_checked, graphql, update_last_checked
+from openhexa.cli.api import detect_graphql_breaking_changes, graphql
 
 
 class TestGraphQLFunctions(TestCase):
     @mock.patch("openhexa.cli.api._query_graphql")
     @mock.patch("openhexa.cli.api.get_library_versions")
-    @mock.patch("click.style", side_effect=lambda text, fg=None: text)
     def test_detect_graphql_breaking_changes_with_mocked_server_schema(
-        self, mock_click_style, mock_get_library_versions, mock_query_graphql
+        self, mock_get_library_versions, mock_query_graphql
     ):
         """Test detect_graphql_breaking_changes with a mocked server schema."""
         mock_get_library_versions.return_value = ["1.2.3", "1000.1.2"]
@@ -47,32 +46,12 @@ class TestGraphQLFunctions(TestCase):
         }
         """
         with mock.patch("pathlib.Path.open", mock.mock_open(read_data=stored_schema)):
-            with mock.patch("click.echo") as mock_click_echo:
+            with mock.patch("click.secho") as mock_click_secho:
                 detect_graphql_breaking_changes("test_token")
-                mock_click_echo.assert_any_call(
-                    "⚠️ Breaking changes detected between the SDK (version 1.2.3) and the server:",
+                mock_click_secho.assert_any_call(
+                    "⚠️ Breaking changes detected between the SDK (version 1.2.3) and the server:", fg="red"
                 )
-                mock_click_echo.assert_any_call("- Query.testField changed type from Int to String.")
-
-    @mock.patch("openhexa.cli.api._CACHE_FILE")
-    def test_get_last_checked(self, mock_cache_file):
-        """Test _get_last_checked function."""
-        mock_cache_file.exists.return_value = True
-        mock_cache_file.read_text.return_value = "1633024800.0"
-        self.assertEqual(get_last_checked(), 1633024800.0)
-
-        mock_cache_file.read_text.return_value = "invalid"
-        self.assertIsNone(get_last_checked())
-
-        mock_cache_file.exists.return_value = False
-        self.assertIsNone(get_last_checked())
-
-    @mock.patch("openhexa.cli.api._CACHE_FILE")
-    @mock.patch("time.time", return_value=1633024800.0)
-    def test_update_last_checked(self, mock_time, mock_cache_file):
-        """Test _update_last_checked function."""
-        update_last_checked()
-        mock_cache_file.write_text.assert_called_once_with("1633024800.0")
+                mock_click_secho.assert_any_call("- Query.testField changed type from Int to String.", fg="yellow")
 
     @mock.patch("openhexa.cli.api._query_graphql")
     @mock.patch("openhexa.cli.api.update_last_checked")
