@@ -5,3 +5,15 @@ repos:
     - id: ruff
       args: [ --fix, --exit-non-zero-on-fix ]
     - id: ruff-format
+
+- repo: local
+  hooks:
+    - id: ariadne-codegen
+      name: ariadne-codegen
+      entry: bash -c
+        ariadne-codegen \
+        git add --force openhexa/cli/graphql/graphql_client/*.py
+      language: system
+      types: [graphql]
+      files: openhexa/cli/graphql/schema.generated.graphql
+      pass_filenames: false
