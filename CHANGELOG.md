@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.1](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.2.0...v2.2.1) (2025-05-15)
+
+
+### Bug Fixes
+
+* SDK dataset add_file filename is not optional ([#262](https://github.com/BLSQ/openhexa-sdk-python/issues/262)) ([825f209](https://github.com/BLSQ/openhexa-sdk-python/commit/825f209e076a0059fa5b44145820ca333565f4f9))
+
 ## [2.2.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.1.2...v2.2.0) (2025-05-14)
 
 
