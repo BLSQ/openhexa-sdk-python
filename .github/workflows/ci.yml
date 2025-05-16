@@ -17,7 +17,7 @@ jobs:
         with:
           python-version: 3.13
 
-      - name: Install Ariadne-codgen
+      - name: Install Ariadne-codegen
         run: pip install ariadne-codegen
 
       - uses: pre-commit/action@v3.0.1
