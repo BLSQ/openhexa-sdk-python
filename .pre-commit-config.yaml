@@ -14,3 +14,4 @@ repos:
       language: python
       types: [graphql]
       pass_filenames: false
+      pass_environment: false
