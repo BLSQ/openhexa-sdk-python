@@ -5,7 +5,6 @@ from typing import Any, Dict, Optional, Union
 
 from .base_client import BaseClient
 from .base_model import UNSET, UnsetType
-from .get_workspace import GetWorkspace
 from .get_workspace_pipelines import GetWorkspacePipelines
 
 
@@ -14,24 +13,6 @@ def gql(q: str) -> str:
 
 
 class Client(BaseClient):
-    def get_workspace(self, slug: str, **kwargs: Any) -> GetWorkspace:
-        query = gql(
-            """
-            query getWorkspace($slug: String!) {
-              workspace(slug: $slug) {
-                name
-                slug
-              }
-            }
-            """
-        )
-        variables: Dict[str, object] = {"slug": slug}
-        response = self.execute(
-            query=query, operation_name="getWorkspace", variables=variables, **kwargs
-        )
-        data = self.get_data(response)
-        return GetWorkspace.model_validate(data)
-
     def get_workspace_pipelines(
         self,
         workspace_slug: str,

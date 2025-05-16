@@ -240,11 +240,6 @@ def get_pipelines_pages(name=None):
     return data["pipelines"]
 
 
-def get_pipelines(name=None):
-    """Get pipelines in the workspace optionally ranked by name similarity."""
-    return get_pipelines_pages(name)["items"]
-
-
 def get_pipeline_from_code(pipeline_code: str) -> dict[str, typing.Any]:
     """Get a single pipeline."""
     if settings.current_workspace is None:
@@ -750,7 +745,7 @@ def is_dhis2_connection_up(workspace_slug: str, connection_slug: str) -> bool:
 class OpenHexaClient(Client):
     """OpenHexaClient is a class that provides methods to interact with the OpenHexa GraphQL API."""
 
-    def __init__(self, token=None, httpx_log_level=logging.WARNING):
+    def __init__(self, token=None):
         """Initialize the OpenHexaClient with the OpenHexa API URL and headers."""
         self._url = settings.api_url + "/graphql/"
         self._token = token or settings.access_token
@@ -766,7 +761,7 @@ class OpenHexaClient(Client):
             },
         )
         logging.getLogger("httpx").setLevel(
-            httpx_log_level
+            logging.WARNING
         )  # HTTPX logs queries by default, we disable them here with WARNING level
 
     def execute(self, query, **kwargs):

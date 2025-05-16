@@ -134,7 +134,6 @@ from .exceptions import (
     GraphQLClientHttpError,
     GraphQLClientInvalidResponseError,
 )
-from .get_workspace import GetWorkspace, GetWorkspaceWorkspace
 from .get_workspace_pipelines import (
     GetWorkspacePipelines,
     GetWorkspacePipelinesPipelines,
@@ -378,12 +377,10 @@ __all__ = [
     "GeneratePipelineWebhookUrlInput",
     "GenerateWorkspaceTokenError",
     "GenerateWorkspaceTokenInput",
-    "GetWorkspace",
     "GetWorkspacePipelines",
     "GetWorkspacePipelinesPipelines",
     "GetWorkspacePipelinesPipelinesItems",
     "GetWorkspacePipelinesPipelinesItemsCurrentVersion",
-    "GetWorkspaceWorkspace",
     "GraphQLClientError",
     "GraphQLClientGraphQLError",
     "GraphQLClientGraphQLMultiError",
