@@ -20,12 +20,6 @@ jobs:
       - name: Install Ariadne-codegen
         run: pip install ariadne-codegen
 
-      - name: Print environment variables
-        run: env
-
-      - name: Unset STRATEGY
-        run: unset STRATEGY
-
       - uses: pre-commit/action@v3.0.1
   test:
     name: Run test suite
