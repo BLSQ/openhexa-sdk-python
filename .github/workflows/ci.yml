@@ -20,6 +20,15 @@ jobs:
       - name: Install dependencies
         run: pip install ".[dev]"
 
+      - name: Verify Installed Packages
+        run: pip list
+
+      - name: Debug Python Environment
+        run: |
+          python --version
+          which python
+          echo $PYTHONPATH
+
       - uses: pre-commit/action@v3.0.1
   test:
     name: Run test suite
