@@ -14,6 +14,7 @@ from openhexa.cli.api import (
     DockerError,
     InvalidDefinitionError,
     NoActiveWorkspaceError,
+    OpenHexaClient,
     OutputDirectoryError,
     PipelineDirectoryError,
     create_pipeline,
@@ -24,7 +25,6 @@ from openhexa.cli.api import (
     ensure_is_pipeline_dir,
     get_library_versions,
     get_pipeline_from_code,
-    get_pipelines,
     get_pipelines_pages,
     get_workspace,
     run_pipeline,
@@ -596,21 +596,19 @@ def pipelines_list():
     if settings.current_workspace is None:
         _terminate("No workspace activated", err=True)
 
-    workspace_pipelines = get_pipelines()
+    workspace_pipelines = (
+        OpenHexaClient().get_workspace_pipelines(workspace_slug=settings.current_workspace).pipelines.items
+    )
     if len(workspace_pipelines) == 0:
         click.echo(f"No pipelines in workspace {settings.current_workspace}")
         return
     click.echo("Pipelines:")
     for pipeline in workspace_pipelines:
-        if pipeline["type"] == "zipFile":
-            current_version = pipeline["currentVersion"].get("number") if pipeline["currentVersion"] else None
-            if current_version is not None:
-                current_version = f"v{current_version}"
-            else:
-                current_version = "N/A"
+        if pipeline.type == "zipFile":
+            current_version = f"v{pipeline.current_version.version_number}" if pipeline.current_version else "N/A"
         else:
             current_version = "Jupyter notebook"
-        click.echo(f"* {pipeline['code']} - {pipeline['name']} ({current_version})")
+        click.echo(f"* {pipeline.code} - {pipeline.name} ({current_version})")
 
 
 def _terminate(message: str, exception: Exception = None, err: bool = False):
