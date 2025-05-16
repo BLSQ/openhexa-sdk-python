@@ -15,5 +15,4 @@ repos:
         git add --force openhexa/cli/graphql/graphql_client/*.py
       language: system
       types: [graphql]
-      files: openhexa/cli/graphql/schema.generated.graphql
       pass_filenames: false
