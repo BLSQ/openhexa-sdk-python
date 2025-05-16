@@ -10,7 +10,10 @@ repos:
   hooks:
     - id: ariadne-codegen
       name: ariadne-codegen
-      entry: ariadne-codegen
-      language: python
+      entry: bash -c
+        echo "Running ariadne-codegen" && \
+        ariadne-codegen \
+        git add --force openhexa/cli/graphql/graphql_client/*.py
+      language: system
       types: [graphql]
       pass_filenames: false
