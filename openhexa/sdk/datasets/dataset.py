@@ -228,7 +228,7 @@ class DatasetVersion:
     def add_file(
         self,
         source: str | PathLike[str] | typing.IO | bytes,
-        filename: str | None,
+        filename: str | None = None,
     ) -> DatasetFile:
         """Create a new dataset file and add it to the dataset version."""
         mime_type = None
