@@ -17,17 +17,8 @@ jobs:
         with:
           python-version: 3.13
 
-      - name: Install dependencies
-        run: pip install ".[dev]"
-
-      - name: Verify Installed Packages
-        run: pip list
-
-      - name: Debug Python Environment
-        run: |
-          python --version
-          which python
-          echo $PYTHONPATH
+      - name: Install Ariadne-codgen
+        run: pip install ariadne-codegen
 
       - uses: pre-commit/action@v3.0.1
   test:
