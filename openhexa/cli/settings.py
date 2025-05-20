@@ -130,6 +130,20 @@ class Settings:
         self._file_config["openhexa"]["last_version_check"] = str(value)
         self.save()
 
+    @property
+    def last_breaking_change_check(self):
+        """Return the last breaking change check timestamp from the settings file."""
+        val = self._file_config["openhexa"].get("last_breaking_change_check", None)
+        if val is not None:
+            return int(val)
+
+    @last_breaking_change_check.setter
+    def last_breaking_change_check(self, value: int):
+        """Set the last breaking change check timestamp in the settings file."""
+        assert isinstance(value, int), "last_breaking_change_check must be an integer."
+        self._file_config["openhexa"]["last_breaking_change_check"] = str(value)
+        self.save()
+
     def save(self):
         """Save the settings to disk."""
         _save_config(self._file_config)
