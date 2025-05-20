@@ -18,24 +18,13 @@ on:
 {% endif %}
 
 jobs:
-  deploy:
+  push-pipeline:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - uses: actions/setup-python@v2
+      - name: Push pipeline on OpenHEXA
+        uses: blsq/openhexa-push-pipeline-action@v1.0.0
         with:
-          python-version: '3.11'
-      
-      - name: Configure OpenHEXA CLI
-        uses: blsq/openhexa-cli-action@v1
-        with:
-          workspace: "[[ workspace_slug ]]"
           token: ${{ secrets.OH_TOKEN }}
-      - name: Push pipeline to OpenHEXA
-        run: |
-          openhexa pipelines push . --yes
-        
-
+          workspace: "[[ workspace_slug ]]"
+          pipeline: "[[ pipeline_code ]]""
