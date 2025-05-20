@@ -240,6 +240,11 @@ def get_pipelines_pages(name=None):
     return data["pipelines"]
 
 
+def get_pipelines(name=None):
+    """Get pipelines in the workspace optionally ranked by name similarity."""
+    return get_pipelines_pages(name)["items"]
+
+
 def get_pipeline_from_code(pipeline_code: str) -> dict[str, typing.Any]:
     """Get a single pipeline."""
     if settings.current_workspace is None:
