@@ -387,16 +387,19 @@ class Parameter:
         self,
         code: str,
         *,
-        type: str
-        | int
-        | bool
-        | S3Connection
-        | CustomConnection
-        | DHIS2Connection
-        | IASOConnection
-        | PostgreSQLConnection
-        | GCSConnection
-        | Dataset,
+        type: type[
+            str
+            | int
+            | bool
+            | float
+            | DHIS2Connection
+            | IASOConnection
+            | PostgreSQLConnection
+            | GCSConnection
+            | S3Connection
+            | CustomConnection
+            | Dataset
+        ],
         name: str | None = None,
         choices: typing.Sequence | None = None,
         help: str | None = None,
@@ -562,17 +565,19 @@ def validate_parameters(parameters: list[Parameter]):
 def parameter(
     code: str,
     *,
-    type: str
-    | int
-    | bool
-    | float
-    | DHIS2Connection
-    | IASOConnection
-    | PostgreSQLConnection
-    | GCSConnection
-    | S3Connection
-    | CustomConnection
-    | Dataset,
+    type: type[
+        str
+        | int
+        | bool
+        | float
+        | DHIS2Connection
+        | IASOConnection
+        | PostgreSQLConnection
+        | GCSConnection
+        | S3Connection
+        | CustomConnection
+        | Dataset
+    ],
     name: str | None = None,
     choices: typing.Sequence | None = None,
     help: str | None = None,
