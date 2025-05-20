@@ -18,11 +18,11 @@ on:
 {% endif %}
 
 jobs:
-  push-pipeline:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Push pipeline on OpenHEXA
+      - name: Push pipeline to OpenHEXA
         uses: blsq/openhexa-push-pipeline-action@v1.0.0
         with:
           token: ${{ secrets.OH_TOKEN }}
