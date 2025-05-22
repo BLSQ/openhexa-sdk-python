@@ -26,11 +26,18 @@ dependencies = [
     "jinja2>3,<4",
     "docker>=7",
     "graphql-core>3,<4",
+    "ariadne-codegen>=0.14.0,<1"
 ]
 
 [project.scripts]
 openhexa = "openhexa.cli:app"
+ariadne-codegen = "ariadne_codegen.cli:main"
 
+[tool.ariadne-codegen]
+schema_path = "openhexa/cli/graphql/schema.generated.graphql"
+queries_path = "openhexa/cli/graphql/queries.graphql"
+target_package_path = "openhexa/cli/graphql"
+async_client = false
 
 [project.optional-dependencies]
 dev = [
@@ -68,6 +75,7 @@ include-package-data = true
 [tool.ruff]
 line-length = 120
 ignore = ["E501"]
+exclude = ["openhexa/cli/graphql/graphql_client"]
 per-file-ignores = { "tests/**/test_*.py" = ["D100","D101","D102", "D103"] } # Ignore missing docstrings in tests
 
 [tool.ruff.lint]

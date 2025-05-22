@@ -17,6 +17,9 @@ jobs:
         with:
           python-version: 3.13
 
+      - name: Install Ariadne-codegen
+        run: pip install ariadne-codegen
+
       - uses: pre-commit/action@v3.0.1
   test:
     name: Run test suite

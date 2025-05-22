@@ -1,0 +1,16 @@
+query getWorkspacePipelines($workspaceSlug: String!, $name: String, $page: Int = 1, $perPage: Int = 10) {
+    pipelines(workspaceSlug: $workspaceSlug, name: $name, page: $page, perPage: $perPage) {
+        totalPages
+        items {
+            id
+            code
+            name
+            type
+            currentVersion {
+                id
+                name
+                versionNumber
+            }
+        }
+    }
+}

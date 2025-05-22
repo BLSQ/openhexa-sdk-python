@@ -21,6 +21,7 @@ from graphql import build_client_schema, build_schema, get_introspection_query
 from graphql.utilities import find_breaking_changes
 from jinja2 import Template
 
+from openhexa.cli.graphql.graphql_client import Client
 from openhexa.cli.settings import settings
 from openhexa.sdk.pipelines import get_local_workspace_config
 from openhexa.sdk.pipelines.runtime import get_pipeline
@@ -107,7 +108,16 @@ def get_library_versions() -> tuple[str, str]:
         return installed_version, installed_version
 
 
-def detect_graphql_breaking_changes(token):
+def _detect_graphql_breaking_changes_if_needed(token):
+    """Detect breaking changes if not done recently between the schema referenced in the SDK and the server using graphql-core."""
+    ONE_HOUR = 60 * 60
+    now_timestamp = int(datetime.now().timestamp())
+    if not settings.last_breaking_change_check or now_timestamp - settings.last_breaking_change_check > ONE_HOUR:
+        _detect_graphql_breaking_changes(token)
+        settings.last_breaking_change_check = now_timestamp
+
+
+def _detect_graphql_breaking_changes(token):
     """Detect breaking changes between the schema referenced in the SDK and the server using graphql-core."""
     stored_schema_obj = build_schema((Path(__file__).parent / "graphql" / "schema.generated.graphql").open().read())
     server_schema_obj = build_client_schema(
@@ -133,11 +143,7 @@ def detect_graphql_breaking_changes(token):
 
 def graphql(query: str, variables=None, token=None):
     """Check that there is no breaking change and perform a GraphQL request."""
-    ONE_HOUR = 60 * 60
-    now_timestamp = int(datetime.now().timestamp())
-    if not settings.last_breaking_change_check or now_timestamp - settings.last_breaking_change_check > ONE_HOUR:
-        detect_graphql_breaking_changes(token)
-        settings.last_breaking_change_check = now_timestamp
+    _detect_graphql_breaking_changes_if_needed(token)
     return _query_graphql(query, variables, token)
 
 
@@ -739,3 +745,47 @@ def is_dhis2_connection_up(workspace_slug: str, connection_slug: str) -> bool:
         },
     )
     return response["data"]["connectionBySlug"]["status"] == "UP"
+
+
+class OpenHexaClient(Client):
+    """OpenHexaClient is a class that provides methods to interact with the OpenHexa GraphQL API."""
+
+    def __init__(self, token=None):
+        """Initialize the OpenHexaClient with the OpenHexa API URL and headers."""
+        self._url = settings.api_url + "/graphql/"
+        self._token = token or settings.access_token
+
+        if not self._token:
+            raise InvalidTokenError("No token found for workspace")
+
+        super().__init__(
+            url=self._url,
+            headers={
+                "User-Agent": f"openhexa-cli/{version('openhexa.sdk')}",
+                "Authorization": f"Bearer {self._token}",
+            },
+        )
+        logging.getLogger("httpx").setLevel(
+            logging.WARNING
+        )  # HTTPX logs queries by default, we disable them here with WARNING level
+
+    def execute(self, query, **kwargs):
+        """Decorate parent execute method to log the GraphQL query and response."""
+        _detect_graphql_breaking_changes(token=self._token)
+
+        if settings.debug:
+            click.echo("")
+            click.echo("Graphql Query:")
+            click.echo(f"URL: {self.url}")
+            click.echo(f"Query: {query}")
+            variables = kwargs.get("variables", {})
+            click.echo(f"Variables: {variables}")
+
+        response = super().execute(query=query, **kwargs)
+
+        if settings.debug:
+            click.echo("")
+            click.echo("Graphql Response:")
+            click.echo(f"Response: {response}")
+
+        return response

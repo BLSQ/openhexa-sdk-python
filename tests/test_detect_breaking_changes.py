@@ -1,7 +1,7 @@
 import time
 from unittest import TestCase, mock
 
-from openhexa.cli.api import detect_graphql_breaking_changes, graphql
+from openhexa.cli.api import _detect_graphql_breaking_changes, graphql
 
 
 class TestGraphQLFunctions(TestCase):
@@ -47,14 +47,14 @@ class TestGraphQLFunctions(TestCase):
         """
         with mock.patch("pathlib.Path.open", mock.mock_open(read_data=stored_schema)):
             with mock.patch("click.secho") as mock_click_secho:
-                detect_graphql_breaking_changes("test_token")
+                _detect_graphql_breaking_changes("test_token")
                 mock_click_secho.assert_any_call(
                     "⚠️ Breaking changes detected between the SDK (version 1.2.3) and the server:", fg="red"
                 )
                 mock_click_secho.assert_any_call("- Query.testField changed type from Int to String.", fg="yellow")
 
     @mock.patch("openhexa.cli.api._query_graphql")
-    @mock.patch("openhexa.cli.api.detect_graphql_breaking_changes")
+    @mock.patch("openhexa.cli.api._detect_graphql_breaking_changes")
     def test_graphql(self, mock_detect_graphql_breaking_changes, mock_query_graphql):
         """Test that the graphql function is caching the breaking change detection for 1 hour."""
         with mock.patch("openhexa.cli.api.settings") as mock_settings:
