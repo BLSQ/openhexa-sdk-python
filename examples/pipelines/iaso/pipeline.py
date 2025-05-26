@@ -9,23 +9,39 @@ from openhexa.sdk.workspaces.connection import IASOConnection
 @parameter("iaso_con", type=IASOConnection, required=True)
 @parameter(
     "forms",
-    type=str,
+    type=int,
     required=True,
-    widget=IASOWidget.FORMS,
+    widget=IASOWidget.IASO_FORMS,
     multiple=True,
     connection="iaso_con",
 )
-def iaso(iaso_con, forms):
+@parameter(
+    "projects",
+    type=int,
+    required=True,
+    widget=IASOWidget.IASO_PROJECTS,
+    multiple=True,
+    connection="iaso_con",
+)
+@parameter(
+    "org_units",
+    type=int,
+    required=True,
+    widget=IASOWidget.IASO_ORG_UNITS,
+    multiple=True,
+    connection="iaso_con",
+)
+def iaso(iaso_con, forms, org_units, projects):
     """Get forms from IASO."""
-    print_forms(iaso_con, forms)
+    print_forms(iaso_con, forms, org_units, projects)
 
 
 @iaso.task
-def print_forms(iaso_con, forms):
+def print_forms(iaso_con, forms, org_units, projects):
     """Print forms."""
     current_run.log_info("Printing forms")
 
-    current_run.log_info(f"Forms: {forms}")
+    current_run.log_info(f"Forms: {forms}, Org Units: {org_units}, Projects: {projects}")
 
 
 if __name__ == "__main__":
