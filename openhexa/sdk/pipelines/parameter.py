@@ -362,9 +362,9 @@ TYPES_BY_PYTHON_TYPE = {
 class IASOWidget(StrEnum):
     """Enum for IASO widgets."""
 
-    FORMS = "IASO_FORMS"
+    IASO_FORMS = "IASO_FORMS"
     IASO_ORG_UNITS = "IASO_ORG_UNITS"
-    PROJECTS = "IASO_PROJECTS"
+    IASO_PROJECTS = "IASO_PROJECTS"
 
 
 class DHIS2Widget(StrEnum):
