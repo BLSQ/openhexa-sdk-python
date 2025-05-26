@@ -1,5 +1,20 @@
 # Changelog
 
+## [2.3.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.2.0...v2.3.0) (2025-05-26)
+
+
+### Features
+
+* add the new GitHub action for pushing into the SDK init command (HEXA-1269) ([#266](https://github.com/BLSQ/openhexa-sdk-python/issues/266)) ([575f604](https://github.com/BLSQ/openhexa-sdk-python/commit/575f604872d39049131a9b460b3571882002edb6))
+* breaking changes detection against the backend server (HEXA-1238) ([#260](https://github.com/BLSQ/openhexa-sdk-python/issues/260)) ([316feef](https://github.com/BLSQ/openhexa-sdk-python/commit/316feef5ed62b981d855c379278f670df544fbdb))
+
+
+### Bug Fixes
+
+* prefix iaso widget with IASO_ ([#267](https://github.com/BLSQ/openhexa-sdk-python/issues/267)) ([8a7dd70](https://github.com/BLSQ/openhexa-sdk-python/commit/8a7dd70b32b4c99deee8c458b1804842ca7b06b7))
+* SDK dataset add_file filename is not optional ([#262](https://github.com/BLSQ/openhexa-sdk-python/issues/262)) ([825f209](https://github.com/BLSQ/openhexa-sdk-python/commit/825f209e076a0059fa5b44145820ca333565f4f9))
+* type of arg `type` should be of type `type` ([#265](https://github.com/BLSQ/openhexa-sdk-python/issues/265)) ([d9e7421](https://github.com/BLSQ/openhexa-sdk-python/commit/d9e742197b47f5fe387a3f8b008b3dd08cbaf184))
+
 ## [2.2.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.1.2...v2.2.0) (2025-05-14)
 
 
