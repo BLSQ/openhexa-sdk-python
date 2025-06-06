@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.1](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.3.0...v2.3.1) (2025-06-06)
+
+
+### Bug Fixes
+
+* **conda:** fixes recipe dependencies ([de137b0](https://github.com/BLSQ/openhexa-sdk-python/commit/de137b0115dda70268bf36acff30bbd9e2ff8359))
+
 ## [2.3.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.2.0...v2.3.0) (2025-05-26)
 
 
