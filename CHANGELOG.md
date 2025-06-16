@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.3.1...v2.4.0) (2025-06-16)
+
+
+### Features
+
+* include R files in the pipeline zip file ([#271](https://github.com/BLSQ/openhexa-sdk-python/issues/271)) ([66c99be](https://github.com/BLSQ/openhexa-sdk-python/commit/66c99beef16f825b685eedbfe01f28746491b3f1))
+
 ## [2.3.1](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.3.0...v2.3.1) (2025-06-06)
 
 
