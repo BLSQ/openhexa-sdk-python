@@ -20,19 +20,21 @@ from .connection import (
     PostgreSQLConnection,
     S3Connection,
 )
-from ...cli.api import OpenHexaClient
+from openhexa.cli.api import OpenHexaClient
 
 
 class Country:
     """Represents a country with its code, name, alpha3 code and flag."""
 
     def __init__(self, code: str, name: str, alpha3: str, flag: str):
+        """Initialize a Country object."""
         self.code = code
         self.name = name
         self.alpha3 = alpha3
         self.flag = flag
 
     def __repr__(self):
+        """Return a string representation of the Country object."""
         return f"Country(code={self.code}, name={self.name}, alpha3={self.alpha3}, flag={self.flag})"
 
 
@@ -77,8 +79,7 @@ class CurrentWorkspace:
     def countries(self) -> list[Country]:
         """The countries of the workspace."""
         try:
-            response = OpenHexaClient().get_countries(workspace_slug=self.slug)
-            return response["workspace"]["countries"]
+            return OpenHexaClient().get_countries(workspace_slug=self.slug).workspace.countries
         except KeyError:
             raise WorkspaceConfigError("The workspace countries are not available in this environment.")
 
