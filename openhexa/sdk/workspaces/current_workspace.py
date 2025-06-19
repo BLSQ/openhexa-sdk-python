@@ -63,7 +63,6 @@ class CurrentWorkspace:
     @property
     def countries(self) -> list[GetCountriesWorkspaceCountries]:
         """The countries of the workspace."""
-
         from openhexa.cli.api import OpenHexaClient
 
         try:
