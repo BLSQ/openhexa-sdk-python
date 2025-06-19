@@ -7,7 +7,6 @@ import os
 from dataclasses import fields, make_dataclass
 from warnings import warn
 
-from openhexa.cli.api import OpenHexaClient
 from openhexa.utils import stringcase
 
 from ...cli.graphql.graphql_client import GetCountriesWorkspaceCountries
@@ -64,6 +63,9 @@ class CurrentWorkspace:
     @property
     def countries(self) -> list[GetCountriesWorkspaceCountries]:
         """The countries of the workspace."""
+
+        from openhexa.cli.api import OpenHexaClient
+
         try:
             return OpenHexaClient().get_countries(workspace_slug=self.slug).workspace.countries
         except KeyError:
