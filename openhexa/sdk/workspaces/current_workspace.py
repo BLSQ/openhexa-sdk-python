@@ -71,9 +71,7 @@ class CurrentWorkspace:
 
     @property
     def country(self) -> Country:
-        """The country of the workspace.
-
-        """
+        """The country of the workspace."""
         try:
             if self._connected:
                 response = graphql(
@@ -112,7 +110,7 @@ class CurrentWorkspace:
                 return os.environ["WORKSPACE_COUNTRY"]
         except KeyError:
             raise WorkspaceConfigError("The workspace country is not available in this environment.")
-            
+
     @property
     def database_host(self) -> str:
         """The workspace database host."""
