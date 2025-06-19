@@ -98,6 +98,7 @@ ignore = [
     "ANN204",
     "ANN205",
     "ANN401",
+    "D105"
 ]
 
 [tool.ruff.pycodestyle]

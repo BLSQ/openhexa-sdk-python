@@ -20,6 +20,8 @@ from .connection import (
     PostgreSQLConnection,
     S3Connection,
 )
+from ...cli.api import OpenHexaClient
+
 
 class Country:
     """Represents a country with its code, name, alpha3 code and flag."""
@@ -32,6 +34,8 @@ class Country:
 
     def __repr__(self):
         return f"Country(code={self.code}, name={self.name}, alpha3={self.alpha3}, flag={self.flag})"
+
+
 class WorkspaceConfigError(Exception):
     """Raised whenever the system cannot find an environment variable required to configure the current workspace."""
 
@@ -70,46 +74,13 @@ class CurrentWorkspace:
             raise WorkspaceConfigError("The workspace slug is not available in this environment.")
 
     @property
-    def country(self) -> Country:
-        """The country of the workspace."""
+    def countries(self) -> list[Country]:
+        """The countries of the workspace."""
         try:
-            if self._connected:
-                response = graphql(
-                    """
-                    query getWorkspaceCountry($slug: String!) {
-                        workspace(slug: $slug) {
-                            countries {
-                                code
-                                name
-                                alpha3
-                                flag
-                            }
-                        }
-                    }
-                    """,
-                    {"slug": self.slug},
-                )
-                countries = response["workspace"]["countries"]
-                if not countries:
-                    raise WorkspaceConfigError("The workspace does not have a country configured.")
-                if len(response["workspace"]["countries"]) > 1:
-                    warn(
-                        "The workspace has multiple countries configured. The first one will be used.",
-                        UserWarning,
-                        stacklevel=2,
-                    )
-                # return the first country
-                first_country = response["workspace"]["countries"][0]
-                return Country(
-                    code=first_country["code"],
-                    name=first_country["name"],
-                    alpha3=first_country["alpha3"],
-                    flag=first_country["flag"],
-                )
-            else:
-                return os.environ["WORKSPACE_COUNTRY"]
+            response = OpenHexaClient().get_countries(workspace_slug=self.slug)
+            return response["workspace"]["countries"]
         except KeyError:
-            raise WorkspaceConfigError("The workspace country is not available in this environment.")
+            raise WorkspaceConfigError("The workspace countries are not available in this environment.")
 
     @property
     def database_host(self) -> str:

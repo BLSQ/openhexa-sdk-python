@@ -134,6 +134,11 @@ from .exceptions import (
     GraphQLClientHttpError,
     GraphQLClientInvalidResponseError,
 )
+from .get_countries import (
+    GetCountries,
+    GetCountriesWorkspace,
+    GetCountriesWorkspaceCountries,
+)
 from .get_workspace_pipelines import (
     GetWorkspacePipelines,
     GetWorkspacePipelinesPipelines,
@@ -377,6 +382,9 @@ __all__ = [
     "GeneratePipelineWebhookUrlInput",
     "GenerateWorkspaceTokenError",
     "GenerateWorkspaceTokenInput",
+    "GetCountries",
+    "GetCountriesWorkspace",
+    "GetCountriesWorkspaceCountries",
     "GetWorkspacePipelines",
     "GetWorkspacePipelinesPipelines",
     "GetWorkspacePipelinesPipelinesItems",

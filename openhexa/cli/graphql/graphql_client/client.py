@@ -5,6 +5,7 @@ from typing import Any, Dict, Optional, Union
 
 from .base_client import BaseClient
 from .base_model import UNSET, UnsetType
+from .get_countries import GetCountries
 from .get_workspace_pipelines import GetWorkspacePipelines
 
 
@@ -60,3 +61,25 @@ class Client(BaseClient):
         )
         data = self.get_data(response)
         return GetWorkspacePipelines.model_validate(data)
+
+    def get_countries(self, workspace_slug: str, **kwargs: Any) -> GetCountries:
+        query = gql(
+            """
+            query getCountries($workspaceSlug: String!) {
+              workspace(slug: $workspaceSlug) {
+                countries {
+                  code
+                  name
+                  flag
+                  alpha3
+                }
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"workspaceSlug": workspace_slug}
+        response = self.execute(
+            query=query, operation_name="getCountries", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return GetCountries.model_validate(data)
