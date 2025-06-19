@@ -7,8 +7,10 @@ import os
 from dataclasses import fields, make_dataclass
 from warnings import warn
 
+from openhexa.cli.api import OpenHexaClient
 from openhexa.utils import stringcase
 
+from ...cli.graphql.graphql_client import GetCountriesWorkspaceCountries
 from ..datasets import Dataset
 from ..utils import graphql
 from .connection import (
@@ -20,22 +22,6 @@ from .connection import (
     PostgreSQLConnection,
     S3Connection,
 )
-from openhexa.cli.api import OpenHexaClient
-
-
-class Country:
-    """Represents a country with its code, name, alpha3 code and flag."""
-
-    def __init__(self, code: str, name: str, alpha3: str, flag: str):
-        """Initialize a Country object."""
-        self.code = code
-        self.name = name
-        self.alpha3 = alpha3
-        self.flag = flag
-
-    def __repr__(self):
-        """Return a string representation of the Country object."""
-        return f"Country(code={self.code}, name={self.name}, alpha3={self.alpha3}, flag={self.flag})"
 
 
 class WorkspaceConfigError(Exception):
@@ -76,7 +62,7 @@ class CurrentWorkspace:
             raise WorkspaceConfigError("The workspace slug is not available in this environment.")
 
     @property
-    def countries(self) -> list[Country]:
+    def countries(self) -> list[GetCountriesWorkspaceCountries]:
         """The countries of the workspace."""
         try:
             return OpenHexaClient().get_countries(workspace_slug=self.slug).workspace.countries
