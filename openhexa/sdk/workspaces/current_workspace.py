@@ -9,6 +9,7 @@ from warnings import warn
 
 from openhexa.utils import stringcase
 
+from ...cli.graphql.graphql_client import GetCountriesWorkspaceCountries
 from ..datasets import Dataset
 from ..utils import graphql
 from .connection import (
@@ -58,6 +59,16 @@ class CurrentWorkspace:
             return os.environ["HEXA_WORKSPACE"]
         except KeyError:
             raise WorkspaceConfigError("The workspace slug is not available in this environment.")
+
+    @property
+    def countries(self) -> list[GetCountriesWorkspaceCountries]:
+        """The countries of the workspace."""
+        from openhexa.cli.api import OpenHexaClient
+
+        try:
+            return OpenHexaClient().get_countries(workspace_slug=self.slug).workspace.countries
+        except KeyError:
+            raise WorkspaceConfigError("The workspace countries are not available in this environment.")
 
     @property
     def database_host(self) -> str:
