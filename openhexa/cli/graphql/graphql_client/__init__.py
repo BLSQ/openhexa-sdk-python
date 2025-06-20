@@ -643,6 +643,7 @@ from .deny_accessmod_access_request import (
     DenyAccessmodAccessRequestDenyAccessmodAccessRequest,
 )
 from .disable_two_factor import DisableTwoFactor, DisableTwoFactorDisableTwoFactor
+from .dummy import Dummy
 from .enable_two_factor import EnableTwoFactor, EnableTwoFactorEnableTwoFactor
 from .enums import (
     AccessmodAccessibilityAnalysisAlgorithm,
@@ -810,12 +811,6 @@ from .generate_pipeline_webhook_url import (
 from .generate_workspace_token import (
     GenerateWorkspaceToken,
     GenerateWorkspaceTokenGenerateWorkspaceToken,
-)
-from .get_workspace_pipelines import (
-    GetWorkspacePipelines,
-    GetWorkspacePipelinesPipelines,
-    GetWorkspacePipelinesPipelinesItems,
-    GetWorkspacePipelinesPipelinesItemsCurrentVersion,
 )
 from .input_types import (
     AddPipelineOutputInput,
@@ -2331,6 +2326,7 @@ __all__ = [
     "DisableTwoFactorDisableTwoFactor",
     "DisableTwoFactorError",
     "DisableTwoFactorInput",
+    "Dummy",
     "EnableTwoFactor",
     "EnableTwoFactorEnableTwoFactor",
     "EnableTwoFactorError",
@@ -2374,10 +2370,6 @@ __all__ = [
     "GenerateWorkspaceTokenError",
     "GenerateWorkspaceTokenGenerateWorkspaceToken",
     "GenerateWorkspaceTokenInput",
-    "GetWorkspacePipelines",
-    "GetWorkspacePipelinesPipelines",
-    "GetWorkspacePipelinesPipelinesItems",
-    "GetWorkspacePipelinesPipelinesItemsCurrentVersion",
     "GraphQLClientError",
     "GraphQLClientGraphQLError",
     "GraphQLClientGraphQLMultiError",

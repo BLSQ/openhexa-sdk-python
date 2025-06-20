@@ -590,21 +590,13 @@ def pipelines_run(
         _terminate(f"❌ Error while running pipeline: {e}", err=True, exception=e)
 
 
-# TODO : readme
-# TODO : replace existing usage
-# TODO : wiki
-# TODO : fix GenericOutput in app
-
-
 @pipelines.command("list")
 def pipelines_list():
     """List all the remote pipelines of the current workspace."""
     if settings.current_workspace is None:
         _terminate("No workspace activated", err=True)
 
-    workspace_pipelines = (
-        OpenHexaClient().get_workspace_pipelines(workspace_slug=settings.current_workspace).pipelines.items
-    )
+    workspace_pipelines = OpenHexaClient().pipelines(workspace_slug=settings.current_workspace).pipelines.items
     if len(workspace_pipelines) == 0:
         click.echo(f"No pipelines in workspace {settings.current_workspace}")
         return

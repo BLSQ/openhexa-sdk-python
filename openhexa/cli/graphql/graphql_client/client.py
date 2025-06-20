@@ -80,6 +80,7 @@ from .delete_workspace_invitation import DeleteWorkspaceInvitation
 from .delete_workspace_member import DeleteWorkspaceMember
 from .deny_accessmod_access_request import DenyAccessmodAccessRequest
 from .disable_two_factor import DisableTwoFactor
+from .dummy import Dummy
 from .enable_two_factor import EnableTwoFactor
 from .enums import (
     AccessmodFilesetMode,
@@ -93,7 +94,6 @@ from .generate_dataset_upload_url import GenerateDatasetUploadUrl
 from .generate_new_database_password import GenerateNewDatabasePassword
 from .generate_pipeline_webhook_url import GeneratePipelineWebhookUrl
 from .generate_workspace_token import GenerateWorkspaceToken
-from .get_workspace_pipelines import GetWorkspacePipelines
 from .input_types import (
     AddPipelineOutputInput,
     AddToFavoritesInput,
@@ -11724,50 +11724,17 @@ class Client(BaseClient):
         data = self.get_data(response)
         return Workspaces.model_validate(data)
 
-    def get_workspace_pipelines(
-        self,
-        workspace_slug: str,
-        name: Union[Optional[str], UnsetType] = UNSET,
-        page: Union[Optional[int], UnsetType] = UNSET,
-        per_page: Union[Optional[int], UnsetType] = UNSET,
-        **kwargs: Any
-    ) -> GetWorkspacePipelines:
+    def dummy(self, **kwargs: Any) -> Dummy:
         query = gql(
             """
-            query getWorkspacePipelines($workspaceSlug: String!, $name: String, $page: Int = 1, $perPage: Int = 10) {
-              pipelines(
-                workspaceSlug: $workspaceSlug
-                name: $name
-                page: $page
-                perPage: $perPage
-              ) {
-                totalPages
-                items {
-                  id
-                  code
-                  name
-                  type
-                  currentVersion {
-                    id
-                    name
-                    versionNumber
-                  }
-                }
-              }
+            query dummy {
+              __typename
             }
             """
         )
-        variables: Dict[str, object] = {
-            "workspaceSlug": workspace_slug,
-            "name": name,
-            "page": page,
-            "perPage": per_page,
-        }
+        variables: Dict[str, object] = {}
         response = self.execute(
-            query=query,
-            operation_name="getWorkspacePipelines",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="dummy", variables=variables, **kwargs
         )
         data = self.get_data(response)
-        return GetWorkspacePipelines.model_validate(data)
+        return Dummy.model_validate(data)
