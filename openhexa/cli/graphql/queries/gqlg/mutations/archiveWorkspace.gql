@@ -1,0 +1,6 @@
+mutation archiveWorkspace($input: ArchiveWorkspaceInput!){
+    archiveWorkspace(input: $input){
+        errors
+        success
+    }
+}

@@ -1,0 +1,23 @@
+query searchDatabaseTables($page: Int, $perPage: Int, $query: String!, $workspaceSlugs: [String]!){
+    searchDatabaseTables(page: $page, perPage: $perPage, query: $query, workspaceSlugs: $workspaceSlugs){
+        items{
+            databaseTable{
+                count
+                name
+                sample
+            }
+            score
+            workspace{
+                createdAt
+                description
+                dockerImage
+                name
+                slug
+                updatedAt
+            }
+        }
+        pageNumber
+        totalItems
+        totalPages
+    }
+}

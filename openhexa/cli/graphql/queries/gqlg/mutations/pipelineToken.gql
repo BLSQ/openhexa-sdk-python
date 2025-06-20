@@ -1,0 +1,7 @@
+mutation pipelineToken($input: PipelineTokenInput!){
+    pipelineToken(input: $input){
+        errors
+        success
+        token
+    }
+}

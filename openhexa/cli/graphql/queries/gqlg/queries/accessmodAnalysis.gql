@@ -1,0 +1,29 @@
+query accessmodAnalysis($id: String){
+    accessmodAnalysis(id: $id){
+        author{
+            avatar{
+                color
+                initials
+            }
+            dateJoined
+            displayName
+            email
+            firstName
+            id
+            language
+            lastLogin
+            lastName
+        }
+        createdAt
+        id
+        name
+        permissions{
+            delete
+            run
+            update
+        }
+        status
+        type
+        updatedAt
+    }
+}

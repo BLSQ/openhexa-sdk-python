@@ -8,6 +8,14 @@ repos:
 
 - repo: local
   hooks:
+    - id: gqlg
+      name: gqlg
+      entry: bash -c
+        echo "Running gqlg" && \
+        gqlg --schemaFilePath ./openhexa/cli/graphql/schema.generated.graphql --destDirPath ./openhexa/cli/graphql/queries/gqlg --depthLimit 3
+      language: system
+      types: [ graphql ]
+      pass_filenames: false
     - id: ariadne-codegen
       name: ariadne-codegen
       entry: bash -c

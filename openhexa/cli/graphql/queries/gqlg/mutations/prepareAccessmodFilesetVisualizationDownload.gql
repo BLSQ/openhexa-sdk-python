@@ -1,0 +1,6 @@
+mutation prepareAccessmodFilesetVisualizationDownload($input: PrepareAccessmodFilesetVisualizationDownloadInput!){
+    prepareAccessmodFilesetVisualizationDownload(input: $input){
+        success
+        url
+    }
+}

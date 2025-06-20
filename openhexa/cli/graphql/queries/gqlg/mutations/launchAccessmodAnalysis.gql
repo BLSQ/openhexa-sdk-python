@@ -1,0 +1,29 @@
+mutation launchAccessmodAnalysis($input: LaunchAccessmodAnalysisInput){
+    launchAccessmodAnalysis(input: $input){
+        analysis{
+            author{
+                dateJoined
+                displayName
+                email
+                firstName
+                id
+                language
+                lastLogin
+                lastName
+            }
+            createdAt
+            id
+            name
+            permissions{
+                delete
+                run
+                update
+            }
+            status
+            type
+            updatedAt
+        }
+        errors
+        success
+    }
+}

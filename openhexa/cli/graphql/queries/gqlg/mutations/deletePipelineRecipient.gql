@@ -1,0 +1,6 @@
+mutation deletePipelineRecipient($input: DeletePipelineRecipientInput!){
+    deletePipelineRecipient(input: $input){
+        errors
+        success
+    }
+}

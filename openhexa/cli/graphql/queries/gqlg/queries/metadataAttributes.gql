@@ -1,0 +1,39 @@
+query metadataAttributes($targetId: OpaqueID!){
+    metadataAttributes(targetId: $targetId){
+        createdAt
+        createdBy{
+            avatar{
+                color
+                initials
+            }
+            dateJoined
+            displayName
+            email
+            firstName
+            id
+            language
+            lastLogin
+            lastName
+        }
+        id
+        key
+        label
+        system
+        updatedAt
+        updatedBy{
+            avatar{
+                color
+                initials
+            }
+            dateJoined
+            displayName
+            email
+            firstName
+            id
+            language
+            lastLogin
+            lastName
+        }
+        value
+    }
+}

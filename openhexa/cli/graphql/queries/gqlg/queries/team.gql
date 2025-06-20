@@ -1,0 +1,24 @@
+query team($page: Int, $perPage: Int, $id: UUID!){
+    team(id: $id){
+        createdAt
+        id
+        memberships(page: $page, perPage: $perPage){
+            items{
+                createdAt
+                id
+                role
+                updatedAt
+            }
+            pageNumber
+            totalItems
+            totalPages
+        }
+        name
+        permissions{
+            createMembership
+            delete
+            update
+        }
+        updatedAt
+    }
+}

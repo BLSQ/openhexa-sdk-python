@@ -1,0 +1,11 @@
+mutation launchNotebookServer($input: LaunchNotebookServerInput!){
+    launchNotebookServer(input: $input){
+        errors
+        server{
+            name
+            ready
+            url
+        }
+        success
+    }
+}

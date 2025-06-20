@@ -1,0 +1,6 @@
+mutation deleteWorkspaceDatabaseTable($input: DeleteWorkspaceDatabaseTableInput!){
+    deleteWorkspaceDatabaseTable(input: $input){
+        errors
+        success
+    }
+}

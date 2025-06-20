@@ -1,0 +1,6 @@
+mutation deleteAccessmodProject($input: DeleteAccessmodProjectInput!){
+    deleteAccessmodProject(input: $input){
+        errors
+        success
+    }
+}

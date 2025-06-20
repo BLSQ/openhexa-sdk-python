@@ -1,0 +1,40 @@
+mutation setDAGRunFavorite($input: SetDAGRunFavoriteInput!){
+    setDAGRunFavorite(input: $input){
+        dagRun{
+            config
+            duration
+            executionDate
+            externalId
+            externalUrl
+            id
+            isFavorite
+            label
+            lastRefreshedAt
+            logs
+            messages{
+                message
+                priority
+                timestamp
+            }
+            outputs{
+                title
+                uri
+            }
+            progress
+            status
+            triggerMode
+            user{
+                dateJoined
+                displayName
+                email
+                firstName
+                id
+                language
+                lastLogin
+                lastName
+            }
+        }
+        errors
+        success
+    }
+}

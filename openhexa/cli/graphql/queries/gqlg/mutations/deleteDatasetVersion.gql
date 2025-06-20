@@ -1,0 +1,6 @@
+mutation deleteDatasetVersion($input: DeleteDatasetVersionInput!){
+    deleteDatasetVersion(input: $input){
+        errors
+        success
+    }
+}

@@ -1,0 +1,62 @@
+mutation createDatasetVersion($attachment: Boolean, $name: String!, $page: Int, $perPage: Int, $input: CreateDatasetVersionInput!){
+    createDatasetVersion(input: $input){
+        errors
+        success
+        version{
+            attributes{
+                createdAt
+                id
+                key
+                label
+                system
+                updatedAt
+                value
+            }
+            changelog
+            createdAt
+            createdBy{
+                dateJoined
+                displayName
+                email
+                firstName
+                id
+                language
+                lastLogin
+                lastName
+            }
+            dataset{
+                createdAt
+                description
+                id
+                name
+                slug
+                targetId
+                updatedAt
+            }
+            fileByName(name: $name){
+                contentType
+                createdAt
+                downloadUrl(attachment: $attachment)
+                filename
+                id
+                properties
+                size
+                targetId
+                uri
+            }
+            files(page: $page, perPage: $perPage){
+                pageNumber
+                totalItems
+                totalPages
+            }
+            id
+            name
+            permissions{
+                delete
+                download
+                update
+            }
+            targetId
+        }
+    }
+}

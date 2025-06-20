@@ -1,0 +1,6 @@
+mutation prepareDownloadURL($input: PrepareDownloadURLInput!){
+    prepareDownloadURL(input: $input){
+        success
+        url
+    }
+}

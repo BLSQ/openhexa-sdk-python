@@ -1,0 +1,9 @@
+query organizations{
+    organizations{
+        contactInfo
+        id
+        name
+        type
+        url
+    }
+}

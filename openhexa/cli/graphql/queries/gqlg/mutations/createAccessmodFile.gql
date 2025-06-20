@@ -1,0 +1,42 @@
+mutation createAccessmodFile($input: CreateAccessmodFileInput!){
+    createAccessmodFile(input: $input){
+        errors
+        file{
+            createdAt
+            fileset{
+                createdAt
+                id
+                metadata
+                mode
+                name
+                owner{
+                    __typename
+                    ... on Team {
+                        createdAt
+                        id
+                        name
+                        updatedAt
+                    }
+                    ... on User {
+                        dateJoined
+                        displayName
+                        email
+                        firstName
+                        id
+                        language
+                        lastLogin
+                        lastName
+                    }
+                }
+                status
+                updatedAt
+            }
+            id
+            mimeType
+            name
+            updatedAt
+            uri
+        }
+        success
+    }
+}

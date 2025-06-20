@@ -1,0 +1,23 @@
+query teams($page: Int, $perPage: Int, $page1: Int, $perPage1: Int, $term: String){
+    teams(page: $page1, perPage: $perPage1, term: $term){
+        items{
+            createdAt
+            id
+            memberships(page: $page, perPage: $perPage){
+                pageNumber
+                totalItems
+                totalPages
+            }
+            name
+            permissions{
+                createMembership
+                delete
+                update
+            }
+            updatedAt
+        }
+        pageNumber
+        totalItems
+        totalPages
+    }
+}

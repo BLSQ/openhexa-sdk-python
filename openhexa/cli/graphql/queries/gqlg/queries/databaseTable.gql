@@ -1,0 +1,17 @@
+query databaseTable($direction: OrderByDirection!, $orderBy: String!, $page: Int!, $perPage: Int, $id: String!){
+    databaseTable(id: $id){
+        columns{
+            name
+            type
+        }
+        count
+        name
+        rows(direction: $direction, orderBy: $orderBy, page: $page, perPage: $perPage){
+            hasNextPage
+            hasPreviousPage
+            items
+            pageNumber
+        }
+        sample
+    }
+}

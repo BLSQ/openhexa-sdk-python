@@ -1,0 +1,35 @@
+mutation setMetadataAttribute($input: SetMetadataAttributeInput!){
+    setMetadataAttribute(input: $input){
+        attribute{
+            createdAt
+            createdBy{
+                dateJoined
+                displayName
+                email
+                firstName
+                id
+                language
+                lastLogin
+                lastName
+            }
+            id
+            key
+            label
+            system
+            updatedAt
+            updatedBy{
+                dateJoined
+                displayName
+                email
+                firstName
+                id
+                language
+                lastLogin
+                lastName
+            }
+            value
+        }
+        errors
+        success
+    }
+}

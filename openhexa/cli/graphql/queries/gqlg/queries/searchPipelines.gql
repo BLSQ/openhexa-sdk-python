@@ -1,0 +1,25 @@
+query searchPipelines($page: Int, $perPage: Int, $query: String!, $workspaceSlugs: [String]!){
+    searchPipelines(page: $page, perPage: $perPage, query: $query, workspaceSlugs: $workspaceSlugs){
+        items{
+            pipeline{
+                code
+                config
+                createdAt
+                description
+                hasNewTemplateVersions
+                id
+                name
+                notebookPath
+                schedule
+                type
+                updatedAt
+                webhookEnabled
+                webhookUrl
+            }
+            score
+        }
+        pageNumber
+        totalItems
+        totalPages
+    }
+}

@@ -1,0 +1,6 @@
+mutation deletePipelineVersion($input: DeletePipelineVersionInput!){
+    deletePipelineVersion(input: $input){
+        errors
+        success
+    }
+}

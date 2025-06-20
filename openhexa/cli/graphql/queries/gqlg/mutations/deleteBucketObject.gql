@@ -1,0 +1,6 @@
+mutation deleteBucketObject($input: DeleteBucketObjectInput!){
+    deleteBucketObject(input: $input){
+        errors
+        success
+    }
+}

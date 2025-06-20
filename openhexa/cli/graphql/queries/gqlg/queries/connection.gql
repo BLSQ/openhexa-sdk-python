@@ -1,0 +1,36 @@
+query connection($id: UUID!){
+    connection(id: $id){
+        createdAt
+        description
+        fields{
+            code
+            createdAt
+            secret
+            updatedAt
+            value
+        }
+        id
+        name
+        permissions{
+            delete
+            update
+        }
+        slug
+        type
+        updatedAt
+        user{
+            avatar{
+                color
+                initials
+            }
+            dateJoined
+            displayName
+            email
+            firstName
+            id
+            language
+            lastLogin
+            lastName
+        }
+    }
+}

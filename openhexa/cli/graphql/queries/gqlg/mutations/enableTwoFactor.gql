@@ -1,0 +1,7 @@
+mutation enableTwoFactor($input: EnableTwoFactorInput){
+    enableTwoFactor(input: $input){
+        errors
+        success
+        verified
+    }
+}

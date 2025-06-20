@@ -1,0 +1,16 @@
+query country($alpha3: String, $code: String){
+    country(alpha3: $alpha3, code: $code){
+        alpha3
+        code
+        flag
+        name
+        whoInfo{
+            defaultCRS
+            region{
+                code
+                name
+            }
+            simplifiedExtent
+        }
+    }
+}

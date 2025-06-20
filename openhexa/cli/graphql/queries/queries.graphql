@@ -1,0 +1,10 @@
+query getCountries($workspaceSlug:String!){
+    workspace(slug: $workspaceSlug) {
+        countries {
+            code
+            name
+            flag
+            alpha3
+        }
+    }
+}

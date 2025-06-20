@@ -1,0 +1,6 @@
+mutation deletePipelineTemplate($input: DeletePipelineTemplateInput){
+    deletePipelineTemplate(input: $input){
+        errors
+        success
+    }
+}

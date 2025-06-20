@@ -1,0 +1,30 @@
+mutation updateWorkspaceMember($input: UpdateWorkspaceMemberInput!){
+    updateWorkspaceMember(input: $input){
+        errors
+        success
+        workspaceMembership{
+            createdAt
+            id
+            role
+            updatedAt
+            user{
+                dateJoined
+                displayName
+                email
+                firstName
+                id
+                language
+                lastLogin
+                lastName
+            }
+            workspace{
+                createdAt
+                description
+                dockerImage
+                name
+                slug
+                updatedAt
+            }
+        }
+    }
+}

@@ -1,0 +1,6 @@
+mutation deleteDatasetLink($input: DeleteDatasetLinkInput!){
+    deleteDatasetLink(input: $input){
+        errors
+        success
+    }
+}

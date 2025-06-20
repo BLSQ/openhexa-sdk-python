@@ -1,0 +1,30 @@
+query accessmodAnalyses($page: Int, $perPage: Int, $projectId: String!){
+    accessmodAnalyses(page: $page, perPage: $perPage, projectId: $projectId){
+        items{
+            author{
+                dateJoined
+                displayName
+                email
+                firstName
+                id
+                language
+                lastLogin
+                lastName
+            }
+            createdAt
+            id
+            name
+            permissions{
+                delete
+                run
+                update
+            }
+            status
+            type
+            updatedAt
+        }
+        pageNumber
+        totalItems
+        totalPages
+    }
+}

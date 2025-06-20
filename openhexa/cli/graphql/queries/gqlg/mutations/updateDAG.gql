@@ -1,0 +1,45 @@
+mutation updateDAG($orderBy: DAGRunOrderBy, $page: Int, $perPage: Int, $input: UpdateDAGInput!){
+    updateDAG(input: $input){
+        dag{
+            countries{
+                alpha3
+                code
+                flag
+                name
+            }
+            description
+            externalId
+            externalUrl
+            formCode
+            id
+            label
+            runs(orderBy: $orderBy, page: $page, perPage: $perPage){
+                pageNumber
+                totalItems
+                totalPages
+            }
+            schedule
+            tags{
+                id
+                name
+            }
+            template{
+                code
+                description
+                sampleConfig
+            }
+            user{
+                dateJoined
+                displayName
+                email
+                firstName
+                id
+                language
+                lastLogin
+                lastName
+            }
+        }
+        errors
+        success
+    }
+}

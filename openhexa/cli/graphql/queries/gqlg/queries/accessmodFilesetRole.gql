@@ -1,0 +1,10 @@
+query accessmodFilesetRole($id: String!){
+    accessmodFilesetRole(id: $id){
+        code
+        createdAt
+        format
+        id
+        name
+        updatedAt
+    }
+}

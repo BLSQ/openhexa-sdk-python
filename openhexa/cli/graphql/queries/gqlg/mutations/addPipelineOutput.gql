@@ -1,0 +1,6 @@
+mutation addPipelineOutput($input: AddPipelineOutputInput!){
+    addPipelineOutput(input: $input){
+        errors
+        success
+    }
+}

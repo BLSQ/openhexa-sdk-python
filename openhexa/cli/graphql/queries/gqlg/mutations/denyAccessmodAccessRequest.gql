@@ -1,0 +1,6 @@
+mutation denyAccessmodAccessRequest($input: DenyAccessmodAccessRequestInput!){
+    denyAccessmodAccessRequest(input: $input){
+        errors
+        success
+    }
+}

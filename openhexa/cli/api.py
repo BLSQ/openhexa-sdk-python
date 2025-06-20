@@ -21,7 +21,8 @@ from graphql import build_client_schema, build_schema, get_introspection_query
 from graphql.utilities import find_breaking_changes
 from jinja2 import Template
 
-from openhexa.cli.graphql.graphql_client import Client
+from openhexa.cli.graphql.graphql_client import *  # noqa: F401, F403 This allows to pass through the typed classes
+from openhexa.cli.graphql.graphql_client import Client as GraphQLClient
 from openhexa.cli.settings import settings
 from openhexa.sdk.pipelines import get_local_workspace_config
 from openhexa.sdk.pipelines.runtime import get_pipeline
@@ -747,7 +748,7 @@ def is_dhis2_connection_up(workspace_slug: str, connection_slug: str) -> bool:
     return response["data"]["connectionBySlug"]["status"] == "UP"
 
 
-class OpenHexaClient(Client):
+class OpenHexaClient(GraphQLClient):
     """OpenHexaClient is a class that provides methods to interact with the OpenHexa GraphQL API."""
 
     def __init__(self, token=None):

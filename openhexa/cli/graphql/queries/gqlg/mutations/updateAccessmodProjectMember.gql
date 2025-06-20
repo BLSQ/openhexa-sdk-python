@@ -1,0 +1,61 @@
+mutation updateAccessmodProjectMember($input: UpdateAccessmodProjectMemberInput!){
+    updateAccessmodProjectMember(input: $input){
+        errors
+        member{
+            createdAt
+            id
+            mode
+            permissions{
+                delete
+                update
+            }
+            project{
+                createdAt
+                crs
+                description
+                extent
+                id
+                name
+                owner{
+                    __typename
+                    ... on Team {
+                        createdAt
+                        id
+                        name
+                        updatedAt
+                    }
+                    ... on User {
+                        dateJoined
+                        displayName
+                        email
+                        firstName
+                        id
+                        language
+                        lastLogin
+                        lastName
+                    }
+                }
+                spatialResolution
+                updatedAt
+            }
+            team{
+                createdAt
+                id
+                name
+                updatedAt
+            }
+            updatedAt
+            user{
+                dateJoined
+                displayName
+                email
+                firstName
+                id
+                language
+                lastLogin
+                lastName
+            }
+        }
+        success
+    }
+}

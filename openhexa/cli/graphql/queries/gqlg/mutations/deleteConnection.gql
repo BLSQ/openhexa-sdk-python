@@ -1,0 +1,6 @@
+mutation deleteConnection($input: DeleteConnectionInput!){
+    deleteConnection(input: $input){
+        errors
+        success
+    }
+}
