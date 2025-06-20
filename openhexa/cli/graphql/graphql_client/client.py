@@ -80,7 +80,6 @@ from .delete_workspace_invitation import DeleteWorkspaceInvitation
 from .delete_workspace_member import DeleteWorkspaceMember
 from .deny_accessmod_access_request import DenyAccessmodAccessRequest
 from .disable_two_factor import DisableTwoFactor
-from .dummy import Dummy
 from .enable_two_factor import EnableTwoFactor
 from .enums import (
     AccessmodFilesetMode,
@@ -94,6 +93,7 @@ from .generate_dataset_upload_url import GenerateDatasetUploadUrl
 from .generate_new_database_password import GenerateNewDatabasePassword
 from .generate_pipeline_webhook_url import GeneratePipelineWebhookUrl
 from .generate_workspace_token import GenerateWorkspaceToken
+from .get_countries import GetCountries
 from .input_types import (
     AddPipelineOutputInput,
     AddToFavoritesInput,
@@ -11724,17 +11724,24 @@ class Client(BaseClient):
         data = self.get_data(response)
         return Workspaces.model_validate(data)
 
-    def dummy(self, **kwargs: Any) -> Dummy:
+    def get_countries(self, workspace_slug: str, **kwargs: Any) -> GetCountries:
         query = gql(
             """
-            query dummy {
-              __typename
+            query getCountries($workspaceSlug: String!) {
+              workspace(slug: $workspaceSlug) {
+                countries {
+                  code
+                  name
+                  flag
+                  alpha3
+                }
+              }
             }
             """
         )
-        variables: Dict[str, object] = {}
+        variables: Dict[str, object] = {"workspaceSlug": workspace_slug}
         response = self.execute(
-            query=query, operation_name="dummy", variables=variables, **kwargs
+            query=query, operation_name="getCountries", variables=variables, **kwargs
         )
         data = self.get_data(response)
-        return Dummy.model_validate(data)
+        return GetCountries.model_validate(data)
