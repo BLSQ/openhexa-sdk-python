@@ -1,0 +1,35 @@
+mutation addPipelineRecipient($input: CreatePipelineRecipientInput!){
+    addPipelineRecipient(input: $input){
+        errors
+        recipient{
+            id
+            notificationLevel
+            pipeline{
+                code
+                config
+                createdAt
+                description
+                hasNewTemplateVersions
+                id
+                name
+                notebookPath
+                schedule
+                type
+                updatedAt
+                webhookEnabled
+                webhookUrl
+            }
+            user{
+                dateJoined
+                displayName
+                email
+                firstName
+                id
+                language
+                lastLogin
+                lastName
+            }
+        }
+        success
+    }
+}

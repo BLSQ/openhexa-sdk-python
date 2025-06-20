@@ -1,0 +1,35 @@
+mutation updateTemplateVersion($input: UpdateTemplateVersionInput!){
+    updateTemplateVersion(input: $input){
+        errors
+        success
+        templateVersion{
+            changelog
+            createdAt
+            id
+            isLatestVersion
+            permissions{
+                delete
+                update
+            }
+            template{
+                code
+                config
+                description
+                id
+                name
+                updatedAt
+            }
+            user{
+                dateJoined
+                displayName
+                email
+                firstName
+                id
+                language
+                lastLogin
+                lastName
+            }
+            versionNumber
+        }
+    }
+}

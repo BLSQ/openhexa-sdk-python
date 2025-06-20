@@ -1,0 +1,6 @@
+mutation deleteWebapp($input: DeleteWebappInput!){
+    deleteWebapp(input: $input){
+        errors
+        success
+    }
+}

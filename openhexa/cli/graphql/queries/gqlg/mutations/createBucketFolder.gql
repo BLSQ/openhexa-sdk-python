@@ -1,0 +1,14 @@
+mutation createBucketFolder($input: CreateBucketFolderInput!){
+    createBucketFolder(input: $input){
+        errors
+        folder{
+            key
+            name
+            path
+            size
+            type
+            updatedAt
+        }
+        success
+    }
+}

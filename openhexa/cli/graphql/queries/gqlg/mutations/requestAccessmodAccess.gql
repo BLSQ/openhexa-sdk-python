@@ -1,0 +1,6 @@
+mutation requestAccessmodAccess($input: RequestAccessmodAccessInput!){
+    requestAccessmodAccess(input: $input){
+        errors
+        success
+    }
+}

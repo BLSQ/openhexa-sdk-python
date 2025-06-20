@@ -1,0 +1,19 @@
+query searchDatasets($page: Int, $perPage: Int, $query: String!, $workspaceSlugs: [String]!){
+    searchDatasets(page: $page, perPage: $perPage, query: $query, workspaceSlugs: $workspaceSlugs){
+        items{
+            dataset{
+                createdAt
+                description
+                id
+                name
+                slug
+                targetId
+                updatedAt
+            }
+            score
+        }
+        pageNumber
+        totalItems
+        totalPages
+    }
+}

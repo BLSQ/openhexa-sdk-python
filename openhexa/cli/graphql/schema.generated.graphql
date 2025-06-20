@@ -1892,9 +1892,9 @@ scalar Generic
 
 """Represents a generic output of a pipeline run."""
 type GenericOutput {
-  name: String
-  type: String!
-  uri: String!
+  genericName: String
+  genericType: String!
+  genericUri: String!
 }
 
 """IASO connection object"""

@@ -1,0 +1,40 @@
+query dagRun($id: UUID!){
+    dagRun(id: $id){
+        config
+        duration
+        executionDate
+        externalId
+        externalUrl
+        id
+        isFavorite
+        label
+        lastRefreshedAt
+        logs
+        messages{
+            message
+            priority
+            timestamp
+        }
+        outputs{
+            title
+            uri
+        }
+        progress
+        status
+        triggerMode
+        user{
+            avatar{
+                color
+                initials
+            }
+            dateJoined
+            displayName
+            email
+            firstName
+            id
+            language
+            lastLogin
+            lastName
+        }
+    }
+}

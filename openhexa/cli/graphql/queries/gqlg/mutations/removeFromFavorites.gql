@@ -1,0 +1,6 @@
+mutation removeFromFavorites($input: RemoveFromFavoritesInput!){
+    removeFromFavorites(input: $input){
+        errors
+        success
+    }
+}

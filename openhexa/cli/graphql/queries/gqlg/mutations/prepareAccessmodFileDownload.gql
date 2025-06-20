@@ -1,0 +1,6 @@
+mutation prepareAccessmodFileDownload($input: PrepareAccessmodFileDownloadInput!){
+    prepareAccessmodFileDownload(input: $input){
+        downloadUrl
+        success
+    }
+}

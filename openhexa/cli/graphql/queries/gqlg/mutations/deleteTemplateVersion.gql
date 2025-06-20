@@ -1,0 +1,6 @@
+mutation deleteTemplateVersion($input: DeleteTemplateVersionInput!){
+    deleteTemplateVersion(input: $input){
+        errors
+        success
+    }
+}

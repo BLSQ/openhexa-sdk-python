@@ -1,0 +1,19 @@
+query boundaries($country_code: String!, $level: String!){
+    boundaries(country_code: $country_code, level: $level){
+        administrative_level
+        country{
+            alpha3
+            code
+            flag
+            name
+            whoInfo{
+                defaultCRS
+                simplifiedExtent
+            }
+        }
+        extent
+        id
+        name
+        parent
+    }
+}

@@ -1,0 +1,42 @@
+mutation linkDataset($input: LinkDatasetInput!){
+    linkDataset(input: $input){
+        errors
+        link{
+            createdAt
+            createdBy{
+                dateJoined
+                displayName
+                email
+                firstName
+                id
+                language
+                lastLogin
+                lastName
+            }
+            dataset{
+                createdAt
+                description
+                id
+                name
+                slug
+                targetId
+                updatedAt
+            }
+            id
+            isPinned
+            permissions{
+                delete
+                pin
+            }
+            workspace{
+                createdAt
+                description
+                dockerImage
+                name
+                slug
+                updatedAt
+            }
+        }
+        success
+    }
+}

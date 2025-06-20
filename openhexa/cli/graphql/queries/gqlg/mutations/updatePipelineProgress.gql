@@ -1,0 +1,6 @@
+mutation updatePipelineProgress($input: UpdatePipelineProgressInput!){
+    updatePipelineProgress(input: $input){
+        errors
+        success
+    }
+}

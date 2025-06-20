@@ -1,0 +1,26 @@
+query searchFiles($page: Int, $perPage: Int, $query: String!, $workspaceSlugs: [String]!){
+    searchFiles(page: $page, perPage: $perPage, query: $query, workspaceSlugs: $workspaceSlugs){
+        items{
+            file{
+                key
+                name
+                path
+                size
+                type
+                updated
+            }
+            score
+            workspace{
+                createdAt
+                description
+                dockerImage
+                name
+                slug
+                updatedAt
+            }
+        }
+        pageNumber
+        totalItems
+        totalPages
+    }
+}

@@ -1,0 +1,36 @@
+mutation updateWebapp($input: UpdateWebappInput!){
+    updateWebapp(input: $input){
+        errors
+        success
+        webapp{
+            createdBy{
+                dateJoined
+                displayName
+                email
+                firstName
+                id
+                language
+                lastLogin
+                lastName
+            }
+            description
+            icon
+            id
+            isFavorite
+            name
+            permissions{
+                delete
+                update
+            }
+            url
+            workspace{
+                createdAt
+                description
+                dockerImage
+                name
+                slug
+                updatedAt
+            }
+        }
+    }
+}

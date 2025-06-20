@@ -1,0 +1,46 @@
+query dags($orderBy: DAGRunOrderBy, $page: Int, $perPage: Int, $page1: Int, $perPage1: Int){
+    dags(page: $page1, perPage: $perPage1){
+        items{
+            countries{
+                alpha3
+                code
+                flag
+                name
+            }
+            description
+            externalId
+            externalUrl
+            formCode
+            id
+            label
+            runs(orderBy: $orderBy, page: $page, perPage: $perPage){
+                pageNumber
+                totalItems
+                totalPages
+            }
+            schedule
+            tags{
+                id
+                name
+            }
+            template{
+                code
+                description
+                sampleConfig
+            }
+            user{
+                dateJoined
+                displayName
+                email
+                firstName
+                id
+                language
+                lastLogin
+                lastName
+            }
+        }
+        pageNumber
+        totalItems
+        totalPages
+    }
+}

@@ -1,0 +1,6 @@
+mutation approveAccessmodAccessRequest($input: ApproveAccessmodAccessRequestInput!){
+    approveAccessmodAccessRequest(input: $input){
+        errors
+        success
+    }
+}

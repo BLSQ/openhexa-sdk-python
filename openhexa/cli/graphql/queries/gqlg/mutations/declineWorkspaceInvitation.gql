@@ -1,0 +1,32 @@
+mutation declineWorkspaceInvitation($input: DeclineWorkspaceInvitationInput!){
+    declineWorkspaceInvitation(input: $input){
+        errors
+        invitation{
+            createdAt
+            email
+            id
+            invitedBy{
+                dateJoined
+                displayName
+                email
+                firstName
+                id
+                language
+                lastLogin
+                lastName
+            }
+            role
+            status
+            updatedAt
+            workspace{
+                createdAt
+                description
+                dockerImage
+                name
+                slug
+                updatedAt
+            }
+        }
+        success
+    }
+}

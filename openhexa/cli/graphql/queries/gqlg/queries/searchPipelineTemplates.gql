@@ -1,0 +1,18 @@
+query searchPipelineTemplates($page: Int, $perPage: Int, $query: String!, $workspaceSlugs: [String]!){
+    searchPipelineTemplates(page: $page, perPage: $perPage, query: $query, workspaceSlugs: $workspaceSlugs){
+        items{
+            pipelineTemplate{
+                code
+                config
+                description
+                id
+                name
+                updatedAt
+            }
+            score
+        }
+        pageNumber
+        totalItems
+        totalPages
+    }
+}

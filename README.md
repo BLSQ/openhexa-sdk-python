@@ -148,6 +148,12 @@ You can run the tests using pytest:
 pytest
 ```
 
+### Codegen from the GraphQL schema
+
+```shell
+gqlg --schemaFilePath ./openhexa/cli/graphql/schema.generated.graphql --destDirPath ./openhexa/cli/graphql/queries/gqlg --depthLimit 3
+```
+
 ## Release
  
 This project uses [release-please](https://github.com/googleapis/release-please) to manage releases using conventional commits.

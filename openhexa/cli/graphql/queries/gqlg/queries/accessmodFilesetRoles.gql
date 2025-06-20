@@ -1,0 +1,10 @@
+query accessmodFilesetRoles{
+    accessmodFilesetRoles{
+        code
+        createdAt
+        format
+        id
+        name
+        updatedAt
+    }
+}

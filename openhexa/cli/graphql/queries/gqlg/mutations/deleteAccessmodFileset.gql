@@ -1,0 +1,6 @@
+mutation deleteAccessmodFileset($input: DeleteAccessmodFilesetInput!){
+    deleteAccessmodFileset(input: $input){
+        errors
+        success
+    }
+}

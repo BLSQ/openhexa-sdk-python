@@ -590,10 +590,12 @@ def pipelines_run(
         _terminate(f"❌ Error while running pipeline: {e}", err=True, exception=e)
 
 
-# TODO : Generate python layer
 # TODO : readme
 # TODO : replace existing usage
 # TODO : wiki
+# TODO : fix GenericOutput in app
+
+
 @pipelines.command("list")
 def pipelines_list():
     """List all the remote pipelines of the current workspace."""

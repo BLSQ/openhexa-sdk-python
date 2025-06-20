@@ -1,0 +1,7 @@
+mutation prepareVersionFileDownload($input: PrepareVersionFileDownloadInput!){
+    prepareVersionFileDownload(input: $input){
+        downloadUrl
+        errors
+        success
+    }
+}

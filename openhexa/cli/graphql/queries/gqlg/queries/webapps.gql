@@ -1,0 +1,37 @@
+query webapps($favorite: Boolean, $page: Int, $perPage: Int, $workspaceSlug: String){
+    webapps(favorite: $favorite, page: $page, perPage: $perPage, workspaceSlug: $workspaceSlug){
+        items{
+            createdBy{
+                dateJoined
+                displayName
+                email
+                firstName
+                id
+                language
+                lastLogin
+                lastName
+            }
+            description
+            icon
+            id
+            isFavorite
+            name
+            permissions{
+                delete
+                update
+            }
+            url
+            workspace{
+                createdAt
+                description
+                dockerImage
+                name
+                slug
+                updatedAt
+            }
+        }
+        pageNumber
+        totalItems
+        totalPages
+    }
+}

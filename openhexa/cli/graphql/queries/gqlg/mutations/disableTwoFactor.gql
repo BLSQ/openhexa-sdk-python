@@ -1,0 +1,6 @@
+mutation disableTwoFactor($input: DisableTwoFactorInput){
+    disableTwoFactor(input: $input){
+        errors
+        success
+    }
+}

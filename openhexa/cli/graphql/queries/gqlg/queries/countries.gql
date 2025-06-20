@@ -1,0 +1,16 @@
+query countries{
+    countries{
+        alpha3
+        code
+        flag
+        name
+        whoInfo{
+            defaultCRS
+            region{
+                code
+                name
+            }
+            simplifiedExtent
+        }
+    }
+}

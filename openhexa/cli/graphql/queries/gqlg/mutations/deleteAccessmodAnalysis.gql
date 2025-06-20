@@ -1,0 +1,6 @@
+mutation deleteAccessmodAnalysis($input: DeleteAccessmodAnalysisInput){
+    deleteAccessmodAnalysis(input: $input){
+        errors
+        success
+    }
+}

@@ -1,0 +1,6 @@
+mutation addToFavorites($input: AddToFavoritesInput!){
+    addToFavorites(input: $input){
+        errors
+        success
+    }
+}

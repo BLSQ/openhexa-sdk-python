@@ -1,0 +1,7 @@
+mutation generateWorkspaceToken($input: GenerateWorkspaceTokenInput!){
+    generateWorkspaceToken(input: $input){
+        errors
+        success
+        token
+    }
+}

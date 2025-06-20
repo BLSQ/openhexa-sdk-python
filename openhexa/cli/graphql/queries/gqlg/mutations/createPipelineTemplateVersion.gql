@@ -1,0 +1,53 @@
+mutation createPipelineTemplateVersion($page: Int, $perPage: Int, $input: CreatePipelineTemplateVersionInput!){
+    createPipelineTemplateVersion(input: $input){
+        errors
+        pipelineTemplate{
+            code
+            config
+            currentVersion{
+                changelog
+                createdAt
+                id
+                isLatestVersion
+                versionNumber
+            }
+            description
+            id
+            name
+            permissions{
+                delete
+                update
+            }
+            sourcePipeline{
+                code
+                config
+                createdAt
+                description
+                hasNewTemplateVersions
+                id
+                name
+                notebookPath
+                schedule
+                type
+                updatedAt
+                webhookEnabled
+                webhookUrl
+            }
+            updatedAt
+            versions(page: $page, perPage: $perPage){
+                pageNumber
+                totalItems
+                totalPages
+            }
+            workspace{
+                createdAt
+                description
+                dockerImage
+                name
+                slug
+                updatedAt
+            }
+        }
+        success
+    }
+}

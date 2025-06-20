@@ -1,0 +1,7 @@
+mutation prepareObjectUpload($input: PrepareObjectUploadInput!){
+    prepareObjectUpload(input: $input){
+        errors
+        success
+        uploadUrl
+    }
+}

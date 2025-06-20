@@ -1,0 +1,33 @@
+query pendingWorkspaceInvitations($page: Int!, $perPage: Int){
+    pendingWorkspaceInvitations(page: $page, perPage: $perPage){
+        items{
+            createdAt
+            email
+            id
+            invitedBy{
+                dateJoined
+                displayName
+                email
+                firstName
+                id
+                language
+                lastLogin
+                lastName
+            }
+            role
+            status
+            updatedAt
+            workspace{
+                createdAt
+                description
+                dockerImage
+                name
+                slug
+                updatedAt
+            }
+        }
+        pageNumber
+        totalItems
+        totalPages
+    }
+}

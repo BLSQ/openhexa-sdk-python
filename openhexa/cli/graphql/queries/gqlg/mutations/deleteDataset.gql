@@ -1,0 +1,6 @@
+mutation deleteDataset($input: DeleteDatasetInput!){
+    deleteDataset(input: $input){
+        errors
+        success
+    }
+}

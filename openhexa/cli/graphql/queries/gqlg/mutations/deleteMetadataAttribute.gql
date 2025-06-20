@@ -1,0 +1,6 @@
+mutation deleteMetadataAttribute($input: DeleteMetadataAttributeInput!){
+    deleteMetadataAttribute(input: $input){
+        errors
+        success
+    }
+}

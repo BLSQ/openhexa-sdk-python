@@ -1,0 +1,20 @@
+mutation updateUser($input: UpdateUserInput!){
+    updateUser(input: $input){
+        errors
+        success
+        user{
+            avatar{
+                color
+                initials
+            }
+            dateJoined
+            displayName
+            email
+            firstName
+            id
+            language
+            lastLogin
+            lastName
+        }
+    }
+}

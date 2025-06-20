@@ -1,0 +1,32 @@
+mutation createMembership($input: CreateMembershipInput!){
+    createMembership(input: $input){
+        errors
+        membership{
+            createdAt
+            id
+            permissions{
+                delete
+                update
+            }
+            role
+            team{
+                createdAt
+                id
+                name
+                updatedAt
+            }
+            updatedAt
+            user{
+                dateJoined
+                displayName
+                email
+                firstName
+                id
+                language
+                lastLogin
+                lastName
+            }
+        }
+        success
+    }
+}

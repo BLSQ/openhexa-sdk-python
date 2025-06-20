@@ -1,0 +1,17 @@
+query accessmodAccessRequests($page: Int, $perPage: Int){
+    accessmodAccessRequests(page: $page, perPage: $perPage){
+        items{
+            acceptedTos
+            createdAt
+            email
+            firstName
+            id
+            lastName
+            status
+            updatedAt
+        }
+        pageNumber
+        totalItems
+        totalPages
+    }
+}

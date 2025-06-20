@@ -1,0 +1,6 @@
+mutation resendWorkspaceInvitation($input: ResendWorkspaceInvitationInput!){
+    resendWorkspaceInvitation(input: $input){
+        errors
+        success
+    }
+}

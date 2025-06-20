@@ -1,0 +1,6 @@
+mutation generateChallenge{
+    generateChallenge{
+        errors
+        success
+    }
+}

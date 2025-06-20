@@ -1,0 +1,7 @@
+mutation prepareAccessmodFileUpload($input: PrepareAccessmodFileUploadInput!){
+    prepareAccessmodFileUpload(input: $input){
+        fileUri
+        success
+        uploadUrl
+    }
+}

@@ -1,0 +1,6 @@
+mutation deleteWorkspaceMember($input: DeleteWorkspaceMemberInput!){
+    deleteWorkspaceMember(input: $input){
+        errors
+        success
+    }
+}
