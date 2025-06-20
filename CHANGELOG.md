@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.5.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.4.0...v2.5.0) (2025-06-20)
+
+
+### Features
+
+* add a "country" property to the current_workspace ([#273](https://github.com/BLSQ/openhexa-sdk-python/issues/273)) ([d942273](https://github.com/BLSQ/openhexa-sdk-python/commit/d942273c8ab7c8b9d41f6228dc783a9d2ec4b0b9))
+
 ## [2.4.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.3.1...v2.4.0) (2025-06-16)
 
 
