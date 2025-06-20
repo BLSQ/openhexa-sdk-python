@@ -150,8 +150,38 @@ pytest
 
 ### Codegen from the GraphQL schema
 
+We use code generation to create Python client code from our GraphQL schema. This involves two tools:
+
+1. [**ariadne-codegen**](https://github.com/mirumee/ariadne-codegen): Generates typed Python GraphQL client code from GraphQL files
+2. [**gqlg**](https://github.com/timqian/gql-generator): Automatically generates comprehensive GraphQL queries for all queries and mutations defined in the schema
+
+The code generation process:
+
+1. The GraphQL schema is manually taken from the [Openhexa Monorepo](https://github.com/BLSQ/openhexa-app/blob/main/frontend/schema.generated.graphql) and saved in [`openhexa/cli/graphql/schema.generated.graphql`](https://github.com/BLSQ/openhexa-sdk-python/blob/main/openhexa/cli/graphql/schema.generated.graphql)
+2. `gqlg` generates all possible queries/mutations from the schema with a depth limit of 3
+3. `ariadne-codegen` uses both the schema and queries to generate typed Python client code
+
+To run code generation manually:
+
 ```shell
+npm install gql-generator -g
+pip install ariadne-codegen
 gqlg --schemaFilePath ./openhexa/cli/graphql/schema.generated.graphql --destDirPath ./openhexa/cli/graphql/queries/gqlg --depthLimit 3
+ariadne-codegen
+```
+
+Both tools run automatically via pre-commit hooks and CI/CD when GraphQL files are modified.
+
+You can add new queries or mutations in the [`openhexa/cli/graphql/queries/queries.graphql`](https://github.com/BLSQ/openhexa-sdk-python/blob/main/openhexa/cli/graphql/queries.graphql) directory, and they will be picked up by the code generation process.
+
+Example of usage of the result :
+```python
+from openhexa.cli.api import OpenHexaClient, CreateWebappInput, AddToFavoritesInput
+
+client = OpenHexaClient()
+new_webapp_id = client.create_webapp(input=CreateWebappInput(description="", icon="", name="",workspaceSlug="", url="")).create_webapp.webapp.id
+client.add_to_favorites(input=AddToFavoritesInput(webappId=new_webapp_id))
+
 ```
 
 ## Release

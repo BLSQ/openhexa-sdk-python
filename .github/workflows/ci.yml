@@ -17,8 +17,15 @@ jobs:
         with:
           python-version: 3.13
 
-      - name: Install Ariadne-codegen
-        run: pip install ariadne-codegen
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install Ariadne-codegen and gqlg
+        run: |
+          pip install ariadne-codegen
+          npm install -g gqlg
 
       - uses: pre-commit/action@v3.0.1
   test:
