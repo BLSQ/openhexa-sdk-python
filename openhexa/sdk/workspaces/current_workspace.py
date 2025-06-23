@@ -21,6 +21,7 @@ from .connection import (
     PostgreSQLConnection,
     S3Connection,
 )
+from ...cli.openhexa_client import OpenHexaClient
 
 
 class WorkspaceConfigError(Exception):
@@ -63,8 +64,6 @@ class CurrentWorkspace:
     @property
     def countries(self) -> list[GetCountriesWorkspaceCountries]:
         """The countries of the workspace."""
-        from openhexa.cli.api import OpenHexaClient
-
         try:
             return OpenHexaClient().get_countries(workspace_slug=self.slug).workspace.countries
         except KeyError:
