@@ -8,12 +8,17 @@ from openhexa.cli.graphql.graphql_client import Client
 from openhexa.cli.settings import settings
 from datetime import datetime
 import click
+from pathlib import Path
 from importlib.metadata import version
+
+from openhexa.utils import create_requests_session
+
 
 class APIError(Exception):
     """Raised when an error occurs while interacting with the API."""
 
     pass
+
 
 class InvalidTokenError(APIError):
     """Raised when the token is invalid."""
@@ -25,6 +30,7 @@ class GraphQLError(APIError):
     """Raised when a GraphQL request returns an error."""
 
     pass
+
 
 class OpenHexaClient(Client):
     """OpenHexaClient is a class that provides methods to interact with the OpenHexa GraphQL API."""
@@ -68,6 +74,7 @@ class OpenHexaClient(Client):
             click.echo(f"Response: {response}")
 
         return response
+
 
 def _detect_graphql_breaking_changes_if_needed(token):
     """Detect breaking changes if not done recently between the schema referenced in the SDK and the server using graphql-core."""
@@ -151,3 +158,21 @@ def _query_graphql(query: str, variables=None, token=None):
             raise InvalidTokenError
         raise GraphQLError(data["errors"])
     return data["data"]
+
+
+def get_library_versions() -> tuple[str, str]:
+    """Return the current version and the one on PyPi."""
+    # Get the currently installed version
+    installed_version = version("openhexa.sdk")
+
+    # Get the latest version available on PyPI
+    try:
+        response = requests.get("https://pypi.org/pypi/openhexa.sdk/json")
+        latest_version = response.json()["info"]["version"]
+        return installed_version, latest_version
+    except requests.RequestException:
+        logging.error(
+            "Could not check for the latest version of the openhexa.sdk package.",
+            exc_info=True,
+        )
+        return installed_version, installed_version

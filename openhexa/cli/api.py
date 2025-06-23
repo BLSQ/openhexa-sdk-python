@@ -8,13 +8,11 @@ import logging
 import os
 import tempfile
 import typing
-from importlib.metadata import version
 from pathlib import Path
 from zipfile import ZipFile
 
 import click
 import docker
-import requests
 from docker.models.containers import Container
 
 from jinja2 import Template
@@ -68,27 +66,6 @@ class PermissionDenied(Exception):
     """Raised whenever an operation on a pipeline is denied by the backend."""
 
     pass
-
-
-def get_library_versions() -> tuple[str, str]:
-    """Return the current version and the one on PyPi."""
-    # Get the currently installed version
-    installed_version = version("openhexa.sdk")
-
-    # Get the latest version available on PyPI
-    try:
-        response = requests.get("https://pypi.org/pypi/openhexa.sdk/json")
-        latest_version = response.json()["info"]["version"]
-        return installed_version, latest_version
-    except requests.RequestException:
-        logging.error(
-            "Could not check for the latest version of the openhexa.sdk package.",
-            exc_info=True,
-        )
-        return installed_version, installed_version
-
-
-
 
 
 def get_skeleton_dir():
@@ -644,5 +621,3 @@ def is_dhis2_connection_up(workspace_slug: str, connection_slug: str) -> bool:
         },
     )
     return response["data"]["connectionBySlug"]["status"] == "UP"
-
-

@@ -14,7 +14,6 @@ from openhexa.cli.api import (
     DockerError,
     InvalidDefinitionError,
     NoActiveWorkspaceError,
-    OpenHexaClient,
     OutputDirectoryError,
     PipelineDirectoryError,
     create_pipeline,
@@ -23,13 +22,13 @@ from openhexa.cli.api import (
     delete_pipeline,
     download_pipeline_sourcecode,
     ensure_is_pipeline_dir,
-    get_library_versions,
     get_pipeline_from_code,
     get_pipelines_pages,
     get_workspace,
     run_pipeline,
     upload_pipeline,
 )
+from openhexa.cli.openhexa_client import get_library_versions, OpenHexaClient
 from openhexa.cli.settings import settings, setup_logging
 from openhexa.sdk.pipelines.exceptions import PipelineNotFound
 from openhexa.sdk.pipelines.runtime import get_pipeline
