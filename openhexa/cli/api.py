@@ -14,7 +14,6 @@ from zipfile import ZipFile
 import click
 import docker
 from docker.models.containers import Container
-
 from jinja2 import Template
 
 from openhexa.cli.openhexa_client import graphql

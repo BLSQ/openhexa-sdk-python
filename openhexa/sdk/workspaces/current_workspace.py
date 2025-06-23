@@ -10,6 +10,7 @@ from warnings import warn
 from openhexa.utils import stringcase
 
 from ...cli.graphql.graphql_client import GetCountriesWorkspaceCountries
+from ...cli.openhexa_client import OpenHexaClient
 from ..datasets import Dataset
 from ..utils import graphql
 from .connection import (
@@ -21,7 +22,6 @@ from .connection import (
     PostgreSQLConnection,
     S3Connection,
 )
-from ...cli.openhexa_client import OpenHexaClient
 
 
 class WorkspaceConfigError(Exception):

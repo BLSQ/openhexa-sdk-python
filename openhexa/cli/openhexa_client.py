@@ -1,16 +1,15 @@
 import logging
+from datetime import datetime
+from importlib.metadata import version
+from pathlib import Path
 
+import click
+import requests
 from graphql import build_client_schema, build_schema, get_introspection_query
 from graphql.utilities import find_breaking_changes
 
-import requests
 from openhexa.cli.graphql.graphql_client import Client
 from openhexa.cli.settings import settings
-from datetime import datetime
-import click
-from pathlib import Path
-from importlib.metadata import version
-
 from openhexa.utils import create_requests_session
 
 

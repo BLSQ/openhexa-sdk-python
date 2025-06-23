@@ -28,7 +28,7 @@ from openhexa.cli.api import (
     run_pipeline,
     upload_pipeline,
 )
-from openhexa.cli.openhexa_client import get_library_versions, OpenHexaClient
+from openhexa.cli.openhexa_client import OpenHexaClient, get_library_versions
 from openhexa.cli.settings import settings, setup_logging
 from openhexa.sdk.pipelines.exceptions import PipelineNotFound
 from openhexa.sdk.pipelines.runtime import get_pipeline
