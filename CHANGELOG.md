@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.5.1](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.5.0...v2.5.1) (2025-06-24)
+
+
+### Bug Fixes
+
+* circular dep ([#278](https://github.com/BLSQ/openhexa-sdk-python/issues/278)) ([d9b079b](https://github.com/BLSQ/openhexa-sdk-python/commit/d9b079b54b1ddb24927d977bcb2cef6c62ae89c6))
+* **deps:** update dependency geopandas to &gt;=1.1.0,&lt;1.2.0 ([#268](https://github.com/BLSQ/openhexa-sdk-python/issues/268)) ([9167809](https://github.com/BLSQ/openhexa-sdk-python/commit/916780918cd785892d9dca05ce77ad4a96147b6e))
+
 ## [2.5.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.4.0...v2.5.0) (2025-06-20)
 
 
