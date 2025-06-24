@@ -1,3 +1,4 @@
+"""Openhexa SDK version module."""
 from importlib.metadata import version
 
 try:

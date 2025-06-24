@@ -1,3 +1,4 @@
+"""OpenHexaClient is a class that provides methods to interact with the OpenHexa GraphQL API."""
 import logging
 from datetime import datetime
 from pathlib import Path

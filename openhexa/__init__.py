@@ -1,0 +1,1 @@
+"""OpenHexa package initialization."""
