@@ -1,14 +1,13 @@
-import logging
 from datetime import datetime
-from importlib.metadata import version
 from pathlib import Path
 
 import click
+import logging
 import requests
 from graphql import build_client_schema, build_schema, get_introspection_query
 from graphql.utilities import find_breaking_changes
 
-from openhexa.cli.graphql.graphql_client import Client
+from openhexa.graphql.graphql_client import Client
 from openhexa.cli.settings import settings
 from openhexa.utils import create_requests_session
 
@@ -34,7 +33,7 @@ class GraphQLError(APIError):
 class OpenHexaClient(Client):
     """OpenHexaClient is a class that provides methods to interact with the OpenHexa GraphQL API."""
 
-    def __init__(self, token=None):
+    def __init__(self, *, api_url: str, token: str):
         """Initialize the OpenHexaClient with the OpenHexa API URL and headers."""
         self._url = settings.api_url + "/graphql/"
         self._token = token or settings.access_token
@@ -44,17 +43,18 @@ class OpenHexaClient(Client):
 
         super().__init__(
             url=self._url,
-            headers={
-                "User-Agent": f"openhexa-cli/{version('openhexa.sdk')}",
-                "Authorization": f"Bearer {self._token}",
-            },
-        )
+            headers={})
         logging.getLogger("httpx").setLevel(
             logging.WARNING
         )  # HTTPX logs queries by default, we disable them here with WARNING level
 
     def execute(self, query, **kwargs):
-        """Decorate parent execute method to log the GraphQL query and response."""
+        """Decorate parent execute method to log the GraphQL query  and response."""
+        from openhexa.version import __version__
+        self.headers["User-Agent"] = f"openhexa-cli/{__version__}"
+        self.headers["Authorization"] = f"Bearer {self._token}"
+
+
         _detect_graphql_breaking_changes(token=self._token)
 
         if settings.debug:
@@ -116,6 +116,7 @@ def graphql(query: str, variables=None, token=None):
 
 def _query_graphql(query: str, variables=None, token=None):
     """Perform a GraphQL request."""
+    from openhexa.version import __version__
     url = settings.api_url + "/graphql/"
     if token is None:
         token = settings.access_token
@@ -135,7 +136,7 @@ def _query_graphql(query: str, variables=None, token=None):
     response = session.post(
         url,
         headers={
-            "User-Agent": f"openhexa-cli/{version('openhexa.sdk')}",
+            "User-Agent": f"openhexa-cli/{__version__}",
             "Authorization": f"Bearer {token}",
         },
         json={"query": query, "variables": variables},
@@ -162,7 +163,7 @@ def _query_graphql(query: str, variables=None, token=None):
 def get_library_versions() -> tuple[str, str]:
     """Return the current version and the one on PyPi."""
     # Get the currently installed version
-    installed_version = version("openhexa.sdk")
+    from openhexa.version import __version__ as installed_version
 
     # Get the latest version available on PyPI
     try:

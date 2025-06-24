@@ -1,12 +1,12 @@
 import time
 from unittest import TestCase, mock
 
-from openhexa.cli.openhexa_client import _detect_graphql_breaking_changes, graphql
+from openhexa.graphql.openhexa_client import _detect_graphql_breaking_changes, graphql
 
 
 class TestGraphQLFunctions(TestCase):
-    @mock.patch("openhexa.cli.openhexa_client._query_graphql")
-    @mock.patch("openhexa.cli.openhexa_client.get_library_versions")
+    @mock.patch("openhexa.graphql.openhexa_client._query_graphql")
+    @mock.patch("openhexa.graphql.openhexa_client.get_library_versions")
     def test_detect_graphql_breaking_changes_with_mocked_server_schema(
         self, mock_get_library_versions, mock_query_graphql
     ):
@@ -53,11 +53,11 @@ class TestGraphQLFunctions(TestCase):
                 )
                 mock_click_secho.assert_any_call("- Query.testField changed type from Int to String.", fg="yellow")
 
-    @mock.patch("openhexa.cli.openhexa_client._query_graphql")
-    @mock.patch("openhexa.cli.openhexa_client._detect_graphql_breaking_changes")
+    @mock.patch("openhexa.graphql.openhexa_client._query_graphql")
+    @mock.patch("openhexa.graphql.openhexa_client._detect_graphql_breaking_changes")
     def test_graphql(self, mock_detect_graphql_breaking_changes, mock_query_graphql):
         """Test that the graphql function is caching the breaking change detection for 1 hour."""
-        with mock.patch("openhexa.cli.openhexa_client.settings") as mock_settings:
+        with mock.patch("openhexa.graphql.openhexa_client.settings") as mock_settings:
             mock_settings.last_breaking_change_check = time.time() - 59 * 60  # Last checked 59 minutes ago
             mock_query_graphql.return_value = {"data": "response"}
 

@@ -6,7 +6,6 @@ from configparser import ConfigParser
 
 import click
 
-from openhexa.sdk.pipelines.log_level import LogLevel
 
 CONFIGFILE_PATH = os.path.expanduser("~") + "/.openhexa.ini"
 
@@ -77,11 +76,6 @@ class Settings:
     def workspaces(self):
         """Return the workspaces from the settings file."""
         return self._file_config["workspaces"]
-
-    @property
-    def log_level(self) -> LogLevel:
-        """Return the log level from the environment variables."""
-        return LogLevel.parse_log_level(os.getenv("HEXA_LOG_LEVEL"))
 
     def activate(self, workspace: str):
         """Set the current workspace in the settings file."""

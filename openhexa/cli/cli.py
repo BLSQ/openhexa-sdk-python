@@ -28,7 +28,7 @@ from openhexa.cli.api import (
     run_pipeline,
     upload_pipeline,
 )
-from openhexa.cli.openhexa_client import OpenHexaClient, get_library_versions
+from openhexa.graphql.openhexa_client import OpenHexaClient, get_library_versions
 from openhexa.cli.settings import settings, setup_logging
 from openhexa.sdk.pipelines.exceptions import PipelineNotFound
 from openhexa.sdk.pipelines.runtime import get_pipeline
@@ -596,7 +596,7 @@ def pipelines_list():
         _terminate("No workspace activated", err=True)
 
     workspace_pipelines = (
-        OpenHexaClient().get_workspace_pipelines(workspace_slug=settings.current_workspace).pipelines.items
+        OpenHexaClient(settings.api_url, settings.access_token).get_workspace_pipelines(workspace_slug=settings.current_workspace).pipelines.items
     )
     if len(workspace_pipelines) == 0:
         click.echo(f"No pipelines in workspace {settings.current_workspace}")

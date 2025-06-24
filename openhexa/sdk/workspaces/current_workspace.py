@@ -9,8 +9,8 @@ from warnings import warn
 
 from openhexa.utils import stringcase
 
-from ...cli.graphql.graphql_client import GetCountriesWorkspaceCountries
-from ...cli.openhexa_client import OpenHexaClient
+from openhexa.graphql.graphql_client import GetCountriesWorkspaceCountries
+from openhexa.graphql.openhexa_client import OpenHexaClient
 from ..datasets import Dataset
 from ..utils import graphql
 from .connection import (
