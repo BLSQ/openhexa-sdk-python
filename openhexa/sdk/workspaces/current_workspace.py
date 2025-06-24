@@ -7,10 +7,10 @@ import os
 from dataclasses import fields, make_dataclass
 from warnings import warn
 
-from openhexa.utils import stringcase
-
 from openhexa.graphql.graphql_client import GetCountriesWorkspaceCountries
 from openhexa.graphql.openhexa_client import OpenHexaClient
+from openhexa.utils import stringcase
+
 from ..datasets import Dataset
 from ..utils import graphql
 from .connection import (

@@ -1,14 +1,14 @@
+import logging
 from datetime import datetime
 from pathlib import Path
 
 import click
-import logging
 import requests
 from graphql import build_client_schema, build_schema, get_introspection_query
 from graphql.utilities import find_breaking_changes
 
-from openhexa.graphql.graphql_client import Client
 from openhexa.cli.settings import settings
+from openhexa.graphql.graphql_client import Client
 from openhexa.utils import create_requests_session
 
 
@@ -41,9 +41,7 @@ class OpenHexaClient(Client):
         if not self._token:
             raise InvalidTokenError("No token found for workspace")
 
-        super().__init__(
-            url=self._url,
-            headers={})
+        super().__init__(url=self._url, headers={})
         logging.getLogger("httpx").setLevel(
             logging.WARNING
         )  # HTTPX logs queries by default, we disable them here with WARNING level
@@ -51,9 +49,9 @@ class OpenHexaClient(Client):
     def execute(self, query, **kwargs):
         """Decorate parent execute method to log the GraphQL query  and response."""
         from openhexa.version import __version__
+
         self.headers["User-Agent"] = f"openhexa-cli/{__version__}"
         self.headers["Authorization"] = f"Bearer {self._token}"
-
 
         _detect_graphql_breaking_changes(token=self._token)
 
@@ -117,6 +115,7 @@ def graphql(query: str, variables=None, token=None):
 def _query_graphql(query: str, variables=None, token=None):
     """Perform a GraphQL request."""
     from openhexa.version import __version__
+
     url = settings.api_url + "/graphql/"
     if token is None:
         token = settings.access_token

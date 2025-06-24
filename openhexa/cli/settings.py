@@ -6,7 +6,6 @@ from configparser import ConfigParser
 
 import click
 
-
 CONFIGFILE_PATH = os.path.expanduser("~") + "/.openhexa.ini"
 
 

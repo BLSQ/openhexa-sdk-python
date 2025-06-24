@@ -75,7 +75,7 @@ include-package-data = true
 [tool.ruff]
 line-length = 120
 ignore = ["E501"]
-exclude = ["openhexa/cli/graphql/graphql_client"]
+exclude = ["openhexa/graphql/graphql_client"]
 per-file-ignores = { "tests/**/test_*.py" = ["D100","D101","D102", "D103"] } # Ignore missing docstrings in tests
 
 [tool.ruff.lint]

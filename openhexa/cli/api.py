@@ -16,8 +16,8 @@ import docker
 from docker.models.containers import Container
 from jinja2 import Template
 
-from openhexa.graphql.openhexa_client import graphql
 from openhexa.cli.settings import settings
+from openhexa.graphql.openhexa_client import graphql
 from openhexa.sdk.pipelines import get_local_workspace_config
 from openhexa.sdk.pipelines.runtime import get_pipeline
 from openhexa.utils import stringcase
