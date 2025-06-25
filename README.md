@@ -148,6 +148,28 @@ You can run the tests using pytest:
 pytest
 ```
 
+### Codegen from the GraphQL schema
+
+We use code generation to create Python client code from our GraphQL schema. This involves one tools:
+
+- [**ariadne-codegen**](https://github.com/mirumee/ariadne-codegen): Generates typed Python GraphQL client code from GraphQL files
+
+The code generation process:
+
+1. The GraphQL schema is manually taken from the [Openhexa Monorepo](https://github.com/BLSQ/openhexa-app/blob/main/frontend/schema.generated.graphql) and saved in [`openhexa/graphql/schema.generated.graphql`](https://github.com/BLSQ/openhexa-sdk-python/blob/main/openhexa/graphql/schema.generated.graphql)
+2`ariadne-codegen` uses both the schema and queries to generate typed Python client code
+
+To run code generation manually:
+
+```shell
+pip install ariadne-codegen
+ariadne-codegen
+```
+
+ariadne-codegen runs automatically via pre-commit hooks and CI/CD when GraphQL files are modified.
+
+You can add new queries or mutations in the [`openhexa/graphql/queries.graphql`](https://github.com/BLSQ/openhexa-sdk-python/blob/main/openhexa/graphql/queries.graphql) directory, and they will be picked up by the code generation process.
+
 ## Release
  
 This project uses [release-please](https://github.com/googleapis/release-please) to manage releases using conventional commits.
