@@ -170,6 +170,14 @@ ariadne-codegen runs automatically via pre-commit hooks and CI/CD when GraphQL f
 
 You can add new queries or mutations in the [`openhexa/graphql/queries.graphql`](https://github.com/BLSQ/openhexa-sdk-python/blob/main/openhexa/graphql/queries.graphql) directory, and they will be picked up by the code generation process.
 
+Example of usage of the generated code:
+
+```python
+from sdk import OpenHexaClient
+
+OpenHexaClient().get_countries(workspace_slug="workspace_slug_example")
+ ```
+
 ## Release
  
 This project uses [release-please](https://github.com/googleapis/release-please) to manage releases using conventional commits.
