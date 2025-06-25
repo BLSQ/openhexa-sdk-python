@@ -21,8 +21,8 @@ from graphql import build_client_schema, build_schema, get_introspection_query
 from graphql.utilities import find_breaking_changes
 from jinja2 import Template
 
-from openhexa.cli.graphql.graphql_client import Client
 from openhexa.cli.settings import settings
+from openhexa.graphql import BaseOpenHexaClient
 from openhexa.sdk.pipelines import get_local_workspace_config
 from openhexa.sdk.pipelines.runtime import get_pipeline
 from openhexa.utils import create_requests_session, stringcase
@@ -747,31 +747,16 @@ def is_dhis2_connection_up(workspace_slug: str, connection_slug: str) -> bool:
     return response["data"]["connectionBySlug"]["status"] == "UP"
 
 
-class OpenHexaClient(Client):
+class OpenHexaClient(BaseOpenHexaClient):
     """OpenHexaClient is a class that provides methods to interact with the OpenHexa GraphQL API."""
 
     def __init__(self, token=None):
         """Initialize the OpenHexaClient with the OpenHexa API URL and headers."""
-        self._url = settings.api_url + "/graphql/"
-        self._token = token or settings.access_token
-
-        if not self._token:
-            raise InvalidTokenError("No token found for workspace")
-
-        super().__init__(
-            url=self._url,
-            headers={
-                "User-Agent": f"openhexa-cli/{version('openhexa.sdk')}",
-                "Authorization": f"Bearer {self._token}",
-            },
-        )
-        logging.getLogger("httpx").setLevel(
-            logging.WARNING
-        )  # HTTPX logs queries by default, we disable them here with WARNING level
+        super().__init__(url=settings.api_url + "/graphql/", token=settings.access_token)
 
     def execute(self, query, **kwargs):
         """Decorate parent execute method to log the GraphQL query and response."""
-        _detect_graphql_breaking_changes(token=self._token)
+        _detect_graphql_breaking_changes(token=self.token)
 
         if settings.debug:
             click.echo("")

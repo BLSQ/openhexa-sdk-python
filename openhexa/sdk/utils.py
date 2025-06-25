@@ -6,6 +6,7 @@ import enum
 import os
 import typing
 
+from openhexa.graphql import BaseOpenHexaClient
 from openhexa.utils import create_requests_session
 
 
@@ -50,6 +51,22 @@ def graphql(operation: str, variables: dict[str | typing.Any] | None = None) -> 
         raise Exception(body["errors"])
 
     return body["data"]
+
+
+class OpenHexaClient(BaseOpenHexaClient):
+    """OpenHexaClient is a class that provides methods to interact with the OpenHexa GraphQL API."""
+
+    def __init__(self, token: str | None = None, server_url: str | None = None):
+        """Initialize the OpenHexaClient with the OpenHexa API URL and headers.
+
+        Args:
+            token: Authentication token. If not provided, will use HEXA_TOKEN environment variable.
+            server_url: Server URL. If not provided, will use HEXA_SERVER_URL environment variable.
+        """
+        url = server_url or f"{os.environ['HEXA_SERVER_URL'].rstrip('/')}/graphql/"
+        token = token or os.environ.get("HEXA_TOKEN")
+
+        super().__init__(url=url, token=token)
 
 
 class Iterator(metaclass=abc.ABCMeta):
