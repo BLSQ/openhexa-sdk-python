@@ -3,12 +3,10 @@
 import abc
 import contextlib
 import enum
-import logging
 import os
 import typing
-from importlib.metadata import version
 
-from openhexa.graphql.graphql_client import Client
+from openhexa.graphql import BaseOpenHexaClient
 from openhexa.utils import create_requests_session
 
 
@@ -55,7 +53,7 @@ def graphql(operation: str, variables: dict[str | typing.Any] | None = None) -> 
     return body["data"]
 
 
-class OpenHexaClient(Client):
+class OpenHexaClient(BaseOpenHexaClient):
     """OpenHexaClient is a class that provides methods to interact with the OpenHexa GraphQL API."""
 
     def __init__(self, token: str | None = None, server_url: str | None = None):
@@ -65,19 +63,10 @@ class OpenHexaClient(Client):
             token: Authentication token. If not provided, will use HEXA_TOKEN environment variable.
             server_url: Server URL. If not provided, will use HEXA_SERVER_URL environment variable.
         """
-        self._url = server_url or f"{os.environ['HEXA_SERVER_URL'].rstrip('/')}/graphql/"
-        self._token = token or os.environ.get("HEXA_TOKEN")
+        url = server_url or f"{os.environ['HEXA_SERVER_URL'].rstrip('/')}/graphql/"
+        token = token or os.environ.get("HEXA_TOKEN")
 
-        super().__init__(
-            url=self._url,
-            headers={
-                "User-Agent": f"openhexa-sdk/{version('openhexa.sdk')}",
-                "Authorization": f"Bearer {self._token}",
-            },
-        )
-        logging.getLogger("httpx").setLevel(
-            logging.WARNING
-        )  # HTTPX logs queries by default, we disable them here with WARNING level
+        super().__init__(url=url, token=token)
 
 
 class Iterator(metaclass=abc.ABCMeta):

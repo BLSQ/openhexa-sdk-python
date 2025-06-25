@@ -175,7 +175,11 @@ Example of usage of the generated code:
 ```python
 from sdk import OpenHexaClient
 
+# connect to OpenHEXA backend using environment variables
 OpenHexaClient().get_countries(workspace_slug="workspace_slug_example")
+
+# or explicitly pass the URL and token
+OpenHexaClient(server_url="app.demo.openhexa.org", token="supersecuretoken")
  ```
 
 ## Release
