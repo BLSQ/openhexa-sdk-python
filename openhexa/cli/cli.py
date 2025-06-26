@@ -596,16 +596,14 @@ def pipelines_list():
     if settings.current_workspace is None:
         _terminate("No workspace activated", err=True)
 
-    workspace_pipelines = (
-        OpenHexaClient().get_workspace_pipelines(workspace_slug=settings.current_workspace).pipelines.items
-    )
+    workspace_pipelines = OpenHexaClient().pipelines(workspace_slug=settings.current_workspace).pipelines.items
     if len(workspace_pipelines) == 0:
         click.echo(f"No pipelines in workspace {settings.current_workspace}")
         return
     click.echo("Pipelines:")
     for pipeline in workspace_pipelines:
         if pipeline.type == "zipFile":
-            current_version = f"v{pipeline.current_version.version_number}" if pipeline.current_version else "N/A"
+            current_version = "N/A" if not pipeline.current_version else f"v{pipeline.current_version.version_number}"
         else:
             current_version = "Jupyter notebook"
         click.echo(f"* {pipeline.code} - {pipeline.name} ({current_version})")
