@@ -64,7 +64,7 @@ class CurrentWorkspace:
     def countries(self) -> list[WorkspaceWorkspaceCountries]:
         """The countries of the workspace."""
         try:
-            return OpenHexaClient().workspace(slug=self.slug).workspace.countries
+            return OpenHexaClient().workspace(slug=self.slug).countries
         except KeyError:
             raise WorkspaceConfigError("The workspace countries are not available in this environment.")
 
