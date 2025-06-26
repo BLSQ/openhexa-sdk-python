@@ -502,6 +502,7 @@ class Client(BaseClient):
                   code
                   flag
                   name
+                  alpha3
                 }
                 permissions {
                   delete

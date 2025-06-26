@@ -192,6 +192,7 @@ query Workspace($slug: String!) {
       code
       flag
       name
+        alpha3
     }
     permissions {
       delete

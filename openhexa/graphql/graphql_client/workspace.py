@@ -25,6 +25,7 @@ class WorkspaceWorkspaceCountries(BaseModel):
     code: str
     flag: str
     name: str
+    alpha_3: str = Field(alias="alpha3")
 
 
 class WorkspaceWorkspacePermissions(BaseModel):
