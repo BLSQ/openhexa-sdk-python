@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.6.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.5.1...v2.6.0) (2025-06-26)
+
+
+### Features
+
+* Add lots of methods to OpenHexaClient ([#281](https://github.com/BLSQ/openhexa-sdk-python/issues/281)) ([c348d2b](https://github.com/BLSQ/openhexa-sdk-python/commit/c348d2b7044a62a681d76948d17faed30abe8c93))
+
+
+### Bug Fixes
+
+* refactor OpenHexaClient to allow usage in both CLI and SDK without circular dependency (HEXA-1314) ([#279](https://github.com/BLSQ/openhexa-sdk-python/issues/279)) ([8936df8](https://github.com/BLSQ/openhexa-sdk-python/commit/8936df8a3069c78cfd3b42f364375bdf585df03f))
+
 ## [2.5.1](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.5.0...v2.5.1) (2025-06-24)
 
 
