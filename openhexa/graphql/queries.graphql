@@ -1,4 +1,4 @@
-query getWorkspacePipelines($workspaceSlug: String!, $name: String, $page: Int = 1, $perPage: Int = 10) {
+query Pipelines($workspaceSlug: String!, $name: String, $page: Int = 1, $perPage: Int = 10) {
     pipelines(workspaceSlug: $workspaceSlug, name: $name, page: $page, perPage: $perPage) {
         totalPages
         items {
@@ -11,17 +11,431 @@ query getWorkspacePipelines($workspaceSlug: String!, $name: String, $page: Int =
                 name
                 versionNumber
             }
+            lastRuns: runs(orderBy: EXECUTION_DATE_DESC, page: 1, perPage: 1) {
+                items {
+                    id
+                    status
+                    executionDate
+                }
+            }
         }
     }
 }
 
-query getCountries($workspaceSlug:String!){
-    workspace(slug: $workspaceSlug) {
-        countries {
+query Pipeline($workspaceSlug: String!, $pipelineCode: String!) {
+    pipelineByCode(workspaceSlug: $workspaceSlug, code: $pipelineCode) {
+        id
+        code
+        name
+        description
+        type
+        currentVersion {
+            id
+            name
+            versionNumber
+            user {
+                id
+                email
+                displayName
+                avatar {
+                    initials
+                    color
+                }
+            }
+            createdAt
+        }
+        webhookUrl
+        webhookEnabled
+        schedule
+        notebookPath
+        sourceTemplate {
+            id
             code
             name
-            flag
-            alpha3
         }
+        hasNewTemplateVersions
+        newTemplateVersions {
+            id
+            changelog
+            versionNumber
+            createdAt
+        }
+        recipients {
+            user {
+                id
+                displayName
+            }
+        }
+    }
+}
+
+mutation CreatePipeline($input: CreatePipelineInput!) {
+  createPipeline(input: $input) {
+    success
+    errors
+    pipeline {
+      code
+    }
+  }
+}
+
+mutation DeletePipeline($input: DeletePipelineInput!) {
+  deletePipeline(input: $input) {
+    success
+    errors
+  }
+}
+
+mutation StopPipeline($input: StopPipelineInput!) {
+  stopPipeline(input: $input) {
+    success
+    errors
+  }
+}
+
+mutation AddPipelineRecipient($input: CreatePipelineRecipientInput!) {
+  addPipelineRecipient(input: $input) {
+    success
+    errors
+  }
+}
+
+mutation DeletePipelineVersion($input: DeletePipelineVersionInput!) {
+  deletePipelineVersion(input: $input) {
+    success
+    errors
+  }
+}
+
+mutation CreatePipelineTemplateVersion($input: CreatePipelineTemplateVersionInput!) {
+  createPipelineTemplateVersion(input: $input) {
+    success
+    errors
+    pipelineTemplate {
+      name
+      code
+    }
+  }
+}
+
+mutation DeletePipelineTemplate($input: DeletePipelineTemplateInput!) {
+  deletePipelineTemplate(input: $input) {
+    success
+    errors
+  }
+}
+
+mutation CreatePipelineFromTemplateVersion($input: CreatePipelineFromTemplateVersionInput!) {
+  createPipelineFromTemplateVersion(input: $input) {
+    success
+    errors
+    pipeline {
+      id
+      name
+      code
+    }
+  }
+}
+
+mutation UpgradePipelineVersionFromTemplate($input: UpgradePipelineVersionFromTemplateInput!) {
+  upgradePipelineVersionFromTemplate(input: $input) {
+    success
+    errors
+  }
+}
+
+mutation UpdateWebapp($input: UpdateWebappInput!) {
+  updateWebapp(input: $input) {
+    success
+    errors
+  }
+}
+
+mutation CreateWebapp($input: CreateWebappInput!) {
+  createWebapp(input: $input) {
+    success
+    errors
+    webapp {
+      id
+    }
+  }
+}
+
+mutation DeleteWebapp($input: DeleteWebappInput!) {
+  deleteWebapp(input: $input) {
+    success
+    errors
+  }
+}
+
+mutation AddWebappToFavorites($input: AddToFavoritesInput!) {
+  addToFavorites(input: $input) {
+    success
+    errors
+  }
+}
+
+mutation RemoveWebappFromFavorites($input: RemoveFromFavoritesInput!) {
+  removeFromFavorites(input: $input) {
+    success
+    errors
+  }
+}
+
+query Workspace($slug: String!) {
+  workspace(slug: $slug) {
+    slug
+    name
+    description
+    dockerImage
+    countries {
+      code
+      flag
+      name
+        alpha3
+    }
+    permissions {
+      delete
+      update
+      manageMembers
+    }
+  }
+}
+
+query Workspaces($page: Int = 1, $perPage: Int = 10) {
+  workspaces(page: $page, perPage: $perPage) {
+    totalPages
+    items {
+      slug
+      name
+      description
+      countries {
+        code
+        alpha3
+        name
+      }
+    }
+  }
+}
+
+mutation CreateWorkspace($input: CreateWorkspaceInput!) {
+  createWorkspace(input: $input) {
+    success
+    workspace {
+      slug
+      name
+      description
+      countries {
+        code
+        alpha3
+        name
+      }
+    }
+    errors
+  }
+}
+
+mutation UpdateWorkspace($input: UpdateWorkspaceInput!) {
+  updateWorkspace(input: $input) {
+    success
+    workspace {
+      slug
+      name
+      description
+      countries {
+        code
+        alpha3
+        name
+      }
+    }
+    errors
+  }
+}
+
+mutation ArchiveWorkspace($input: ArchiveWorkspaceInput!) {
+  archiveWorkspace(input: $input) {
+    success
+    errors
+  }
+}
+
+mutation InviteWorkspaceMember($input: InviteWorkspaceMemberInput!) {
+  inviteWorkspaceMember(input: $input) {
+    success
+    errors
+    workspaceMembership {
+      id
+    }
+  }
+}
+
+mutation CreateConnection($input: CreateConnectionInput!) {
+  createConnection(input: $input) {
+    success
+    connection {
+      id
+      name
+    }
+    errors
+  }
+}
+
+mutation UpdateConnection($input: UpdateConnectionInput!) {
+  updateConnection(input: $input) {
+    success
+    errors
+    connection {
+      id
+      name
+      slug
+      description
+      fields {
+        code
+        value
+        secret
+      }
+    }
+  }
+}
+
+mutation DeleteConnection($input: DeleteConnectionInput!) {
+  deleteConnection(input: $input) {
+    success
+    errors
+  }
+}
+
+query Organization($id: UUID!) {
+  organization(id: $id) {
+    id
+    name
+    shortName
+    workspaces {
+      items {
+        slug
+        name
+        countries {
+          code
+        }
+      }
+    }
+    permissions {
+      createWorkspace
+      archiveWorkspace
+    }
+  }
+}
+
+query Organizations {
+  organizations {
+    id
+    name
+    workspaces {
+      items {
+        slug
+        name
+      }
+    }
+  }
+}
+
+query GetUsers($query: String!, $workspaceSlug: String!) {
+  users(query: $query, workspaceSlug: $workspaceSlug) {
+    id
+    email
+    displayName
+    avatar {
+      initials
+      color
+    }
+  }
+}
+
+query Datasets($query: String, $page: Int = 1, $perPage: Int = 15) {
+    datasets(query: $query, page: $page, perPage: $perPage) {
+        totalPages
+        items {
+            id
+            slug
+            name
+            description
+            createdAt
+            updatedAt
+            createdBy {
+                id
+                displayName
+            }
+            permissions {
+                update
+                delete
+            }
+        }
+    }
+}
+
+query Dataset($id: ID!) {
+    dataset(id: $id) {
+        id
+        slug
+        name
+        description
+        createdAt
+        updatedAt
+        createdBy {
+            id
+            displayName
+            email
+        }
+        permissions {
+            update
+            delete
+            createVersion
+        }
+        versions {
+            items {
+                id
+                name
+                changelog
+                createdAt
+                createdBy {
+                    id
+                    displayName
+                }
+            }
+        }
+        workspace {
+            slug
+            name
+        }
+    }
+}
+
+mutation CreateDataset($input: CreateDatasetInput!) {
+    createDataset(input: $input) {
+        success
+        errors
+        dataset {
+            slug
+            name
+        }
+    }
+}
+
+mutation UpdateDataset($input: UpdateDatasetInput!) {
+    updateDataset(input: $input) {
+        success
+        errors
+        dataset {
+            slug
+            name
+            description
+        }
+    }
+}
+
+mutation DeleteDataset($input: DeleteDatasetInput!) {
+    deleteDataset(input: $input) {
+        success
+        errors
     }
 }

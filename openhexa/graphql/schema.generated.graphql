@@ -890,6 +890,7 @@ input CreateWorkspaceInput {
   description: String
   loadSampleData: Boolean
   name: String!
+  organizationId: UUID
   slug: String
 }
 
@@ -1905,10 +1906,45 @@ type IASOConnection implements Connection {
   id: String!
   name: String!
   permissions: ConnectionPermissions!
+  queryMetadata(filters: [IASOQueryFilterInput!], page: Int, perPage: Int, search: String, type: IASOMetadataType!): IASOQueryResultPage!
   slug: String!
   type: ConnectionType!
   updatedAt: DateTime
   user: User
+}
+
+"""IASO connection error"""
+enum IASOConnectionError {
+  REQUEST_ERROR
+  UNKNOWN_ERROR
+}
+
+"""IASO metadata item"""
+type IASOMetadataItem {
+  id: Int
+  label: String!
+}
+
+"""Enum representing the type for IASO metadata item."""
+enum IASOMetadataType {
+  IASO_FORMS
+  IASO_ORG_UNITS
+  IASO_PROJECTS
+}
+
+input IASOQueryFilterInput {
+  type: String!
+  value: [Int]!
+}
+
+"""IASO metadata query result"""
+type IASOQueryResultPage {
+  error: IASOConnectionError
+  items: [IASOMetadataItem!]
+  pageNumber: Int!
+  success: Boolean!
+  totalItems: Int!
+  totalPages: Int!
 }
 
 """Represents the input for inviting a member to a workspace."""
@@ -2416,14 +2452,26 @@ type Organization {
   """The unique identifier of the organization."""
   id: UUID!
 
+  """The members of the organization."""
+  members(page: Int, perPage: Int): OrganizationMembershipPage!
+
   """The name of the organization."""
   name: String!
+
+  """The permissions the current user has in the organization."""
+  permissions: OrganizationPermissions!
+
+  """The short name of the organization."""
+  shortName: String
 
   """The type of the organization."""
   type: String!
 
   """The URL of the organization."""
   url: String!
+
+  """The workspaces associated with the organization."""
+  workspaces(page: Int, perPage: Int): WorkspacePage!
 }
 
 """
@@ -2444,6 +2492,36 @@ input OrganizationInput {
 
   """The updated URL of the organization."""
   url: String
+}
+
+"""Represents a membership in an organization."""
+type OrganizationMembership {
+  createdAt: DateTime!
+  id: UUID!
+  organization: Organization!
+  role: OrganizationMembershipRole!
+  updatedAt: DateTime
+  user: User!
+}
+
+"""Represents a page of organization memberships."""
+type OrganizationMembershipPage {
+  items: [WorkspaceMembership!]!
+  pageNumber: Int!
+  totalItems: Int!
+  totalPages: Int!
+}
+
+"""Represents the role of a organization membership."""
+enum OrganizationMembershipRole {
+  ADMIN
+  MEMBER
+  OWNER
+}
+
+type OrganizationPermissions {
+  archiveWorkspace: Boolean!
+  createWorkspace: Boolean!
 }
 
 """Represents an input parameter of a pipeline."""
@@ -2485,6 +2563,9 @@ enum ParameterWidget {
   DHIS2_ORG_UNITS
   DHIS2_ORG_UNIT_GROUPS
   DHIS2_ORG_UNIT_LEVELS
+  IASO_FORMS
+  IASO_ORG_UNITS
+  IASO_PROJECTS
 }
 
 """The PermissionMode enum represents the mode of permissions for a team."""
@@ -2897,7 +2978,7 @@ enum PrepareObjectUploadError {
 
 """
 Input for preparing to upload an object to a workspace's bucket.
-The `contentType` 
+The `contentType`
 """
 input PrepareObjectUploadInput {
   contentType: String
@@ -2982,6 +3063,7 @@ type Query {
   me: Me!
   metadataAttributes(targetId: OpaqueID!): [MetadataAttribute]!
   notebooksUrl: URL!
+  organization(id: UUID!): Organization
 
   """Retrieves a list of organizations."""
   organizations: [Organization!]!
@@ -3004,20 +3086,25 @@ type Query {
 
   """Retrieves a page of pipelines ordered by relevant name."""
   pipelines(name: String, page: Int, perPage: Int, search: String, workspaceSlug: String): PipelinesPage!
-  searchDatabaseTables(page: Int = 1, perPage: Int = 15, query: String!, workspaceSlugs: [String]!): DatabaseTableResultPage!
-  searchDatasets(page: Int = 1, perPage: Int = 15, query: String!, workspaceSlugs: [String]!): DatasetResultPage!
-  searchFiles(page: Int = 1, perPage: Int = 15, query: String!, workspaceSlugs: [String]!): FileResultPage!
-  searchPipelineTemplates(page: Int = 1, perPage: Int = 15, query: String!, workspaceSlugs: [String]!): PipelineTemplateResultPage!
-  searchPipelines(page: Int = 1, perPage: Int = 15, query: String!, workspaceSlugs: [String]!): PipelineResultPage!
+  searchDatabaseTables(organizationId: UUID, page: Int = 1, perPage: Int = 15, query: String!, workspaceSlugs: [String]): DatabaseTableResultPage!
+  searchDatasets(organizationId: UUID, page: Int = 1, perPage: Int = 15, query: String!, workspaceSlugs: [String]): DatasetResultPage!
+  searchFiles(organizationId: UUID, page: Int = 1, perPage: Int = 15, query: String!, workspaceSlugs: [String]): FileResultPage!
+  searchPipelineTemplates(organizationId: UUID, page: Int = 1, perPage: Int = 15, query: String!, workspaceSlugs: [String]): PipelineTemplateResultPage!
+  searchPipelines(organizationId: UUID, page: Int = 1, perPage: Int = 15, query: String!, workspaceSlugs: [String]): PipelineResultPage!
   team(id: UUID!): Team
   teams(page: Int, perPage: Int, term: String): TeamPage!
 
   """Retrieves a template by workspace slug and code."""
   templateByCode(code: String!): PipelineTemplate
+
+  """
+  Search users, to be moved to "Organizations"
+  """
+  users(query: String!, workspaceSlug: String!): [User!]!
   webapp(id: UUID!): Webapp
   webapps(favorite: Boolean, page: Int, perPage: Int, workspaceSlug: String): WebappsPage!
   workspace(slug: String!): Workspace
-  workspaces(page: Int, perPage: Int, query: String): WorkspacePage!
+  workspaces(organizationId: UUID, page: Int, perPage: Int, query: String): WorkspacePage!
 }
 
 """
@@ -4060,6 +4147,7 @@ type Workspace {
   invitations(includeAccepted: Boolean, page: Int, perPage: Int): WorkspaceInvitationPage!
   members(page: Int, perPage: Int): WorkspaceMembershipPage!
   name: String!
+  organization: Organization
   permissions: WorkspacePermissions!
   slug: String!
   updatedAt: DateTime
