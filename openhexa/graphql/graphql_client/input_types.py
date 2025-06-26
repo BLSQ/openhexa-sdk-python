@@ -173,6 +173,7 @@ class CreateWorkspaceInput(BaseModel):
     description: Optional[str] = None
     load_sample_data: Optional[bool] = Field(alias="loadSampleData", default=None)
     name: str
+    organization_id: Optional[Any] = Field(alias="organizationId", default=None)
     slug: Optional[str] = None
 
 
@@ -299,6 +300,11 @@ class GeneratePipelineWebhookUrlInput(BaseModel):
 
 class GenerateWorkspaceTokenInput(BaseModel):
     slug: str
+
+
+class IASOQueryFilterInput(BaseModel):
+    type: str
+    value: List[int]
 
 
 class InviteWorkspaceMemberInput(BaseModel):

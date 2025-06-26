@@ -3,10 +3,59 @@
 
 from typing import Any, Dict, Optional, Union
 
+from .add_pipeline_recipient import AddPipelineRecipient
+from .add_webapp_to_favorites import AddWebappToFavorites
+from .archive_workspace import ArchiveWorkspace
 from .base_client import BaseClient
 from .base_model import UNSET, UnsetType
-from .get_countries import GetCountries
-from .get_workspace_pipelines import GetWorkspacePipelines
+from .create_connection import CreateConnection
+from .create_pipeline import CreatePipeline
+from .create_pipeline_from_template_version import CreatePipelineFromTemplateVersion
+from .create_pipeline_template_version import CreatePipelineTemplateVersion
+from .create_webapp import CreateWebapp
+from .create_workspace import CreateWorkspace
+from .delete_connection import DeleteConnection
+from .delete_pipeline import DeletePipeline
+from .delete_pipeline_template import DeletePipelineTemplate
+from .delete_pipeline_version import DeletePipelineVersion
+from .delete_webapp import DeleteWebapp
+from .get_users import GetUsers
+from .input_types import (
+    AddToFavoritesInput,
+    ArchiveWorkspaceInput,
+    CreateConnectionInput,
+    CreatePipelineFromTemplateVersionInput,
+    CreatePipelineInput,
+    CreatePipelineRecipientInput,
+    CreatePipelineTemplateVersionInput,
+    CreateWebappInput,
+    CreateWorkspaceInput,
+    DeleteConnectionInput,
+    DeletePipelineInput,
+    DeletePipelineTemplateInput,
+    DeletePipelineVersionInput,
+    DeleteWebappInput,
+    InviteWorkspaceMemberInput,
+    RemoveFromFavoritesInput,
+    StopPipelineInput,
+    UpdateConnectionInput,
+    UpdateWebappInput,
+    UpdateWorkspaceInput,
+    UpgradePipelineVersionFromTemplateInput,
+)
+from .invite_workspace_member import InviteWorkspaceMember
+from .organization import Organization
+from .organizations import Organizations
+from .pipeline import Pipeline
+from .pipelines import Pipelines
+from .remove_webapp_from_favorites import RemoveWebappFromFavorites
+from .stop_pipeline import StopPipeline
+from .update_connection import UpdateConnection
+from .update_webapp import UpdateWebapp
+from .update_workspace import UpdateWorkspace
+from .upgrade_pipeline_version_from_template import UpgradePipelineVersionFromTemplate
+from .workspace import Workspace
+from .workspaces import Workspaces
 
 
 def gql(q: str) -> str:
@@ -14,17 +63,17 @@ def gql(q: str) -> str:
 
 
 class Client(BaseClient):
-    def get_workspace_pipelines(
+    def pipelines(
         self,
         workspace_slug: str,
         name: Union[Optional[str], UnsetType] = UNSET,
         page: Union[Optional[int], UnsetType] = UNSET,
         per_page: Union[Optional[int], UnsetType] = UNSET,
         **kwargs: Any
-    ) -> GetWorkspacePipelines:
+    ) -> Pipelines:
         query = gql(
             """
-            query getWorkspacePipelines($workspaceSlug: String!, $name: String, $page: Int = 1, $perPage: Int = 10) {
+            query Pipelines($workspaceSlug: String!, $name: String, $page: Int = 1, $perPage: Int = 10) {
               pipelines(
                 workspaceSlug: $workspaceSlug
                 name: $name
@@ -42,6 +91,13 @@ class Client(BaseClient):
                     name
                     versionNumber
                   }
+                  lastRuns: runs(orderBy: EXECUTION_DATE_DESC, page: 1, perPage: 1) {
+                    items {
+                      id
+                      status
+                      executionDate
+                    }
+                  }
                 }
               }
             }
@@ -54,32 +110,717 @@ class Client(BaseClient):
             "perPage": per_page,
         }
         response = self.execute(
-            query=query,
-            operation_name="getWorkspacePipelines",
-            variables=variables,
-            **kwargs
+            query=query, operation_name="Pipelines", variables=variables, **kwargs
         )
         data = self.get_data(response)
-        return GetWorkspacePipelines.model_validate(data)
+        return Pipelines.model_validate(data)
 
-    def get_countries(self, workspace_slug: str, **kwargs: Any) -> GetCountries:
+    def pipeline(
+        self, workspace_slug: str, pipeline_code: str, **kwargs: Any
+    ) -> Pipeline:
         query = gql(
             """
-            query getCountries($workspaceSlug: String!) {
-              workspace(slug: $workspaceSlug) {
-                countries {
+            query Pipeline($workspaceSlug: String!, $pipelineCode: String!) {
+              pipelineByCode(workspaceSlug: $workspaceSlug, code: $pipelineCode) {
+                id
+                code
+                name
+                description
+                type
+                currentVersion {
+                  id
+                  name
+                  versionNumber
+                  user {
+                    id
+                    email
+                    displayName
+                    avatar {
+                      initials
+                      color
+                    }
+                  }
+                  createdAt
+                }
+                webhookUrl
+                webhookEnabled
+                schedule
+                notebookPath
+                sourceTemplate {
+                  id
                   code
                   name
-                  flag
-                  alpha3
+                }
+                hasNewTemplateVersions
+                newTemplateVersions {
+                  id
+                  changelog
+                  versionNumber
+                  createdAt
+                }
+                recipients {
+                  user {
+                    id
+                    displayName
+                  }
                 }
               }
             }
             """
         )
-        variables: Dict[str, object] = {"workspaceSlug": workspace_slug}
+        variables: Dict[str, object] = {
+            "workspaceSlug": workspace_slug,
+            "pipelineCode": pipeline_code,
+        }
         response = self.execute(
-            query=query, operation_name="getCountries", variables=variables, **kwargs
+            query=query, operation_name="Pipeline", variables=variables, **kwargs
         )
         data = self.get_data(response)
-        return GetCountries.model_validate(data)
+        return Pipeline.model_validate(data)
+
+    def create_pipeline(
+        self, input: CreatePipelineInput, **kwargs: Any
+    ) -> CreatePipeline:
+        query = gql(
+            """
+            mutation CreatePipeline($input: CreatePipelineInput!) {
+              createPipeline(input: $input) {
+                success
+                errors
+                pipeline {
+                  code
+                }
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"input": input}
+        response = self.execute(
+            query=query, operation_name="CreatePipeline", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return CreatePipeline.model_validate(data)
+
+    def delete_pipeline(
+        self, input: DeletePipelineInput, **kwargs: Any
+    ) -> DeletePipeline:
+        query = gql(
+            """
+            mutation DeletePipeline($input: DeletePipelineInput!) {
+              deletePipeline(input: $input) {
+                success
+                errors
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"input": input}
+        response = self.execute(
+            query=query, operation_name="DeletePipeline", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return DeletePipeline.model_validate(data)
+
+    def stop_pipeline(self, input: StopPipelineInput, **kwargs: Any) -> StopPipeline:
+        query = gql(
+            """
+            mutation StopPipeline($input: StopPipelineInput!) {
+              stopPipeline(input: $input) {
+                success
+                errors
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"input": input}
+        response = self.execute(
+            query=query, operation_name="StopPipeline", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return StopPipeline.model_validate(data)
+
+    def add_pipeline_recipient(
+        self, input: CreatePipelineRecipientInput, **kwargs: Any
+    ) -> AddPipelineRecipient:
+        query = gql(
+            """
+            mutation AddPipelineRecipient($input: CreatePipelineRecipientInput!) {
+              addPipelineRecipient(input: $input) {
+                success
+                errors
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"input": input}
+        response = self.execute(
+            query=query,
+            operation_name="AddPipelineRecipient",
+            variables=variables,
+            **kwargs
+        )
+        data = self.get_data(response)
+        return AddPipelineRecipient.model_validate(data)
+
+    def delete_pipeline_version(
+        self, input: DeletePipelineVersionInput, **kwargs: Any
+    ) -> DeletePipelineVersion:
+        query = gql(
+            """
+            mutation DeletePipelineVersion($input: DeletePipelineVersionInput!) {
+              deletePipelineVersion(input: $input) {
+                success
+                errors
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"input": input}
+        response = self.execute(
+            query=query,
+            operation_name="DeletePipelineVersion",
+            variables=variables,
+            **kwargs
+        )
+        data = self.get_data(response)
+        return DeletePipelineVersion.model_validate(data)
+
+    def create_pipeline_template_version(
+        self, input: CreatePipelineTemplateVersionInput, **kwargs: Any
+    ) -> CreatePipelineTemplateVersion:
+        query = gql(
+            """
+            mutation CreatePipelineTemplateVersion($input: CreatePipelineTemplateVersionInput!) {
+              createPipelineTemplateVersion(input: $input) {
+                success
+                errors
+                pipelineTemplate {
+                  name
+                  code
+                }
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"input": input}
+        response = self.execute(
+            query=query,
+            operation_name="CreatePipelineTemplateVersion",
+            variables=variables,
+            **kwargs
+        )
+        data = self.get_data(response)
+        return CreatePipelineTemplateVersion.model_validate(data)
+
+    def delete_pipeline_template(
+        self, input: DeletePipelineTemplateInput, **kwargs: Any
+    ) -> DeletePipelineTemplate:
+        query = gql(
+            """
+            mutation DeletePipelineTemplate($input: DeletePipelineTemplateInput!) {
+              deletePipelineTemplate(input: $input) {
+                success
+                errors
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"input": input}
+        response = self.execute(
+            query=query,
+            operation_name="DeletePipelineTemplate",
+            variables=variables,
+            **kwargs
+        )
+        data = self.get_data(response)
+        return DeletePipelineTemplate.model_validate(data)
+
+    def create_pipeline_from_template_version(
+        self, input: CreatePipelineFromTemplateVersionInput, **kwargs: Any
+    ) -> CreatePipelineFromTemplateVersion:
+        query = gql(
+            """
+            mutation CreatePipelineFromTemplateVersion($input: CreatePipelineFromTemplateVersionInput!) {
+              createPipelineFromTemplateVersion(input: $input) {
+                success
+                errors
+                pipeline {
+                  id
+                  name
+                  code
+                }
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"input": input}
+        response = self.execute(
+            query=query,
+            operation_name="CreatePipelineFromTemplateVersion",
+            variables=variables,
+            **kwargs
+        )
+        data = self.get_data(response)
+        return CreatePipelineFromTemplateVersion.model_validate(data)
+
+    def upgrade_pipeline_version_from_template(
+        self, input: UpgradePipelineVersionFromTemplateInput, **kwargs: Any
+    ) -> UpgradePipelineVersionFromTemplate:
+        query = gql(
+            """
+            mutation UpgradePipelineVersionFromTemplate($input: UpgradePipelineVersionFromTemplateInput!) {
+              upgradePipelineVersionFromTemplate(input: $input) {
+                success
+                errors
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"input": input}
+        response = self.execute(
+            query=query,
+            operation_name="UpgradePipelineVersionFromTemplate",
+            variables=variables,
+            **kwargs
+        )
+        data = self.get_data(response)
+        return UpgradePipelineVersionFromTemplate.model_validate(data)
+
+    def update_webapp(self, input: UpdateWebappInput, **kwargs: Any) -> UpdateWebapp:
+        query = gql(
+            """
+            mutation UpdateWebapp($input: UpdateWebappInput!) {
+              updateWebapp(input: $input) {
+                success
+                errors
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"input": input}
+        response = self.execute(
+            query=query, operation_name="UpdateWebapp", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return UpdateWebapp.model_validate(data)
+
+    def create_webapp(self, input: CreateWebappInput, **kwargs: Any) -> CreateWebapp:
+        query = gql(
+            """
+            mutation CreateWebapp($input: CreateWebappInput!) {
+              createWebapp(input: $input) {
+                success
+                errors
+                webapp {
+                  id
+                }
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"input": input}
+        response = self.execute(
+            query=query, operation_name="CreateWebapp", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return CreateWebapp.model_validate(data)
+
+    def delete_webapp(self, input: DeleteWebappInput, **kwargs: Any) -> DeleteWebapp:
+        query = gql(
+            """
+            mutation DeleteWebapp($input: DeleteWebappInput!) {
+              deleteWebapp(input: $input) {
+                success
+                errors
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"input": input}
+        response = self.execute(
+            query=query, operation_name="DeleteWebapp", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return DeleteWebapp.model_validate(data)
+
+    def add_webapp_to_favorites(
+        self, input: AddToFavoritesInput, **kwargs: Any
+    ) -> AddWebappToFavorites:
+        query = gql(
+            """
+            mutation AddWebappToFavorites($input: AddToFavoritesInput!) {
+              addToFavorites(input: $input) {
+                success
+                errors
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"input": input}
+        response = self.execute(
+            query=query,
+            operation_name="AddWebappToFavorites",
+            variables=variables,
+            **kwargs
+        )
+        data = self.get_data(response)
+        return AddWebappToFavorites.model_validate(data)
+
+    def remove_webapp_from_favorites(
+        self, input: RemoveFromFavoritesInput, **kwargs: Any
+    ) -> RemoveWebappFromFavorites:
+        query = gql(
+            """
+            mutation RemoveWebappFromFavorites($input: RemoveFromFavoritesInput!) {
+              removeFromFavorites(input: $input) {
+                success
+                errors
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"input": input}
+        response = self.execute(
+            query=query,
+            operation_name="RemoveWebappFromFavorites",
+            variables=variables,
+            **kwargs
+        )
+        data = self.get_data(response)
+        return RemoveWebappFromFavorites.model_validate(data)
+
+    def workspace(self, slug: str, **kwargs: Any) -> Workspace:
+        query = gql(
+            """
+            query Workspace($slug: String!) {
+              workspace(slug: $slug) {
+                slug
+                name
+                description
+                dockerImage
+                countries {
+                  code
+                  flag
+                  name
+                }
+                permissions {
+                  delete
+                  update
+                  manageMembers
+                }
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"slug": slug}
+        response = self.execute(
+            query=query, operation_name="Workspace", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return Workspace.model_validate(data)
+
+    def workspaces(
+        self,
+        page: Union[Optional[int], UnsetType] = UNSET,
+        per_page: Union[Optional[int], UnsetType] = UNSET,
+        **kwargs: Any
+    ) -> Workspaces:
+        query = gql(
+            """
+            query Workspaces($page: Int = 1, $perPage: Int = 10) {
+              workspaces(page: $page, perPage: $perPage) {
+                totalPages
+                items {
+                  slug
+                  name
+                  description
+                  countries {
+                    code
+                    alpha3
+                    name
+                  }
+                }
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"page": page, "perPage": per_page}
+        response = self.execute(
+            query=query, operation_name="Workspaces", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return Workspaces.model_validate(data)
+
+    def create_workspace(
+        self, input: CreateWorkspaceInput, **kwargs: Any
+    ) -> CreateWorkspace:
+        query = gql(
+            """
+            mutation CreateWorkspace($input: CreateWorkspaceInput!) {
+              createWorkspace(input: $input) {
+                success
+                workspace {
+                  slug
+                  name
+                  description
+                  countries {
+                    code
+                    alpha3
+                    name
+                  }
+                }
+                errors
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"input": input}
+        response = self.execute(
+            query=query, operation_name="CreateWorkspace", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return CreateWorkspace.model_validate(data)
+
+    def update_workspace(
+        self, input: UpdateWorkspaceInput, **kwargs: Any
+    ) -> UpdateWorkspace:
+        query = gql(
+            """
+            mutation UpdateWorkspace($input: UpdateWorkspaceInput!) {
+              updateWorkspace(input: $input) {
+                success
+                workspace {
+                  slug
+                  name
+                  description
+                  countries {
+                    code
+                    alpha3
+                    name
+                  }
+                }
+                errors
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"input": input}
+        response = self.execute(
+            query=query, operation_name="UpdateWorkspace", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return UpdateWorkspace.model_validate(data)
+
+    def archive_workspace(
+        self, input: ArchiveWorkspaceInput, **kwargs: Any
+    ) -> ArchiveWorkspace:
+        query = gql(
+            """
+            mutation ArchiveWorkspace($input: ArchiveWorkspaceInput!) {
+              archiveWorkspace(input: $input) {
+                success
+                errors
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"input": input}
+        response = self.execute(
+            query=query,
+            operation_name="ArchiveWorkspace",
+            variables=variables,
+            **kwargs
+        )
+        data = self.get_data(response)
+        return ArchiveWorkspace.model_validate(data)
+
+    def invite_workspace_member(
+        self, input: InviteWorkspaceMemberInput, **kwargs: Any
+    ) -> InviteWorkspaceMember:
+        query = gql(
+            """
+            mutation InviteWorkspaceMember($input: InviteWorkspaceMemberInput!) {
+              inviteWorkspaceMember(input: $input) {
+                success
+                errors
+                workspaceMembership {
+                  id
+                }
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"input": input}
+        response = self.execute(
+            query=query,
+            operation_name="InviteWorkspaceMember",
+            variables=variables,
+            **kwargs
+        )
+        data = self.get_data(response)
+        return InviteWorkspaceMember.model_validate(data)
+
+    def create_connection(
+        self, input: CreateConnectionInput, **kwargs: Any
+    ) -> CreateConnection:
+        query = gql(
+            """
+            mutation CreateConnection($input: CreateConnectionInput!) {
+              createConnection(input: $input) {
+                success
+                connection {
+                  __typename
+                  id
+                  name
+                }
+                errors
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"input": input}
+        response = self.execute(
+            query=query,
+            operation_name="CreateConnection",
+            variables=variables,
+            **kwargs
+        )
+        data = self.get_data(response)
+        return CreateConnection.model_validate(data)
+
+    def update_connection(
+        self, input: UpdateConnectionInput, **kwargs: Any
+    ) -> UpdateConnection:
+        query = gql(
+            """
+            mutation UpdateConnection($input: UpdateConnectionInput!) {
+              updateConnection(input: $input) {
+                success
+                errors
+                connection {
+                  __typename
+                  id
+                  name
+                  slug
+                  description
+                  fields {
+                    code
+                    value
+                    secret
+                  }
+                }
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"input": input}
+        response = self.execute(
+            query=query,
+            operation_name="UpdateConnection",
+            variables=variables,
+            **kwargs
+        )
+        data = self.get_data(response)
+        return UpdateConnection.model_validate(data)
+
+    def delete_connection(
+        self, input: DeleteConnectionInput, **kwargs: Any
+    ) -> DeleteConnection:
+        query = gql(
+            """
+            mutation DeleteConnection($input: DeleteConnectionInput!) {
+              deleteConnection(input: $input) {
+                success
+                errors
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"input": input}
+        response = self.execute(
+            query=query,
+            operation_name="DeleteConnection",
+            variables=variables,
+            **kwargs
+        )
+        data = self.get_data(response)
+        return DeleteConnection.model_validate(data)
+
+    def organization(self, id: Any, **kwargs: Any) -> Organization:
+        query = gql(
+            """
+            query Organization($id: UUID!) {
+              organization(id: $id) {
+                id
+                name
+                shortName
+                workspaces {
+                  items {
+                    slug
+                    name
+                    countries {
+                      code
+                    }
+                  }
+                }
+                permissions {
+                  createWorkspace
+                  archiveWorkspace
+                }
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"id": id}
+        response = self.execute(
+            query=query, operation_name="Organization", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return Organization.model_validate(data)
+
+    def organizations(self, **kwargs: Any) -> Organizations:
+        query = gql(
+            """
+            query Organizations {
+              organizations {
+                id
+                name
+                workspaces {
+                  items {
+                    slug
+                    name
+                  }
+                }
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {}
+        response = self.execute(
+            query=query, operation_name="Organizations", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return Organizations.model_validate(data)
+
+    def get_users(self, query: str, workspace_slug: str, **kwargs: Any) -> GetUsers:
+        _query = gql(
+            """
+            query GetUsers($query: String!, $workspaceSlug: String!) {
+              users(query: $query, workspaceSlug: $workspaceSlug) {
+                id
+                email
+                displayName
+                avatar {
+                  initials
+                  color
+                }
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"query": query, "workspaceSlug": workspace_slug}
+        response = self.execute(
+            query=_query, operation_name="GetUsers", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return GetUsers.model_validate(data)

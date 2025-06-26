@@ -396,6 +396,17 @@ class GenerateWorkspaceTokenError(str, Enum):
     WORKSPACE_NOT_FOUND = "WORKSPACE_NOT_FOUND"
 
 
+class IASOConnectionError(str, Enum):
+    REQUEST_ERROR = "REQUEST_ERROR"
+    UNKNOWN_ERROR = "UNKNOWN_ERROR"
+
+
+class IASOMetadataType(str, Enum):
+    IASO_FORMS = "IASO_FORMS"
+    IASO_ORG_UNITS = "IASO_ORG_UNITS"
+    IASO_PROJECTS = "IASO_PROJECTS"
+
+
 class InviteWorkspaceMembershipError(str, Enum):
     ALREADY_EXISTS = "ALREADY_EXISTS"
     PERMISSION_DENIED = "PERMISSION_DENIED"
@@ -450,6 +461,12 @@ class OrderByDirection(str, Enum):
     DESC = "DESC"
 
 
+class OrganizationMembershipRole(str, Enum):
+    ADMIN = "ADMIN"
+    MEMBER = "MEMBER"
+    OWNER = "OWNER"
+
+
 class ParameterType(str, Enum):
     bool = "bool"
     custom = "custom"
@@ -473,6 +490,9 @@ class ParameterWidget(str, Enum):
     DHIS2_ORG_UNITS = "DHIS2_ORG_UNITS"
     DHIS2_ORG_UNIT_GROUPS = "DHIS2_ORG_UNIT_GROUPS"
     DHIS2_ORG_UNIT_LEVELS = "DHIS2_ORG_UNIT_LEVELS"
+    IASO_FORMS = "IASO_FORMS"
+    IASO_ORG_UNITS = "IASO_ORG_UNITS"
+    IASO_PROJECTS = "IASO_PROJECTS"
 
 
 class PermissionMode(str, Enum):
