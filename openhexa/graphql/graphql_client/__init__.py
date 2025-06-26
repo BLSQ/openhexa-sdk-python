@@ -17,6 +17,11 @@ from .create_connection import (
     CreateConnectionCreateConnection,
     CreateConnectionCreateConnectionConnection,
 )
+from .create_dataset import (
+    CreateDataset,
+    CreateDatasetCreateDataset,
+    CreateDatasetCreateDatasetDataset,
+)
 from .create_pipeline import (
     CreatePipeline,
     CreatePipelineCreatePipeline,
@@ -43,7 +48,25 @@ from .create_workspace import (
     CreateWorkspaceCreateWorkspaceWorkspace,
     CreateWorkspaceCreateWorkspaceWorkspaceCountries,
 )
+from .dataset import (
+    Dataset,
+    DatasetDataset,
+    DatasetDatasetCreatedBy,
+    DatasetDatasetPermissions,
+    DatasetDatasetVersions,
+    DatasetDatasetVersionsItems,
+    DatasetDatasetVersionsItemsCreatedBy,
+    DatasetDatasetWorkspace,
+)
+from .datasets import (
+    Datasets,
+    DatasetsDatasets,
+    DatasetsDatasetsItems,
+    DatasetsDatasetsItemsCreatedBy,
+    DatasetsDatasetsItemsPermissions,
+)
 from .delete_connection import DeleteConnection, DeleteConnectionDeleteConnection
+from .delete_dataset import DeleteDataset, DeleteDatasetDeleteDataset
 from .delete_pipeline import DeletePipeline, DeletePipelineDeletePipeline
 from .delete_pipeline_template import (
     DeletePipelineTemplate,
@@ -349,6 +372,11 @@ from .update_connection import (
     UpdateConnectionUpdateConnectionConnection,
     UpdateConnectionUpdateConnectionConnectionFields,
 )
+from .update_dataset import (
+    UpdateDataset,
+    UpdateDatasetUpdateDataset,
+    UpdateDatasetUpdateDatasetDataset,
+)
 from .update_webapp import UpdateWebapp, UpdateWebappUpdateWebapp
 from .update_workspace import (
     UpdateWorkspace,
@@ -422,6 +450,9 @@ __all__ = [
     "CreateConnectionCreateConnectionConnection",
     "CreateConnectionError",
     "CreateConnectionInput",
+    "CreateDataset",
+    "CreateDatasetCreateDataset",
+    "CreateDatasetCreateDatasetDataset",
     "CreateDatasetError",
     "CreateDatasetInput",
     "CreateDatasetVersionError",
@@ -465,6 +496,19 @@ __all__ = [
     "DHIS2ConnectionError",
     "DHIS2ConnectionStatus",
     "DHIS2MetadataType",
+    "Dataset",
+    "DatasetDataset",
+    "DatasetDatasetCreatedBy",
+    "DatasetDatasetPermissions",
+    "DatasetDatasetVersions",
+    "DatasetDatasetVersionsItems",
+    "DatasetDatasetVersionsItemsCreatedBy",
+    "DatasetDatasetWorkspace",
+    "Datasets",
+    "DatasetsDatasets",
+    "DatasetsDatasetsItems",
+    "DatasetsDatasetsItemsCreatedBy",
+    "DatasetsDatasetsItemsPermissions",
     "DeclineWorkspaceInvitationError",
     "DeclineWorkspaceInvitationInput",
     "DeleteAccessmodAnalysisError",
@@ -481,6 +525,8 @@ __all__ = [
     "DeleteConnectionDeleteConnection",
     "DeleteConnectionError",
     "DeleteConnectionInput",
+    "DeleteDataset",
+    "DeleteDatasetDeleteDataset",
     "DeleteDatasetError",
     "DeleteDatasetInput",
     "DeleteDatasetLinkError",
@@ -657,8 +703,11 @@ __all__ = [
     "UpdateConnectionUpdateConnectionConnectionFields",
     "UpdateDAGError",
     "UpdateDAGInput",
+    "UpdateDataset",
     "UpdateDatasetError",
     "UpdateDatasetInput",
+    "UpdateDatasetUpdateDataset",
+    "UpdateDatasetUpdateDatasetDataset",
     "UpdateDatasetVersionError",
     "UpdateDatasetVersionInput",
     "UpdateMembershipError",

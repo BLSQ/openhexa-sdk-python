@@ -350,3 +350,92 @@ query GetUsers($query: String!, $workspaceSlug: String!) {
     }
   }
 }
+
+query Datasets($query: String, $page: Int = 1, $perPage: Int = 15) {
+    datasets(query: $query, page: $page, perPage: $perPage) {
+        totalPages
+        items {
+            id
+            slug
+            name
+            description
+            createdAt
+            updatedAt
+            createdBy {
+                id
+                displayName
+            }
+            permissions {
+                update
+                delete
+            }
+        }
+    }
+}
+
+query Dataset($id: ID!) {
+    dataset(id: $id) {
+        id
+        slug
+        name
+        description
+        createdAt
+        updatedAt
+        createdBy {
+            id
+            displayName
+            email
+        }
+        permissions {
+            update
+            delete
+            createVersion
+        }
+        versions {
+            items {
+                id
+                name
+                changelog
+                createdAt
+                createdBy {
+                    id
+                    displayName
+                }
+            }
+        }
+        workspace {
+            slug
+            name
+        }
+    }
+}
+
+mutation CreateDataset($input: CreateDatasetInput!) {
+    createDataset(input: $input) {
+        success
+        errors
+        dataset {
+            slug
+            name
+        }
+    }
+}
+
+mutation UpdateDataset($input: UpdateDatasetInput!) {
+    updateDataset(input: $input) {
+        success
+        errors
+        dataset {
+            slug
+            name
+            description
+        }
+    }
+}
+
+mutation DeleteDataset($input: DeleteDatasetInput!) {
+    deleteDataset(input: $input) {
+        success
+        errors
+    }
+}

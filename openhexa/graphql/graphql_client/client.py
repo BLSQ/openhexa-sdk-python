@@ -15,6 +15,7 @@ from .archive_workspace import ArchiveWorkspace, ArchiveWorkspaceArchiveWorkspac
 from .base_client import BaseClient
 from .base_model import UNSET, UnsetType
 from .create_connection import CreateConnection, CreateConnectionCreateConnection
+from .create_dataset import CreateDataset, CreateDatasetCreateDataset
 from .create_pipeline import CreatePipeline, CreatePipelineCreatePipeline
 from .create_pipeline_from_template_version import (
     CreatePipelineFromTemplateVersion,
@@ -26,7 +27,10 @@ from .create_pipeline_template_version import (
 )
 from .create_webapp import CreateWebapp, CreateWebappCreateWebapp
 from .create_workspace import CreateWorkspace, CreateWorkspaceCreateWorkspace
+from .dataset import Dataset, DatasetDataset
+from .datasets import Datasets, DatasetsDatasets
 from .delete_connection import DeleteConnection, DeleteConnectionDeleteConnection
+from .delete_dataset import DeleteDataset, DeleteDatasetDeleteDataset
 from .delete_pipeline import DeletePipeline, DeletePipelineDeletePipeline
 from .delete_pipeline_template import (
     DeletePipelineTemplate,
@@ -42,6 +46,7 @@ from .input_types import (
     AddToFavoritesInput,
     ArchiveWorkspaceInput,
     CreateConnectionInput,
+    CreateDatasetInput,
     CreatePipelineFromTemplateVersionInput,
     CreatePipelineInput,
     CreatePipelineRecipientInput,
@@ -49,6 +54,7 @@ from .input_types import (
     CreateWebappInput,
     CreateWorkspaceInput,
     DeleteConnectionInput,
+    DeleteDatasetInput,
     DeletePipelineInput,
     DeletePipelineTemplateInput,
     DeletePipelineVersionInput,
@@ -57,6 +63,7 @@ from .input_types import (
     RemoveFromFavoritesInput,
     StopPipelineInput,
     UpdateConnectionInput,
+    UpdateDatasetInput,
     UpdateWebappInput,
     UpdateWorkspaceInput,
     UpgradePipelineVersionFromTemplateInput,
@@ -75,6 +82,7 @@ from .remove_webapp_from_favorites import (
 )
 from .stop_pipeline import StopPipeline, StopPipelineStopPipeline
 from .update_connection import UpdateConnection, UpdateConnectionUpdateConnection
+from .update_dataset import UpdateDataset, UpdateDatasetUpdateDataset
 from .update_webapp import UpdateWebapp, UpdateWebappUpdateWebapp
 from .update_workspace import UpdateWorkspace, UpdateWorkspaceUpdateWorkspace
 from .upgrade_pipeline_version_from_template import (
@@ -870,3 +878,163 @@ class Client(BaseClient):
         )
         data = self.get_data(response)
         return GetUsers.model_validate(data).users
+
+    def datasets(
+        self,
+        query: Union[Optional[str], UnsetType] = UNSET,
+        page: Union[Optional[int], UnsetType] = UNSET,
+        per_page: Union[Optional[int], UnsetType] = UNSET,
+        **kwargs: Any
+    ) -> DatasetsDatasets:
+        _query = gql(
+            """
+            query Datasets($query: String, $page: Int = 1, $perPage: Int = 15) {
+              datasets(query: $query, page: $page, perPage: $perPage) {
+                totalPages
+                items {
+                  id
+                  slug
+                  name
+                  description
+                  createdAt
+                  updatedAt
+                  createdBy {
+                    id
+                    displayName
+                  }
+                  permissions {
+                    update
+                    delete
+                  }
+                }
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {
+            "query": query,
+            "page": page,
+            "perPage": per_page,
+        }
+        response = self.execute(
+            query=_query, operation_name="Datasets", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return Datasets.model_validate(data).datasets
+
+    def dataset(self, id: str, **kwargs: Any) -> Optional[DatasetDataset]:
+        query = gql(
+            """
+            query Dataset($id: ID!) {
+              dataset(id: $id) {
+                id
+                slug
+                name
+                description
+                createdAt
+                updatedAt
+                createdBy {
+                  id
+                  displayName
+                  email
+                }
+                permissions {
+                  update
+                  delete
+                  createVersion
+                }
+                versions {
+                  items {
+                    id
+                    name
+                    changelog
+                    createdAt
+                    createdBy {
+                      id
+                      displayName
+                    }
+                  }
+                }
+                workspace {
+                  slug
+                  name
+                }
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"id": id}
+        response = self.execute(
+            query=query, operation_name="Dataset", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return Dataset.model_validate(data).dataset
+
+    def create_dataset(
+        self, input: CreateDatasetInput, **kwargs: Any
+    ) -> CreateDatasetCreateDataset:
+        query = gql(
+            """
+            mutation CreateDataset($input: CreateDatasetInput!) {
+              createDataset(input: $input) {
+                success
+                errors
+                dataset {
+                  slug
+                  name
+                }
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"input": input}
+        response = self.execute(
+            query=query, operation_name="CreateDataset", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return CreateDataset.model_validate(data).create_dataset
+
+    def update_dataset(
+        self, input: UpdateDatasetInput, **kwargs: Any
+    ) -> UpdateDatasetUpdateDataset:
+        query = gql(
+            """
+            mutation UpdateDataset($input: UpdateDatasetInput!) {
+              updateDataset(input: $input) {
+                success
+                errors
+                dataset {
+                  slug
+                  name
+                  description
+                }
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"input": input}
+        response = self.execute(
+            query=query, operation_name="UpdateDataset", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return UpdateDataset.model_validate(data).update_dataset
+
+    def delete_dataset(
+        self, input: DeleteDatasetInput, **kwargs: Any
+    ) -> DeleteDatasetDeleteDataset:
+        query = gql(
+            """
+            mutation DeleteDataset($input: DeleteDatasetInput!) {
+              deleteDataset(input: $input) {
+                success
+                errors
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"input": input}
+        response = self.execute(
+            query=query, operation_name="DeleteDataset", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return DeleteDataset.model_validate(data).delete_dataset
