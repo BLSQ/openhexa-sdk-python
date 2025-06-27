@@ -72,8 +72,6 @@ from .invite_workspace_member import (
     InviteWorkspaceMember,
     InviteWorkspaceMemberInviteWorkspaceMember,
 )
-from .organization import Organization, OrganizationOrganization
-from .organizations import Organizations, OrganizationsOrganizations
 from .pipeline import Pipeline, PipelinePipelineByCode
 from .pipelines import Pipelines, PipelinesPipelines
 from .remove_webapp_from_favorites import (
@@ -795,64 +793,6 @@ class Client(BaseClient):
         )
         data = self.get_data(response)
         return DeleteConnection.model_validate(data).delete_connection
-
-    def organization(
-        self, id: Any, **kwargs: Any
-    ) -> Optional[OrganizationOrganization]:
-        query = gql(
-            """
-            query Organization($id: UUID!) {
-              organization(id: $id) {
-                id
-                name
-                shortName
-                workspaces {
-                  items {
-                    slug
-                    name
-                    countries {
-                      code
-                    }
-                  }
-                }
-                permissions {
-                  createWorkspace
-                  archiveWorkspace
-                }
-              }
-            }
-            """
-        )
-        variables: Dict[str, object] = {"id": id}
-        response = self.execute(
-            query=query, operation_name="Organization", variables=variables, **kwargs
-        )
-        data = self.get_data(response)
-        return Organization.model_validate(data).organization
-
-    def organizations(self, **kwargs: Any) -> List[OrganizationsOrganizations]:
-        query = gql(
-            """
-            query Organizations {
-              organizations {
-                id
-                name
-                workspaces {
-                  items {
-                    slug
-                    name
-                  }
-                }
-              }
-            }
-            """
-        )
-        variables: Dict[str, object] = {}
-        response = self.execute(
-            query=query, operation_name="Organizations", variables=variables, **kwargs
-        )
-        data = self.get_data(response)
-        return Organizations.model_validate(data).organizations
 
     def get_users(
         self, query: str, workspace_slug: str, **kwargs: Any
