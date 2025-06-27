@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.7.2](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.7.1...v2.7.2) (2025-06-27)
+
+
+### Bug Fixes
+
+* Set schema to Prod/Demo schema, handle exception gracefully ([#288](https://github.com/BLSQ/openhexa-sdk-python/issues/288)) ([cdb901f](https://github.com/BLSQ/openhexa-sdk-python/commit/cdb901f9c75ab3af5052dbbbac1504ea81cdefb8))
+
 ## [2.7.1](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.7.0...v2.7.1) (2025-06-27)
 
 
