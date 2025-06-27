@@ -768,7 +768,12 @@ class OpenHexaClient(BaseOpenHexaClient):
             variables = kwargs.get("variables", {})
             click.echo(f"Variables: {variables}")
 
-        response = super().execute(query=query, **kwargs)
+        try:
+            response = super().execute(query=query, **kwargs)
+        except Exception as e:
+            if "authenticated user" in str(e) or "UNAUTHENTICATED" in str(e):
+                raise InvalidTokenError("No or invalid token found for workspace, the requests are not authenticated.")
+            raise
 
         if settings.debug:
             click.echo("")
