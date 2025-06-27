@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.7.1](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.7.0...v2.7.1) (2025-06-27)
+
+
+### Bug Fixes
+
+* include the graphql file in the build, with the correct path ([#286](https://github.com/BLSQ/openhexa-sdk-python/issues/286)) ([8a8c693](https://github.com/BLSQ/openhexa-sdk-python/commit/8a8c693a9de960e2cf9b62c6e8059b2e7911ad6d))
+
 ## [2.7.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.6.0...v2.7.0) (2025-06-27)
 
 
