@@ -11,10 +11,12 @@ import typing
 from datetime import datetime
 from importlib.metadata import version
 from pathlib import Path
+from typing import Any
 from zipfile import ZipFile
 
 import click
 import docker
+import httpx
 import requests
 from docker.models.containers import Container
 from graphql import build_client_schema, build_schema, get_introspection_query
@@ -760,6 +762,9 @@ class OpenHexaClient(BaseOpenHexaClient):
         """Decorate parent execute method to log the GraphQL query and response."""
         _detect_graphql_breaking_changes(token=self.token)
 
+        if self.token is None:
+            raise InvalidTokenError("No token found for workspace")
+
         if settings.debug:
             click.echo("")
             click.echo("Graphql Query:")
@@ -768,12 +773,7 @@ class OpenHexaClient(BaseOpenHexaClient):
             variables = kwargs.get("variables", {})
             click.echo(f"Variables: {variables}")
 
-        try:
-            response = super().execute(query=query, **kwargs)
-        except Exception as e:
-            if "authenticated user" in str(e) or "UNAUTHENTICATED" in str(e):
-                raise InvalidTokenError("No or invalid token found for workspace, the requests are not authenticated.")
-            raise
+        response = super().execute(query=query, **kwargs)
 
         if settings.debug:
             click.echo("")
@@ -781,3 +781,13 @@ class OpenHexaClient(BaseOpenHexaClient):
             click.echo(f"Response: {response}")
 
         return response
+
+    def get_data(self, response: httpx.Response) -> dict[str, Any]:
+        """Get the data from the response, handling errors and authentication issues."""
+        try:
+            data = super().get_data(response)
+        except Exception as e:
+            if "Resolver requires an authenticated user" in str(e):
+                raise InvalidTokenError("No or invalid token found for workspace, please check your configuration.")
+            raise
+        return data
