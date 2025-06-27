@@ -172,4 +172,9 @@ def get_local_workspace_config(path: Path):
         if "image" in local_workspace_config:
             env_vars["WORKSPACE_DOCKER_IMAGE"] = local_workspace_config["image"]
 
+        # Additional environment variables
+        if "env" in local_workspace_config:
+            for key, value in local_workspace_config["env"].items():
+                env_vars[key] = str(value)
+
     return env_vars
