@@ -175,6 +175,18 @@ class Client(BaseClient):
                   }
                   createdAt
                 }
+                runs(orderBy: EXECUTION_DATE_DESC, page: 1, perPage: 10) {
+                  items {
+                    id
+                    status
+                    executionDate
+                    user {
+                      id
+                      displayName
+                      email
+                    }
+                  }
+                }
                 webhookUrl
                 webhookEnabled
                 schedule

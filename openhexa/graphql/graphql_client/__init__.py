@@ -336,6 +336,9 @@ from .pipeline import (
     PipelinePipelineByCodeNewTemplateVersions,
     PipelinePipelineByCodeRecipients,
     PipelinePipelineByCodeRecipientsUser,
+    PipelinePipelineByCodeRuns,
+    PipelinePipelineByCodeRunsItems,
+    PipelinePipelineByCodeRunsItemsUser,
     PipelinePipelineByCodeSourceTemplate,
 )
 from .pipelines import (
@@ -612,6 +615,9 @@ __all__ = [
     "PipelinePipelineByCodeNewTemplateVersions",
     "PipelinePipelineByCodeRecipients",
     "PipelinePipelineByCodeRecipientsUser",
+    "PipelinePipelineByCodeRuns",
+    "PipelinePipelineByCodeRunsItems",
+    "PipelinePipelineByCodeRunsItemsUser",
     "PipelinePipelineByCodeSourceTemplate",
     "PipelineRecipientError",
     "PipelineRunOrderBy",
