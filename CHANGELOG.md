@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.7.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.6.0...v2.7.0) (2025-06-27)
+
+
+### Features
+
+* add global instance of OpenHexaClient ([#285](https://github.com/BLSQ/openhexa-sdk-python/issues/285)) ([5a831c8](https://github.com/BLSQ/openhexa-sdk-python/commit/5a831c83b1b3136234db7a95d1b2e176f5330f7b))
+* pass env variables to container ([#282](https://github.com/BLSQ/openhexa-sdk-python/issues/282)) ([b99d881](https://github.com/BLSQ/openhexa-sdk-python/commit/b99d8812304e17d0f3093f96cfec507de307e720))
+
+
+### Bug Fixes
+
+* path to GraphQL schema for breaking change detection ([#284](https://github.com/BLSQ/openhexa-sdk-python/issues/284)) ([2259a87](https://github.com/BLSQ/openhexa-sdk-python/commit/2259a87acddec7bd14fe2d560b2073a9efe91337))
+
 ## [2.6.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.5.1...v2.6.0) (2025-06-26)
 
 
