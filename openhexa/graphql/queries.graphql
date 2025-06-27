@@ -305,39 +305,39 @@ mutation DeleteConnection($input: DeleteConnectionInput!) {
   }
 }
 
-query Organization($id: UUID!) {
-  organization(id: $id) {
-    id
-    name
-    shortName
-    workspaces {
-      items {
-        slug
-        name
-        countries {
-          code
-        }
-      }
-    }
-    permissions {
-      createWorkspace
-      archiveWorkspace
-    }
-  }
-}
-
-query Organizations {
-  organizations {
-    id
-    name
-    workspaces {
-      items {
-        slug
-        name
-      }
-    }
-  }
-}
+#query Organization($id: UUID!) {
+#  organization(id: $id) {
+#    id
+#    name
+#    shortName
+#    workspaces {
+#      items {
+#        slug
+#        name
+#        countries {
+#          code
+#        }
+#      }
+#    }
+#    permissions {
+#      createWorkspace
+#      archiveWorkspace
+#    }
+#  }
+#}
+#
+#query Organizations {
+#  organizations {
+#    id
+#    name
+#    workspaces {
+#      items {
+#        slug
+#        name
+#      }
+#    }
+#  }
+#}
 
 query GetUsers($query: String!, $workspaceSlug: String!) {
   users(query: $query, workspaceSlug: $workspaceSlug) {

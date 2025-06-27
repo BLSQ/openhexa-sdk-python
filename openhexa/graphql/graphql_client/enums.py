@@ -461,12 +461,6 @@ class OrderByDirection(str, Enum):
     DESC = "DESC"
 
 
-class OrganizationMembershipRole(str, Enum):
-    ADMIN = "ADMIN"
-    MEMBER = "MEMBER"
-    OWNER = "OWNER"
-
-
 class ParameterType(str, Enum):
     bool = "bool"
     custom = "custom"

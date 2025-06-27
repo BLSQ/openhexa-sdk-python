@@ -156,7 +156,6 @@ from .enums import (
     MembershipRole,
     MessagePriority,
     OrderByDirection,
-    OrganizationMembershipRole,
     ParameterType,
     ParameterWidget,
     PermissionMode,
@@ -327,20 +326,6 @@ from .invite_workspace_member import (
     InviteWorkspaceMember,
     InviteWorkspaceMemberInviteWorkspaceMember,
     InviteWorkspaceMemberInviteWorkspaceMemberWorkspaceMembership,
-)
-from .organization import (
-    Organization,
-    OrganizationOrganization,
-    OrganizationOrganizationPermissions,
-    OrganizationOrganizationWorkspaces,
-    OrganizationOrganizationWorkspacesItems,
-    OrganizationOrganizationWorkspacesItemsCountries,
-)
-from .organizations import (
-    Organizations,
-    OrganizationsOrganizations,
-    OrganizationsOrganizationsWorkspaces,
-    OrganizationsOrganizationsWorkspacesItems,
 )
 from .pipeline import (
     Pipeline,
@@ -610,18 +595,7 @@ __all__ = [
     "MembershipRole",
     "MessagePriority",
     "OrderByDirection",
-    "Organization",
     "OrganizationInput",
-    "OrganizationMembershipRole",
-    "OrganizationOrganization",
-    "OrganizationOrganizationPermissions",
-    "OrganizationOrganizationWorkspaces",
-    "OrganizationOrganizationWorkspacesItems",
-    "OrganizationOrganizationWorkspacesItemsCountries",
-    "Organizations",
-    "OrganizationsOrganizations",
-    "OrganizationsOrganizationsWorkspaces",
-    "OrganizationsOrganizationsWorkspacesItems",
     "ParameterInput",
     "ParameterType",
     "ParameterWidget",

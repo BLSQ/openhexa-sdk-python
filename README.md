@@ -163,7 +163,7 @@ To run code generation manually:
 
 ```shell
 pip install ariadne-codegen
-ariadne-codegen
+python -m ariadne_codegen
 ```
 
 ariadne-codegen runs automatically via pre-commit hooks and CI/CD when GraphQL files are modified.
