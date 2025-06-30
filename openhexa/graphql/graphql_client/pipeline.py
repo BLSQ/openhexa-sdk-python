@@ -6,7 +6,7 @@ from typing import Any, List, Optional
 from pydantic import Field
 
 from .base_model import BaseModel
-from .enums import PipelineType
+from .enums import PipelineRunStatus, PipelineType
 
 
 class Pipeline(BaseModel):
@@ -22,6 +22,7 @@ class PipelinePipelineByCode(BaseModel):
     current_version: Optional["PipelinePipelineByCodeCurrentVersion"] = Field(
         alias="currentVersion"
     )
+    runs: "PipelinePipelineByCodeRuns"
     webhook_url: Optional[str] = Field(alias="webhookUrl")
     webhook_enabled: bool = Field(alias="webhookEnabled")
     schedule: Optional[str]
@@ -56,6 +57,23 @@ class PipelinePipelineByCodeCurrentVersionUserAvatar(BaseModel):
     color: str
 
 
+class PipelinePipelineByCodeRuns(BaseModel):
+    items: List["PipelinePipelineByCodeRunsItems"]
+
+
+class PipelinePipelineByCodeRunsItems(BaseModel):
+    id: Any
+    status: PipelineRunStatus
+    execution_date: Optional[Any] = Field(alias="executionDate")
+    user: Optional["PipelinePipelineByCodeRunsItemsUser"]
+
+
+class PipelinePipelineByCodeRunsItemsUser(BaseModel):
+    id: Any
+    display_name: str = Field(alias="displayName")
+    email: str
+
+
 class PipelinePipelineByCodeSourceTemplate(BaseModel):
     id: Any
     code: str
@@ -82,4 +100,6 @@ Pipeline.model_rebuild()
 PipelinePipelineByCode.model_rebuild()
 PipelinePipelineByCodeCurrentVersion.model_rebuild()
 PipelinePipelineByCodeCurrentVersionUser.model_rebuild()
+PipelinePipelineByCodeRuns.model_rebuild()
+PipelinePipelineByCodeRunsItems.model_rebuild()
 PipelinePipelineByCodeRecipients.model_rebuild()
