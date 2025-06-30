@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.8.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.7.2...v2.8.0) (2025-06-30)
+
+
+### Features
+
+* add runs to pipeline in openhexa client ([#290](https://github.com/BLSQ/openhexa-sdk-python/issues/290)) ([0b025b8](https://github.com/BLSQ/openhexa-sdk-python/commit/0b025b8536c05f26c32c153803ec0c6f23d7ff29))
+
 ## [2.7.2](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.7.1...v2.7.2) (2025-06-27)
 
 
