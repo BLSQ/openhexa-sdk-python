@@ -20,6 +20,13 @@ class CurrentRun:
     def _connected(self):
         return "HEXA_SERVER_URL" in os.environ
 
+    def id(self):
+        """Exposes pipeline run id."""
+        if "HEXA_RUN_ID" in os.environ:
+            return os.environ["HEXA_RUN_ID"]
+        else:
+            raise RuntimeError("Current run ID is not set. Make sure you are running this in a pipeline context.")
+
     def add_file_output(self, path: str):
         """Record a run output for a file creation operation.
 
