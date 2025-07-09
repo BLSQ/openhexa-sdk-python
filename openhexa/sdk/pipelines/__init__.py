@@ -15,6 +15,7 @@ __all__ = [
     "Pipeline",
     "parameter",
     "current_run",
+    "current_pipeline",
     "import_pipeline",
     "download_pipeline",
     "get_local_workspace_config",
