@@ -2,10 +2,10 @@ FROM blsq/openhexa-base-environment:latest
 
 USER root
 
-WORKDIR /app
-COPY . /app
+WORKDIR /home/hexa
+COPY . /home/hexa
 
 RUN pip install build
 RUN python -m build .
 
-RUN pip install --no-cache-dir /app/dist/*.tar.gz && rm -rf /app/dist/*.tar.gz
+RUN pip install --no-cache-dir /home/hexa/dist/*.tar.gz && rm -rf /home/hexa/dist/*.tar.gz

@@ -136,9 +136,17 @@ docker build --platform linux/amd64 -t local_image:v1 -f images/Dockerfile .
 
 Then reference the image name and tag in the `.env` file of your OpenHexa app :
 
-```
+```dotenv
 DEFAULT_WORKSPACE_IMAGE=local_image:v1
 ```
+
+Or you can set the following in your `workspace.yaml` configuration file in your pipeline directory:
+
+```yaml
+env:
+  WORKSPACE_DOCKER_IMAGE: local_image:v1
+```
+
 
 ### Running the tests
 
