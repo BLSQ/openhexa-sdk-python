@@ -11,6 +11,7 @@ from openhexa.graphql.graphql_client import WorkspaceWorkspaceCountries
 from openhexa.utils import stringcase
 
 from ..datasets import Dataset
+from ..files import File
 from ..utils import OpenHexaClient, graphql
 from .connection import (
     ConnectionClasses,
@@ -540,7 +541,7 @@ class CurrentWorkspace:
             query getWorkspaceDatasets($slug: String!) {
                 workspace(slug: $slug) {
                     datasets {
-                        items { 
+                        items {
                             id
                             dataset {
                                 id
@@ -549,7 +550,7 @@ class CurrentWorkspace:
                                 description
                             }
                         }
-                    
+
                     }
                 }
             }
@@ -568,3 +569,48 @@ class CurrentWorkspace:
         ]
 
         return datasets
+
+    def get_file(self, path: str) -> File:
+        """Get a file by its path.
+
+        Parameters
+        ----------
+        path : str
+            The path of the file in the OpenHEXA backend
+
+        Returns
+        -------
+        FileResult
+            The file
+
+        Raises
+        ------
+        ValueError
+            If the file does not exist
+        """
+        response = graphql(
+            """
+            query getFileByPath($path: String!, $workspaceSlug: String!) {
+                getFileByPath(workspaceSlug: $workspaceSlug, path: $path) {
+                    key
+                    name
+                    path
+                    size
+                    type
+                }
+            }
+        """,
+            {"path": path, "workspaceSlug": self.slug},
+        )
+        data = response["getFileByPath"]
+
+        if data is None:
+            raise ValueError(f"File with path {path} does not exist.")
+
+        return File(
+            key=data["key"],
+            name=data["name"],
+            path=data["path"],
+            size=data["size"],
+            type=data["type"],
+        )

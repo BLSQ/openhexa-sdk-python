@@ -7,6 +7,7 @@ import typing
 from enum import StrEnum
 
 from openhexa.sdk.datasets import Dataset
+from openhexa.sdk.files import File
 from openhexa.sdk.pipelines.exceptions import InvalidParameterError, ParameterValueError
 from openhexa.sdk.pipelines.utils import validate_pipeline_parameter_code
 from openhexa.sdk.workspaces import workspace
@@ -344,6 +345,40 @@ class DatasetType(ParameterType):
             raise ParameterValueError(str(e))
 
 
+class FileType(ParameterType):
+    """Type class for file parameter."""
+
+    @property
+    def spec_type(self) -> str:
+        """Return a type string for the specs that are sent to the backend."""
+        return "file"
+
+    @property
+    def expected_type(self) -> type:
+        """Returns the python type expected for values."""
+        return File
+
+    def validate_default(self, value: typing.Any | None):
+        """Validate the default value configured for this type."""
+        if value is None:
+            return
+
+        if not isinstance(value, str):
+            raise InvalidParameterError("Default value for file parameter type should be string.")
+        elif value == "":
+            raise ParameterValueError("Empty values are not accepted.")
+
+    def validate(self, value: typing.Any | None) -> File:
+        """Validate the provided value for this type."""
+        if not isinstance(value, str):
+            raise ParameterValueError(f"Invalid type for value {value} (expected {str}, got {type(value)})")
+
+        try:
+            return workspace.get_file(value)
+        except ValueError as e:
+            raise ParameterValueError(str(e))
+
+
 TYPES_BY_PYTHON_TYPE = {
     "str": StringType,
     "bool": Boolean,
@@ -356,6 +391,7 @@ TYPES_BY_PYTHON_TYPE = {
     "GCSConnection": GCSConnectionType,
     "CustomConnection": CustomConnectionType,
     "Dataset": DatasetType,
+    "File": FileType,
 }
 
 

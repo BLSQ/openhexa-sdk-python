@@ -1,6 +1,7 @@
 """SDK package."""
 
 from .datasets import Dataset
+from .files import File
 from .pipelines import current_run, parameter, pipeline
 from .pipelines.parameter import DHIS2Widget, IASOWidget
 from .utils import OpenHexaClient
@@ -29,4 +30,5 @@ __all__ = [
     "CustomConnection",
     "Dataset",
     "OpenHexaClient",
+    "File",
 ]
