@@ -13,7 +13,6 @@ from openhexa.utils import stringcase
 from ..datasets import Dataset
 from ..utils import OpenHexaClient, graphql
 from .connection import (
-    Connection,
     ConnectionClasses,
     CustomConnection,
     DHIS2Connection,
