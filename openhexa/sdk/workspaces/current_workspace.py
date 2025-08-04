@@ -190,6 +190,27 @@ class CurrentWorkspace:
 
         return connection_fields
 
+    def get_connection_from_api(self, identifier: str) -> tuple[dict[str, str], str] | None:
+        """Get a connection by its identifier from the OpenHEXA API."""
+        connection_fields: dict[str, str] = {}
+        connection = OpenHexaClient().get_connection(workspace_slug=self.slug, connection_slug=identifier.lower())
+        if not connection:
+            return None
+        for f in connection.fields:
+            connection_fields[f.code] = f.value
+        connection_type = connection.type.upper()
+        return connection_fields, connection_type
+
+    def get_connection_from_env(self, identifier: str) -> tuple[dict[str, str], str] | None:
+        """Get a connection by its identifier from the environment variables."""
+        env_variable_prefix = stringcase.constcase(identifier.lower())
+        try:
+            connection_type = os.environ[f"{env_variable_prefix}"].upper()
+            connection_fields = self._get_local_connection_fields(env_variable_prefix)
+            return connection_fields, connection_type
+        except KeyError:
+            return None
+
     def get_connection(
         self, identifier: str
     ) -> (
@@ -212,41 +233,14 @@ class CurrentWorkspace:
         ValueError
             If the connection does not exist
         """
-        connection_fields = {}
-        connection_type = None
-        if self._connected:
-            response = graphql(
-                """
-                query getConnection($workspaceSlug:String!, $connectionSlug: String!) {
-                    connectionBySlug(workspaceSlug:$workspaceSlug, connectionSlug: $connectionSlug) {
-                        type
-                        fields {
-                            code
-                            value
-                        }
-                    }
-                }
-            """,
-                {"workspaceSlug": self.slug, "connectionSlug": identifier.lower()},
-            )
-            data = response["connectionBySlug"]
-            if data is None:
-                raise ValueError(f"Connection {identifier} does not exist.")
+        connection = self.get_connection_from_env(identifier)
+        if not connection and self._connected:
+            connection = self.get_connection_from_api(identifier)
 
-            for d in data["fields"]:
-                connection_fields[d.get("code")] = d.get("value")
-
-            connection_type = data["type"].upper()
-        else:
-            try:
-                env_variable_prefix = stringcase.constcase(identifier.lower())
-                connection_type = os.environ[f"{env_variable_prefix}"].upper()
-                connection_fields = self._get_local_connection_fields(env_variable_prefix)
-            except KeyError:
-                raise ValueError
-
-        if not connection_type:
+        if not connection:
             raise ValueError(f"Connection {identifier} does not exist.")
+
+        connection_fields, connection_type = connection
 
         # In connected mode (API call) the secret_access_key field and db_name name are
         # different from the offline ones

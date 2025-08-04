@@ -8,6 +8,7 @@ from unittest import mock
 
 import pytest
 
+from openhexa.graphql import GetConnectionConnectionBySlug
 from openhexa.sdk.workspaces.connection import (
     CustomConnection,
     DHIS2Connection,
@@ -318,10 +319,10 @@ class TestConnectedWorkspace:
 
     def test_workspace_get_connection_not_exist(self, workspace):
         """Test get connection not found."""
-        data = {"connectionBySlug": None}
+        data = None
 
         with mock.patch(
-            "openhexa.sdk.workspaces.current_workspace.graphql",
+            "openhexa.sdk.workspaces.current_workspace.OpenHexaClient.get_connection",
             return_value=data,
         ):
             with pytest.raises(ValueError):
@@ -330,14 +331,14 @@ class TestConnectedWorkspace:
     def test_workspace_get_connection_case_insensitive(self, workspace):
         """Test get connection."""
         data = {
-            "connectionBySlug": {
-                "type": "CUSTOM",
-                "fields": [{"code": "field_1", "value": "field_1_value"}],
-            }
+            "__typename": "CustomConnection",
+            "type": "CUSTOM",
+            "fields": [{"code": "field_1", "value": "field_1_value"}],
         }
+        mocked_data = GetConnectionConnectionBySlug(**data)
         with mock.patch(
-            "openhexa.sdk.workspaces.current_workspace.graphql",
-            return_value=data,
+            "openhexa.sdk.workspaces.current_workspace.OpenHexaClient.get_connection",
+            return_value=mocked_data,
         ):
             connection = workspace.get_connection("RaNDom")
             assert isinstance(connection, CustomConnection)
@@ -345,19 +346,18 @@ class TestConnectedWorkspace:
     def test_workspace_get_connection(self, workspace):
         """Test get connection."""
         data = {
-            "connectionBySlug": {
-                "type": "S3",
-                "fields": [
-                    {"code": "bucket_name", "value": "bucket_name"},
-                    {"code": "access_key_id", "value": "access_key_id"},
-                    {"code": "access_key_secret", "value": "secret_access_key"},
-                ],
-            }
+            "__typename": "S3Connection",
+            "type": "S3",
+            "fields": [
+                {"code": "bucket_name", "value": "bucket_name"},
+                {"code": "access_key_id", "value": "access_key_id"},
+                {"code": "access_key_secret", "value": "secret_access_key"},
+            ],
         }
-
+        mocked_data = GetConnectionConnectionBySlug(**data)
         with mock.patch(
-            "openhexa.sdk.workspaces.current_workspace.graphql",
-            return_value=data,
+            "openhexa.sdk.workspaces.current_workspace.OpenHexaClient.get_connection",
+            return_value=mocked_data,
         ):
             connection = workspace.get_connection("s3-connection")
             assert isinstance(connection, S3Connection)

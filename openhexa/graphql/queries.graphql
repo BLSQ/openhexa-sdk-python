@@ -451,3 +451,13 @@ mutation DeleteDataset($input: DeleteDatasetInput!) {
         errors
     }
 }
+
+query getConnection($workspaceSlug:String!, $connectionSlug: String!) {
+                connectionBySlug(workspaceSlug:$workspaceSlug, connectionSlug: $connectionSlug) {
+                    type
+                    fields {
+                        code
+                        value
+                    }
+                }
+            }
