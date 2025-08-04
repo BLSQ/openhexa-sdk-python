@@ -193,27 +193,13 @@ class CurrentWorkspace:
     def get_connection_from_api(self, identifier: str) -> tuple[dict[str, str], str] | None:
         """Get a connection by its identifier from the OpenHEXA API."""
         connection_fields: dict[str, str] = {}
-        response = graphql(
-            """
-            query getConnection($workspaceSlug:String!, $connectionSlug: String!) {
-                connectionBySlug(workspaceSlug:$workspaceSlug, connectionSlug: $connectionSlug) {
-                    type
-                    fields {
-                        code
-                        value
-                    }
-                }
-            }
-        """,
-            {"workspaceSlug": self.slug, "connectionSlug": identifier.lower()},
-        )
-        data = response["connectionBySlug"]
-        if data:
-            for d in data["fields"]:
-                connection_fields[d.get("code")] = d.get("value")
-            connection_type = data["type"].upper()
-            return connection_fields, connection_type
-        return None
+        connection = OpenHexaClient().get_connection(workspace_slug=self.slug, connection_slug=identifier.lower())
+        if not connection:
+            return None
+        for f in connection.fields:
+            connection_fields[f["code"]] = f["value"]
+        connection_type = connection.type.upper()
+        return connection_fields, connection_type
 
     def get_connection_from_env(self, identifier: str) -> tuple[dict[str, str], str] | None:
         """Get a connection by its identifier from the environment variables."""

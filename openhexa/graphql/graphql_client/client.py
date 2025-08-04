@@ -41,6 +41,7 @@ from .delete_pipeline_version import (
     DeletePipelineVersionDeletePipelineVersion,
 )
 from .delete_webapp import DeleteWebapp, DeleteWebappDeleteWebapp
+from .get_connection import GetConnection, GetConnectionConnectionBySlug
 from .get_users import GetUsers, GetUsersUsers
 from .input_types import (
     AddToFavoritesInput,
@@ -990,3 +991,30 @@ class Client(BaseClient):
         )
         data = self.get_data(response)
         return DeleteDataset.model_validate(data).delete_dataset
+
+    def get_connection(
+        self, workspace_slug: str, connection_slug: str, **kwargs: Any
+    ) -> Optional[GetConnectionConnectionBySlug]:
+        query = gql(
+            """
+            query getConnection($workspaceSlug: String!, $connectionSlug: String!) {
+              connectionBySlug(workspaceSlug: $workspaceSlug, connectionSlug: $connectionSlug) {
+                __typename
+                type
+                fields {
+                  code
+                  value
+                }
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {
+            "workspaceSlug": workspace_slug,
+            "connectionSlug": connection_slug,
+        }
+        response = self.execute(
+            query=query, operation_name="getConnection", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return GetConnection.model_validate(data).connection_by_slug

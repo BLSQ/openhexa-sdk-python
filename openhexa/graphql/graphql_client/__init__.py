@@ -210,6 +210,11 @@ from .exceptions import (
     GraphQLClientHttpError,
     GraphQLClientInvalidResponseError,
 )
+from .get_connection import (
+    GetConnection,
+    GetConnectionConnectionBySlug,
+    GetConnectionConnectionBySlugFields,
+)
 from .get_users import GetUsers, GetUsersUsers, GetUsersUsersAvatar
 from .input_types import (
     AddPipelineOutputInput,
@@ -568,6 +573,9 @@ __all__ = [
     "GeneratePipelineWebhookUrlInput",
     "GenerateWorkspaceTokenError",
     "GenerateWorkspaceTokenInput",
+    "GetConnection",
+    "GetConnectionConnectionBySlug",
+    "GetConnectionConnectionBySlugFields",
     "GetUsers",
     "GetUsersUsers",
     "GetUsersUsersAvatar",
