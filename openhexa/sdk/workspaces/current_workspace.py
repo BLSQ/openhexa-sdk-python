@@ -197,7 +197,7 @@ class CurrentWorkspace:
         if not connection:
             return None
         for f in connection.fields:
-            connection_fields[f["code"]] = f["value"]
+            connection_fields[f.code] = f.value
         connection_type = connection.type.upper()
         return connection_fields, connection_type
 
