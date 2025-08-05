@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.9.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.8.0...v2.9.0) (2025-08-05)
+
+
+### Features
+
+* prioritize connections from env ([#297](https://github.com/BLSQ/openhexa-sdk-python/issues/297)) ([f3ed79a](https://github.com/BLSQ/openhexa-sdk-python/commit/f3ed79a3ce003401331ebbdbaee6ac03831121c1))
+
+
+### Bug Fixes
+
+* running pipeline locally with custom image (HEXA-1337) ([172ecf6](https://github.com/BLSQ/openhexa-sdk-python/commit/172ecf6d9f8edfb8672559d0d767f1f1adec8d0a))
+
 ## [2.8.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.7.2...v2.8.0) (2025-06-30)
 
 
