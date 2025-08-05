@@ -1,7 +1,7 @@
 """SDK package."""
 
 from .datasets import Dataset
-from .pipelines import current_run, parameter, pipeline
+from .pipelines import current_pipeline, current_run, parameter, pipeline
 from .pipelines.parameter import DHIS2Widget, IASOWidget
 from .utils import OpenHexaClient
 from .workspaces import workspace
@@ -17,6 +17,7 @@ from .workspaces.connection import (
 __all__ = [
     "workspace",
     "pipeline",
+    "current_pipeline",
     "parameter",
     "current_run",
     "DHIS2Connection",
