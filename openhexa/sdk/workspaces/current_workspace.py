@@ -78,49 +78,7 @@ class CurrentWorkspace:
         """
         if not self._connected:
             return None
-        try:
-            workspace_data = OpenHexaClient().workspace(slug=self.slug)
-            return workspace_data.configuration
-        except KeyError:
-            raise WorkspaceConfigError("The workspace configuration is not available in this environment.")
-
-    def get_config(self, key: str, default=None) -> str | dict | None:
-        """Get a specific configuration value by key.
-
-        Parameters
-        ----------
-        key : str
-            The configuration key to retrieve
-        default : any, optional
-            Default value to return if key is not found
-
-        Returns
-        -------
-        str | dict | None
-            The configuration value, or default if key is not found
-        """
-        config = self.configuration
-        if config is None:
-            return default
-        return config.get(key, default)
-
-    def has_config(self, key: str) -> bool:
-        """Check if a configuration key exists.
-
-        Parameters
-        ----------
-        key : str
-            The configuration key to check
-
-        Returns
-        -------
-        bool
-            True if the key exists in configuration, False otherwise
-        """
-        config = self.configuration
-        if config is None:
-            return False
-        return key in config
+        return OpenHexaClient().workspace(slug=self.slug).configuration
 
     @property
     def database_host(self) -> str:

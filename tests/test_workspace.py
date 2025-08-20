@@ -557,34 +557,3 @@ class TestConnectedWorkspace:
         with mock.patch("openhexa.sdk.workspaces.current_workspace.OpenHexaClient") as mock_client:
             mock_client.return_value.workspace.return_value = mock_workspace_data
             assert workspace.configuration == mock_config
-
-    def test_workspace_get_config(self, workspace):
-        mock_config = {
-            "api_url": "https://api.example.com",
-            "debug_mode": "true",
-            "database_config": {"host": "localhost", "port": 5432},
-        }
-
-        mock_workspace_data = mock.Mock()
-        mock_workspace_data.configuration = mock_config
-
-        with mock.patch("openhexa.sdk.workspaces.current_workspace.OpenHexaClient") as mock_client:
-            mock_client.return_value.workspace.return_value = mock_workspace_data
-
-            assert workspace.get_config("api_url") == "https://api.example.com"
-            assert workspace.get_config("database_config") == {"host": "localhost", "port": 5432}
-            assert workspace.get_config("missing_key", "default_value") == "default_value"
-            assert workspace.get_config("missing_key") is None
-
-    def test_workspace_has_config(self, workspace):
-        mock_config = {"api_url": "https://api.example.com", "debug_mode": "true"}
-
-        mock_workspace_data = mock.Mock()
-        mock_workspace_data.configuration = mock_config
-
-        with mock.patch("openhexa.sdk.workspaces.current_workspace.OpenHexaClient") as mock_client:
-            mock_client.return_value.workspace.return_value = mock_workspace_data
-
-            assert workspace.has_config("api_url") is True
-            assert workspace.has_config("debug_mode") is True
-            assert workspace.has_config("missing_key") is False
