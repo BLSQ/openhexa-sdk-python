@@ -44,7 +44,7 @@ plugins = ["ariadne_codegen.contrib.shorter_results.ShorterResultsPlugin"]
 dev = [
     "ruff>=0.7.0,<0.8.0",
     "pytest>=8.3,<9",
-    "build>=0.10,<1.3",
+    "build>=1.3,<2",
     "pytest-cov>=6,<7",
     "pre-commit",
     "httmock",
