@@ -543,3 +543,17 @@ class TestConnectedWorkspace:
             assert workspace.dhis2_connection("polio-123").url == url
             assert workspace.dhis2_connection("Polio-123").url == url
             assert workspace.dhis2_connection("POLIO-123").url == url
+
+    def test_workspace_configuration(self, workspace):
+        mock_config = {
+            "api_url": "https://api.example.com",
+            "debug_mode": "true",
+            "database_config": {"host": "localhost", "port": 5432},
+        }
+
+        mock_workspace_data = mock.Mock()
+        mock_workspace_data.configuration = mock_config
+
+        with mock.patch("openhexa.sdk.workspaces.current_workspace.OpenHexaClient") as mock_client:
+            mock_client.return_value.workspace.return_value = mock_workspace_data
+            assert workspace.configuration == mock_config

@@ -200,6 +200,7 @@ query Workspace($slug: String!) {
     name
     description
     dockerImage
+    configuration
     countries {
       code
       flag

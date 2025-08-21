@@ -69,6 +69,18 @@ class CurrentWorkspace:
             raise WorkspaceConfigError("The workspace countries are not available in this environment.")
 
     @property
+    def configuration(self) -> dict[str, str | dict] | None:
+        """The workspace configuration as a dictionary.
+
+        Returns a dictionary containing workspace configuration as key-value pairs,
+        where keys are strings and values can be either strings or JSON objects.
+        Returns None if no configuration is available or if not connected to the API.
+        """
+        if not self._connected:
+            return None
+        return OpenHexaClient().workspace(slug=self.slug).configuration
+
+    @property
     def database_host(self) -> str:
         """The workspace database host."""
         try:

@@ -4090,6 +4090,8 @@ Represents a workspace. A workspace is a shared environment where users can coll
 type Workspace {
   """File storage of the workspace represented as a bucket"""
   bucket: Bucket!
+  """JSON field containing workspace configuration as key-value pairs"""
+  configuration: JSON
   connections: [Connection!]!
   countries: [Country!]!
   createdAt: DateTime!

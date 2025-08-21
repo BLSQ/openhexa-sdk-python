@@ -558,6 +558,7 @@ class Client(BaseClient):
                 name
                 description
                 dockerImage
+                configuration
                 countries {
                   code
                   flag
