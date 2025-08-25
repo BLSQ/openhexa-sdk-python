@@ -381,6 +381,7 @@ from .upgrade_pipeline_version_from_template import (
     UpgradePipelineVersionFromTemplate,
     UpgradePipelineVersionFromTemplateUpgradePipelineVersionFromTemplate,
 )
+from .upload_pipeline import UploadPipeline, UploadPipelineUploadPipeline
 from .workspace import (
     Workspace,
     WorkspaceWorkspace,
@@ -731,7 +732,9 @@ __all__ = [
     "UpgradePipelineVersionFromTemplateInput",
     "UpgradePipelineVersionFromTemplateUpgradePipelineVersionFromTemplate",
     "Upload",
+    "UploadPipeline",
     "UploadPipelineInput",
+    "UploadPipelineUploadPipeline",
     "VerifyDeviceError",
     "VerifyDeviceInput",
     "Workspace",

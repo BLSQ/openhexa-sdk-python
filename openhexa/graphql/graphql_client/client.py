@@ -68,6 +68,7 @@ from .input_types import (
     UpdateWebappInput,
     UpdateWorkspaceInput,
     UpgradePipelineVersionFromTemplateInput,
+    UploadPipelineInput,
 )
 from .invite_workspace_member import (
     InviteWorkspaceMember,
@@ -88,6 +89,7 @@ from .upgrade_pipeline_version_from_template import (
     UpgradePipelineVersionFromTemplate,
     UpgradePipelineVersionFromTemplateUpgradePipelineVersionFromTemplate,
 )
+from .upload_pipeline import UploadPipeline, UploadPipelineUploadPipeline
 from .workspace import Workspace, WorkspaceWorkspace
 from .workspaces import Workspaces, WorkspacesWorkspaces
 
@@ -246,6 +248,26 @@ class Client(BaseClient):
         )
         data = self.get_data(response)
         return CreatePipeline.model_validate(data).create_pipeline
+
+    def upload_pipeline(
+        self, input: UploadPipelineInput, **kwargs: Any
+    ) -> UploadPipelineUploadPipeline:
+        query = gql(
+            """
+            mutation uploadPipeline($input: UploadPipelineInput!) {
+              uploadPipeline(input: $input) {
+                success
+                errors
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"input": input}
+        response = self.execute(
+            query=query, operation_name="uploadPipeline", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return UploadPipeline.model_validate(data).upload_pipeline
 
     def delete_pipeline(
         self, input: DeletePipelineInput, **kwargs: Any
