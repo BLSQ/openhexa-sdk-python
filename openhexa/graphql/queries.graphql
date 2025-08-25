@@ -91,6 +91,13 @@ mutation CreatePipeline($input: CreatePipelineInput!) {
   }
 }
 
+mutation uploadPipeline($input: UploadPipelineInput!) {
+    uploadPipeline(input: $input) {
+        success
+        errors
+    }
+}
+
 mutation DeletePipeline($input: DeletePipelineInput!) {
   deletePipeline(input: $input) {
     success
