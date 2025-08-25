@@ -1,5 +1,21 @@
 # Changelog
 
+## [2.9.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.8.0...v2.9.0) (2025-08-25)
+
+
+### Features
+
+* **graphql:** support uploadPipeline mutation ([#302](https://github.com/BLSQ/openhexa-sdk-python/issues/302)) ([9dd13c5](https://github.com/BLSQ/openhexa-sdk-python/commit/9dd13c5b5854b7e0c267173d6f8b82dc8fceb73e))
+* prioritize connections from env ([#297](https://github.com/BLSQ/openhexa-sdk-python/issues/297)) ([f3ed79a](https://github.com/BLSQ/openhexa-sdk-python/commit/f3ed79a3ce003401331ebbdbaee6ac03831121c1))
+* **workspace:** add method to expose configuration property from workspace ([#299](https://github.com/BLSQ/openhexa-sdk-python/issues/299)) ([9d5a425](https://github.com/BLSQ/openhexa-sdk-python/commit/9d5a4251ff3bf4412d4ee9901924342634272c7f))
+
+
+### Bug Fixes
+
+* add conda build to ci workflow ([#293](https://github.com/BLSQ/openhexa-sdk-python/issues/293)) ([7ae0aad](https://github.com/BLSQ/openhexa-sdk-python/commit/7ae0aad53b666786b6f2f98f3c2a7dabf7463c98))
+* **deps:** update dependency build to &gt;=1.3,&lt;2 ([#296](https://github.com/BLSQ/openhexa-sdk-python/issues/296)) ([cc91e25](https://github.com/BLSQ/openhexa-sdk-python/commit/cc91e25bf1e4b82a03b875ea75ce705d3211da2f))
+* running pipeline locally with custom image (HEXA-1337) ([172ecf6](https://github.com/BLSQ/openhexa-sdk-python/commit/172ecf6d9f8edfb8672559d0d767f1f1adec8d0a))
+
 ## [2.8.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.7.2...v2.8.0) (2025-06-30)
 
 
