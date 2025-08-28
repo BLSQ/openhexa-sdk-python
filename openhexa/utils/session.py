@@ -10,9 +10,11 @@ def create_requests_session(
     retries=3,
     backoff_factor=0.3,
     status_forcelist=(500, 502, 504),
+    verify=True,
 ) -> Session:
     """Return a Session object with retry capability."""
     session = requests.Session()
+    session.verify = verify
     retry = Retry(
         total=retries,
         read=retries,

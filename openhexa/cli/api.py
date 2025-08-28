@@ -110,22 +110,22 @@ def get_library_versions() -> tuple[str, str]:
         return installed_version, installed_version
 
 
-def _detect_graphql_breaking_changes_if_needed(token):
+def _detect_graphql_breaking_changes_if_needed(token, no_verify=False):
     """Detect breaking changes if not done recently between the schema referenced in the SDK and the server using graphql-core."""
     ONE_HOUR = 60 * 60
     now_timestamp = int(datetime.now().timestamp())
     if not settings.last_breaking_change_check or now_timestamp - settings.last_breaking_change_check > ONE_HOUR:
-        _detect_graphql_breaking_changes(token)
+        _detect_graphql_breaking_changes(token, no_verify=no_verify)
         settings.last_breaking_change_check = now_timestamp
 
 
-def _detect_graphql_breaking_changes(token):
+def _detect_graphql_breaking_changes(token, no_verify=False):
     """Detect breaking changes between the schema referenced in the SDK and the server using graphql-core."""
     stored_schema_obj = build_schema(
         (Path(__file__).parent.parent / "graphql" / "schema.generated.graphql").open().read()
     )
     server_schema_obj = build_client_schema(
-        _query_graphql(get_introspection_query(input_value_deprecation=True), token=token)
+        _query_graphql(get_introspection_query(input_value_deprecation=True), token=token, no_verify=no_verify)
     )
 
     breaking_changes = find_breaking_changes(stored_schema_obj, server_schema_obj)
@@ -145,13 +145,13 @@ def _detect_graphql_breaking_changes(token):
         )
 
 
-def graphql(query: str, variables=None, token=None):
+def graphql(query: str, variables=None, token=None, no_verify=False):
     """Check that there is no breaking change and perform a GraphQL request."""
-    _detect_graphql_breaking_changes_if_needed(token)
-    return _query_graphql(query, variables, token)
+    _detect_graphql_breaking_changes_if_needed(token, no_verify=no_verify)
+    return _query_graphql(query, variables, token, no_verify=no_verify)
 
 
-def _query_graphql(query: str, variables=None, token=None):
+def _query_graphql(query: str, variables=None, token=None, no_verify=False):
     """Perform a GraphQL request."""
     url = settings.api_url + "/graphql/"
     if token is None:
@@ -167,7 +167,7 @@ def _query_graphql(query: str, variables=None, token=None):
         click.echo(f"Query: {query}")
         click.echo(f"Variables: {variables}")
 
-    session = create_requests_session()
+    session = create_requests_session(verify=not no_verify)
 
     response = session.post(
         url,
@@ -201,7 +201,7 @@ def get_skeleton_dir():
     return Path(__file__).parent / "skeleton"
 
 
-def get_workspace(slug: str, token: str):
+def get_workspace(slug: str, token: str, no_verify: bool = False):
     """Get a single workspace."""
     return graphql(
         """
@@ -214,6 +214,7 @@ def get_workspace(slug: str, token: str):
             """,
         {"slug": slug},
         token,
+        no_verify=no_verify,
     )["workspace"]
 
 
