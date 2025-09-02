@@ -8,6 +8,7 @@ from dataclasses import fields, make_dataclass
 from warnings import warn
 
 from openhexa.graphql.graphql_client import WorkspaceWorkspaceCountries
+from openhexa.graphql.graphql_client.input_types import UpdateWorkspaceInput
 from openhexa.utils import stringcase
 
 from ..datasets import Dataset
@@ -79,6 +80,46 @@ class CurrentWorkspace:
         if not self._connected:
             return None
         return OpenHexaClient().workspace(slug=self.slug).configuration
+
+    @configuration.setter
+    def configuration(self, value: dict[str, str | dict]) -> None:
+        """Set the workspace configuration.
+
+        Parameters
+        ----------
+        value : dict[str, str | dict]
+            The configuration dictionary to set for the workspace.
+            Keys must be strings and values can be strings or JSON objects.
+
+        Raises
+        ------
+        WorkspaceConfigError
+            If not connected to the API or if the update fails.
+
+        Examples
+        --------
+        >>> workspace.configuration = {
+        ...     "api_url": "https://api.example.com",
+        ...     "debug_mode": "true",
+        ...     "SNT_CONFIG": "VERY_GOOD_CONFIG"
+        ... }
+        """
+        if not self._connected:
+            raise WorkspaceConfigError("Cannot update configuration: not connected to the API.")
+
+        try:
+            client = OpenHexaClient()
+
+            input_data = UpdateWorkspaceInput(slug=self.slug, configuration=value)
+            result = client.update_workspace(input=input_data)
+
+            if not result.success:
+                raise WorkspaceConfigError("Failed to update workspace configuration.")
+
+        except Exception as e:
+            if isinstance(e, WorkspaceConfigError):
+                raise
+            raise WorkspaceConfigError(f"Failed to update workspace configuration: {str(e)}")
 
     @property
     def database_host(self) -> str:

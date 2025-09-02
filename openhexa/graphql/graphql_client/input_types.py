@@ -609,6 +609,7 @@ class UpdateWebappInput(BaseModel):
 
 
 class UpdateWorkspaceInput(BaseModel):
+    configuration: Optional[Any] = None
     countries: Optional[List["CountryInput"]] = None
     description: Optional[str] = None
     docker_image: Optional[str] = Field(alias="dockerImage", default=None)

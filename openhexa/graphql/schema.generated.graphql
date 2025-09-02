@@ -3903,6 +3903,7 @@ enum UpdateWorkspaceError {
 
 """Represents the input for updating a workspace."""
 input UpdateWorkspaceInput {
+  configuration: JSON
   countries: [CountryInput!]
   description: String
   dockerImage: String
