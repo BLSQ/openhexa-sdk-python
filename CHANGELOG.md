@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.10.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.9.0...v2.10.0) (2025-09-02)
+
+
+### Features
+
+* **workspace:** PATHWAYS-634 update worksapce settings ([#304](https://github.com/BLSQ/openhexa-sdk-python/issues/304)) ([3c38fe0](https://github.com/BLSQ/openhexa-sdk-python/commit/3c38fe00ef2268b4904b1266e34b2d914784d345))
+
 ## [2.9.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.8.0...v2.9.0) (2025-08-25)
 
 
