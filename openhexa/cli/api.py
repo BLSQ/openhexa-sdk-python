@@ -37,7 +37,6 @@ def handle_ssl_error(e):
             "SSL certificate verification failed. "
             "If you want to disable SSL verification, set the environment variable: HEXA_VERIFY_SSL=false"
         )
-    raise
 
 
 class InvalidDefinitionError(Exception):
@@ -794,11 +793,7 @@ class OpenHexaClient(BaseOpenHexaClient):
         try:
             response = super().execute(query=query, **kwargs)
         except Exception as e:
-            if "CERTIFICATE_VERIFY_FAILED" in str(e):
-                raise GraphQLError(
-                    "SSL certificate verification failed. "
-                    "If you want to disable SSL verification, set the environment variable: HEXA_VERIFY_SSL=false"
-                )
+            handle_ssl_error(e)
             raise
 
         if settings.debug:
@@ -813,12 +808,8 @@ class OpenHexaClient(BaseOpenHexaClient):
         try:
             data = super().get_data(response)
         except Exception as e:
-            if "CERTIFICATE_VERIFY_FAILED" in str(e):
-                raise GraphQLError(
-                    "SSL certificate verification failed. "
-                    "If you want to disable SSL verification, set the environment variable: HEXA_VERIFY_SSL=false"
-                )
-            elif "Resolver requires an authenticated user" in str(e):
+            handle_ssl_error(e)
+            if "Resolver requires an authenticated user" in str(e):
                 raise InvalidTokenError("No or invalid token found for workspace, please check your configuration.")
             raise
         return data
