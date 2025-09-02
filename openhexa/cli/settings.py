@@ -51,6 +51,14 @@ class Settings:
         return os.getenv("DEBUG") or os.getenv("HEXA_DEBUG")
 
     @property
+    def verify_ssl(self):
+        """Return the SSL verification flag from environment variables."""
+        env_value = os.getenv("HEXA_VERIFY_SSL")
+        if env_value is None:
+            return True
+        return env_value.lower() in ("1", "true", "yes", "on")
+
+    @property
     def api_url(self):
         """Return the API URL from the settings file or environment variables."""
         url_from_env = os.getenv("HEXA_API_URL") or os.getenv("HEXA_SERVER_URL")

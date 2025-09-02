@@ -93,18 +93,13 @@ def workspaces(ctx):
     confirmation_prompt=False,
     envvar="HEXA_TOKEN",
 )
-@click.option(
-    "--no-verify",
-    is_flag=True,
-    help="Disable SSL certificate verification",
-)
-def workspaces_add(slug, token, no_verify):
+def workspaces_add(slug, token):
     """Add a workspace to the configuration and activate it. The access token is required to access the workspace."""
     if slug in settings.workspaces:
         click.echo(f"Workspace {slug} already exists. We will only update its token.")
     else:
         click.echo(f"Adding workspace {slug}")
-    if get_workspace(slug, token, no_verify=no_verify):
+    if get_workspace(slug, token):
         settings.add_workspace(slug, token)
     else:
         _terminate(
