@@ -1,5 +1,6 @@
 """CLI module, with click."""
 
+import functools
 import json
 import signal
 import urllib
@@ -34,6 +35,22 @@ from openhexa.cli.api import (
 from openhexa.cli.settings import settings, setup_logging
 from openhexa.sdk.pipelines.exceptions import PipelineNotFound
 from openhexa.sdk.pipelines.runtime import get_pipeline
+
+
+def handle_ssl_errors(func):
+    """Handle SSL certificate verification errors in CLI commands."""
+
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except GraphQLError as e:
+            if "SSL certificate verification failed" in str(e):
+                click.echo(click.style(str(e), fg="red"), err=True)
+                raise click.Abort()
+            raise
+
+    return wrapper
 
 
 def validate_url(ctx, param, value):
@@ -94,24 +111,20 @@ def workspaces(ctx):
     confirmation_prompt=False,
     envvar="HEXA_TOKEN",
 )
+@handle_ssl_errors
 def workspaces_add(slug, token):
     """Add a workspace to the configuration and activate it. The access token is required to access the workspace."""
     if slug in settings.workspaces:
         click.echo(f"Workspace {slug} already exists. We will only update its token.")
     else:
         click.echo(f"Adding workspace {slug}")
-    try:
-        if get_workspace(slug, token):
-            settings.add_workspace(slug, token)
-        else:
-            _terminate(
-                f"Workspace {slug} does not exist on {settings.api_url}.",
-                err=True,
-            )
-    except GraphQLError as e:
-        if "SSL certificate verification failed" in str(e):
-            _terminate(str(e), err=True)
-        raise
+    if get_workspace(slug, token):
+        settings.add_workspace(slug, token)
+    else:
+        _terminate(
+            f"Workspace {slug} does not exist on {settings.api_url}.",
+            err=True,
+        )
 
 
 @workspaces.command(name="activate")
@@ -368,6 +381,7 @@ def select_pipeline(workspace_pipelines, number_of_pages: int, pipeline):
     prompt_required=False,
 )
 @click.option("--yes", is_flag=True, help="Skip confirmation")
+@handle_ssl_errors
 def pipelines_push(
     path: str,
     code: str = None,
@@ -402,14 +416,9 @@ def pipelines_push(
     except Exception as e:
         _terminate(f'❌ Error while importing pipeline: "{e}"', exception=e, err=True)
     else:
-        try:
-            pipeline_pages = get_pipelines_pages(name=pipeline.name)
-            workspace_pipelines = pipeline_pages["items"]
-            number_of_pages = pipeline_pages["totalPages"]
-        except GraphQLError as e:
-            if "SSL certificate verification failed" in str(e):
-                _terminate(str(e), err=True)
-            raise
+        pipeline_pages = get_pipelines_pages(name=pipeline.name)
+        workspace_pipelines = pipeline_pages["items"]
+        number_of_pages = pipeline_pages["totalPages"]
         if settings.debug:
             click.echo(workspace_pipelines)
 
@@ -602,17 +611,13 @@ def pipelines_run(
 
 
 @pipelines.command("list")
+@handle_ssl_errors
 def pipelines_list():
     """List all the remote pipelines of the current workspace."""
     if settings.current_workspace is None:
         _terminate("No workspace activated", err=True)
 
-    try:
-        workspace_pipelines = OpenHexaClient().pipelines(workspace_slug=settings.current_workspace).items
-    except GraphQLError as e:
-        if "SSL certificate verification failed" in str(e):
-            _terminate(str(e), err=True)
-        raise
+    workspace_pipelines = OpenHexaClient().pipelines(workspace_slug=settings.current_workspace).items
     if len(workspace_pipelines) == 0:
         click.echo(f"No pipelines in workspace {settings.current_workspace}")
         return
