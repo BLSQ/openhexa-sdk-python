@@ -30,6 +30,16 @@ from openhexa.sdk.pipelines.runtime import get_pipeline
 from openhexa.utils import create_requests_session, stringcase
 
 
+def handle_ssl_error(e):
+    """Handle SSL certificate verification errors with helpful message."""
+    if "SSL certificate verification failed" in str(e) or "CERTIFICATE_VERIFY_FAILED" in str(e):
+        raise GraphQLError(
+            "SSL certificate verification failed. "
+            "If you want to disable SSL verification, set the environment variable: HEXA_VERIFY_SSL=false"
+        )
+    raise
+
+
 class InvalidDefinitionError(Exception):
     """Raised whenever pipeline parameters and/or pipeline options are incompatible."""
 
@@ -785,7 +795,7 @@ class OpenHexaClient(BaseOpenHexaClient):
             response = super().execute(query=query, **kwargs)
         except Exception as e:
             if "CERTIFICATE_VERIFY_FAILED" in str(e):
-                raise Exception(
+                raise GraphQLError(
                     "SSL certificate verification failed. "
                     "If you want to disable SSL verification, set the environment variable: HEXA_VERIFY_SSL=false"
                 )
@@ -804,7 +814,7 @@ class OpenHexaClient(BaseOpenHexaClient):
             data = super().get_data(response)
         except Exception as e:
             if "CERTIFICATE_VERIFY_FAILED" in str(e):
-                raise Exception(
+                raise GraphQLError(
                     "SSL certificate verification failed. "
                     "If you want to disable SSL verification, set the environment variable: HEXA_VERIFY_SSL=false"
                 )

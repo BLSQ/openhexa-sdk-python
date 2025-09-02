@@ -402,9 +402,14 @@ def pipelines_push(
     except Exception as e:
         _terminate(f'❌ Error while importing pipeline: "{e}"', exception=e, err=True)
     else:
-        pipeline_pages = get_pipelines_pages(name=pipeline.name)
-        workspace_pipelines = pipeline_pages["items"]
-        number_of_pages = pipeline_pages["totalPages"]
+        try:
+            pipeline_pages = get_pipelines_pages(name=pipeline.name)
+            workspace_pipelines = pipeline_pages["items"]
+            number_of_pages = pipeline_pages["totalPages"]
+        except GraphQLError as e:
+            if "SSL certificate verification failed" in str(e):
+                _terminate(str(e), err=True)
+            raise
         if settings.debug:
             click.echo(workspace_pipelines)
 
@@ -602,7 +607,12 @@ def pipelines_list():
     if settings.current_workspace is None:
         _terminate("No workspace activated", err=True)
 
-    workspace_pipelines = OpenHexaClient().pipelines(workspace_slug=settings.current_workspace).items
+    try:
+        workspace_pipelines = OpenHexaClient().pipelines(workspace_slug=settings.current_workspace).items
+    except GraphQLError as e:
+        if "SSL certificate verification failed" in str(e):
+            _terminate(str(e), err=True)
+        raise
     if len(workspace_pipelines) == 0:
         click.echo(f"No pipelines in workspace {settings.current_workspace}")
         return
