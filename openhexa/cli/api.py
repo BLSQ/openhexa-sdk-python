@@ -169,14 +169,22 @@ def _query_graphql(query: str, variables=None, token=None):
 
     session = create_requests_session(verify=settings.verify_ssl)
 
-    response = session.post(
-        url,
-        headers={
-            "User-Agent": f"openhexa-cli/{version('openhexa.sdk')}",
-            "Authorization": f"Bearer {token}",
-        },
-        json={"query": query, "variables": variables},
-    )
+    try:
+        response = session.post(
+            url,
+            headers={
+                "User-Agent": f"openhexa-cli/{version('openhexa.sdk')}",
+                "Authorization": f"Bearer {token}",
+            },
+            json={"query": query, "variables": variables},
+        )
+    except requests.exceptions.SSLError as e:
+        if "CERTIFICATE_VERIFY_FAILED" in str(e):
+            raise GraphQLError(
+                "SSL certificate verification failed. "
+                "If you want to disable SSL verification, set the environment variable: HEXA_VERIFY_SSL=false"
+            )
+        raise GraphQLError(str(e))
     try:
         response.raise_for_status()
     except requests.exceptions.HTTPError as e:
@@ -773,7 +781,15 @@ class OpenHexaClient(BaseOpenHexaClient):
             variables = kwargs.get("variables", {})
             click.echo(f"Variables: {variables}")
 
-        response = super().execute(query=query, **kwargs)
+        try:
+            response = super().execute(query=query, **kwargs)
+        except Exception as e:
+            if "CERTIFICATE_VERIFY_FAILED" in str(e):
+                raise Exception(
+                    "SSL certificate verification failed. "
+                    "If you want to disable SSL verification, set the environment variable: HEXA_VERIFY_SSL=false"
+                )
+            raise
 
         if settings.debug:
             click.echo("")
@@ -787,7 +803,12 @@ class OpenHexaClient(BaseOpenHexaClient):
         try:
             data = super().get_data(response)
         except Exception as e:
-            if "Resolver requires an authenticated user" in str(e):
+            if "CERTIFICATE_VERIFY_FAILED" in str(e):
+                raise Exception(
+                    "SSL certificate verification failed. "
+                    "If you want to disable SSL verification, set the environment variable: HEXA_VERIFY_SSL=false"
+                )
+            elif "Resolver requires an authenticated user" in str(e):
                 raise InvalidTokenError("No or invalid token found for workspace, please check your configuration.")
             raise
         return data

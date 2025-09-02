@@ -12,6 +12,7 @@ import click
 
 from openhexa.cli.api import (
     DockerError,
+    GraphQLError,
     InvalidDefinitionError,
     NoActiveWorkspaceError,
     OpenHexaClient,
@@ -99,13 +100,18 @@ def workspaces_add(slug, token):
         click.echo(f"Workspace {slug} already exists. We will only update its token.")
     else:
         click.echo(f"Adding workspace {slug}")
-    if get_workspace(slug, token):
-        settings.add_workspace(slug, token)
-    else:
-        _terminate(
-            f"Workspace {slug} does not exist on {settings.api_url}.",
-            err=True,
-        )
+    try:
+        if get_workspace(slug, token):
+            settings.add_workspace(slug, token)
+        else:
+            _terminate(
+                f"Workspace {slug} does not exist on {settings.api_url}.",
+                err=True,
+            )
+    except GraphQLError as e:
+        if "SSL certificate verification failed" in str(e):
+            _terminate(str(e), err=True)
+        raise
 
 
 @workspaces.command(name="activate")

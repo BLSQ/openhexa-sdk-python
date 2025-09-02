@@ -2,6 +2,7 @@
 
 
 import requests
+import urllib3
 from requests import Session
 from requests.adapters import HTTPAdapter
 from urllib3.util import Retry
@@ -16,6 +17,10 @@ def create_requests_session(
     """Return a Session object with retry capability."""
     session = requests.Session()
     session.verify = verify
+
+    if not verify:
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
     retry = Retry(
         total=retries,
         read=retries,
