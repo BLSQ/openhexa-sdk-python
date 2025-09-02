@@ -42,4 +42,5 @@ def settings(monkeypatch):
     settings_mock.debug = False
     settings_mock.access_token = "token"
     settings_mock.log_level = LogLevel.INFO
+    settings_mock.verify_ssl = True
     return settings_mock

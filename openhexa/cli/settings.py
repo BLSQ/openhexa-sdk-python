@@ -56,7 +56,7 @@ class Settings:
         env_value = os.getenv("HEXA_VERIFY_SSL")
         if env_value is None:
             return True
-        return env_value.lower() in ("1", "true", "yes", "on")
+        return env_value.lower() not in ("0", "false")
 
     @property
     def api_url(self):
