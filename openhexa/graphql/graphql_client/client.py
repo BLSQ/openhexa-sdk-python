@@ -677,6 +677,7 @@ class Client(BaseClient):
                   slug
                   name
                   description
+                  configuration
                   countries {
                     code
                     alpha3

@@ -262,6 +262,7 @@ mutation UpdateWorkspace($input: UpdateWorkspaceInput!) {
       slug
       name
       description
+      configuration
       countries {
         code
         alpha3

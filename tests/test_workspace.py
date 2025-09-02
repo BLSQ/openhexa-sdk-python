@@ -557,3 +557,24 @@ class TestConnectedWorkspace:
         with mock.patch("openhexa.sdk.workspaces.current_workspace.OpenHexaClient") as mock_client:
             mock_client.return_value.workspace.return_value = mock_workspace_data
             assert workspace.configuration == mock_config
+
+    def test_workspace_configuration_setter(self, workspace):
+        """Test setting workspace configuration through property setter."""
+        new_config = {
+            "api_url": "https://new-api.example.com",
+            "environment": "development",
+            "features": {"feature1": True, "feature2": False},
+        }
+
+        mock_result = mock.Mock()
+        mock_result.success = True
+
+        with mock.patch("openhexa.sdk.workspaces.current_workspace.OpenHexaClient") as mock_client:
+            mock_client.return_value.update_workspace.return_value = mock_result
+
+            workspace.configuration = new_config
+
+            mock_client.return_value.update_workspace.assert_called_once()
+            call_args = mock_client.return_value.update_workspace.call_args[1]["input"]
+            assert call_args.slug == workspace.slug
+            assert call_args.configuration == new_config
