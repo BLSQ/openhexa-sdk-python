@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.11.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.10.0...v2.11.0) (2025-09-03)
+
+
+### Features
+
+* add HEXA_VERIFY_SSL option to disable ssl certificate (HEXA-1350) ([#303](https://github.com/BLSQ/openhexa-sdk-python/issues/303)) ([4908f07](https://github.com/BLSQ/openhexa-sdk-python/commit/4908f078283b478b3df005870cfa69d367bf6917))
+
 ## [2.10.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.9.0...v2.10.0) (2025-09-02)
 
 
