@@ -53,10 +53,7 @@ class Settings:
     @property
     def verify_ssl(self):
         """Return the SSL verification flag from environment variables."""
-        env_value = os.getenv("HEXA_VERIFY_SSL")
-        if env_value is None:
-            return True
-        return env_value.lower() not in ("0", "false")
+        return os.getenv("HEXA_VERIFY_SSL", "True").lower() not in ("0", "false")
 
     @property
     def api_url(self):

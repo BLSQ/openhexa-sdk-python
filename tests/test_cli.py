@@ -366,6 +366,8 @@ class CliRunTest(TestCase):
     def test_pipelines_list_ssl_error(self, mock_client_class):
         """Test the pipelines list command handles SSL errors gracefully."""
         mock_client = mock_client_class.return_value
+        mock_client.__enter__ = lambda self: mock_client
+        mock_client.__exit__ = lambda self, *args: None
         ssl_error = GraphQLError(
             "SSL certificate verification failed. If you want to disable SSL verification, set the environment variable: HEXA_VERIFY_SSL=false"
         )
