@@ -64,13 +64,9 @@ class OpenHexaClient(BaseOpenHexaClient):
             server_url: Server URL. If not provided, will use HEXA_SERVER_URL environment variable.
         """
         url = server_url or f"{os.environ['HEXA_SERVER_URL'].rstrip('/')}/graphql/"
-        token = token or os.environ.get("HEXA_TOKEN")
+        token = token or os.getenv("HEXA_TOKEN")
 
-        env_value = os.environ.get("HEXA_VERIFY_SSL")
-        if env_value is None:
-            verify_ssl = True
-        else:
-            verify_ssl = env_value.lower() not in ("0", "false")
+        verify_ssl = os.getenv("HEXA_VERIFY_SSL", "True").lower() not in ("0", "false")
 
         super().__init__(url=url, token=token, verify=verify_ssl)
 
