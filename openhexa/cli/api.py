@@ -187,11 +187,10 @@ def _query_graphql(query: str, variables=None, token=None):
             },
             json={"query": query, "variables": variables},
         )
+        response.raise_for_status()
     except requests.exceptions.SSLError as e:
         handle_ssl_error(e)
-        raise GraphQLError(str(e))
-    try:
-        response.raise_for_status()
+        raise
     except requests.exceptions.HTTPError as e:
         raise GraphQLError(str(e))
 
