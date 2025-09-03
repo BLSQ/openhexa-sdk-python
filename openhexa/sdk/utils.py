@@ -64,9 +64,11 @@ class OpenHexaClient(BaseOpenHexaClient):
             server_url: Server URL. If not provided, will use HEXA_SERVER_URL environment variable.
         """
         url = server_url or f"{os.environ['HEXA_SERVER_URL'].rstrip('/')}/graphql/"
-        token = token or os.environ.get("HEXA_TOKEN")
+        token = token or os.getenv("HEXA_TOKEN")
 
-        super().__init__(url=url, token=token)
+        verify_ssl = os.getenv("HEXA_VERIFY_SSL", "True").lower() not in ("0", "false")
+
+        super().__init__(url=url, token=token, verify=verify_ssl)
 
 
 class Iterator(metaclass=abc.ABCMeta):

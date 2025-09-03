@@ -1,5 +1,6 @@
 """CLI module, with click."""
 
+import functools
 import json
 import signal
 import urllib
@@ -12,6 +13,7 @@ import click
 
 from openhexa.cli.api import (
     DockerError,
+    GraphQLError,
     InvalidDefinitionError,
     NoActiveWorkspaceError,
     OpenHexaClient,
@@ -33,6 +35,22 @@ from openhexa.cli.api import (
 from openhexa.cli.settings import settings, setup_logging
 from openhexa.sdk.pipelines.exceptions import PipelineNotFound
 from openhexa.sdk.pipelines.runtime import get_pipeline
+
+
+def handle_ssl_errors(func):
+    """Handle SSL certificate verification errors in CLI commands."""
+
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except GraphQLError as e:
+            if "SSL certificate verification failed" in str(e):
+                click.echo(click.style(str(e), fg="red"), err=True)
+                raise click.Abort()
+            raise
+
+    return wrapper
 
 
 def validate_url(ctx, param, value):
@@ -93,6 +111,7 @@ def workspaces(ctx):
     confirmation_prompt=False,
     envvar="HEXA_TOKEN",
 )
+@handle_ssl_errors
 def workspaces_add(slug, token):
     """Add a workspace to the configuration and activate it. The access token is required to access the workspace."""
     if slug in settings.workspaces:
@@ -151,6 +170,7 @@ def config(ctx):
     if ctx.invoked_subcommand is None:
         click.echo("Debug: " + ("True" if settings.debug else "False"))
         click.echo(f"Backend URL: {settings.api_url}")
+        click.echo("SSL Verification: " + ("True" if settings.verify_ssl else "False"))
         click.echo(f"Current workspace: {settings.current_workspace}")
         click.echo("\nWorkspaces:")
         click.echo("\n".join(settings.workspaces.keys()))
@@ -362,6 +382,7 @@ def select_pipeline(workspace_pipelines, number_of_pages: int, pipeline):
     prompt_required=False,
 )
 @click.option("--yes", is_flag=True, help="Skip confirmation")
+@handle_ssl_errors
 def pipelines_push(
     path: str,
     code: str = None,
@@ -591,12 +612,14 @@ def pipelines_run(
 
 
 @pipelines.command("list")
+@handle_ssl_errors
 def pipelines_list():
     """List all the remote pipelines of the current workspace."""
     if settings.current_workspace is None:
         _terminate("No workspace activated", err=True)
 
-    workspace_pipelines = OpenHexaClient().pipelines(workspace_slug=settings.current_workspace).items
+    with OpenHexaClient() as client:
+        workspace_pipelines = client.pipelines(workspace_slug=settings.current_workspace).items
     if len(workspace_pipelines) == 0:
         click.echo(f"No pipelines in workspace {settings.current_workspace}")
         return

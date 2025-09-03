@@ -12,7 +12,15 @@ from zipfile import ZipFile
 import pytest
 from click.testing import CliRunner
 
-from openhexa.cli.cli import pipelines_download, pipelines_push, pipelines_run, select_pipeline, workspaces_add
+from openhexa.cli.api import GraphQLError
+from openhexa.cli.cli import (
+    pipelines_download,
+    pipelines_list,
+    pipelines_push,
+    pipelines_run,
+    select_pipeline,
+    workspaces_add,
+)
 from openhexa.sdk.pipelines import Pipeline
 
 python_file_name = "pipeline.py"
@@ -352,3 +360,20 @@ class CliRunTest(TestCase):
             mock_graphql.return_value = {"workspace": {"name": "test_workspace", "slug": "test_workspace_0000"}}
             result = self.runner.invoke(workspaces_add, ["test_workspace"], input="random_token \n")
             self.assertEqual(result.exit_code, 0)
+
+    @patch.dict(os.environ, {"HEXA_WORKSPACE": "test_workspace"})
+    @patch("openhexa.cli.cli.OpenHexaClient")
+    def test_pipelines_list_ssl_error(self, mock_client_class):
+        """Test the pipelines list command handles SSL errors gracefully."""
+        mock_client = mock_client_class.return_value
+        mock_client.__enter__ = lambda self: mock_client
+        mock_client.__exit__ = lambda self, *args: None
+        ssl_error = GraphQLError(
+            "SSL certificate verification failed. If you want to disable SSL verification, set the environment variable: HEXA_VERIFY_SSL=false"
+        )
+        mock_client.pipelines.side_effect = ssl_error
+
+        result = self.runner.invoke(pipelines_list)
+        self.assertEqual(result.exit_code, 1)
+        self.assertIn("SSL certificate verification failed", result.output)
+        self.assertIn("HEXA_VERIFY_SSL=false", result.output)

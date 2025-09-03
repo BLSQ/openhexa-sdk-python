@@ -30,6 +30,15 @@ from openhexa.sdk.pipelines.runtime import get_pipeline
 from openhexa.utils import create_requests_session, stringcase
 
 
+def handle_ssl_error(e):
+    """Handle SSL certificate verification errors with helpful message."""
+    if "SSL certificate verification failed" in str(e) or "CERTIFICATE_VERIFY_FAILED" in str(e):
+        raise GraphQLError(
+            "SSL certificate verification failed. "
+            "If you want to disable SSL verification, set the environment variable: HEXA_VERIFY_SSL=false"
+        )
+
+
 class InvalidDefinitionError(Exception):
     """Raised whenever pipeline parameters and/or pipeline options are incompatible."""
 
@@ -167,18 +176,21 @@ def _query_graphql(query: str, variables=None, token=None):
         click.echo(f"Query: {query}")
         click.echo(f"Variables: {variables}")
 
-    session = create_requests_session()
+    session = create_requests_session(verify=settings.verify_ssl)
 
-    response = session.post(
-        url,
-        headers={
-            "User-Agent": f"openhexa-cli/{version('openhexa.sdk')}",
-            "Authorization": f"Bearer {token}",
-        },
-        json={"query": query, "variables": variables},
-    )
     try:
+        response = session.post(
+            url,
+            headers={
+                "User-Agent": f"openhexa-cli/{version('openhexa.sdk')}",
+                "Authorization": f"Bearer {token}",
+            },
+            json={"query": query, "variables": variables},
+        )
         response.raise_for_status()
+    except requests.exceptions.SSLError as e:
+        handle_ssl_error(e)
+        raise
     except requests.exceptions.HTTPError as e:
         raise GraphQLError(str(e))
 
@@ -756,7 +768,7 @@ class OpenHexaClient(BaseOpenHexaClient):
 
     def __init__(self, token=None):
         """Initialize the OpenHexaClient with the OpenHexa API URL and headers."""
-        super().__init__(url=settings.api_url + "/graphql/", token=settings.access_token)
+        super().__init__(url=settings.api_url + "/graphql/", token=settings.access_token, verify=settings.verify_ssl)
 
     def execute(self, query, **kwargs):
         """Decorate parent execute method to log the GraphQL query and response."""
@@ -773,7 +785,11 @@ class OpenHexaClient(BaseOpenHexaClient):
             variables = kwargs.get("variables", {})
             click.echo(f"Variables: {variables}")
 
-        response = super().execute(query=query, **kwargs)
+        try:
+            response = super().execute(query=query, **kwargs)
+        except Exception as e:
+            handle_ssl_error(e)
+            raise
 
         if settings.debug:
             click.echo("")
@@ -787,6 +803,7 @@ class OpenHexaClient(BaseOpenHexaClient):
         try:
             data = super().get_data(response)
         except Exception as e:
+            handle_ssl_error(e)
             if "Resolver requires an authenticated user" in str(e):
                 raise InvalidTokenError("No or invalid token found for workspace, please check your configuration.")
             raise
