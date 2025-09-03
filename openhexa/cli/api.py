@@ -188,11 +188,7 @@ def _query_graphql(query: str, variables=None, token=None):
             json={"query": query, "variables": variables},
         )
     except requests.exceptions.SSLError as e:
-        if "CERTIFICATE_VERIFY_FAILED" in str(e):
-            raise GraphQLError(
-                "SSL certificate verification failed. "
-                "If you want to disable SSL verification, set the environment variable: HEXA_VERIFY_SSL=false"
-            )
+        handle_ssl_error(e)
         raise GraphQLError(str(e))
     try:
         response.raise_for_status()
