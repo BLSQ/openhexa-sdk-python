@@ -170,6 +170,7 @@ def config(ctx):
     if ctx.invoked_subcommand is None:
         click.echo("Debug: " + ("True" if settings.debug else "False"))
         click.echo(f"Backend URL: {settings.api_url}")
+        click.echo("SSL Verification: " + ("True" if settings.verify_ssl else "False"))
         click.echo(f"Current workspace: {settings.current_workspace}")
         click.echo("\nWorkspaces:")
         click.echo("\n".join(settings.workspaces.keys()))
