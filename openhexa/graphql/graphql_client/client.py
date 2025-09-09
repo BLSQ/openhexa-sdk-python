@@ -42,6 +42,7 @@ from .delete_pipeline_version import (
 )
 from .delete_webapp import DeleteWebapp, DeleteWebappDeleteWebapp
 from .get_connection import GetConnection, GetConnectionConnectionBySlug
+from .get_file_by_path import GetFileByPath, GetFileByPathGetFileByPath
 from .get_users import GetUsers, GetUsersUsers
 from .input_types import (
     AddToFavoritesInput,
@@ -1042,3 +1043,26 @@ class Client(BaseClient):
         )
         data = self.get_data(response)
         return GetConnection.model_validate(data).connection_by_slug
+
+    def get_file_by_path(
+        self, path: str, workspace_slug: str, **kwargs: Any
+    ) -> Optional[GetFileByPathGetFileByPath]:
+        query = gql(
+            """
+            query getFileByPath($path: String!, $workspaceSlug: String!) {
+              getFileByPath(workspaceSlug: $workspaceSlug, path: $path) {
+                key
+                name
+                path
+                size
+                type
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"path": path, "workspaceSlug": workspace_slug}
+        response = self.execute(
+            query=query, operation_name="getFileByPath", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return GetFileByPath.model_validate(data).get_file_by_path

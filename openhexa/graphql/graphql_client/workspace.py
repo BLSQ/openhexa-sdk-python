@@ -17,7 +17,7 @@ class WorkspaceWorkspace(BaseModel):
     name: str
     description: Optional[str]
     docker_image: Optional[str] = Field(alias="dockerImage")
-    configuration: Optional[Any]
+    configuration: Any
     countries: List["WorkspaceWorkspaceCountries"]
     permissions: "WorkspaceWorkspacePermissions"
 

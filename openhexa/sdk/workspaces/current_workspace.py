@@ -12,6 +12,7 @@ from openhexa.graphql.graphql_client.input_types import UpdateWorkspaceInput
 from openhexa.utils import stringcase
 
 from ..datasets import Dataset
+from ..files import File
 from ..utils import OpenHexaClient, graphql
 from .connection import (
     ConnectionClasses,
@@ -587,7 +588,7 @@ class CurrentWorkspace:
             query getWorkspaceDatasets($slug: String!) {
                 workspace(slug: $slug) {
                     datasets {
-                        items { 
+                        items {
                             id
                             dataset {
                                 id
@@ -596,7 +597,7 @@ class CurrentWorkspace:
                                 description
                             }
                         }
-                    
+
                     }
                 }
             }
@@ -615,3 +616,22 @@ class CurrentWorkspace:
         ]
 
         return datasets
+
+    def get_file(self, path: str) -> File:
+        """Get a file by its path.
+
+        Parameters
+        ----------
+        path : str
+            The path of the file in the OpenHEXA backend
+
+        Returns
+        -------
+        The file
+
+        Raises
+        ------
+        ValueError
+            If the file does not exist
+        """
+        return OpenHexaClient().get_file_by_path(path=path, workspace_slug=self.slug)

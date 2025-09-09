@@ -23,7 +23,7 @@ class UpdateWorkspaceUpdateWorkspaceWorkspace(BaseModel):
     slug: str
     name: str
     description: Optional[str]
-    configuration: Optional[Any]
+    configuration: Any
     countries: List["UpdateWorkspaceUpdateWorkspaceWorkspaceCountries"]
 
 
