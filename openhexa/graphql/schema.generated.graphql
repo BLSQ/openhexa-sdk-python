@@ -283,6 +283,46 @@ type AccessmodZonalStatistics implements AccessmodAnalysis & AccessmodOwnership 
   zonalStatisticsTable: AccessmodFileset
 }
 
+"""
+The AddOrganizationMemberError enum represents the possible errors that can occur during the addOrganizationMember mutation.
+"""
+enum AddOrganizationMemberError {
+  """
+  Indicates that the user does not have permission to add members to the organization.
+  """
+  PERMISSION_DENIED
+}
+
+"""
+The AddOrganizationMemberInput type represents the input for the addOrganizationMember mutation.
+"""
+input AddOrganizationMemberInput {
+  """The unique identifier of the organization."""
+  organizationId: UUID!
+
+  """The role of the user in the organization."""
+  role: OrganizationMembershipRole!
+
+  """The email address of the user to add to the organization."""
+  userEmail: String!
+}
+
+"""
+The AddOrganizationMemberResult type represents the result of the addOrganizationMember mutation.
+"""
+type AddOrganizationMemberResult {
+  """
+  The list of errors that occurred during the addOrganizationMember mutation.
+  """
+  errors: [AddOrganizationMemberError!]!
+
+  """The created organization membership object."""
+  membership: OrganizationMembership
+
+  """Indicates whether the addOrganizationMember mutation was successful."""
+  success: Boolean!
+}
+
 """Represents the input for adding an output to a pipeline."""
 input AddPipelineOutputInput {
   name: String
@@ -881,15 +921,18 @@ Enum representing the possible errors that can occur when creating a workspace.
 """
 enum CreateWorkspaceError {
   INVALID_SLUG
+  ORGANIZATION_NOT_FOUND
   PERMISSION_DENIED
 }
 
 """Represents the input for creating a workspace."""
 input CreateWorkspaceInput {
+  configuration: JSON
   countries: [CountryInput!]
   description: String
   loadSampleData: Boolean
   name: String!
+  organizationId: UUID
   slug: String
 }
 
@@ -1141,6 +1184,7 @@ type Dataset implements MetadataObject {
   links(page: Int = 1, perPage: Int = 15): DatasetLinkPage!
   name: String!
   permissions: DatasetPermissions!
+  sharedWithOrganization: Boolean!
   slug: String!
   targetId: OpaqueID!
   updatedAt: DateTime!
@@ -1495,6 +1539,69 @@ type DeleteMetadataAttributeResult {
   success: Boolean!
 }
 
+"""
+The DeleteOrganizationInvitationError enum represents the possible errors that can occur during the deleteOrganizationInvitation mutation.
+"""
+enum DeleteOrganizationInvitationError {
+  INVITATION_NOT_FOUND
+  PERMISSION_DENIED
+}
+
+"""
+The DeleteOrganizationInvitationInput type represents the input for the deleteOrganizationInvitation mutation.
+"""
+input DeleteOrganizationInvitationInput {
+  """The unique identifier of the organization invitation to delete."""
+  id: UUID!
+}
+
+"""
+The DeleteOrganizationInvitationResult type represents the result of the deleteOrganizationInvitation mutation.
+"""
+type DeleteOrganizationInvitationResult {
+  errors: [DeleteOrganizationInvitationError!]!
+  success: Boolean!
+}
+
+"""
+The DeleteOrganizationMemberError enum represents the possible errors that can occur during the deleteOrganizationMember mutation.
+"""
+enum DeleteOrganizationMemberError {
+  """Indicates that users cannot delete themselves from an organization."""
+  CANNOT_DELETE_SELF
+
+  """Indicates that the organization membership was not found."""
+  NOT_FOUND
+
+  """
+  Indicates that the user does not have permission to delete the organization membership.
+  """
+  PERMISSION_DENIED
+}
+
+"""
+The DeleteOrganizationMemberInput type represents the input for the deleteOrganizationMember mutation.
+"""
+input DeleteOrganizationMemberInput {
+  """The unique identifier of the organization membership to delete."""
+  id: UUID!
+}
+
+"""
+The DeleteOrganizationMemberResult type represents the result of the deleteOrganizationMember mutation.
+"""
+type DeleteOrganizationMemberResult {
+  """
+  The list of errors that occurred during the deleteOrganizationMember mutation.
+  """
+  errors: [DeleteOrganizationMemberError!]!
+
+  """
+  Indicates whether the deleteOrganizationMember mutation was successful.
+  """
+  success: Boolean!
+}
+
 """Represents the input for deleting a pipeline."""
 input DeletePipelineInput {
   id: UUID!
@@ -1758,6 +1865,19 @@ type File {
   updated: DateTime
 }
 
+"""Represents a file or directory node in a flattened structure."""
+type FileNode {
+  autoSelect: Boolean!
+  content: String
+  id: String!
+  language: String
+  lineCount: Int
+  name: String!
+  parentId: String
+  path: String!
+  type: FileType!
+}
+
 type FileResult implements SearchResult {
   file: File!
   score: Float!
@@ -1944,6 +2064,57 @@ type IASOQueryResultPage {
   success: Boolean!
   totalItems: Int!
   totalPages: Int!
+}
+
+"""
+The InviteOrganizationMemberError enum represents the possible errors that can occur during the inviteOrganizationMember mutation.
+"""
+enum InviteOrganizationMemberError {
+  """Indicates that the user is already a member of the organization."""
+  ALREADY_MEMBER
+
+  """Indicates that the organization was not found."""
+  ORGANIZATION_NOT_FOUND
+
+  """
+  Indicates that the user does not have permission to invite members to the organization.
+  """
+  PERMISSION_DENIED
+
+  """Indicates that one or more workspaces were not found."""
+  WORKSPACE_NOT_FOUND
+}
+
+"""
+The InviteOrganizationMemberInput type represents the input for the inviteOrganizationMember mutation.
+"""
+input InviteOrganizationMemberInput {
+  """The unique identifier of the organization."""
+  organizationId: UUID!
+
+  """The role of the user in the organization."""
+  organizationRole: OrganizationMembershipRole!
+
+  """The email address of the user to invite to the organization."""
+  userEmail: String!
+
+  """The list of workspaces to invite the user to."""
+  workspaceInvitations: [WorkspaceInvitationInput!]!
+}
+
+"""
+The InviteOrganizationMemberResult type represents the result of the inviteOrganizationMember mutation.
+"""
+type InviteOrganizationMemberResult {
+  """
+  The list of errors that occurred during the inviteOrganizationMember mutation.
+  """
+  errors: [InviteOrganizationMemberError!]!
+
+  """
+  Indicates whether the inviteOrganizationMember mutation was successful.
+  """
+  success: Boolean!
 }
 
 """Represents the input for inviting a member to a workspace."""
@@ -2276,6 +2447,8 @@ type Mutation {
 
   """Delete an metadata attribute from an object instance"""
   deleteMetadataAttribute(input: DeleteMetadataAttributeInput!): DeleteMetadataAttributeResult!
+  deleteOrganizationInvitation(input: DeleteOrganizationInvitationInput!): DeleteOrganizationInvitationResult!
+  deleteOrganizationMember(input: DeleteOrganizationMemberInput!): DeleteOrganizationMemberResult!
 
   """Deletes a pipeline."""
   deletePipeline(input: DeletePipelineInput): DeletePipelineResult!
@@ -2321,6 +2494,7 @@ type Mutation {
   """Generates a webhook URL for a pipeline."""
   generatePipelineWebhookUrl(input: GeneratePipelineWebhookUrlInput!): GeneratePipelineWebhookUrlResult!
   generateWorkspaceToken(input: GenerateWorkspaceTokenInput!): GenerateWorkspaceTokenResult!
+  inviteOrganizationMember(input: InviteOrganizationMemberInput!): InviteOrganizationMemberResult!
   inviteWorkspaceMember(input: InviteWorkspaceMemberInput!): InviteWorkspaceMemberResult!
   joinWorkspace(input: JoinWorkspaceInput!): JoinWorkspaceResult!
   launchAccessmodAnalysis(input: LaunchAccessmodAnalysisInput): LaunchAccessmodAnalysisResult!
@@ -2361,6 +2535,7 @@ type Mutation {
   register(input: RegisterInput!): RegisterResult!
   removeFromFavorites(input: RemoveFromFavoritesInput!): RemoveFromFavoritesResult!
   requestAccessmodAccess(input: RequestAccessmodAccessInput!): RequestAccessmodAccessInputResult!
+  resendOrganizationInvitation(input: ResendOrganizationInvitationInput!): ResendOrganizationInvitationResult!
   resendWorkspaceInvitation(input: ResendWorkspaceInvitationInput!): ResendWorkspaceInvitationResult!
 
   """Sends a password reset email to the user."""
@@ -2393,6 +2568,7 @@ type Mutation {
   """Update a dataset version."""
   updateDatasetVersion(input: UpdateDatasetVersionInput!): UpdateDatasetVersionResult!
   updateMembership(input: UpdateMembershipInput!): UpdateMembershipResult!
+  updateOrganizationMember(input: UpdateOrganizationMemberInput!): UpdateOrganizationMemberResult!
 
   """Updates an existing pipeline."""
   updatePipeline(input: UpdatePipelineInput!): UpdatePipelineResult!
@@ -2448,17 +2624,35 @@ type Organization {
   """The contact information of the organization."""
   contactInfo: String!
 
+  """Datasets available in the organization"""
+  datasets(page: Int = 1, perPage: Int = 15, query: String): DatasetPage!
+
   """The unique identifier of the organization."""
   id: UUID!
 
+  """The invitations sent to join the organization."""
+  invitations(includeAccepted: Boolean, page: Int, perPage: Int): OrganizationInvitationPage!
+
+  """The members of the organization."""
+  members(page: Int, perPage: Int, term: String): OrganizationMembershipPage!
+
   """The name of the organization."""
   name: String!
+
+  """The permissions the current user has in the organization."""
+  permissions: OrganizationPermissions!
+
+  """The short name of the organization."""
+  shortName: String
 
   """The type of the organization."""
   type: String!
 
   """The URL of the organization."""
   url: String!
+
+  """The workspaces associated with the organization."""
+  workspaces(page: Int, perPage: Int): WorkspacePage!
 }
 
 """
@@ -2481,6 +2675,73 @@ input OrganizationInput {
   url: String
 }
 
+"""Represents an invitation to join an organization."""
+type OrganizationInvitation {
+  createdAt: DateTime!
+  email: String!
+  id: UUID!
+  invitedBy: User
+  organization: Organization!
+  role: OrganizationMembershipRole!
+  status: OrganizationInvitationStatus!
+  updatedAt: DateTime
+  workspaceInvitations: [OrganizationWorkspaceInvitation!]!
+}
+
+"""Represents a page of organization invitations."""
+type OrganizationInvitationPage {
+  items: [OrganizationInvitation!]!
+  pageNumber: Int!
+  totalItems: Int!
+  totalPages: Int!
+}
+
+"""Represents the status of an organization invitation."""
+enum OrganizationInvitationStatus {
+  ACCEPTED
+  DECLINED
+  PENDING
+}
+
+"""Represents a membership in an organization."""
+type OrganizationMembership {
+  createdAt: DateTime!
+  id: UUID!
+  organization: Organization!
+  role: OrganizationMembershipRole!
+  updatedAt: DateTime
+  user: User!
+  workspaceMemberships: [WorkspaceMembership!]!
+}
+
+"""Represents a page of organization memberships."""
+type OrganizationMembershipPage {
+  items: [OrganizationMembership!]!
+  pageNumber: Int!
+  totalItems: Int!
+  totalPages: Int!
+}
+
+"""Represents the role of a organization membership."""
+enum OrganizationMembershipRole {
+  ADMIN
+  MEMBER
+  OWNER
+}
+
+type OrganizationPermissions {
+  archiveWorkspace: Boolean!
+  createWorkspace: Boolean!
+  manageMembers: Boolean!
+  manageOwners: Boolean!
+}
+
+"""Represents a workspace invitation within an organization invitation."""
+type OrganizationWorkspaceInvitation {
+  role: WorkspaceMembershipRole!
+  workspace: Workspace!
+}
+
 """Represents an input parameter of a pipeline."""
 input ParameterInput {
   choices: [Generic!]
@@ -2501,6 +2762,7 @@ enum ParameterType {
   custom
   dataset
   dhis2
+  file
   float
   gcs
   iaso
@@ -2561,6 +2823,7 @@ type PinDatasetResult {
 
 """Represents a pipeline."""
 type Pipeline {
+  autoUpdateFromTemplate: Boolean!
   code: String!
   config: JSON!
   createdAt: DateTime!
@@ -2779,6 +3042,7 @@ type PipelineTemplateVersion {
   id: UUID!
   isLatestVersion: Boolean!
   permissions: PipelineTemplateVersionPermissions!
+  sourcePipelineVersion: PipelineVersion!
   template: PipelineTemplate!
   user: User
   versionNumber: Int!
@@ -2815,6 +3079,7 @@ type PipelineVersion {
   createdAt: DateTime!
   description: String
   externalLink: URL
+  files: [FileNode!]!
   id: UUID!
   isLatestVersion: Boolean!
   name: String
@@ -3016,10 +3281,14 @@ type Query {
   """Search datasets."""
   datasets(page: Int = 1, perPage: Int = 15, query: String): DatasetPage!
 
+  """Get a file by its path within a workspace."""
+  getFileByPath(path: String!, workspaceSlug: String!): BucketObject
+
   """Retrieves the currently authenticated user."""
   me: Me!
   metadataAttributes(targetId: OpaqueID!): [MetadataAttribute]!
   notebooksUrl: URL!
+  organization(id: UUID!): Organization
 
   """Retrieves a list of organizations."""
   organizations: [Organization!]!
@@ -3042,25 +3311,23 @@ type Query {
 
   """Retrieves a page of pipelines ordered by relevant name."""
   pipelines(name: String, page: Int, perPage: Int, search: String, workspaceSlug: String): PipelinesPage!
-  searchDatabaseTables(page: Int = 1, perPage: Int = 15, query: String!, workspaceSlugs: [String]!): DatabaseTableResultPage!
-  searchDatasets(page: Int = 1, perPage: Int = 15, query: String!, workspaceSlugs: [String]!): DatasetResultPage!
-  searchFiles(page: Int = 1, perPage: Int = 15, query: String!, workspaceSlugs: [String]!): FileResultPage!
-  searchPipelineTemplates(page: Int = 1, perPage: Int = 15, query: String!, workspaceSlugs: [String]!): PipelineTemplateResultPage!
-  searchPipelines(page: Int = 1, perPage: Int = 15, query: String!, workspaceSlugs: [String]!): PipelineResultPage!
+  searchDatabaseTables(organizationId: UUID, page: Int = 1, perPage: Int = 15, query: String!, workspaceSlugs: [String]): DatabaseTableResultPage!
+  searchDatasets(organizationId: UUID, page: Int = 1, perPage: Int = 15, query: String!, workspaceSlugs: [String]): DatasetResultPage!
+  searchFiles(organizationId: UUID, page: Int = 1, perPage: Int = 15, query: String!, workspaceSlugs: [String]): FileResultPage!
+  searchPipelineTemplates(organizationId: UUID, page: Int = 1, perPage: Int = 15, query: String!, workspaceSlugs: [String]): PipelineTemplateResultPage!
+  searchPipelines(organizationId: UUID, page: Int = 1, perPage: Int = 15, query: String!, workspaceSlugs: [String]): PipelineResultPage!
   team(id: UUID!): Team
   teams(page: Int, perPage: Int, term: String): TeamPage!
 
   """Retrieves a template by workspace slug and code."""
   templateByCode(code: String!): PipelineTemplate
 
-  """
-  Search users, to be moved to "Organizations"
-  """
-  users(query: String!, workspaceSlug: String!): [User!]!
+  """Search users."""
+  users(organizationId: UUID, query: String!, workspaceSlug: String): [User!]!
   webapp(id: UUID!): Webapp
   webapps(favorite: Boolean, page: Int, perPage: Int, workspaceSlug: String): WebappsPage!
   workspace(slug: String!): Workspace
-  workspaces(page: Int, perPage: Int, query: String): WorkspacePage!
+  workspaces(organizationId: UUID, page: Int, perPage: Int, query: String): WorkspacePage!
 }
 
 """
@@ -3143,6 +3410,30 @@ input RequestAccessmodAccessInput {
 
 type RequestAccessmodAccessInputResult {
   errors: [RequestAccessmodAccessError!]!
+  success: Boolean!
+}
+
+"""
+The ResendOrganizationInvitationError enum represents the possible errors that can occur during the resendOrganizationInvitation mutation.
+"""
+enum ResendOrganizationInvitationError {
+  INVITATION_NOT_FOUND
+  PERMISSION_DENIED
+}
+
+"""
+The ResendOrganizationInvitationInput type represents the input for the resendOrganizationInvitation mutation.
+"""
+input ResendOrganizationInvitationInput {
+  """The unique identifier of the organization invitation to resend."""
+  id: UUID!
+}
+
+"""
+The ResendOrganizationInvitationResult type represents the result of the resendOrganizationInvitation mutation.
+"""
+type ResendOrganizationInvitationResult {
+  errors: [ResendOrganizationInvitationError!]!
   success: Boolean!
 }
 
@@ -3603,6 +3894,7 @@ input UpdateDatasetInput {
   datasetId: ID!
   description: String
   name: String
+  sharedWithOrganization: Boolean
 }
 
 """Result of updating a dataset."""
@@ -3674,6 +3966,54 @@ type UpdateMembershipResult {
 }
 
 """
+The UpdateOrganizationMemberError enum represents the possible errors that can occur during the updateOrganizationMember mutation.
+"""
+enum UpdateOrganizationMemberError {
+  """Indicates that the provided role is invalid."""
+  INVALID_ROLE
+
+  """Indicates that the organization membership was not found."""
+  NOT_FOUND
+
+  """
+  Indicates that the user does not have permission to update the organization membership.
+  """
+  PERMISSION_DENIED
+}
+
+"""
+The UpdateOrganizationMemberInput type represents the input for the updateOrganizationMember mutation.
+"""
+input UpdateOrganizationMemberInput {
+  """The unique identifier of the organization membership to update."""
+  id: UUID!
+
+  """The updated role of the user in the organization."""
+  role: OrganizationMembershipRole!
+
+  """The list of workspace permissions to update for the user."""
+  workspacePermissions: [WorkspacePermissionInput!]
+}
+
+"""
+The UpdateOrganizationMemberResult type represents the result of the updateOrganizationMember mutation.
+"""
+type UpdateOrganizationMemberResult {
+  """
+  The list of errors that occurred during the updateOrganizationMember mutation.
+  """
+  errors: [UpdateOrganizationMemberError!]!
+
+  """The updated organization membership object."""
+  membership: OrganizationMembership
+
+  """
+  Indicates whether the updateOrganizationMember mutation was successful.
+  """
+  success: Boolean!
+}
+
+"""
 Enum representing the possible errors that can occur when updating a pipeline.
 """
 enum UpdatePipelineError {
@@ -3685,6 +4025,7 @@ enum UpdatePipelineError {
 
 """Represents the input for updating a pipeline."""
 input UpdatePipelineInput {
+  autoUpdateFromTemplate: Boolean
   config: JSON
   description: String
   id: UUID!
@@ -4091,8 +4432,7 @@ Represents a workspace. A workspace is a shared environment where users can coll
 type Workspace {
   """File storage of the workspace represented as a bucket"""
   bucket: Bucket!
-  """JSON field containing workspace configuration as key-value pairs"""
-  configuration: JSON
+  configuration: JSON!
   connections: [Connection!]!
   countries: [Country!]!
   createdAt: DateTime!
@@ -4106,6 +4446,7 @@ type Workspace {
   invitations(includeAccepted: Boolean, page: Int, perPage: Int): WorkspaceInvitationPage!
   members(page: Int, perPage: Int): WorkspaceMembershipPage!
   name: String!
+  organization: Organization
   permissions: WorkspacePermissions!
   slug: String!
   updatedAt: DateTime
@@ -4121,6 +4462,20 @@ type WorkspaceInvitation {
   status: WorkspaceInvitationStatus!
   updatedAt: DateTime
   workspace: Workspace!
+}
+
+"""
+The WorkspaceInvitationInput type represents a workspace invitation within an organization member invitation.
+"""
+input WorkspaceInvitationInput {
+  """The role of the user in the workspace."""
+  role: WorkspaceMembershipRole!
+
+  """The name of the workspace to invite the user to."""
+  workspaceName: String!
+
+  """The slug of the workspace to invite the user to."""
+  workspaceSlug: String!
 }
 
 """Represents a page of workspace invitations."""
@@ -4169,6 +4524,19 @@ type WorkspacePage {
   pageNumber: Int!
   totalItems: Int!
   totalPages: Int!
+}
+
+"""
+The WorkspacePermissionInput type represents workspace permission updates for an existing organization member.
+"""
+input WorkspacePermissionInput {
+  """
+  The role of the user in the workspace. If null, the user will be removed from the workspace.
+  """
+  role: WorkspaceMembershipRole
+
+  """The slug of the workspace to update permissions for."""
+  workspaceSlug: String!
 }
 
 """Represents the permissions of a workspace."""

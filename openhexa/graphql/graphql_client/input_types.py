@@ -11,11 +11,18 @@ from .enums import (
     ConnectionType,
     MembershipRole,
     MessagePriority,
+    OrganizationMembershipRole,
     ParameterWidget,
     PermissionMode,
     PipelineNotificationLevel,
     WorkspaceMembershipRole,
 )
+
+
+class AddOrganizationMemberInput(BaseModel):
+    organization_id: Any = Field(alias="organizationId")
+    role: OrganizationMembershipRole
+    user_email: str = Field(alias="userEmail")
 
 
 class AddPipelineOutputInput(BaseModel):
@@ -169,10 +176,12 @@ class CreateWebappInput(BaseModel):
 
 
 class CreateWorkspaceInput(BaseModel):
+    configuration: Optional[Any] = None
     countries: Optional[List["CountryInput"]] = None
     description: Optional[str] = None
     load_sample_data: Optional[bool] = Field(alias="loadSampleData", default=None)
     name: str
+    organization_id: Optional[Any] = Field(alias="organizationId", default=None)
     slug: Optional[str] = None
 
 
@@ -224,6 +233,14 @@ class DeleteMembershipInput(BaseModel):
 class DeleteMetadataAttributeInput(BaseModel):
     key: str
     target_id: Any = Field(alias="targetId")
+
+
+class DeleteOrganizationInvitationInput(BaseModel):
+    id: Any
+
+
+class DeleteOrganizationMemberInput(BaseModel):
+    id: Any
 
 
 class DeletePipelineInput(BaseModel):
@@ -304,6 +321,15 @@ class GenerateWorkspaceTokenInput(BaseModel):
 class IASOQueryFilterInput(BaseModel):
     type: str
     value: List[int]
+
+
+class InviteOrganizationMemberInput(BaseModel):
+    organization_id: Any = Field(alias="organizationId")
+    organization_role: OrganizationMembershipRole = Field(alias="organizationRole")
+    user_email: str = Field(alias="userEmail")
+    workspace_invitations: List["WorkspaceInvitationInput"] = Field(
+        alias="workspaceInvitations"
+    )
 
 
 class InviteWorkspaceMemberInput(BaseModel):
@@ -422,6 +448,10 @@ class RequestAccessmodAccessInput(BaseModel):
     last_name: str = Field(alias="lastName")
 
 
+class ResendOrganizationInvitationInput(BaseModel):
+    id: Any
+
+
 class ResendWorkspaceInvitationInput(BaseModel):
     invitation_id: Any = Field(alias="invitationId")
 
@@ -538,6 +568,9 @@ class UpdateDatasetInput(BaseModel):
     dataset_id: str = Field(alias="datasetId")
     description: Optional[str] = None
     name: Optional[str] = None
+    shared_with_organization: Optional[bool] = Field(
+        alias="sharedWithOrganization", default=None
+    )
 
 
 class UpdateDatasetVersionInput(BaseModel):
@@ -551,7 +584,18 @@ class UpdateMembershipInput(BaseModel):
     role: MembershipRole
 
 
+class UpdateOrganizationMemberInput(BaseModel):
+    id: Any
+    role: OrganizationMembershipRole
+    workspace_permissions: Optional[List["WorkspacePermissionInput"]] = Field(
+        alias="workspacePermissions", default=None
+    )
+
+
 class UpdatePipelineInput(BaseModel):
+    auto_update_from_template: Optional[bool] = Field(
+        alias="autoUpdateFromTemplate", default=None
+    )
     config: Optional[Any] = None
     description: Optional[str] = None
     id: Any
@@ -643,10 +687,23 @@ class VerifyDeviceInput(BaseModel):
     token: Optional[str] = None
 
 
+class WorkspaceInvitationInput(BaseModel):
+    role: WorkspaceMembershipRole
+    workspace_name: str = Field(alias="workspaceName")
+    workspace_slug: str = Field(alias="workspaceSlug")
+
+
+class WorkspacePermissionInput(BaseModel):
+    role: Optional[WorkspaceMembershipRole] = None
+    workspace_slug: str = Field(alias="workspaceSlug")
+
+
 CreateAccessmodProjectInput.model_rebuild()
 CreateConnectionInput.model_rebuild()
 CreateWorkspaceInput.model_rebuild()
+InviteOrganizationMemberInput.model_rebuild()
 UpdateConnectionInput.model_rebuild()
 UpdateDAGInput.model_rebuild()
+UpdateOrganizationMemberInput.model_rebuild()
 UpdateWorkspaceInput.model_rebuild()
 UploadPipelineInput.model_rebuild()

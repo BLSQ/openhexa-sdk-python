@@ -74,6 +74,10 @@ class AccessmodProjectOrder(str, Enum):
     UPDATED_AT_DESC = "UPDATED_AT_DESC"
 
 
+class AddOrganizationMemberError(str, Enum):
+    PERMISSION_DENIED = "PERMISSION_DENIED"
+
+
 class AddToFavoritesError(str, Enum):
     WEBAPP_NOT_FOUND = "WEBAPP_NOT_FOUND"
 
@@ -202,6 +206,7 @@ class CreateWebappError(str, Enum):
 
 class CreateWorkspaceError(str, Enum):
     INVALID_SLUG = "INVALID_SLUG"
+    ORGANIZATION_NOT_FOUND = "ORGANIZATION_NOT_FOUND"
     PERMISSION_DENIED = "PERMISSION_DENIED"
 
 
@@ -308,6 +313,17 @@ class DeleteMetadataAttributeError(str, Enum):
     TARGET_NOT_FOUND = "TARGET_NOT_FOUND"
 
 
+class DeleteOrganizationInvitationError(str, Enum):
+    INVITATION_NOT_FOUND = "INVITATION_NOT_FOUND"
+    PERMISSION_DENIED = "PERMISSION_DENIED"
+
+
+class DeleteOrganizationMemberError(str, Enum):
+    CANNOT_DELETE_SELF = "CANNOT_DELETE_SELF"
+    NOT_FOUND = "NOT_FOUND"
+    PERMISSION_DENIED = "PERMISSION_DENIED"
+
+
 class DeletePipelineVersionError(str, Enum):
     PERMISSION_DENIED = "PERMISSION_DENIED"
     PIPELINE_NOT_FOUND = "PIPELINE_NOT_FOUND"
@@ -407,6 +423,13 @@ class IASOMetadataType(str, Enum):
     IASO_PROJECTS = "IASO_PROJECTS"
 
 
+class InviteOrganizationMemberError(str, Enum):
+    ALREADY_MEMBER = "ALREADY_MEMBER"
+    ORGANIZATION_NOT_FOUND = "ORGANIZATION_NOT_FOUND"
+    PERMISSION_DENIED = "PERMISSION_DENIED"
+    WORKSPACE_NOT_FOUND = "WORKSPACE_NOT_FOUND"
+
+
 class InviteWorkspaceMembershipError(str, Enum):
     ALREADY_EXISTS = "ALREADY_EXISTS"
     PERMISSION_DENIED = "PERMISSION_DENIED"
@@ -461,11 +484,24 @@ class OrderByDirection(str, Enum):
     DESC = "DESC"
 
 
+class OrganizationInvitationStatus(str, Enum):
+    ACCEPTED = "ACCEPTED"
+    DECLINED = "DECLINED"
+    PENDING = "PENDING"
+
+
+class OrganizationMembershipRole(str, Enum):
+    ADMIN = "ADMIN"
+    MEMBER = "MEMBER"
+    OWNER = "OWNER"
+
+
 class ParameterType(str, Enum):
     bool = "bool"
     custom = "custom"
     dataset = "dataset"
     dhis2 = "dhis2"
+    file = "file"
     float = "float"
     gcs = "gcs"
     iaso = "iaso"
@@ -593,6 +629,11 @@ class RequestAccessmodAccessError(str, Enum):
     MUST_ACCEPT_TOS = "MUST_ACCEPT_TOS"
 
 
+class ResendOrganizationInvitationError(str, Enum):
+    INVITATION_NOT_FOUND = "INVITATION_NOT_FOUND"
+    PERMISSION_DENIED = "PERMISSION_DENIED"
+
+
 class ResendWorkspaceInvitationError(str, Enum):
     INVITATION_NOT_FOUND = "INVITATION_NOT_FOUND"
     PERMISSION_DENIED = "PERMISSION_DENIED"
@@ -671,6 +712,12 @@ class UpdateDatasetVersionError(str, Enum):
 
 
 class UpdateMembershipError(str, Enum):
+    INVALID_ROLE = "INVALID_ROLE"
+    NOT_FOUND = "NOT_FOUND"
+    PERMISSION_DENIED = "PERMISSION_DENIED"
+
+
+class UpdateOrganizationMemberError(str, Enum):
     INVALID_ROLE = "INVALID_ROLE"
     NOT_FOUND = "NOT_FOUND"
     PERMISSION_DENIED = "PERMISSION_DENIED"
