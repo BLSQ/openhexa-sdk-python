@@ -5,6 +5,11 @@ See https://github.com/BLSQ/openhexa/wiki/Writing-OpenHEXA-pipelines#using-file-
 
 
 class File:
+    """File class.
+
+    See https://github.com/BLSQ/openhexa/wiki/Writing-OpenHEXA-pipelines#using-file-parameters
+    """
+
     def __init__(
         self,
         key: str,
