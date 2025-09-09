@@ -223,6 +223,7 @@ from .get_connection import (
     GetConnectionConnectionBySlug,
     GetConnectionConnectionBySlugFields,
 )
+from .get_file_by_path import GetFileByPath, GetFileByPathGetFileByPath
 from .get_users import GetUsers, GetUsersUsers, GetUsersUsersAvatar
 from .input_types import (
     AddOrganizationMemberInput,
@@ -599,6 +600,8 @@ __all__ = [
     "GetConnection",
     "GetConnectionConnectionBySlug",
     "GetConnectionConnectionBySlugFields",
+    "GetFileByPath",
+    "GetFileByPathGetFileByPath",
     "GetUsers",
     "GetUsersUsers",
     "GetUsersUsersAvatar",

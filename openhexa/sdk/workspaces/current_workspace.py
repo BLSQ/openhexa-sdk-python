@@ -627,37 +627,11 @@ class CurrentWorkspace:
 
         Returns
         -------
-        FileResult
-            The file
+        The file
 
         Raises
         ------
         ValueError
             If the file does not exist
         """
-        response = graphql(
-            """
-            query getFileByPath($path: String!, $workspaceSlug: String!) {
-                getFileByPath(workspaceSlug: $workspaceSlug, path: $path) {
-                    key
-                    name
-                    path
-                    size
-                    type
-                }
-            }
-        """,
-            {"path": path, "workspaceSlug": self.slug},
-        )
-        data = response["getFileByPath"]
-
-        if data is None:
-            raise ValueError(f"File with path {path} does not exist.")
-
-        return File(
-            key=data["key"],
-            name=data["name"],
-            path=data["path"],
-            size=data["size"],
-            type=data["type"],
-        )
+        return OpenHexaClient().get_file_by_path(path=path, workspace_slug=self.slug)
