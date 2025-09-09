@@ -1,6 +1,6 @@
 """File-related classes and functions.
 
-TODO: Add link to wiki
+See https://github.com/BLSQ/openhexa/wiki/Writing-OpenHEXA-pipelines#using-file-parameters
 """
 
 

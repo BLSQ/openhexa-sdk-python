@@ -1,6 +1,6 @@
 """Files package.
 
-TODO: Add link to wiki
+See https://github.com/BLSQ/openhexa/wiki/Writing-OpenHEXA-pipelines#using-file-parameters
 """
 
 from .file import File
