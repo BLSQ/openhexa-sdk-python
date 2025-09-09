@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.12.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.11.0...v2.12.0) (2025-09-09)
+
+
+### Features
+
+* Add support for File parameter type ([4d1e230](https://github.com/BLSQ/openhexa-sdk-python/commit/4d1e2309f1770d11eac39c2e7983689f29bd3f13))
+
 ## [2.11.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.10.0...v2.11.0) (2025-09-03)
 
 
