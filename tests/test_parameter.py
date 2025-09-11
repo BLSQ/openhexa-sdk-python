@@ -217,7 +217,7 @@ def test_validate_dataset_parameter(mock_get_dataset):
 @mock.patch("openhexa.sdk.workspace.get_file")
 def test_validate_file_parameter(mock_get_file):
     """Check File parameter validation."""
-    file = File(key="test.csv", name="test.csv", path="my_folder/test.csv", size=1024, type="file")
+    file = File(name="test.csv", path="my_folder/test.csv", size=1024, type="file")
     mock_get_file.return_value = file
 
     file_type = FileType()
