@@ -634,4 +634,11 @@ class CurrentWorkspace:
         ValueError
             If the file does not exist
         """
-        return OpenHexaClient().get_file_by_path(path=path, workspace_slug=self.slug)
+        result = OpenHexaClient().get_file_by_path(path=path, workspace_slug=self.slug)
+
+        return File(
+            name=result.name,
+            path=f"{self.files_path}/{result.key}",
+            size=result.size,
+            type=result.type,
+        )
