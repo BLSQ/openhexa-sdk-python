@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.12.1](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.12.0...v2.12.1) (2025-09-11)
+
+
+### Bug Fixes
+
+* File paramter: Improve user-friendliness of File class ([ce6e29a](https://github.com/BLSQ/openhexa-sdk-python/commit/ce6e29aa679db51b3a006ee03eba6efd4f005607))
+
 ## [2.12.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.11.0...v2.12.0) (2025-09-09)
 
 
