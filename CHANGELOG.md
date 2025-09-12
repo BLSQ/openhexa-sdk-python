@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.12.2](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.12.1...v2.12.2) (2025-09-12)
+
+
+### Bug Fixes
+
+* get_dataset and list_dataset to consider source workspace slug (HEXA-1366) ([#314](https://github.com/BLSQ/openhexa-sdk-python/issues/314)) ([5fa6b82](https://github.com/BLSQ/openhexa-sdk-python/commit/5fa6b820b01bb115738187486141b5a6e099404d))
+
 ## [2.12.1](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.12.0...v2.12.1) (2025-09-11)
 
 
