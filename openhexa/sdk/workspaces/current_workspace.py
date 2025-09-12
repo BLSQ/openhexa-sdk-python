@@ -521,13 +521,16 @@ class CurrentWorkspace:
         identifier = rsp["createDataset"]["dataset"]["slug"]
         return self.get_dataset(identifier)
 
-    def get_dataset(self, identifier: str) -> Dataset:
+    def get_dataset(self, identifier: str, workspace_slug: str = None) -> Dataset:
         """Get a dataset by its identifier.
 
         Parameters
         ----------
         identifier : str
             The identifier of the dataset in the OpenHEXA backend
+
+        workspace_slug : str
+            The slug of the workspace the dataset belongs to,  defaults to the current workspace slug
 
         Returns
         -------
@@ -544,10 +547,6 @@ class CurrentWorkspace:
             query getDataset($datasetSlug: String!, $workspaceSlug: String!) {
                 datasetLinkBySlug(datasetSlug: $datasetSlug, workspaceSlug: $workspaceSlug) {
                     id
-                    workspace {
-                        slug
-                        name
-                    }
                     dataset {
                         id
                         slug
@@ -558,11 +557,14 @@ class CurrentWorkspace:
                             name
                             description
                         }
+                        workspace {
+                            slug
+                        }
                     }
                 }
             }
         """,
-            {"datasetSlug": identifier, "workspaceSlug": self.slug},
+            {"datasetSlug": identifier, "workspaceSlug": workspace_slug or self.slug},
         )
         data = response["datasetLinkBySlug"]
 
@@ -574,6 +576,7 @@ class CurrentWorkspace:
             slug=data["dataset"]["slug"],
             name=data["dataset"]["name"],
             description=data["dataset"]["description"],
+            workspace_slug=data["dataset"]["workspace"]["slug"],
         )
 
     def list_datasets(self) -> list[Dataset]:
@@ -595,6 +598,9 @@ class CurrentWorkspace:
                                 slug
                                 name
                                 description
+                                workspace {
+                                    slug
+                                }
                             }
                         }
 
@@ -611,6 +617,7 @@ class CurrentWorkspace:
                 slug=d["dataset"]["slug"],
                 name=d["dataset"]["name"],
                 description=d["dataset"]["description"],
+                workspace_slug=d["dataset"]["workspace"]["slug"],
             )
             for d in data
         ]

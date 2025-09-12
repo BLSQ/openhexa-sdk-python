@@ -370,11 +370,13 @@ class Dataset:
         slug: str,
         name: str,
         description: str,
+        workspace_slug: str = None,
     ):
         self.id = id
         self.slug = slug
         self.name = name
         self.description = description
+        self.workspace_slug = workspace_slug
 
     def create_version(self, name: typing.Any) -> DatasetVersion:
         """Build a dataset version, save it and return it."""
@@ -457,7 +459,7 @@ class Dataset:
 
     def __repr__(self) -> str:
         """Safe representation of the dataset."""
-        return f"<Dataset slug={self.slug} id={self.id}>"
+        return f"<Dataset slug={self.slug} id={self.id} source_workspace_slug={self.workspace_slug}>"
 
 
 class FileNotFound(Exception):
