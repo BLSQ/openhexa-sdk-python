@@ -570,9 +570,9 @@ class CurrentWorkspace:
 
         if data is None:
             raise ValueError(
-                f"Dataset {identifier} does not exist on workspace {source_workspace_slug}."
+                f"Dataset {identifier} does not exist on workspace {source_workspace_slug or self.slug}."
                 + (
-                    " If you try and get a dataset shared from another workspace, please provide the workspace_slug parameter."
+                    " If you try and get a dataset shared from another workspace, please provide the source_workspace_slug parameter."
                     if not source_workspace_slug
                     else ""
                 )
