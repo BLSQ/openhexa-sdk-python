@@ -521,7 +521,7 @@ class CurrentWorkspace:
         identifier = rsp["createDataset"]["dataset"]["slug"]
         return self.get_dataset(identifier)
 
-    def get_dataset(self, identifier: str, workspace_slug: str = None) -> Dataset:
+    def get_dataset(self, identifier: str, source_workspace_slug: str = None) -> Dataset:
         """Get a dataset by its identifier.
 
         Parameters
@@ -529,7 +529,7 @@ class CurrentWorkspace:
         identifier : str
             The identifier of the dataset in the OpenHEXA backend
 
-        workspace_slug : str
+        source_workspace_slug : str
             The slug of the workspace the dataset belongs to,  defaults to the current workspace slug
 
         Returns
@@ -542,7 +542,6 @@ class CurrentWorkspace:
         ValueError
             If the dataset does not exist
         """
-        source_workspace_slug = workspace_slug or self.slug
         response = graphql(
             """
             query getDataset($datasetSlug: String!, $workspaceSlug: String!) {
@@ -565,7 +564,7 @@ class CurrentWorkspace:
                 }
             }
         """,
-            {"datasetSlug": identifier, "workspaceSlug": source_workspace_slug},
+            {"datasetSlug": identifier, "workspaceSlug": source_workspace_slug or self.slug},
         )
         data = response["datasetLinkBySlug"]
 
@@ -574,7 +573,7 @@ class CurrentWorkspace:
                 f"Dataset {identifier} does not exist on workspace {source_workspace_slug}."
                 + (
                     " If you try and get a dataset shared from another workspace, please provide the workspace_slug parameter."
-                    if not workspace_slug
+                    if not source_workspace_slug
                     else ""
                 )
             )
@@ -584,7 +583,7 @@ class CurrentWorkspace:
             slug=data["dataset"]["slug"],
             name=data["dataset"]["name"],
             description=data["dataset"]["description"],
-            workspace_slug=data["dataset"]["workspace"]["slug"],
+            source_workspace_slug=data["dataset"]["workspace"]["slug"],
         )
 
     def list_datasets(self) -> list[Dataset]:
@@ -625,7 +624,7 @@ class CurrentWorkspace:
                 slug=d["dataset"]["slug"],
                 name=d["dataset"]["name"],
                 description=d["dataset"]["description"],
-                workspace_slug=d["dataset"]["workspace"]["slug"],
+                source_workspace_slug=d["dataset"]["workspace"]["slug"],
             )
             for d in data
         ]
