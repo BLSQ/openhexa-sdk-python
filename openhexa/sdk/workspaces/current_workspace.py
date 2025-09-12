@@ -542,6 +542,7 @@ class CurrentWorkspace:
         ValueError
             If the dataset does not exist
         """
+        source_workspace_slug = workspace_slug or self.slug
         response = graphql(
             """
             query getDataset($datasetSlug: String!, $workspaceSlug: String!) {
@@ -564,12 +565,17 @@ class CurrentWorkspace:
                 }
             }
         """,
-            {"datasetSlug": identifier, "workspaceSlug": workspace_slug or self.slug},
+            {"datasetSlug": identifier, "workspaceSlug": source_workspace_slug},
         )
         data = response["datasetLinkBySlug"]
 
         if data is None:
-            raise ValueError(f"Dataset {identifier} does not exist.")
+            raise ValueError(
+                f"Dataset {identifier} does not exist on workspace {source_workspace_slug}."
+                + " If you try and get a dataset from another workspace, please provide the workspace_slug parameter."
+                if not workspace_slug
+                else ""
+            )
 
         return Dataset(
             id=data["dataset"]["id"],
