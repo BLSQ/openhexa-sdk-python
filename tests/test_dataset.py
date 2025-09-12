@@ -52,13 +52,12 @@ class DatasetTest(TestCase):
                         "data": {
                             "datasetLinkBySlug": {
                                 "id": "link_id",
-                                "workspace": "WORKSPACE",
                                 "dataset": {
                                     "id": "dataset_id",
                                     "slug": "my-dataset",
                                     "name": "My Dataset",
                                     "description": "My Dataset description",
-                                    "createdAt": "2021-01-01T00:00:00.000Z",
+                                    "workspace": {"slug": "source-workspace"},
                                 },
                             }
                         }
