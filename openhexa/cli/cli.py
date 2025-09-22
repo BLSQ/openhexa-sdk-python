@@ -336,6 +336,11 @@ def select_pipeline(workspace_pipelines, number_of_pages: int, pipeline):
     return _handle_user_selection(_generate_choices())
 
 
+def normalize_tag(tag: str) -> str:
+    """Normalize a tag by stripping whitespace, converting to lowercase, and replacing spaces with hyphens."""
+    return tag.strip().lower().replace(" ", "-")
+
+
 @pipelines.command("push")
 @click.argument(
     "path",
@@ -381,6 +386,18 @@ def select_pipeline(workspace_pipelines, number_of_pages: int, pipeline):
     prompt="Link of the version release",
     prompt_required=False,
 )
+@click.option(
+    "--functional-type",
+    "-ft",
+    type=click.Choice(["extraction", "transformation", "loading", "computation"]),
+    help="Functional type of the pipeline",
+)
+@click.option(
+    "--tags",
+    "-t",
+    multiple=True,
+    help="Tags to associate with the pipeline",
+)
 @click.option("--yes", is_flag=True, help="Skip confirmation")
 @handle_ssl_errors
 def pipelines_push(
@@ -389,6 +406,8 @@ def pipelines_push(
     name: str = None,
     description: str = None,
     link: str = None,
+    functional_type: str = None,
+    tags: tuple = (),
     yes: bool = False,
 ):
     """Push a pipeline to the backend. If the pipeline already exists, it will be updated otherwise it will be created.
@@ -440,11 +459,18 @@ def pipelines_push(
             )
             click.confirm(confirmation_message, default=True, abort=True)
 
-        selected_pipeline = selected_pipeline or create_pipeline(pipeline.name)
+        selected_pipeline = selected_pipeline or create_pipeline(pipeline.name, functional_type=functional_type)
         uploaded_pipeline_version = None
         try:
+            normalized_tags = [normalize_tag(tag) for tag in tags] if tags else []
             uploaded_pipeline_version = upload_pipeline(
-                selected_pipeline["code"], path, name, description=description, link=link
+                selected_pipeline["code"],
+                path,
+                name,
+                description=description,
+                link=link,
+                functional_type=functional_type,
+                tags=normalized_tags,
             )
             version_url = click.style(
                 f"{settings.public_api_url}/workspaces/{workspace}/pipelines/{selected_pipeline['code']}",
