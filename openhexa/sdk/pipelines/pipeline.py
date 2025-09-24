@@ -41,6 +41,8 @@ class Pipeline:
         A list of Parameter instance corresponding to the pipeline parameters.
     timeout : int
         The timeout in seconds after which the pipeline will be killed.
+    functional_type : str
+        The functional type of the pipeline (extraction, transformation, loading, computation).
     """
 
     def __init__(
@@ -49,11 +51,13 @@ class Pipeline:
         function: typing.Callable,
         parameters: typing.Sequence[Parameter],
         timeout: int = None,
+        functional_type: str = None,
     ):
         self.name = name
         self.function = function
         self.parameters = parameters
         self.timeout = timeout
+        self.functional_type = functional_type
         self.tasks = []
 
     def task(self, function) -> PipelineWithTask:
@@ -164,6 +168,7 @@ class Pipeline:
             "name": self.name,
             "parameters": [p.to_dict() for p in self.parameters],
             "timeout": self.timeout,
+            "functional_type": self.functional_type,
             "function": self.function.__dict__ if self.function else None,
             "tasks": [t.__dict__ for t in self.tasks],
         }
@@ -241,7 +246,7 @@ class Pipeline:
 
 
 def pipeline(
-    code: str = None, name: str = None, timeout: int = None
+    code: str = None, name: str = None, timeout: int = None, functional_type: str = None
 ) -> typing.Callable[[typing.Callable[..., typing.Any]], Pipeline]:
     """Decorate a Python function as an OpenHEXA pipeline.
 
@@ -254,6 +259,8 @@ def pipeline(
     timeout : int, optional
         An optional timeout, in seconds, after which the pipeline run will be terminated (if not provided, a default
         timeout will be applied by the OpenHEXA backend)
+    functional_type : str, optional
+        The functional type of the pipeline. Valid values are "extraction", "transformation", "loading", "computation".
 
     Returns
     -------
@@ -262,7 +269,7 @@ def pipeline(
 
     Examples
     --------
-    >>> @pipeline("my-pipeline")
+    >>> @pipeline("my-pipeline", functional_type="extraction")
     ... def my_pipeline():
     ...     a_task()
     ...
@@ -278,7 +285,7 @@ def pipeline(
         else:
             parameters = []
 
-        return Pipeline(name, fun, parameters, timeout)
+        return Pipeline(name, fun, parameters, timeout, functional_type)
 
     return decorator
 

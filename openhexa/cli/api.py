@@ -286,7 +286,7 @@ def get_pipeline_from_code(pipeline_code: str) -> dict[str, typing.Any]:
     return data["pipelineByCode"]
 
 
-def create_pipeline(pipeline_name: str):
+def create_pipeline(pipeline_name: str, functional_type: str = None):
     """Create a pipeline using the API."""
     if settings.current_workspace is None:
         raise NoActiveWorkspaceError
@@ -308,6 +308,7 @@ def create_pipeline(pipeline_name: str):
             "input": {
                 "workspaceSlug": settings.current_workspace,
                 "name": pipeline_name,
+                "functionalType": functional_type,
             }
         },
     )
@@ -598,6 +599,8 @@ def upload_pipeline(
     name: str = None,
     description: str = None,
     link: str = None,
+    functional_type: str = None,
+    tags: list[str] = None,
 ):
     """Upload the pipeline contained in the provided directory using the GraphQL API.
 
@@ -654,6 +657,8 @@ def upload_pipeline(
                 "zipfile": base64_content,
                 "parameters": [p.to_dict() for p in pipeline.parameters],
                 "timeout": pipeline.timeout,
+                "functionalType": functional_type or pipeline.functional_type,
+                "tags": tags,
             }
         },
     )
