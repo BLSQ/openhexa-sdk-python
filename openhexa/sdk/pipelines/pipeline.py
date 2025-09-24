@@ -17,7 +17,7 @@ from pathlib import Path
 import requests
 from multiprocess import get_context  # NOQA
 
-from openhexa.sdk.utils import Environment, get_environment
+from openhexa.sdk.utils import Environment, Settings, get_environment
 
 from .parameter import FunctionWithParameter, Parameter, ParameterValueError
 from .task import PipelineWithTask, Task
@@ -179,7 +179,6 @@ class Pipeline:
                             mutation updatePipelineProgress ($input: UpdatePipelineProgressInput!) {
                                 updatePipelineProgress(input: $input) { success errors }
                             }"""
-            verify_ssl = os.getenv("HEXA_VERIFY_SSL", "True").lower() not in ("0", "false")
             r = requests.post(
                 f"{os.environ['HEXA_SERVER_URL']}/graphql/",
                 headers=headers,
@@ -187,7 +186,7 @@ class Pipeline:
                     "query": query,
                     "variables": {"input": {"percent": progress}},
                 },
-                verify=verify_ssl,
+                verify=Settings.verify_ssl(),
             )
             r.raise_for_status()
         else:
