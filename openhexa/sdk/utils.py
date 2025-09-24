@@ -10,6 +10,20 @@ from openhexa.graphql import BaseOpenHexaClient
 from openhexa.utils import create_requests_session
 
 
+class Settings:
+    """Centralized settings for the OpenHexa SDK."""
+
+    @staticmethod
+    def verify_ssl() -> bool:
+        """Return the SSL verification flag from environment variables."""
+        return os.getenv("HEXA_VERIFY_SSL", "True").lower() not in ("0", "false")
+
+    @staticmethod
+    def debug() -> bool:
+        """Return the debug flag from environment variables."""
+        return bool(os.getenv("DEBUG") or os.getenv("HEXA_DEBUG"))
+
+
 class Environment(enum.Enum):
     """Enumeration of supported runtime environments."""
 
@@ -35,7 +49,7 @@ def graphql(operation: str, variables: dict[str | typing.Any] | None = None) -> 
         "HEXA_TOKEN"
     ]  # Works for notebooks with the membership token and pipelines with the run token
     headers = {"Authorization": f"Bearer {auth_token}"}
-    session = create_requests_session()
+    session = create_requests_session(verify=Settings.verify_ssl())
 
     req = session.post(
         f"{os.environ['HEXA_SERVER_URL'].rstrip('/')}/graphql/",
@@ -66,9 +80,7 @@ class OpenHexaClient(BaseOpenHexaClient):
         url = server_url or f"{os.environ['HEXA_SERVER_URL'].rstrip('/')}/graphql/"
         token = token or os.getenv("HEXA_TOKEN")
 
-        verify_ssl = os.getenv("HEXA_VERIFY_SSL", "True").lower() not in ("0", "false")
-
-        super().__init__(url=url, token=token, verify=verify_ssl)
+        super().__init__(url=url, token=token, verify=Settings.verify_ssl())
 
 
 class Iterator(metaclass=abc.ABCMeta):

@@ -11,7 +11,7 @@ from pathlib import Path
 
 import requests
 
-from openhexa.sdk.utils import Iterator, Page, graphql, read_content
+from openhexa.sdk.utils import Iterator, Page, Settings, graphql, read_content
 
 
 class DatasetFile:
@@ -38,7 +38,7 @@ class DatasetFile:
 
     def read(self):
         """Download the file content and return it."""
-        response = requests.get(self.download_url, stream=True)
+        response = requests.get(self.download_url, stream=True, verify=Settings.verify_ssl())
         response.raise_for_status()
         return response.content
 
@@ -261,7 +261,9 @@ class DatasetVersion:
 
         upload_url = upload_url_result["generateDatasetUploadUrl"]["uploadUrl"]
         with read_content(source) as content:
-            response = requests.put(upload_url, data=content, headers={"Content-Type": mime_type})
+            response = requests.put(
+                upload_url, data=content, headers={"Content-Type": mime_type}, verify=Settings.verify_ssl()
+            )
         response.raise_for_status()
 
         data = graphql(

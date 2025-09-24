@@ -17,7 +17,7 @@ from pathlib import Path
 import requests
 from multiprocess import get_context  # NOQA
 
-from openhexa.sdk.utils import Environment, get_environment
+from openhexa.sdk.utils import Environment, Settings, get_environment
 
 from .parameter import FunctionWithParameter, Parameter, ParameterValueError
 from .task import PipelineWithTask, Task
@@ -186,6 +186,7 @@ class Pipeline:
                     "query": query,
                     "variables": {"input": {"percent": progress}},
                 },
+                verify=Settings.verify_ssl(),
             )
             r.raise_for_status()
         else:

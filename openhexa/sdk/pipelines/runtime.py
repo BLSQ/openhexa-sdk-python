@@ -21,6 +21,7 @@ from openhexa.sdk.pipelines.parameter import (
     Parameter,
     validate_parameters,
 )
+from openhexa.sdk.utils import Settings
 
 from .pipeline import Pipeline
 
@@ -91,11 +92,14 @@ def download_pipeline(url: str, token: str, run_id: str, target_dir: str) -> Non
     """
 
     try:
+        import os
+
         response = requests.post(
             f"{url}/graphql/",
             headers={"Authorization": f"Bearer {token}"},
             json={"query": query, "variables": {"id": run_id}},
             timeout=30,
+            verify=Settings.verify_ssl(),
         )
         response.raise_for_status()
 
