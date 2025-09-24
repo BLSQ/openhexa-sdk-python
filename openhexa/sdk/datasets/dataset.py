@@ -5,6 +5,7 @@ https://github.com/BLSQ/openhexa/wiki/Using-the-OpenHEXA-SDK#working-with-datase
 """
 
 import mimetypes
+import os
 import typing
 from os import PathLike
 from pathlib import Path
@@ -38,7 +39,8 @@ class DatasetFile:
 
     def read(self):
         """Download the file content and return it."""
-        response = requests.get(self.download_url, stream=True)
+        verify_ssl = os.getenv("HEXA_VERIFY_SSL", "True").lower() not in ("0", "false")
+        response = requests.get(self.download_url, stream=True, verify=verify_ssl)
         response.raise_for_status()
         return response.content
 
@@ -260,8 +262,9 @@ class DatasetVersion:
             self.raise_upload_exception(errors)
 
         upload_url = upload_url_result["generateDatasetUploadUrl"]["uploadUrl"]
+        verify_ssl = os.getenv("HEXA_VERIFY_SSL", "True").lower() not in ("0", "false")
         with read_content(source) as content:
-            response = requests.put(upload_url, data=content, headers={"Content-Type": mime_type})
+            response = requests.put(upload_url, data=content, headers={"Content-Type": mime_type}, verify=verify_ssl)
         response.raise_for_status()
 
         data = graphql(

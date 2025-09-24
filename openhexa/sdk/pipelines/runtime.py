@@ -91,11 +91,15 @@ def download_pipeline(url: str, token: str, run_id: str, target_dir: str) -> Non
     """
 
     try:
+        import os
+
+        verify_ssl = os.getenv("HEXA_VERIFY_SSL", "True").lower() not in ("0", "false")
         response = requests.post(
             f"{url}/graphql/",
             headers={"Authorization": f"Bearer {token}"},
             json={"query": query, "variables": {"id": run_id}},
             timeout=30,
+            verify=verify_ssl,
         )
         response.raise_for_status()
 

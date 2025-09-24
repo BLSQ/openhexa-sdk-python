@@ -35,7 +35,8 @@ def graphql(operation: str, variables: dict[str | typing.Any] | None = None) -> 
         "HEXA_TOKEN"
     ]  # Works for notebooks with the membership token and pipelines with the run token
     headers = {"Authorization": f"Bearer {auth_token}"}
-    session = create_requests_session()
+    verify_ssl = os.getenv("HEXA_VERIFY_SSL", "True").lower() not in ("0", "false")
+    session = create_requests_session(verify=verify_ssl)
 
     req = session.post(
         f"{os.environ['HEXA_SERVER_URL'].rstrip('/')}/graphql/",

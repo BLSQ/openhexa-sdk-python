@@ -179,6 +179,7 @@ class Pipeline:
                             mutation updatePipelineProgress ($input: UpdatePipelineProgressInput!) {
                                 updatePipelineProgress(input: $input) { success errors }
                             }"""
+            verify_ssl = os.getenv("HEXA_VERIFY_SSL", "True").lower() not in ("0", "false")
             r = requests.post(
                 f"{os.environ['HEXA_SERVER_URL']}/graphql/",
                 headers=headers,
@@ -186,6 +187,7 @@ class Pipeline:
                     "query": query,
                     "variables": {"input": {"percent": progress}},
                 },
+                verify=verify_ssl,
             )
             r.raise_for_status()
         else:
