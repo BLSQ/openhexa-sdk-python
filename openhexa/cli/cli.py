@@ -393,7 +393,7 @@ def normalize_tag(tag: str) -> str:
     help="Functional type of the pipeline",
 )
 @click.option(
-    "--tags",
+    "--tag",
     "-t",
     multiple=True,
     help="Tags to associate with the pipeline",
