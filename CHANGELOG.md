@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.13.1](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.13.0...v2.13.1) (2025-09-25)
+
+
+### Bug Fixes
+
+* try another pattern on global level for PR name ([014ea85](https://github.com/BLSQ/openhexa-sdk-python/commit/014ea85bccd5b8e34396efbf118bed44fbca4b3f))
+* try to remove PR title pattern, to fix release ([ee36066](https://github.com/BLSQ/openhexa-sdk-python/commit/ee3606630db0743734f3307075df43f961e16efe))
+* update PR title to include version ([22864de](https://github.com/BLSQ/openhexa-sdk-python/commit/22864de7b582152a60a94e9f4f0500478b86c077))
+
 ## [2.13.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.12.2...v2.13.0) (2025-09-25)
 
 
