@@ -5,7 +5,6 @@
   "bump-patch-for-minor-pre-major": false,
   "include-v-in-tag": true,
   "separate-pull-requests": false,
-  "pull-request-title-pattern": "chore: release ${version}",
   "changelog-sections": [
     {"type":"feat","section":"Features","hidden":false},
     {"type":"fix","section":"Bug Fixes","hidden":false},
