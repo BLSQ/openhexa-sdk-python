@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.13.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.12.2...v2.13.0) (2025-09-25)
+
+
+### Features
+
+* release trigger ([c055e1c](https://github.com/BLSQ/openhexa-sdk-python/commit/c055e1cafcc7fa33c617024d610876969815d2c1))
+
+
+### Bug Fixes
+
+* include v in tag ([11fa1fc](https://github.com/BLSQ/openhexa-sdk-python/commit/11fa1fca4e663b4b9bcb9a39ed533d933be8f5c4))
+* release please configration ([3f032e3](https://github.com/BLSQ/openhexa-sdk-python/commit/3f032e3d46453c8261525aca9db66a119295dc02))
+* use manifest ([fe8978a](https://github.com/BLSQ/openhexa-sdk-python/commit/fe8978a5026ffc15fdc398c30916cb06af0e2e1f))
+
 ## [2.12.2](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.12.1...v2.12.2) (2025-09-12)
 
 
