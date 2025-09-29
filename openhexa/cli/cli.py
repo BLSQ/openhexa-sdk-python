@@ -407,7 +407,7 @@ def pipelines_push(
     description: str = None,
     link: str = None,
     functional_type: str = None,
-    tags: tuple = (),
+    tag: tuple = (),
     yes: bool = False,
 ):
     """Push a pipeline to the backend. If the pipeline already exists, it will be updated otherwise it will be created.
@@ -462,7 +462,7 @@ def pipelines_push(
         selected_pipeline = selected_pipeline or create_pipeline(pipeline.name, functional_type=functional_type)
         uploaded_pipeline_version = None
         try:
-            normalized_tags = [normalize_tag(tag) for tag in tags] if tags else []
+            normalized_tags = [normalize_tag(t) for t in tag] if tag else []
             uploaded_pipeline_version = upload_pipeline(
                 selected_pipeline["code"],
                 path,
