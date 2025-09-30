@@ -46,6 +46,7 @@ class AstTest(TestCase):
                     "tasks": [],
                     "parameters": [],
                     "timeout": None,
+                    "functional_type": None,
                 },
             )
 
@@ -73,6 +74,7 @@ class AstTest(TestCase):
                     "name": "Test pipeline",
                     "parameters": [],
                     "timeout": None,
+                    "functional_type": None,
                 },
             )
 
@@ -154,6 +156,7 @@ class AstTest(TestCase):
                         }
                     ],
                     "timeout": None,
+                    "functional_type": None,
                 },
             )
 
@@ -196,6 +199,7 @@ class AstTest(TestCase):
                         }
                     ],
                     "timeout": None,
+                    "functional_type": None,
                 },
             )
 
@@ -239,6 +243,7 @@ class AstTest(TestCase):
                         }
                     ],
                     "timeout": None,
+                    "functional_type": None,
                 },
             )
 
@@ -281,6 +286,7 @@ class AstTest(TestCase):
                         }
                     ],
                     "timeout": None,
+                    "functional_type": None,
                 },
             )
 
@@ -308,6 +314,7 @@ class AstTest(TestCase):
                     "timeout": 42,
                     "function": None,
                     "tasks": [],
+                    "functional_type": None,
                 },
             )
 
@@ -350,6 +357,7 @@ class AstTest(TestCase):
                         }
                     ],
                     "timeout": None,
+                    "functional_type": None,
                 },
             )
 
@@ -405,6 +413,7 @@ class AstTest(TestCase):
                         },
                     ],
                     "timeout": None,
+                    "functional_type": None,
                 },
             )
 
@@ -482,6 +491,7 @@ class AstTest(TestCase):
                         },
                     ],
                     "timeout": None,
+                    "functional_type": None,
                 },
             )
 
@@ -565,6 +575,7 @@ class AstTest(TestCase):
                         },
                     ],
                     "timeout": None,
+                    "functional_type": None,
                 },
             )
 
