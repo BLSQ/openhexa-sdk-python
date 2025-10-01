@@ -33,10 +33,14 @@ from openhexa.utils import create_requests_session, stringcase
 def handle_ssl_error(e):
     """Handle SSL certificate verification errors with helpful message."""
     if "SSL certificate verification failed" in str(e) or "CERTIFICATE_VERIFY_FAILED" in str(e):
-        raise GraphQLError(
+        error_msg = (
             "SSL certificate verification failed. "
             "If you want to disable SSL verification, set the environment variable: HEXA_VERIFY_SSL=false"
         )
+        if settings.debug:
+            raise GraphQLError(error_msg) from e
+        else:
+            raise GraphQLError(error_msg)
 
 
 class InvalidDefinitionError(Exception):
