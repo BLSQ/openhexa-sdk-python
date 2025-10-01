@@ -6,8 +6,36 @@ import enum
 import os
 import typing
 
+import httpx
+import requests
+
 from openhexa.graphql import BaseOpenHexaClient
 from openhexa.utils import create_requests_session
+
+
+class SSLError(Exception):
+    """Raised when SSL certificate verification fails."""
+
+    pass
+
+
+def handle_ssl_error(e: Exception) -> None:
+    """Handle SSL certificate verification errors with helpful message.
+
+    Args:
+        e: The exception to handle.
+    """
+    if isinstance(e, requests.exceptions.SSLError | httpx.ConnectError):
+        error_str = str(e)
+        if "SSL" in error_str or "CERTIFICATE" in error_str or "certificate" in error_str.lower():
+            error_msg = (
+                "SSL certificate verification failed. "
+                "If you want to disable SSL verification, set the environment variable: HEXA_VERIFY_SSL=false"
+            )
+            if Settings.debug():
+                raise SSLError(error_msg) from e
+            else:
+                raise SSLError(error_msg)
 
 
 class Settings:
@@ -45,21 +73,24 @@ def get_environment():
 
 def graphql(operation: str, variables: dict[str | typing.Any] | None = None) -> dict[str | typing.Any]:
     """Performa GraphQL query."""
-    auth_token = os.environ[
-        "HEXA_TOKEN"
-    ]  # Works for notebooks with the membership token and pipelines with the run token
+    auth_token = os.environ["HEXA_TOKEN"]
     headers = {"Authorization": f"Bearer {auth_token}"}
     session = create_requests_session(verify=Settings.verify_ssl())
 
-    req = session.post(
-        f"{os.environ['HEXA_SERVER_URL'].rstrip('/')}/graphql/",
-        headers=headers,
-        json={
-            "query": operation,
-            "variables": variables if variables is not None else {},
-        },
-    )
-    req.raise_for_status()
+    try:
+        req = session.post(
+            f"{os.environ['HEXA_SERVER_URL'].rstrip('/')}/graphql/",
+            headers=headers,
+            json={
+                "query": operation,
+                "variables": variables if variables is not None else {},
+            },
+        )
+        req.raise_for_status()
+    except (requests.exceptions.SSLError, httpx.ConnectError) as e:
+        handle_ssl_error(e)
+        raise
+
     body = req.json()
     if "errors" in body:
         raise Exception(body["errors"])
@@ -80,7 +111,11 @@ class OpenHexaClient(BaseOpenHexaClient):
         url = server_url or f"{os.environ['HEXA_SERVER_URL'].rstrip('/')}/graphql/"
         token = token or os.getenv("HEXA_TOKEN")
 
-        super().__init__(url=url, token=token, verify=Settings.verify_ssl())
+        try:
+            super().__init__(url=url, token=token, verify=Settings.verify_ssl())
+        except (requests.exceptions.SSLError, httpx.ConnectError) as e:
+            handle_ssl_error(e)
+            raise
 
 
 class Iterator(metaclass=abc.ABCMeta):
