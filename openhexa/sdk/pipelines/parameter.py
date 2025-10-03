@@ -358,6 +358,16 @@ class FileType(ParameterType):
         """Returns the python type expected for values."""
         return File
 
+    @property
+    def accepts_multiple(self) -> bool:
+        """Only allow single file selection."""
+        return False
+
+    @property
+    def accepts_choices(self) -> bool:
+        """Don't allow choices for file."""
+        return False
+
     def validate_default(self, value: typing.Any | None):
         """Validate the default value configured for this type."""
         if value is None:
