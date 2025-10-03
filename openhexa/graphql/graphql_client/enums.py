@@ -546,11 +546,19 @@ class PipelineError(str, Enum):
     PERMISSION_DENIED = "PERMISSION_DENIED"
     PIPELINE_ALREADY_COMPLETED = "PIPELINE_ALREADY_COMPLETED"
     PIPELINE_ALREADY_STOPPED = "PIPELINE_ALREADY_STOPPED"
+    PIPELINE_CODE_PARSING_ERROR = "PIPELINE_CODE_PARSING_ERROR"
     PIPELINE_DOES_NOT_SUPPORT_PARAMETERS = "PIPELINE_DOES_NOT_SUPPORT_PARAMETERS"
     PIPELINE_NOT_FOUND = "PIPELINE_NOT_FOUND"
     PIPELINE_VERSION_NOT_FOUND = "PIPELINE_VERSION_NOT_FOUND"
     TABLE_NOT_FOUND = "TABLE_NOT_FOUND"
     WORKSPACE_NOT_FOUND = "WORKSPACE_NOT_FOUND"
+
+
+class PipelineFunctionalType(str, Enum):
+    computation = "computation"
+    extraction = "extraction"
+    loading = "loading"
+    transformation = "transformation"
 
 
 class PipelineNotificationLevel(str, Enum):

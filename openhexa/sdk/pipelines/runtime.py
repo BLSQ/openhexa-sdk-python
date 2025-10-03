@@ -294,6 +294,7 @@ def get_pipeline(pipeline_path: Path) -> Pipeline:
                     Argument("connection", [ast.Constant]),
                     Argument("required", [ast.Constant], default_value=True),
                     Argument("multiple", [ast.Constant], default_value=False),
+                    Argument("directory", [ast.Constant]),
                 ),
             )
 
