@@ -25,17 +25,15 @@ def handle_ssl_error(e: Exception) -> None:
     Args:
         e: The exception to handle.
     """
-    if isinstance(e, requests.exceptions.SSLError | httpx.ConnectError):
-        error_str = str(e)
-        if "SSL" in error_str or "CERTIFICATE" in error_str or "certificate" in error_str.lower():
-            error_msg = (
-                "SSL certificate verification failed. "
-                "If you want to disable SSL verification, set the environment variable: HEXA_VERIFY_SSL=false"
-            )
-            if Settings.debug():
-                raise SSLError(error_msg) from e
-            else:
-                raise SSLError(error_msg)
+    if "SSL certificate verification failed" in str(e) or "CERTIFICATE_VERIFY_FAILED" in str(e):
+        error_msg = (
+            "SSL certificate verification failed. "
+            "If you want to disable SSL verification, set the environment variable: HEXA_VERIFY_SSL=false"
+        )
+        if Settings.debug():
+            raise SSLError(error_msg) from e
+        else:
+            raise SSLError(error_msg)
 
 
 class Settings:
