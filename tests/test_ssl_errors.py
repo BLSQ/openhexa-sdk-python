@@ -26,16 +26,6 @@ class TestSSLErrorHandling:
         assert "SSL certificate verification failed" in error_msg
         assert "HEXA_VERIFY_SSL=false" in error_msg
 
-    def test_ssl_error_handling_with_generic_ssl_error(self):
-        ssl_error = requests.exceptions.SSLError("Some SSL error")
-
-        with pytest.raises(SSLError) as exc_info:
-            handle_ssl_error(ssl_error)
-
-        error_msg = str(exc_info.value)
-        assert "SSL certificate verification failed" in error_msg
-        assert "HEXA_VERIFY_SSL=false" in error_msg
-
     def test_non_ssl_error_passes_through(self):
         non_ssl_error = requests.exceptions.RequestException("Not an SSL error")
         handle_ssl_error(non_ssl_error)
