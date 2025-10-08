@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.14.1](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.14.0...v2.14.1) (2025-10-08)
+
+
+### Bug Fixes
+
+* HEXA-1389 make functional type and tags optional ([#324](https://github.com/BLSQ/openhexa-sdk-python/issues/324)) ([0553aee](https://github.com/BLSQ/openhexa-sdk-python/commit/0553aeeea72f4f57fcaed14dc0e28ea526f4dadd))
+
+
+### Miscellaneous
+
+* **deps:** update dependency ruff to &gt;=0.14.0,&lt;0.15.0 ([#323](https://github.com/BLSQ/openhexa-sdk-python/issues/323)) ([e05d3f1](https://github.com/BLSQ/openhexa-sdk-python/commit/e05d3f1df1f3668c2c1f6fa9aea3fbe61561d09a))
+
 ## [2.14.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.13.0...v2.14.0) (2025-10-06)
 
 
