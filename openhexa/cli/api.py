@@ -290,7 +290,7 @@ def get_pipeline_from_code(pipeline_code: str) -> dict[str, typing.Any]:
     return data["pipelineByCode"]
 
 
-def create_pipeline(pipeline_name: str, functional_type: str = None):
+def create_pipeline(pipeline_name: str, functional_type: str = None, tags: list[str] = None):
     """Create a pipeline using the API."""
     if settings.current_workspace is None:
         raise NoActiveWorkspaceError
@@ -302,6 +302,9 @@ def create_pipeline(pipeline_name: str, functional_type: str = None):
 
     if functional_type is not None:
         input_data["functionalType"] = functional_type
+
+    if tags:
+        input_data["tags"] = tags
 
     data = graphql(
         """
