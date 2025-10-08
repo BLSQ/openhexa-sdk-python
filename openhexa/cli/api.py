@@ -294,6 +294,15 @@ def create_pipeline(pipeline_name: str, functional_type: str = None):
     """Create a pipeline using the API."""
     if settings.current_workspace is None:
         raise NoActiveWorkspaceError
+
+    input_data = {
+        "workspaceSlug": settings.current_workspace,
+        "name": pipeline_name,
+    }
+
+    if functional_type is not None:
+        input_data["functionalType"] = functional_type
+
     data = graphql(
         """
     mutation createPipeline($input: CreatePipelineInput!) {
@@ -308,13 +317,7 @@ def create_pipeline(pipeline_name: str, functional_type: str = None):
         }
     }
     """,
-        {
-            "input": {
-                "workspaceSlug": settings.current_workspace,
-                "name": pipeline_name,
-                "functionalType": functional_type,
-            }
-        },
+        {"input": input_data},
     )
 
     if not data["createPipeline"]["success"]:
@@ -625,6 +628,24 @@ def upload_pipeline(
         zip_file.seek(0)
 
     base64_content = base64.b64encode(zip_file.read()).decode("ascii")
+
+    input_data = {
+        "workspaceSlug": settings.current_workspace,
+        "code": target_pipeline_code,
+        "name": name,
+        "description": description,
+        "externalLink": link,
+        "zipfile": base64_content,
+        "parameters": [p.to_dict() for p in pipeline.parameters],
+        "timeout": pipeline.timeout,
+    }
+
+    if functional_type or pipeline.functional_type:
+        input_data["functionalType"] = functional_type or pipeline.functional_type
+
+    if tags:
+        input_data["tags"] = tags
+
     data = graphql(
         """
             mutation uploadPipeline($input: UploadPipelineInput!) {
@@ -651,20 +672,7 @@ def upload_pipeline(
                 }
             }
         """,
-        {
-            "input": {
-                "workspaceSlug": settings.current_workspace,
-                "code": target_pipeline_code,
-                "name": name,
-                "description": description,
-                "externalLink": link,
-                "zipfile": base64_content,
-                "parameters": [p.to_dict() for p in pipeline.parameters],
-                "timeout": pipeline.timeout,
-                "functionalType": functional_type or pipeline.functional_type,
-                "tags": tags,
-            }
-        },
+        {"input": input_data},
     )
 
     if not data["uploadPipeline"]["success"]:
