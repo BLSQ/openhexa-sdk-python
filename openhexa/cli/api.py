@@ -86,7 +86,7 @@ class PipelineDirectoryError(Exception):
 
 
 class DockerError(Exception):
-    """Raised when Docker is not running or is not installed."""
+    """Raised when Docker is not running or is not accessible."""
 
     pass
 
@@ -409,9 +409,10 @@ def run_pipeline(path: Path, config: dict, image: str = None, debug: bool = Fals
     try:
         docker_client = docker.from_env()
         docker_client.ping()
-    except docker.errors.DockerException:
+    except docker.errors.DockerException as e:
         raise DockerError(
-            "Docker is not running or is not installed. Please install Docker Desktop and start the service."
+            "Docker is not accessible. Please ensure the Docker daemon is running and the Docker socket is accessible.\n"
+            f"Error details: {str(e)}"
         )
 
     if image is None:
