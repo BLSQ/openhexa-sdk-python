@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.15.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.14.1...v2.15.0) (2025-10-13)
+
+
+### Features
+
+* Add directory argument to allow restricting file browser on specific folder (HEXA-1356) ([b22fd96](https://github.com/BLSQ/openhexa-sdk-python/commit/b22fd9651e36f00dbccf33469927e157a688a885))
+
 ## [2.14.1](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.14.0...v2.14.1) (2025-10-08)
 
 
