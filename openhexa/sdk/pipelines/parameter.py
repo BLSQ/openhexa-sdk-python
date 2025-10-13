@@ -358,6 +358,16 @@ class FileType(ParameterType):
         """Returns the python type expected for values."""
         return File
 
+    @property
+    def accepts_multiple(self) -> bool:
+        """Only allow single file selection."""
+        return False
+
+    @property
+    def accepts_choices(self) -> bool:
+        """Don't allow choices for file."""
+        return False
+
     def validate_default(self, value: typing.Any | None):
         """Validate the default value configured for this type."""
         if value is None:
@@ -444,6 +454,7 @@ class Parameter:
         connection: str | None = None,
         required: bool = True,
         multiple: bool = False,
+        directory: str | None = None,
     ):
         validate_pipeline_parameter_code(code)
         self.code = code
@@ -480,6 +491,7 @@ class Parameter:
 
         self.widget = widget
         self.connection = connection
+        self.directory = directory
 
         self._validate_default(default, multiple)
         self.default = default
@@ -504,6 +516,7 @@ class Parameter:
             "connection": self.connection,
             "required": self.required,
             "multiple": self.multiple,
+            "directory": self.directory,
         }
 
     def _validate_single(self, value: typing.Any):
@@ -622,6 +635,7 @@ def parameter(
     default: typing.Any | None = None,
     required: bool = True,
     multiple: bool = False,
+    directory: str | None = None,
 ):
     """Decorate a pipeline function by attaching a parameter to it..
 
@@ -651,6 +665,8 @@ def parameter(
     multiple : bool, default=True
         Whether this parameter should be provided multiple values (if True, the value must be provided as a list of
         values of the chosen type)
+    directory : str, optional
+        An optional parameter to force file selection to specific directory (only used for parater type File). If the directory does not exist, it will be ignored.
 
     Returns
     -------
@@ -673,6 +689,7 @@ def parameter(
                 widget=widget,
                 connection=connection,
                 multiple=multiple,
+                directory=directory,
             ),
         )
 

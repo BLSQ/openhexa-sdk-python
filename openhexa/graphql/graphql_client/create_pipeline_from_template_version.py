@@ -10,9 +10,9 @@ from .enums import CreatePipelineFromTemplateVersionError
 
 
 class CreatePipelineFromTemplateVersion(BaseModel):
-    create_pipeline_from_template_version: (
-        "CreatePipelineFromTemplateVersionCreatePipelineFromTemplateVersion"
-    ) = Field(alias="createPipelineFromTemplateVersion")
+    create_pipeline_from_template_version: "CreatePipelineFromTemplateVersionCreatePipelineFromTemplateVersion" = Field(
+        alias="createPipelineFromTemplateVersion"
+    )
 
 
 class CreatePipelineFromTemplateVersionCreatePipelineFromTemplateVersion(BaseModel):

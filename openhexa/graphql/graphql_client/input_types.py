@@ -14,6 +14,7 @@ from .enums import (
     OrganizationMembershipRole,
     ParameterWidget,
     PermissionMode,
+    PipelineFunctionalType,
     PipelineNotificationLevel,
     WorkspaceMembershipRole,
 )
@@ -141,6 +142,9 @@ class CreatePipelineFromTemplateVersionInput(BaseModel):
 
 class CreatePipelineInput(BaseModel):
     code: Optional[str] = None
+    functional_type: Optional[PipelineFunctionalType] = Field(
+        alias="functionalType", default=None
+    )
     name: str
     notebook_path: Optional[str] = Field(alias="notebookPath", default=None)
     workspace_slug: str = Field(alias="workspaceSlug")
@@ -379,6 +383,7 @@ class ParameterInput(BaseModel):
     code: str
     connection: Optional[str] = None
     default: Optional[Any] = None
+    directory: Optional[str] = None
     help: Optional[str] = None
     multiple: Optional[bool] = None
     name: Optional[str] = None
@@ -598,9 +603,13 @@ class UpdatePipelineInput(BaseModel):
     )
     config: Optional[Any] = None
     description: Optional[str] = None
+    functional_type: Optional[PipelineFunctionalType] = Field(
+        alias="functionalType", default=None
+    )
     id: Any
     name: Optional[str] = None
     schedule: Optional[str] = None
+    tags: Optional[List[str]] = None
     webhook_enabled: Optional[bool] = Field(alias="webhookEnabled", default=None)
 
 
@@ -675,9 +684,13 @@ class UploadPipelineInput(BaseModel):
     config: Optional[Any] = None
     description: Optional[str] = None
     external_link: Optional[Any] = Field(alias="externalLink", default=None)
+    functional_type: Optional[PipelineFunctionalType] = Field(
+        alias="functionalType", default=None
+    )
     name: Optional[str] = None
-    parameters: List["ParameterInput"]
+    parameters: Optional[List["ParameterInput"]] = None
     pipeline_code: Optional[str] = Field(alias="pipelineCode", default=None)
+    tags: Optional[List[str]] = None
     timeout: Optional[int] = None
     workspace_slug: str = Field(alias="workspaceSlug")
     zipfile: str

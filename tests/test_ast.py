@@ -153,6 +153,7 @@ class AstTest(TestCase):
                             "connection": None,
                             "help": "Param help",
                             "required": True,
+                            "directory": None,
                         }
                     ],
                     "timeout": None,
@@ -196,6 +197,7 @@ class AstTest(TestCase):
                             "connection": None,
                             "help": "Param help",
                             "required": True,
+                            "directory": None,
                         }
                     ],
                     "timeout": None,
@@ -240,6 +242,7 @@ class AstTest(TestCase):
                             "connection": None,
                             "help": "Dataset",
                             "required": False,
+                            "directory": None,
                         }
                     ],
                     "timeout": None,
@@ -283,6 +286,7 @@ class AstTest(TestCase):
                             "connection": None,
                             "help": "Param help",
                             "required": True,
+                            "directory": None,
                         }
                     ],
                     "timeout": None,
@@ -354,6 +358,7 @@ class AstTest(TestCase):
                             "connection": None,
                             "help": "Param help",
                             "required": True,
+                            "directory": None,
                         }
                     ],
                     "timeout": None,
@@ -398,6 +403,7 @@ class AstTest(TestCase):
                             "connection": None,
                             "help": "Param help",
                             "required": True,
+                            "directory": None,
                         },
                         {
                             "choices": ["a", "b"],
@@ -410,6 +416,7 @@ class AstTest(TestCase):
                             "connection": None,
                             "help": "Param help 2",
                             "required": True,
+                            "directory": None,
                         },
                     ],
                     "timeout": None,
@@ -476,6 +483,7 @@ class AstTest(TestCase):
                             "connection": None,
                             "help": None,
                             "required": True,
+                            "directory": None,
                         },
                         {
                             "code": "data_element_ids",
@@ -488,6 +496,7 @@ class AstTest(TestCase):
                             "choices": None,
                             "help": None,
                             "required": True,
+                            "directory": None,
                         },
                     ],
                     "timeout": None,
@@ -536,6 +545,7 @@ class AstTest(TestCase):
                             "connection": None,
                             "help": None,
                             "required": True,
+                            "directory": None,
                         },
                         {
                             "code": "org_units",
@@ -548,6 +558,7 @@ class AstTest(TestCase):
                             "choices": None,
                             "help": None,
                             "required": True,
+                            "directory": None,
                         },
                         {
                             "code": "projects",
@@ -560,6 +571,7 @@ class AstTest(TestCase):
                             "choices": None,
                             "help": None,
                             "required": True,
+                            "directory": None,
                         },
                         {
                             "code": "forms",
@@ -572,6 +584,7 @@ class AstTest(TestCase):
                             "choices": None,
                             "help": None,
                             "required": True,
+                            "directory": None,
                         },
                     ],
                     "timeout": None,
