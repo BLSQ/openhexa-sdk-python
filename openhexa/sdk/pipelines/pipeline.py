@@ -21,7 +21,7 @@ from multiprocess import get_context  # NOQA
 from openhexa.sdk.utils import Environment, Settings, get_environment
 
 from .parameter import FunctionWithParameter, Parameter, ParameterValueError
-from .task import P, PipelineWithTask, R, Task
+from .task import P, R, Task
 from .utils import get_local_workspace_config
 
 logger = getLogger(__name__)
