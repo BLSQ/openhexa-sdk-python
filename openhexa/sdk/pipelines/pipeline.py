@@ -20,7 +20,7 @@ from multiprocess import get_context  # NOQA
 from openhexa.sdk.utils import Environment, Settings, get_environment
 
 from .parameter import FunctionWithParameter, Parameter, ParameterValueError
-from .task import PipelineWithTask, Task
+from .task import P, PipelineWithTask, R, Task
 from .utils import get_local_workspace_config
 
 logger = getLogger(__name__)
@@ -60,7 +60,7 @@ class Pipeline:
         self.functional_type = functional_type
         self.tasks = []
 
-    def task(self, function) -> PipelineWithTask:
+    def task(self, function: typing.Callable[P, R]) -> PipelineWithTask[P, R]:
         """Task decorator.
 
         Examples
