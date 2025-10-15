@@ -144,7 +144,7 @@ class PipelineWithTask(typing.Generic[P, R]):
         self.pipeline = pipeline
         wraps(function)(self)
 
-    def __call__(self, *task_args: P.args, **task_kwargs: P.kwargs) -> Task:
+    def __call__(self, *task_args: typing.Any, **task_kwargs: typing.Any) -> Task:
         """Attach the new task to the decorated pipeline and return it."""
         task = Task(self.function)(*task_args, **task_kwargs)
         self.pipeline.tasks.append(task)
