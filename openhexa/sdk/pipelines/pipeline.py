@@ -88,10 +88,57 @@ class Pipeline:
         config : typing.Dict[str, typing.Any]
             The parameter values to use for this pipeline run.
         """
+        from openhexa.sdk.pipelines.heartbeat import heartbeat_manager
+        from openhexa.sdk.pipelines.run import current_run
+
         now = datetime.datetime.now(tz=datetime.UTC).replace(microsecond=0).isoformat()
         print(f'{now} Starting pipeline "{self.name}"')
 
-        # Validate / default parameters
+        validated_config = self._validate_config(config)
+
+        with heartbeat_manager(current_run, interval=30):
+            # Execute pipeline function
+            self.function(**validated_config)
+            # Execute tasks using Pool's built-in context manager
+            context = get_context("spawn")
+            with context.Pool() as pool:  # FIXME: set max size of pool
+                self._execute_tasks(pool)
+
+        now = datetime.datetime.now(tz=datetime.UTC).replace(microsecond=0).isoformat()
+        print(f'{now} Successfully completed pipeline "{self.name}"')
+
+    def to_dict(self):
+        """Return a dictionary representation of the pipeline."""
+        return {
+            "name": self.name,
+            "parameters": [p.to_dict() for p in self.parameters],
+            "timeout": self.timeout,
+            "functional_type": self.functional_type,
+            "function": self.function.__dict__ if self.function else None,
+            "tasks": [t.__dict__ for t in self.tasks],
+        }
+
+    def _get_available_tasks(self) -> list[Task]:
+        return [task for task in self.tasks if task.is_ready()]
+
+    def _validate_config(self, config: dict[str, typing.Any]) -> dict[str, typing.Any]:
+        """Validate and default parameters.
+
+        Parameters
+        ----------
+        config : dict[str, typing.Any]
+            The raw configuration provided by the user.
+
+        Returns
+        -------
+        dict[str, typing.Any]
+            The validated configuration.
+
+        Raises
+        ------
+        ParameterValueError
+            If the config contains invalid keys or parameter validation fails.
+        """
         validated_config = {}
         for parameter in self.parameters:
             value = config.pop(parameter.code, None)
@@ -101,12 +148,22 @@ class Pipeline:
         if len(config) > 0:
             raise ParameterValueError(f"The provided config contains invalid key(s): {', '.join(list(config.keys()))}")
 
-        self.function(**validated_config)
+        return validated_config
 
-        # managing variables
+    def _execute_tasks(self, pool):
+        """Execute all tasks using the provided multiprocessing pool.
+
+        Parameters
+        ----------
+        pool : multiprocess.Pool
+            The multiprocessing pool to use for task execution.
+
+        Raises
+        ------
+        PipelineRunError
+            If any task fails during execution.
+        """
         result_list = []
-        context = get_context("spawn")
-        pool = context.Pool()  # FIXME: set max size of pool
         total = len(self.tasks)
         completed = 0
 
@@ -155,26 +212,6 @@ class Pipeline:
                 else:
                     # busy loop
                     time.sleep(0.3)
-
-        pool.close()
-        pool.join()
-
-        now = datetime.datetime.now(tz=datetime.UTC).replace(microsecond=0).isoformat()
-        print(f'{now} Successfully completed pipeline "{self.name}"')
-
-    def to_dict(self):
-        """Return a dictionary representation of the pipeline."""
-        return {
-            "name": self.name,
-            "parameters": [p.to_dict() for p in self.parameters],
-            "timeout": self.timeout,
-            "functional_type": self.functional_type,
-            "function": self.function.__dict__ if self.function else None,
-            "tasks": [t.__dict__ for t in self.tasks],
-        }
-
-    def _get_available_tasks(self) -> list[Task]:
-        return [task for task in self.tasks if task.is_ready()]
 
     def _update_progress(self, progress: int):
         if self._connected:
