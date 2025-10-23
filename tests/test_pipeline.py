@@ -199,17 +199,20 @@ def test_pipeline_run_connection_postgres_parameter_config(workspace):
         "HEXA_RUN_ID": "test-run-id",
     },
 )
-@patch("openhexa.sdk.pipelines.heartbeat.graphql")
+@patch("openhexa.sdk.pipelines.heartbeat.OpenHexaClient")
 @patch("openhexa.sdk.utils.get_environment")
-def test_pipeline_run_with_heartbeat_in_cloud(mock_get_environment, mock_graphql):
+def test_pipeline_run_with_heartbeat_in_cloud(mock_get_environment, mock_client_class):
     """Test that pipeline.run() starts heartbeat manager in cloud environment."""
     from openhexa.sdk.utils import Environment
 
     # Mock cloud environment
     mock_get_environment.return_value = Environment.CLOUD_PIPELINE
 
-    # Mock successful heartbeat response
-    mock_graphql.return_value = {"data": {"updatePipelineHeartbeat": {"success": True, "errors": []}}}
+    # Mock the client instance
+    mock_client_instance = Mock()
+    mock_result = Mock(success=True, errors=[])
+    mock_client_instance.update_pipeline_heartbeat.return_value = mock_result
+    mock_client_class.return_value = mock_client_instance
 
     pipeline_func = Mock()
     parameter_1 = Parameter("arg1", type=str, default="default")
@@ -226,8 +229,8 @@ def test_pipeline_run_with_heartbeat_in_cloud(mock_get_environment, mock_graphql
 
 
 @patch.dict(os.environ, {}, clear=True)
-@patch("openhexa.sdk.pipelines.heartbeat.graphql")
-def test_pipeline_run_without_heartbeat_locally(mock_graphql):
+@patch("openhexa.sdk.pipelines.heartbeat.OpenHexaClient")
+def test_pipeline_run_without_heartbeat_locally(mock_client_class):
     """Test that pipeline.run() does not start heartbeat when running locally."""
     pipeline_func = Mock()
     parameter_1 = Parameter("arg1", type=str, default="default")
@@ -239,8 +242,8 @@ def test_pipeline_run_without_heartbeat_locally(mock_graphql):
     # Verify pipeline function was called
     pipeline_func.assert_called_once_with(arg1="test_value")
 
-    # Verify no heartbeat was sent (not connected)
-    mock_graphql.assert_not_called()
+    # Verify no heartbeat client was created (not connected)
+    mock_client_class.assert_not_called()
 
 
 @patch.dict(
@@ -251,9 +254,9 @@ def test_pipeline_run_without_heartbeat_locally(mock_graphql):
         "HEXA_RUN_ID": "test-run-id",
     },
 )
-@patch("openhexa.sdk.pipelines.heartbeat.graphql")
+@patch("openhexa.sdk.pipelines.heartbeat.OpenHexaClient")
 @patch("openhexa.sdk.utils.get_environment")
-def test_pipeline_run_heartbeat_continues_on_error(mock_get_environment, mock_graphql):
+def test_pipeline_run_heartbeat_continues_on_error(mock_get_environment, mock_client_class):
     """Test that heartbeat continues even if GraphQL fails."""
     from openhexa.sdk.utils import Environment
 
@@ -261,7 +264,7 @@ def test_pipeline_run_heartbeat_continues_on_error(mock_get_environment, mock_gr
     mock_get_environment.return_value = Environment.CLOUD_PIPELINE
 
     # Mock heartbeat failure (should not crash pipeline)
-    mock_graphql.side_effect = Exception("Network error")
+    mock_client_class.side_effect = Exception("Network error")
 
     pipeline_func = Mock()
     parameter_1 = Parameter("arg1", type=str, default="default")

@@ -48,24 +48,20 @@ class HeartbeatThread(threading.Thread):
 
     def _send_heartbeat(self):
         """Send a single heartbeat via GraphQL mutation."""
-        from openhexa.sdk.utils import graphql
+        from openhexa.sdk.utils import OpenHexaClient
 
-        mutation = """
-        mutation UpdatePipelineHeartbeat($input: UpdatePipelineHeartbeatInput!) {
-            updatePipelineHeartbeat(input: $input) {
-                success
-                errors
-            }
-        }
-        """
+        try:
+            client = OpenHexaClient()
+            result = client.update_pipeline_heartbeat()
 
-        result = graphql(mutation, {"input": {}})
-        if result.get("data", {}).get("updatePipelineHeartbeat", {}).get("success"):
-            self.logger.debug("Heartbeat sent successfully")
-        else:
-            errors = result.get("data", {}).get("updatePipelineHeartbeat", {}).get("errors", [])
-            if errors:
-                self.logger.warning(f"Heartbeat returned errors: {errors}")
+            if result.success:
+                self.logger.debug("Heartbeat sent successfully")
+            else:
+                if result.errors:
+                    self.logger.warning(f"Heartbeat returned errors: {result.errors}")
+        except Exception as e:
+            # Log error but don't raise - heartbeat failures shouldn't crash the pipeline
+            self.logger.warning(f"Failed to send heartbeat: {e}")
 
     def stop(self):
         """Signal the thread to stop."""

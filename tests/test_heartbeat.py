@@ -23,61 +23,63 @@ class TestHeartbeatThread:
         assert thread.name == "PipelineHeartbeat"
         assert not thread.stop_event.is_set()
 
-    @patch("openhexa.sdk.pipelines.heartbeat.graphql")
-    def test_heartbeat_sends_graphql_mutation(self, mock_graphql):
+    @patch("openhexa.sdk.pipelines.heartbeat.OpenHexaClient")
+    def test_heartbeat_sends_graphql_mutation(self, mock_client_class):
         """Test that _send_heartbeat calls GraphQL mutation correctly."""
         mock_run_context = Mock(spec=CurrentRun)
-        mock_graphql.return_value = {"data": {"updatePipelineHeartbeat": {"success": True, "errors": []}}}
+
+        # Mock the client instance and result
+        mock_client_instance = Mock()
+        mock_result = Mock(success=True, errors=[])
+        mock_client_instance.update_pipeline_heartbeat.return_value = mock_result
+        mock_client_class.return_value = mock_client_instance
 
         thread = HeartbeatThread(mock_run_context, interval=30)
         thread._send_heartbeat()
 
-        # Verify GraphQL was called with correct mutation
-        mock_graphql.assert_called_once()
-        args, kwargs = mock_graphql.call_args
-        mutation = args[0]
-        variables = args[1]
+        # Verify client was instantiated and method was called
+        mock_client_class.assert_called_once()
+        mock_client_instance.update_pipeline_heartbeat.assert_called_once()
 
-        assert "updatePipelineHeartbeat" in mutation
-        assert "UpdatePipelineHeartbeatInput" in mutation
-        assert variables == {"input": {}}
-
-    @patch("openhexa.sdk.pipelines.heartbeat.graphql")
-    def test_heartbeat_handles_graphql_errors(self, mock_graphql):
+    @patch("openhexa.sdk.pipelines.heartbeat.OpenHexaClient")
+    def test_heartbeat_handles_graphql_errors(self, mock_client_class):
         """Test that heartbeat handles GraphQL errors gracefully."""
         mock_run_context = Mock(spec=CurrentRun)
-        mock_graphql.return_value = {
-            "data": {
-                "updatePipelineHeartbeat": {
-                    "success": False,
-                    "errors": ["PIPELINE_NOT_FOUND"],
-                }
-            }
-        }
+
+        # Mock the client instance with error response
+        mock_client_instance = Mock()
+        mock_result = Mock(success=False, errors=["PIPELINE_NOT_FOUND"])
+        mock_client_instance.update_pipeline_heartbeat.return_value = mock_result
+        mock_client_class.return_value = mock_client_instance
 
         thread = HeartbeatThread(mock_run_context, interval=30)
         # Should not raise exception
         thread._send_heartbeat()
 
-        mock_graphql.assert_called_once()
+        mock_client_instance.update_pipeline_heartbeat.assert_called_once()
 
-    @patch("openhexa.sdk.pipelines.heartbeat.graphql")
-    def test_heartbeat_handles_exceptions(self, mock_graphql):
+    @patch("openhexa.sdk.pipelines.heartbeat.OpenHexaClient")
+    def test_heartbeat_handles_exceptions(self, mock_client_class):
         """Test that heartbeat handles exceptions without crashing."""
         mock_run_context = Mock(spec=CurrentRun)
-        mock_graphql.side_effect = Exception("Network error")
+        mock_client_class.side_effect = Exception("Network error")
 
         thread = HeartbeatThread(mock_run_context, interval=30)
         # Should not raise exception
         thread._send_heartbeat()
 
-        mock_graphql.assert_called_once()
+        mock_client_class.assert_called_once()
 
-    @patch("openhexa.sdk.pipelines.heartbeat.graphql")
-    def test_heartbeat_thread_runs_periodically(self, mock_graphql):
+    @patch("openhexa.sdk.pipelines.heartbeat.OpenHexaClient")
+    def test_heartbeat_thread_runs_periodically(self, mock_client_class):
         """Test that heartbeat thread sends heartbeats periodically."""
         mock_run_context = Mock(spec=CurrentRun)
-        mock_graphql.return_value = {"data": {"updatePipelineHeartbeat": {"success": True, "errors": []}}}
+
+        # Mock the client instance
+        mock_client_instance = Mock()
+        mock_result = Mock(success=True, errors=[])
+        mock_client_instance.update_pipeline_heartbeat.return_value = mock_result
+        mock_client_class.return_value = mock_client_instance
 
         thread = HeartbeatThread(mock_run_context, interval=0.1)  # 100ms for fast test
         thread.start()
@@ -88,14 +90,18 @@ class TestHeartbeatThread:
         thread.join(timeout=1)
 
         # Verify multiple calls were made
-        assert mock_graphql.call_count >= 2
+        assert mock_client_instance.update_pipeline_heartbeat.call_count >= 2
 
     def test_heartbeat_thread_stops_gracefully(self):
         """Test that heartbeat thread stops when stop() is called."""
         mock_run_context = Mock(spec=CurrentRun)
 
-        with patch("openhexa.sdk.pipelines.heartbeat.graphql") as mock_graphql:
-            mock_graphql.return_value = {"data": {"updatePipelineHeartbeat": {"success": True, "errors": []}}}
+        with patch("openhexa.sdk.pipelines.heartbeat.OpenHexaClient") as mock_client_class:
+            # Mock the client instance
+            mock_client_instance = Mock()
+            mock_result = Mock(success=True, errors=[])
+            mock_client_instance.update_pipeline_heartbeat.return_value = mock_result
+            mock_client_class.return_value = mock_client_instance
 
             thread = HeartbeatThread(mock_run_context, interval=10)
             thread.start()
@@ -116,12 +122,17 @@ class TestHeartbeatManager:
     """Test suite for heartbeat_manager context manager."""
 
     @patch.object(CurrentRun, "_connected", True)
-    @patch("openhexa.sdk.pipelines.heartbeat.graphql")
-    def test_heartbeat_manager_starts_and_stops_thread(self, mock_graphql):
+    @patch("openhexa.sdk.pipelines.heartbeat.OpenHexaClient")
+    def test_heartbeat_manager_starts_and_stops_thread(self, mock_client_class):
         """Test that heartbeat_manager starts thread on enter and stops on exit."""
         mock_run_context = Mock(spec=CurrentRun)
         mock_run_context._connected = True
-        mock_graphql.return_value = {"data": {"updatePipelineHeartbeat": {"success": True, "errors": []}}}
+
+        # Mock the client instance
+        mock_client_instance = Mock()
+        mock_result = Mock(success=True, errors=[])
+        mock_client_instance.update_pipeline_heartbeat.return_value = mock_result
+        mock_client_class.return_value = mock_client_instance
 
         thread = None
         with heartbeat_manager(mock_run_context, interval=0.1) as hb_thread:
@@ -143,12 +154,17 @@ class TestHeartbeatManager:
             assert thread is None
 
     @patch.object(CurrentRun, "_connected", True)
-    @patch("openhexa.sdk.pipelines.heartbeat.graphql")
-    def test_heartbeat_manager_stops_thread_on_exception(self, mock_graphql):
+    @patch("openhexa.sdk.pipelines.heartbeat.OpenHexaClient")
+    def test_heartbeat_manager_stops_thread_on_exception(self, mock_client_class):
         """Test that heartbeat_manager stops thread even when exception occurs."""
         mock_run_context = Mock(spec=CurrentRun)
         mock_run_context._connected = True
-        mock_graphql.return_value = {"data": {"updatePipelineHeartbeat": {"success": True, "errors": []}}}
+
+        # Mock the client instance
+        mock_client_instance = Mock()
+        mock_result = Mock(success=True, errors=[])
+        mock_client_instance.update_pipeline_heartbeat.return_value = mock_result
+        mock_client_class.return_value = mock_client_instance
 
         thread = None
         with pytest.raises(ValueError):
@@ -162,30 +178,40 @@ class TestHeartbeatManager:
         assert not thread.is_alive()
 
     @patch.object(CurrentRun, "_connected", True)
-    @patch("openhexa.sdk.pipelines.heartbeat.graphql")
-    def test_heartbeat_manager_custom_interval(self, mock_graphql):
+    @patch("openhexa.sdk.pipelines.heartbeat.OpenHexaClient")
+    def test_heartbeat_manager_custom_interval(self, mock_client_class):
         """Test that heartbeat_manager respects custom interval."""
         mock_run_context = Mock(spec=CurrentRun)
         mock_run_context._connected = True
-        mock_graphql.return_value = {"data": {"updatePipelineHeartbeat": {"success": True, "errors": []}}}
+
+        # Mock the client instance
+        mock_client_instance = Mock()
+        mock_result = Mock(success=True, errors=[])
+        mock_client_instance.update_pipeline_heartbeat.return_value = mock_result
+        mock_client_class.return_value = mock_client_instance
 
         with heartbeat_manager(mock_run_context, interval=60) as thread:
             assert thread.interval == 60
 
     @patch.object(CurrentRun, "_connected", True)
-    @patch("openhexa.sdk.pipelines.heartbeat.graphql")
-    def test_heartbeat_manager_sends_heartbeats_during_execution(self, mock_graphql):
+    @patch("openhexa.sdk.pipelines.heartbeat.OpenHexaClient")
+    def test_heartbeat_manager_sends_heartbeats_during_execution(self, mock_client_class):
         """Test that heartbeats are sent continuously during pipeline execution."""
         mock_run_context = Mock(spec=CurrentRun)
         mock_run_context._connected = True
-        mock_graphql.return_value = {"data": {"updatePipelineHeartbeat": {"success": True, "errors": []}}}
+
+        # Mock the client instance
+        mock_client_instance = Mock()
+        mock_result = Mock(success=True, errors=[])
+        mock_client_instance.update_pipeline_heartbeat.return_value = mock_result
+        mock_client_class.return_value = mock_client_instance
 
         with heartbeat_manager(mock_run_context, interval=0.05):
             # Simulate pipeline work
             time.sleep(0.2)
 
         # Verify multiple heartbeats were sent
-        assert mock_graphql.call_count >= 2
+        assert mock_client_instance.update_pipeline_heartbeat.call_count >= 2
 
     @patch.object(CurrentRun, "_connected", True)
     @patch("openhexa.sdk.pipelines.heartbeat.HeartbeatThread")
