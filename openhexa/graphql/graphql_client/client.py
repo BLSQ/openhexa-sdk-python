@@ -84,6 +84,10 @@ from .remove_webapp_from_favorites import (
 from .stop_pipeline import StopPipeline, StopPipelineStopPipeline
 from .update_connection import UpdateConnection, UpdateConnectionUpdateConnection
 from .update_dataset import UpdateDataset, UpdateDatasetUpdateDataset
+from .update_pipeline_heartbeat import (
+    UpdatePipelineHeartbeat,
+    UpdatePipelineHeartbeatUpdatePipelineHeartbeat,
+)
 from .update_webapp import UpdateWebapp, UpdateWebappUpdateWebapp
 from .update_workspace import UpdateWorkspace, UpdateWorkspaceUpdateWorkspace
 from .upgrade_pipeline_version_from_template import (
@@ -309,6 +313,29 @@ class Client(BaseClient):
         )
         data = self.get_data(response)
         return StopPipeline.model_validate(data).stop_pipeline
+
+    def update_pipeline_heartbeat(
+        self, **kwargs: Any
+    ) -> UpdatePipelineHeartbeatUpdatePipelineHeartbeat:
+        query = gql(
+            """
+            mutation UpdatePipelineHeartbeat {
+              updatePipelineHeartbeat {
+                success
+                errors
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {}
+        response = self.execute(
+            query=query,
+            operation_name="UpdatePipelineHeartbeat",
+            variables=variables,
+            **kwargs
+        )
+        data = self.get_data(response)
+        return UpdatePipelineHeartbeat.model_validate(data).update_pipeline_heartbeat
 
     def add_pipeline_recipient(
         self, input: CreatePipelineRecipientInput, **kwargs: Any

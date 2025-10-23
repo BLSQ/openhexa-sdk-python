@@ -388,6 +388,10 @@ from .update_dataset import (
     UpdateDatasetUpdateDataset,
     UpdateDatasetUpdateDatasetDataset,
 )
+from .update_pipeline_heartbeat import (
+    UpdatePipelineHeartbeat,
+    UpdatePipelineHeartbeatUpdatePipelineHeartbeat,
+)
 from .update_webapp import UpdateWebapp, UpdateWebappUpdateWebapp
 from .update_workspace import (
     UpdateWorkspace,
@@ -737,6 +741,8 @@ __all__ = [
     "UpdateOrganizationMemberError",
     "UpdateOrganizationMemberInput",
     "UpdatePipelineError",
+    "UpdatePipelineHeartbeat",
+    "UpdatePipelineHeartbeatUpdatePipelineHeartbeat",
     "UpdatePipelineInput",
     "UpdatePipelineProgressInput",
     "UpdatePipelineRecipientInput",

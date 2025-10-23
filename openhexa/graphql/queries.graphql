@@ -112,6 +112,13 @@ mutation StopPipeline($input: StopPipelineInput!) {
   }
 }
 
+mutation UpdatePipelineHeartbeat {
+  updatePipelineHeartbeat {
+    success
+    errors
+  }
+}
+
 mutation AddPipelineRecipient($input: CreatePipelineRecipientInput!) {
   addPipelineRecipient(input: $input) {
     success
