@@ -10,9 +10,9 @@ from .enums import UpgradePipelineVersionFromTemplateError
 
 
 class UpgradePipelineVersionFromTemplate(BaseModel):
-    upgrade_pipeline_version_from_template: "UpgradePipelineVersionFromTemplateUpgradePipelineVersionFromTemplate" = Field(
-        alias="upgradePipelineVersionFromTemplate"
-    )
+    upgrade_pipeline_version_from_template: (
+        "UpgradePipelineVersionFromTemplateUpgradePipelineVersionFromTemplate"
+    ) = Field(alias="upgradePipelineVersionFromTemplate")
 
 
 class UpgradePipelineVersionFromTemplateUpgradePipelineVersionFromTemplate(BaseModel):

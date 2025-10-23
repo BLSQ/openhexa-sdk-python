@@ -147,6 +147,7 @@ class CreatePipelineInput(BaseModel):
     )
     name: str
     notebook_path: Optional[str] = Field(alias="notebookPath", default=None)
+    tags: Optional[List[str]] = None
     workspace_slug: str = Field(alias="workspaceSlug")
 
 
@@ -638,8 +639,12 @@ class UpdateTeamInput(BaseModel):
 class UpdateTemplateInput(BaseModel):
     config: Optional[Any] = None
     description: Optional[str] = None
+    functional_type: Optional[PipelineFunctionalType] = Field(
+        alias="functionalType", default=None
+    )
     id: Any
     name: Optional[str] = None
+    tags: Optional[List[str]] = None
 
 
 class UpdateTemplateVersionInput(BaseModel):
