@@ -11,6 +11,12 @@ from contextlib import contextmanager
 logger = logging.getLogger(__name__)
 
 
+# TODO : get generated schema and cogen
+# TODO : review code
+# TODO : validate tests
+# TODO : run locally
+
+
 class HeartbeatThread(threading.Thread):
     """Background thread that sends periodic heartbeats to the OpenHEXA backend."""
 
