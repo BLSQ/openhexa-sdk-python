@@ -1,11 +1,10 @@
 """Pipeline run module."""
 
-import datetime
 import errno
 import os
 
 from openhexa.sdk.pipelines.log_level import LogLevel
-from openhexa.sdk.utils import Environment, get_environment, graphql
+from openhexa.sdk.utils import Environment, get_environment, get_timestamp, graphql
 from openhexa.sdk.workspaces import workspace
 
 
@@ -119,8 +118,7 @@ class CurrentRun:
                 {"input": {"priority": log_level.name, "message": str(message)}},
             )
         else:
-            now = datetime.datetime.now(tz=datetime.UTC).replace(microsecond=0).isoformat()
-            print(now, log_level.name, message)
+            print(get_timestamp(), log_level.name, message)
 
 
 if get_environment() == Environment.CLOUD_JUPYTER:

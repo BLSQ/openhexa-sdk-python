@@ -8,7 +8,7 @@ from contextlib import contextmanager
 
 from openhexa.sdk.pipelines.run import CurrentRun
 
-from ..utils import OpenHexaClient
+from ..utils import OpenHexaClient, get_timestamp
 
 
 class HeartbeatThread(threading.Thread):
@@ -35,11 +35,11 @@ class HeartbeatThread(threading.Thread):
             try:
                 result = OpenHexaClient().update_pipeline_heartbeat()
                 if result.success:
-                    print("Heartbeat sent successfully")
+                    print(f"{get_timestamp()} Heartbeat sent successfully")
                 else:
-                    print(f"Heartbeat failed, returned errors: {result.errors}")
+                    print(f"{get_timestamp()} Heartbeat failed, returned errors: {result.errors}")
             except Exception as e:
-                print(f"Exception while trying to send heartbeat to Openhexa Backend: {e}")
+                print(f"{get_timestamp()} Exception while trying to send heartbeat to Openhexa Backend: {e}")
 
             # Wait for next interval or stop signal
             self.stop_event.wait(self.interval)
@@ -79,11 +79,11 @@ def heartbeat_manager(run_context: CurrentRun, interval: float = 30):
 
     thread = HeartbeatThread(run_context, interval=interval)
     thread.start()
-    print("Heartbeat thread started")
+    print(f"{get_timestamp()} Heartbeat thread started")
 
     try:
         yield thread
     finally:
         thread.stop()
         thread.join(timeout=5)
-        print("Heartbeat thread stopped")
+        print(f"{get_timestamp()} Heartbeat thread stopped")

@@ -5,7 +5,6 @@ https://github.com/BLSQ/openhexa/wiki/Writing-OpenHEXA-pipelines for more inform
 """
 
 import argparse
-import datetime
 import json
 import os
 import sys
@@ -17,7 +16,7 @@ from pathlib import Path
 import requests
 from multiprocess import get_context  # NOQA
 
-from openhexa.sdk.utils import Environment, Settings, get_environment
+from openhexa.sdk.utils import Environment, Settings, get_environment, get_timestamp
 
 from .heartbeat import heartbeat_manager
 from .parameter import FunctionWithParameter, Parameter, ParameterValueError
@@ -91,8 +90,7 @@ class Pipeline:
         """
         from .run import current_run
 
-        now = datetime.datetime.now(tz=datetime.UTC).replace(microsecond=0).isoformat()
-        print(f'{now} Starting pipeline "{self.name}"')
+        print(f'{get_timestamp()} Starting pipeline "{self.name}"')
 
         # Validate / default parameters
         validated_config = self._validate_config(config)
@@ -105,8 +103,7 @@ class Pipeline:
             with context.Pool() as pool:  # FIXME: set max size of pool
                 self._execute_tasks(pool)
 
-        now = datetime.datetime.now(tz=datetime.UTC).replace(microsecond=0).isoformat()
-        print(f'{now} Successfully completed pipeline "{self.name}"')
+        print(f'{get_timestamp()} Successfully completed pipeline "{self.name}"')
 
     def _validate_config(self, config: dict[str, typing.Any]) -> dict[str, typing.Any]:
         """Validate and default parameters.
@@ -164,8 +161,7 @@ class Pipeline:
                 break
 
             for task in tasks:
-                now = datetime.datetime.now(tz=datetime.UTC).replace(microsecond=0).isoformat()
-                print(f'{now} Started task "{task.compute.__name__}"')
+                print(f'{get_timestamp()} Started task "{task.compute.__name__}"')
                 result = pool.apply_async(task.run)
                 result_list.append((result, task))
                 task.pooled = True
@@ -176,11 +172,10 @@ class Pipeline:
                 for result, task in result_list:
                     if not result.ready():
                         continue
-                    now = datetime.datetime.now(tz=datetime.UTC).replace(microsecond=0).isoformat()
 
                     completed += 1
                     progress = int(completed / total * 100)
-                    print(f'{now} Finished task "{task.compute.__name__}"')
+                    print(f'{get_timestamp()} Finished task "{task.compute.__name__}"')
                     self._update_progress(progress)
 
                     try:

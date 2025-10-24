@@ -2,6 +2,7 @@
 
 import abc
 import contextlib
+import datetime
 import enum
 import os
 import typing
@@ -11,6 +12,23 @@ import requests
 
 from openhexa.graphql import BaseOpenHexaClient
 from openhexa.utils import create_requests_session
+
+
+def get_timestamp() -> str:
+    """Get current UTC timestamp as ISO format string without microseconds.
+
+    Returns
+    -------
+    str
+        Current timestamp in ISO format (e.g., "2024-01-15T10:30:45+00:00")
+
+    Examples
+    --------
+    >>> timestamp = get_timestamp()
+    >>> print(f"{timestamp} Pipeline started")
+    2024-01-15T10:30:45+00:00 Pipeline started
+    """
+    return datetime.datetime.now(tz=datetime.UTC).replace(microsecond=0).isoformat()
 
 
 class SSLError(Exception):
