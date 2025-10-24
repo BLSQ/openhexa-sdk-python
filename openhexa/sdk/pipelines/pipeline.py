@@ -93,6 +93,7 @@ class Pipeline:
         now = datetime.datetime.now(tz=datetime.UTC).replace(microsecond=0).isoformat()
         print(f'{now} Starting pipeline "{self.name}"')
 
+        # Validate / default parameters
         validated_config = self._validate_config(config)
 
         with heartbeat_manager(current_run, interval=30):
