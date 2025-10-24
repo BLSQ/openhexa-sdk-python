@@ -19,6 +19,8 @@ from multiprocess import get_context  # NOQA
 
 from openhexa.sdk.utils import Environment, Settings, get_environment
 
+from .. import current_run
+from .heartbeat import heartbeat_manager
 from .parameter import FunctionWithParameter, Parameter, ParameterValueError
 from .task import PipelineWithTask, Task
 from .utils import get_local_workspace_config
@@ -88,9 +90,6 @@ class Pipeline:
         config : typing.Dict[str, typing.Any]
             The parameter values to use for this pipeline run.
         """
-        from openhexa.sdk.pipelines.heartbeat import heartbeat_manager
-        from openhexa.sdk.pipelines.run import current_run
-
         now = datetime.datetime.now(tz=datetime.UTC).replace(microsecond=0).isoformat()
         print(f'{now} Starting pipeline "{self.name}"')
 
@@ -117,9 +116,6 @@ class Pipeline:
             "function": self.function.__dict__ if self.function else None,
             "tasks": [t.__dict__ for t in self.tasks],
         }
-
-    def _get_available_tasks(self) -> list[Task]:
-        return [task for task in self.tasks if task.is_ready()]
 
     def _validate_config(self, config: dict[str, typing.Any]) -> dict[str, typing.Any]:
         """Validate and default parameters.
@@ -212,6 +208,9 @@ class Pipeline:
                 else:
                     # busy loop
                     time.sleep(0.3)
+
+    def _get_available_tasks(self) -> list[Task]:
+        return [task for task in self.tasks if task.is_ready()]
 
     def _update_progress(self, progress: int):
         if self._connected:
