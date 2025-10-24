@@ -231,6 +231,49 @@ def test_pipeline_sends_heartbeats_during_execution(mock_get_environment, mock_c
     ), "Verify multiple heartbeats were sent (should be at least 2-3 in 200ms)"
 
 
+@patch.dict(
+    os.environ,
+    {
+        "HEXA_SERVER_URL": "https://test.openhexa.org",
+        "HEXA_TOKEN": "test-token",
+        "HEXA_RUN_ID": "test-run-id",
+    },
+)
+@patch("openhexa.sdk.pipelines.heartbeat.OpenHexaClient")
+@patch("openhexa.sdk.utils.get_environment")
+def test_pipeline_continues_execution_when_heartbeat_fails(mock_get_environment, mock_client_class):
+    """Test that pipeline execution continues even when heartbeats fail."""
+    mock_get_environment.return_value = Environment.CLOUD_PIPELINE
+    mock_client_instance = Mock()
+    # Simulate heartbeat failure
+    mock_client_instance.update_pipeline_heartbeat.side_effect = Exception("Network error")
+    mock_client_class.return_value = mock_client_instance
+
+    execution_completed = False
+
+    def pipeline_with_side_effect(arg1):
+        nonlocal execution_completed
+        time.sleep(0.2)  # Sleep to allow heartbeat attempts
+        execution_completed = True
+
+    parameter_1 = Parameter("arg1", type=str, default="default")
+    pipeline = Pipeline("pipeline", pipeline_with_side_effect, [parameter_1])
+
+    original_init = HeartbeatThread.__init__
+
+    def fast_init(self, run_context, interval=30):
+        original_init(self, run_context, interval=0.05)  # 50ms interval for testing
+
+    with patch.object(HeartbeatThread, "__init__", fast_init):
+        pipeline.run({"arg1": "test_value"})
+
+    assert execution_completed, "Pipeline should complete even when heartbeats fail"
+
+    assert (
+        mock_client_instance.update_pipeline_heartbeat.call_count >= 2
+    ), "Heartbeat should have been attempted multiple times despite failures"
+
+
 class TestLogLevel(TestCase):
     def test_parse_log_level(self):
         test_cases = [
