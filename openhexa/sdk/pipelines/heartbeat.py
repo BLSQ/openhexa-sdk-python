@@ -3,16 +3,12 @@
 This module provides a background thread that sends periodic heartbeats to the
 OpenHEXA backend to indicate that a pipeline is still running.
 """
-
-import logging
 import threading
 from contextlib import contextmanager
 
 from openhexa.sdk.pipelines.run import CurrentRun
 
 from ..utils import OpenHexaClient
-
-logger = logging.getLogger(__name__)
 
 
 class HeartbeatThread(threading.Thread):
@@ -32,26 +28,21 @@ class HeartbeatThread(threading.Thread):
         self.run_context = run_context
         self.interval = interval
         self.stop_event = threading.Event()
-        self.logger = logger
 
     def run(self):
         """Send heartbeats periodically until stopped."""
         while not self.stop_event.is_set():
             try:
-                self._send_heartbeat()
+                result = OpenHexaClient().update_pipeline_heartbeat()
+                if result.success:
+                    print("Heartbeat sent successfully")
+                else:
+                    print(f"Heartbeat failed, returned errors: {result.errors}")
             except Exception as e:
-                self.logger.warning(f"Exception while trying to send heartbeat to Openhexa Backend: {e}")
+                print(f"Exception while trying to send heartbeat to Openhexa Backend: {e}")
 
             # Wait for next interval or stop signal
             self.stop_event.wait(self.interval)
-
-    def _send_heartbeat(self):
-        """Send a single heartbeat via GraphQL mutation."""
-        result = OpenHexaClient().update_pipeline_heartbeat()
-        if result.success:
-            self.logger.debug("Heartbeat sent successfully")
-        else:
-            self.logger.warning(f"Heartbeat failed, returned errors: {result.errors}")
 
     def stop(self):
         """Signal the thread to stop."""
@@ -88,11 +79,11 @@ def heartbeat_manager(run_context: CurrentRun, interval: float = 30):
 
     thread = HeartbeatThread(run_context, interval=interval)
     thread.start()
-    logger.debug("Heartbeat thread started")
+    print("Heartbeat thread started")
 
     try:
         yield thread
     finally:
         thread.stop()
         thread.join(timeout=5)
-        logger.debug("Heartbeat thread stopped")
+        print("Heartbeat thread stopped")
