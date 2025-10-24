@@ -107,17 +107,6 @@ class Pipeline:
         now = datetime.datetime.now(tz=datetime.UTC).replace(microsecond=0).isoformat()
         print(f'{now} Successfully completed pipeline "{self.name}"')
 
-    def to_dict(self):
-        """Return a dictionary representation of the pipeline."""
-        return {
-            "name": self.name,
-            "parameters": [p.to_dict() for p in self.parameters],
-            "timeout": self.timeout,
-            "functional_type": self.functional_type,
-            "function": self.function.__dict__ if self.function else None,
-            "tasks": [t.__dict__ for t in self.tasks],
-        }
-
     def _validate_config(self, config: dict[str, typing.Any]) -> dict[str, typing.Any]:
         """Validate and default parameters.
 
@@ -209,6 +198,17 @@ class Pipeline:
                 else:
                     # busy loop
                     time.sleep(0.3)
+
+    def to_dict(self):
+        """Return a dictionary representation of the pipeline."""
+        return {
+            "name": self.name,
+            "parameters": [p.to_dict() for p in self.parameters],
+            "timeout": self.timeout,
+            "functional_type": self.functional_type,
+            "function": self.function.__dict__ if self.function else None,
+            "tasks": [t.__dict__ for t in self.tasks],
+        }
 
     def _get_available_tasks(self) -> list[Task]:
         return [task for task in self.tasks if task.is_ready()]
