@@ -8,18 +8,17 @@ import logging
 import threading
 from contextlib import contextmanager
 
+from openhexa.sdk.pipelines.run import CurrentRun
+
+from ..utils import OpenHexaClient
+
 logger = logging.getLogger(__name__)
-
-
-# TODO : review code
-# TODO : validate tests
-# TODO : run locally
 
 
 class HeartbeatThread(threading.Thread):
     """Background thread that sends periodic heartbeats to the OpenHEXA backend."""
 
-    def __init__(self, run_context, interval=30):
+    def __init__(self, run_context: CurrentRun, interval: int = 30):
         """Initialize the heartbeat thread.
 
         Parameters
@@ -41,27 +40,18 @@ class HeartbeatThread(threading.Thread):
             try:
                 self._send_heartbeat()
             except Exception as e:
-                self.logger.warning(f"Failed to send heartbeat: {e}")
+                self.logger.warning(f"Exception while trying to send heartbeat to Openhexa Backend: {e}")
 
             # Wait for next interval or stop signal
             self.stop_event.wait(self.interval)
 
     def _send_heartbeat(self):
         """Send a single heartbeat via GraphQL mutation."""
-        from openhexa.sdk.utils import OpenHexaClient
-
-        try:
-            client = OpenHexaClient()
-            result = client.update_pipeline_heartbeat()
-
-            if result.success:
-                self.logger.debug("Heartbeat sent successfully")
-            else:
-                if result.errors:
-                    self.logger.warning(f"Heartbeat returned errors: {result.errors}")
-        except Exception as e:
-            # Log error but don't raise - heartbeat failures shouldn't crash the pipeline
-            self.logger.warning(f"Failed to send heartbeat: {e}")
+        result = OpenHexaClient().update_pipeline_heartbeat()
+        if result.success:
+            self.logger.debug("Heartbeat sent successfully")
+        else:
+            self.logger.warning(f"Heartbeat failed, returned errors: {result.errors}")
 
     def stop(self):
         """Signal the thread to stop."""
@@ -69,7 +59,7 @@ class HeartbeatThread(threading.Thread):
 
 
 @contextmanager
-def heartbeat_manager(run_context, interval=30):
+def heartbeat_manager(run_context: CurrentRun, interval: int = 30):
     """Context manager for managing heartbeat thread lifecycle.
 
     Parameters
