@@ -19,7 +19,6 @@ from multiprocess import get_context  # NOQA
 
 from openhexa.sdk.utils import Environment, Settings, get_environment
 
-from .. import current_run
 from .heartbeat import heartbeat_manager
 from .parameter import FunctionWithParameter, Parameter, ParameterValueError
 from .task import PipelineWithTask, Task
@@ -90,6 +89,8 @@ class Pipeline:
         config : typing.Dict[str, typing.Any]
             The parameter values to use for this pipeline run.
         """
+        from .run import current_run
+
         now = datetime.datetime.now(tz=datetime.UTC).replace(microsecond=0).isoformat()
         print(f'{now} Starting pipeline "{self.name}"')
 

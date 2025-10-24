@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class HeartbeatThread(threading.Thread):
     """Background thread that sends periodic heartbeats to the OpenHEXA backend."""
 
-    def __init__(self, run_context: CurrentRun, interval: int = 30):
+    def __init__(self, run_context: CurrentRun, interval: float = 30):
         """Initialize the heartbeat thread.
 
         Parameters
@@ -59,7 +59,7 @@ class HeartbeatThread(threading.Thread):
 
 
 @contextmanager
-def heartbeat_manager(run_context: CurrentRun, interval: int = 30):
+def heartbeat_manager(run_context: CurrentRun, interval: float = 30):
     """Context manager for managing heartbeat thread lifecycle.
 
     Parameters
