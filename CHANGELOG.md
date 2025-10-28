@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.15.1](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.15.0...v2.15.1) (2025-10-28)
+
+
+### Bug Fixes
+
+* emit regular pipeline heartbeats (HEXA-1406) ([#329](https://github.com/BLSQ/openhexa-sdk-python/issues/329)) ([747c673](https://github.com/BLSQ/openhexa-sdk-python/commit/747c67391bae27aea044af16e68af1f5f5f73f13))
+
 ## [2.15.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.14.1...v2.15.0) (2025-10-13)
 
 
