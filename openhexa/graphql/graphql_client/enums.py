@@ -750,6 +750,7 @@ class UpdateTeamError(str, Enum):
 
 
 class UpdateTemplateError(str, Enum):
+    INVALID_CONFIG = "INVALID_CONFIG"
     NOT_FOUND = "NOT_FOUND"
     PERMISSION_DENIED = "PERMISSION_DENIED"
 

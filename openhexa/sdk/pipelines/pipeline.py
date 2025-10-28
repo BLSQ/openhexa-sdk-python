@@ -5,7 +5,6 @@ https://github.com/BLSQ/openhexa/wiki/Writing-OpenHEXA-pipelines for more inform
 """
 
 import argparse
-import datetime
 import json
 import os
 import sys
@@ -17,8 +16,9 @@ from pathlib import Path
 import requests
 from multiprocess import get_context  # NOQA
 
-from openhexa.sdk.utils import Environment, Settings, get_environment
+from openhexa.sdk.utils import Environment, Settings, get_environment, get_timestamp
 
+from .heartbeat import heartbeat_manager
 from .parameter import FunctionWithParameter, Parameter, ParameterValueError
 from .task import PipelineWithTask, Task
 from .utils import get_local_workspace_config
@@ -88,10 +88,41 @@ class Pipeline:
         config : typing.Dict[str, typing.Any]
             The parameter values to use for this pipeline run.
         """
-        now = datetime.datetime.now(tz=datetime.UTC).replace(microsecond=0).isoformat()
-        print(f'{now} Starting pipeline "{self.name}"')
+        from .run import current_run
+
+        print(f'{get_timestamp()} Starting pipeline "{self.name}"')
 
         # Validate / default parameters
+        validated_config = self._validate_config(config)
+
+        with heartbeat_manager(current_run, interval=30):
+            # Execute pipeline function
+            self.function(**validated_config)
+            # Execute tasks using Pool's built-in context manager
+            context = get_context("spawn")
+            with context.Pool() as pool:  # FIXME: set max size of pool
+                self._execute_tasks(pool)
+
+        print(f'{get_timestamp()} Successfully completed pipeline "{self.name}"')
+
+    def _validate_config(self, config: dict[str, typing.Any]) -> dict[str, typing.Any]:
+        """Validate and default parameters.
+
+        Parameters
+        ----------
+        config : dict[str, typing.Any]
+            The raw configuration provided by the user.
+
+        Returns
+        -------
+        dict[str, typing.Any]
+            The validated configuration.
+
+        Raises
+        ------
+        ParameterValueError
+            If the config contains invalid keys or parameter validation fails.
+        """
         validated_config = {}
         for parameter in self.parameters:
             value = config.pop(parameter.code, None)
@@ -101,12 +132,22 @@ class Pipeline:
         if len(config) > 0:
             raise ParameterValueError(f"The provided config contains invalid key(s): {', '.join(list(config.keys()))}")
 
-        self.function(**validated_config)
+        return validated_config
 
-        # managing variables
+    def _execute_tasks(self, pool):
+        """Execute all tasks using the provided multiprocessing pool.
+
+        Parameters
+        ----------
+        pool : multiprocess.Pool
+            The multiprocessing pool to use for task execution.
+
+        Raises
+        ------
+        PipelineRunError
+            If any task fails during execution.
+        """
         result_list = []
-        context = get_context("spawn")
-        pool = context.Pool()  # FIXME: set max size of pool
         total = len(self.tasks)
         completed = 0
 
@@ -120,8 +161,7 @@ class Pipeline:
                 break
 
             for task in tasks:
-                now = datetime.datetime.now(tz=datetime.UTC).replace(microsecond=0).isoformat()
-                print(f'{now} Started task "{task.compute.__name__}"')
+                print(f'{get_timestamp()} Started task "{task.compute.__name__}"')
                 result = pool.apply_async(task.run)
                 result_list.append((result, task))
                 task.pooled = True
@@ -132,11 +172,10 @@ class Pipeline:
                 for result, task in result_list:
                     if not result.ready():
                         continue
-                    now = datetime.datetime.now(tz=datetime.UTC).replace(microsecond=0).isoformat()
 
                     completed += 1
                     progress = int(completed / total * 100)
-                    print(f'{now} Finished task "{task.compute.__name__}"')
+                    print(f'{get_timestamp()} Finished task "{task.compute.__name__}"')
                     self._update_progress(progress)
 
                     try:
@@ -155,12 +194,6 @@ class Pipeline:
                 else:
                     # busy loop
                     time.sleep(0.3)
-
-        pool.close()
-        pool.join()
-
-        now = datetime.datetime.now(tz=datetime.UTC).replace(microsecond=0).isoformat()
-        print(f'{now} Successfully completed pipeline "{self.name}"')
 
     def to_dict(self):
         """Return a dictionary representation of the pipeline."""

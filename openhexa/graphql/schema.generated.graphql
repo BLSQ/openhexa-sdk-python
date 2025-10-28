@@ -797,6 +797,7 @@ input CreatePipelineInput {
   functionalType: PipelineFunctionalType
   name: String!
   notebookPath: String
+  tags: [String!]
   workspaceSlug: String!
 }
 
@@ -1863,7 +1864,8 @@ type File {
   path: String!
   size: BigInt
   type: FileType!
-  updated: DateTime
+  updated: DateTime @deprecated(reason: "Use updatedAt instead")
+  updatedAt: DateTime
 }
 
 """Represents a file or directory node in a flattened structure."""
@@ -2574,6 +2576,12 @@ type Mutation {
   """Updates an existing pipeline."""
   updatePipeline(input: UpdatePipelineInput!): UpdatePipelineResult!
 
+  """
+  Updates the heartbeat timestamp for the current pipeline run.
+  Must be called by an authenticated pipeline run.
+  """
+  updatePipelineHeartbeat: UpdatePipelineHeartbeatResult!
+
   """Updates the progress of a pipeline."""
   updatePipelineProgress(input: UpdatePipelineProgressInput!): UpdatePipelineProgressResult!
 
@@ -2625,6 +2633,9 @@ type Organization {
   """The contact information of the organization."""
   contactInfo: String!
 
+  """Dataset links available in the organization"""
+  datasetLinks(page: Int = 1, perPage: Int = 15, query: String): DatasetLinkPage!
+
   """Datasets available in the organization"""
   datasets(page: Int = 1, perPage: Int = 15, query: String): DatasetPage!
 
@@ -2640,8 +2651,19 @@ type Organization {
   """The name of the organization."""
   name: String!
 
+  """
+  The direct invitations sent to join a specific workspace in the organization.
+  """
+  pendingWorkspaceInvitations(page: Int, perPage: Int): WorkspaceInvitationPage!
+
   """The permissions the current user has in the organization."""
   permissions: OrganizationPermissions!
+
+  """Pipeline tags used within this organization."""
+  pipelineTags: [String!]!
+
+  """Pipeline template tags used within this organization."""
+  pipelineTemplateTags: [String!]!
 
   """The short name of the organization."""
   shortName: String
@@ -2899,6 +2921,7 @@ type PipelineParameter {
   code: String!
   connection: String
   default: Generic
+  directory: String
   help: String
   multiple: Boolean!
   name: String!
@@ -3018,10 +3041,12 @@ type PipelineTemplate {
   config: String
   currentVersion: PipelineTemplateVersion
   description: String
+  functionalType: PipelineFunctionalType
   id: UUID!
   name: String!
   permissions: PipelineTemplatePermissions!
   sourcePipeline: Pipeline
+  tags: [Tag!]!
   updatedAt: DateTime!
   versions(page: Int, perPage: Int): TemplateVersionPage!
   workspace: Workspace
@@ -3229,7 +3254,7 @@ enum PrepareObjectUploadError {
 
 """
 Input for preparing to upload an object to a workspace's bucket.
-The `contentType`
+The `contentType` 
 """
 input PrepareObjectUploadInput {
   contentType: String
@@ -3332,8 +3357,11 @@ type Query {
   """Retrieves a pipeline run by ID."""
   pipelineRun(id: UUID!): PipelineRun
 
+  """Retrieves a pipeline template version by ID."""
+  pipelineTemplateVersion(id: UUID!): PipelineTemplateVersion
+
   """Retrieves a page of pipeline templates."""
-  pipelineTemplates(page: Int = 1, perPage: Int = 15, search: String, workspaceSlug: String): PipelineTemplatePage!
+  pipelineTemplates(functionalType: PipelineFunctionalType, page: Int = 1, perPage: Int = 15, search: String, tags: [String!], workspaceSlug: String): PipelineTemplatePage!
 
   """Retrieves a pipeline version by ID."""
   pipelineVersion(id: UUID!): PipelineVersion
@@ -3342,7 +3370,7 @@ type Query {
   pipelines(functionalType: PipelineFunctionalType, name: String, page: Int, perPage: Int, search: String, tags: [String!], workspaceSlug: String): PipelinesPage!
   searchDatabaseTables(organizationId: UUID, page: Int = 1, perPage: Int = 15, query: String!, workspaceSlugs: [String]): DatabaseTableResultPage!
   searchDatasets(organizationId: UUID, page: Int = 1, perPage: Int = 15, query: String!, workspaceSlugs: [String]): DatasetResultPage!
-  searchFiles(organizationId: UUID, page: Int = 1, perPage: Int = 15, query: String!, workspaceSlugs: [String]): FileResultPage!
+  searchFiles(organizationId: UUID, page: Int = 1, perPage: Int = 15, prefix: String, query: String!, workspaceSlugs: [String]): FileResultPage!
   searchPipelineTemplates(organizationId: UUID, page: Int = 1, perPage: Int = 15, query: String!, workspaceSlugs: [String]): PipelineTemplateResultPage!
   searchPipelines(functionalType: PipelineFunctionalType, organizationId: UUID, page: Int = 1, perPage: Int = 15, query: String!, workspaceSlugs: [String]): PipelineResultPage!
   team(id: UUID!): Team
@@ -4052,6 +4080,12 @@ enum UpdatePipelineError {
   PERMISSION_DENIED
 }
 
+"""Represents the result of updating a pipeline heartbeat."""
+type UpdatePipelineHeartbeatResult {
+  errors: [PipelineError!]!
+  success: Boolean!
+}
+
 """Represents the input for updating a pipeline."""
 input UpdatePipelineInput {
   autoUpdateFromTemplate: Boolean
@@ -4162,6 +4196,7 @@ type UpdateTeamResult {
 Enum representing the possible errors that can occur when updating a template.
 """
 enum UpdateTemplateError {
+  INVALID_CONFIG
   NOT_FOUND
   PERMISSION_DENIED
 }
@@ -4170,8 +4205,10 @@ enum UpdateTemplateError {
 input UpdateTemplateInput {
   config: JSON
   description: String
+  functionalType: PipelineFunctionalType
   id: UUID!
   name: String
+  tags: [String!]
 }
 
 """Represents the result of updating a template."""
@@ -4482,6 +4519,8 @@ type Workspace {
   name: String!
   organization: Organization
   permissions: WorkspacePermissions!
+  pipelineTags: [String!]!
+  pipelineTemplateTags: [String!]!
   slug: String!
   updatedAt: DateTime
 }
@@ -4531,6 +4570,7 @@ enum WorkspaceInvitationStatus {
 type WorkspaceMembership {
   createdAt: DateTime!
   id: UUID!
+  organizationMembership: OrganizationMembership
   role: WorkspaceMembershipRole!
   updatedAt: DateTime
   user: User!
