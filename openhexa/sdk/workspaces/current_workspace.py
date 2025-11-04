@@ -184,10 +184,15 @@ class CurrentWorkspace:
         The URL follows the official PostgreSQL specification.
         (See https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING for more information)
         """
-        return (
-            f"postgresql://{self.database_username}:{self.database_password}"
-            f"@{self.database_host}:{self.database_port}/{self.database_name}"
-        )
+        try:
+            # First try the environment variable. In case we're inside a pipeline,
+            # we add some extra parameters to the URL.
+            return os.environ.get("WORKSPACE_DATABASE_URL")
+        except KeyError:
+            return (
+                f"postgresql://{self.database_username}:{self.database_password}"
+                f"@{self.database_host}:{self.database_port}/{self.database_name}"
+            )
 
     @property
     def files_path(self) -> str:
