@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.15.2](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.15.1...v2.15.2) (2025-11-20)
+
+
+### Bug Fixes
+
+* Allow adding .sql files to pipeline archive ([98a0cec](https://github.com/BLSQ/openhexa-sdk-python/commit/98a0cec2f10c023453fe43be5a0bd1ad2c20d679))
+* Allow adding .sql files to pipeline archive ([2a163d1](https://github.com/BLSQ/openhexa-sdk-python/commit/2a163d12eb84175197f0026fc15a743f48bebd9d))
+
+
+### Miscellaneous
+
+* **deps:** update googleapis/release-please-action action to v4.4.0 ([fbde000](https://github.com/BLSQ/openhexa-sdk-python/commit/fbde0000556b7d990a642f9ae60cb97da89202ff))
+* **deps:** update googleapis/release-please-action action to v4.4.0 ([b62dae8](https://github.com/BLSQ/openhexa-sdk-python/commit/b62dae8a87776113e567712c3e82751593a75d36))
+
 ## [2.15.1](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.15.0...v2.15.1) (2025-10-28)
 
 
