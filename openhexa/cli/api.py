@@ -583,7 +583,9 @@ def generate_zip_file(pipeline_directory_path: str | Path) -> io.BytesIO:
                 # We are in a virtual environment
                 excluded_paths.append(path.parent.parent)  # ./<venv>/bin/python -> ./<venv>
 
-            if path.suffix not in (".py", ".ipynb", ".txt", ".md", ".R", ".r"):
+            if not path.suffix:
+                continue
+            if path.suffix.lower() not in (".py", ".ipynb", ".txt", ".md", ".r", ".sql"):
                 continue
 
             files.append(path)
