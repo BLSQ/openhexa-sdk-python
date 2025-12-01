@@ -661,3 +661,27 @@ class CurrentWorkspace:
             size=result.size,
             type=result.type,
         )
+
+    def get_webapp(self, webapp_slug: str):
+        """Get a webapp by its slug.
+
+        Parameters
+        ----------
+        webapp_slug : str
+            The slug identifier of the webapp
+
+        Returns
+        -------
+        The webapp object with name, url, description and other properties
+
+        Raises
+        ------
+        ValueError
+            If the webapp does not exist
+        """
+        webapp = OpenHexaClient().get_webapp_by_slug(workspace_slug=self.slug, webapp_slug=webapp_slug)
+
+        if not webapp:
+            raise ValueError(f"Webapp {webapp_slug} does not exist in workspace {self.slug}.")
+
+        return webapp
