@@ -226,6 +226,13 @@ from .get_connection import (
 )
 from .get_file_by_path import GetFileByPath, GetFileByPathGetFileByPath
 from .get_users import GetUsers, GetUsersUsers, GetUsersUsersAvatar
+from .get_webapp_by_slug import (
+    GetWebappBySlug,
+    GetWebappBySlugWebappBySlug,
+    GetWebappBySlugWebappBySlugCreatedBy,
+    GetWebappBySlugWebappBySlugPermissions,
+    GetWebappBySlugWebappBySlugWorkspace,
+)
 from .input_types import (
     AddOrganizationMemberInput,
     AddPipelineOutputInput,
@@ -610,6 +617,11 @@ __all__ = [
     "GetUsers",
     "GetUsersUsers",
     "GetUsersUsersAvatar",
+    "GetWebappBySlug",
+    "GetWebappBySlugWebappBySlug",
+    "GetWebappBySlugWebappBySlugCreatedBy",
+    "GetWebappBySlugWebappBySlugPermissions",
+    "GetWebappBySlugWebappBySlugWorkspace",
     "GraphQLClientError",
     "GraphQLClientGraphQLError",
     "GraphQLClientGraphQLMultiError",

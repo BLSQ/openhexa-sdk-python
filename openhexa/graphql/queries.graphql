@@ -487,3 +487,27 @@ query getFileByPath($path: String!, $workspaceSlug: String!) {
         type
     }
 }
+
+query getWebappBySlug($workspaceSlug: String!, $webappSlug: String!) {
+    webappBySlug(workspaceSlug: $workspaceSlug, webappSlug: $webappSlug) {
+        id
+        name
+        description
+        url
+        icon
+        isFavorite
+        createdBy {
+            id
+            displayName
+            email
+        }
+        workspace {
+            slug
+            name
+        }
+        permissions {
+            update
+            delete
+        }
+    }
+}
