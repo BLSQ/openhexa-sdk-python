@@ -228,10 +228,10 @@ from .get_file_by_path import GetFileByPath, GetFileByPathGetFileByPath
 from .get_users import GetUsers, GetUsersUsers, GetUsersUsersAvatar
 from .get_webapp_by_slug import (
     GetWebappBySlug,
-    GetWebappBySlugWebappBySlug,
-    GetWebappBySlugWebappBySlugCreatedBy,
-    GetWebappBySlugWebappBySlugPermissions,
-    GetWebappBySlugWebappBySlugWorkspace,
+    GetWebappBySlugWebapp,
+    GetWebappBySlugWebappCreatedBy,
+    GetWebappBySlugWebappPermissions,
+    GetWebappBySlugWebappWorkspace,
 )
 from .input_types import (
     AddOrganizationMemberInput,
@@ -618,10 +618,10 @@ __all__ = [
     "GetUsersUsers",
     "GetUsersUsersAvatar",
     "GetWebappBySlug",
-    "GetWebappBySlugWebappBySlug",
-    "GetWebappBySlugWebappBySlugCreatedBy",
-    "GetWebappBySlugWebappBySlugPermissions",
-    "GetWebappBySlugWebappBySlugWorkspace",
+    "GetWebappBySlugWebapp",
+    "GetWebappBySlugWebappCreatedBy",
+    "GetWebappBySlugWebappPermissions",
+    "GetWebappBySlugWebappWorkspace",
     "GraphQLClientError",
     "GraphQLClientGraphQLError",
     "GraphQLClientGraphQLMultiError",

@@ -44,7 +44,7 @@ from .delete_webapp import DeleteWebapp, DeleteWebappDeleteWebapp
 from .get_connection import GetConnection, GetConnectionConnectionBySlug
 from .get_file_by_path import GetFileByPath, GetFileByPathGetFileByPath
 from .get_users import GetUsers, GetUsersUsers
-from .get_webapp_by_slug import GetWebappBySlug, GetWebappBySlugWebappBySlug
+from .get_webapp_by_slug import GetWebappBySlug, GetWebappBySlugWebapp
 from .input_types import (
     AddToFavoritesInput,
     ArchiveWorkspaceInput,
@@ -1097,11 +1097,11 @@ class Client(BaseClient):
 
     def get_webapp_by_slug(
         self, workspace_slug: str, webapp_slug: str, **kwargs: Any
-    ) -> Optional[GetWebappBySlugWebappBySlug]:
+    ) -> Optional[GetWebappBySlugWebapp]:
         query = gql(
             """
             query getWebappBySlug($workspaceSlug: String!, $webappSlug: String!) {
-              webappBySlug(workspaceSlug: $workspaceSlug, webappSlug: $webappSlug) {
+              webapp(workspaceSlug: $workspaceSlug, slug: $webappSlug) {
                 id
                 name
                 description
@@ -1133,4 +1133,4 @@ class Client(BaseClient):
             query=query, operation_name="getWebappBySlug", variables=variables, **kwargs
         )
         data = self.get_data(response)
-        return GetWebappBySlug.model_validate(data).webapp_by_slug
+        return GetWebappBySlug.model_validate(data).webapp

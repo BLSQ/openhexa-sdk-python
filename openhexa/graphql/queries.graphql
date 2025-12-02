@@ -489,7 +489,7 @@ query getFileByPath($path: String!, $workspaceSlug: String!) {
 }
 
 query getWebappBySlug($workspaceSlug: String!, $webappSlug: String!) {
-    webappBySlug(workspaceSlug: $workspaceSlug, webappSlug: $webappSlug) {
+    webapp(workspaceSlug: $workspaceSlug, slug: $webappSlug) {
         id
         name
         description
