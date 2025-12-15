@@ -1,5 +1,21 @@
 # Changelog
 
+## [2.16.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.15.2...v2.16.0) (2025-12-08)
+
+
+### Features
+
+* add get webapps by slug method ([9153394](https://github.com/BLSQ/openhexa-sdk-python/commit/91533946f847b8afc6ed994271c8399e16ed975c))
+* add get webapps by slug method ([c97521f](https://github.com/BLSQ/openhexa-sdk-python/commit/c97521f1e9d774361340967f975bc1eed381d5b8))
+
+
+### Miscellaneous
+
+* **deps:** update actions/checkout action to v6 ([7b576dd](https://github.com/BLSQ/openhexa-sdk-python/commit/7b576dda911824e7d795f9c803444487c94c0d6a))
+* **deps:** update actions/checkout action to v6 ([007cd5d](https://github.com/BLSQ/openhexa-sdk-python/commit/007cd5dcf260b46d4619e0efcaf0cbcb7e03fcb2))
+* **deps:** update dependency pytest to v9 ([2831af6](https://github.com/BLSQ/openhexa-sdk-python/commit/2831af685d8221c74c032e39764defd7c9654f7f))
+* **deps:** update dependency pytest to v9 ([3df723a](https://github.com/BLSQ/openhexa-sdk-python/commit/3df723a2ec9025e3995d2fa042c15fc4f35e7443))
+
 ## [2.15.2](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.15.1...v2.15.2) (2025-11-20)
 
 
