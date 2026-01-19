@@ -82,6 +82,11 @@ class AddToFavoritesError(str, Enum):
     WEBAPP_NOT_FOUND = "WEBAPP_NOT_FOUND"
 
 
+class AddWebappToShortcutsError(str, Enum):
+    ITEM_ALREADY_EXISTS = "ITEM_ALREADY_EXISTS"
+    ITEM_NOT_FOUND = "ITEM_NOT_FOUND"
+
+
 class ApproveAccessmodAccessRequestError(str, Enum):
     INVALID = "INVALID"
 
@@ -171,6 +176,12 @@ class CreateMembershipError(str, Enum):
     PERMISSION_DENIED = "PERMISSION_DENIED"
 
 
+class CreateOrganizationError(str, Enum):
+    INVALID_EMAIL = "INVALID_EMAIL"
+    NAME_DUPLICATE = "NAME_DUPLICATE"
+    PERMISSION_DENIED = "PERMISSION_DENIED"
+
+
 class CreatePipelineFromTemplateVersionError(str, Enum):
     PERMISSION_DENIED = "PERMISSION_DENIED"
     PIPELINE_TEMPLATE_VERSION_NOT_FOUND = "PIPELINE_TEMPLATE_VERSION_NOT_FOUND"
@@ -208,6 +219,7 @@ class CreateWorkspaceError(str, Enum):
     INVALID_SLUG = "INVALID_SLUG"
     ORGANIZATION_NOT_FOUND = "ORGANIZATION_NOT_FOUND"
     PERMISSION_DENIED = "PERMISSION_DENIED"
+    WORKSPACES_LIMIT_REACHED = "WORKSPACES_LIMIT_REACHED"
 
 
 class DAGRunOrderBy(str, Enum):
@@ -311,6 +323,11 @@ class DeleteMetadataAttributeError(str, Enum):
     METADATA_ATTRIBUTE_NOT_FOUND = "METADATA_ATTRIBUTE_NOT_FOUND"
     PERMISSION_DENIED = "PERMISSION_DENIED"
     TARGET_NOT_FOUND = "TARGET_NOT_FOUND"
+
+
+class DeleteOrganizationError(str, Enum):
+    NOT_FOUND = "NOT_FOUND"
+    PERMISSION_DENIED = "PERMISSION_DENIED"
 
 
 class DeleteOrganizationInvitationError(str, Enum):
@@ -427,6 +444,7 @@ class InviteOrganizationMemberError(str, Enum):
     ALREADY_MEMBER = "ALREADY_MEMBER"
     ORGANIZATION_NOT_FOUND = "ORGANIZATION_NOT_FOUND"
     PERMISSION_DENIED = "PERMISSION_DENIED"
+    USERS_LIMIT_REACHED = "USERS_LIMIT_REACHED"
     WORKSPACE_NOT_FOUND = "WORKSPACE_NOT_FOUND"
 
 
@@ -434,6 +452,16 @@ class InviteWorkspaceMembershipError(str, Enum):
     ALREADY_EXISTS = "ALREADY_EXISTS"
     PERMISSION_DENIED = "PERMISSION_DENIED"
     USER_NOT_FOUND = "USER_NOT_FOUND"
+    WORKSPACE_NOT_FOUND = "WORKSPACE_NOT_FOUND"
+
+
+class IssueWorkspaceTokenError(str, Enum):
+    AUTH_UNAUTHENTICATED = "AUTH_UNAUTHENTICATED"
+    CLOCK_ERROR = "CLOCK_ERROR"
+    CONFIG_MISSING_PRIVATE_KEY = "CONFIG_MISSING_PRIVATE_KEY"
+    INPUT_INVALID = "INPUT_INVALID"
+    MEMBERSHIP_REQUIRED = "MEMBERSHIP_REQUIRED"
+    ROLE_UNRESOLVED = "ROLE_UNRESOLVED"
     WORKSPACE_NOT_FOUND = "WORKSPACE_NOT_FOUND"
 
 
@@ -549,6 +577,7 @@ class PipelineError(str, Enum):
     PIPELINE_CODE_PARSING_ERROR = "PIPELINE_CODE_PARSING_ERROR"
     PIPELINE_DOES_NOT_SUPPORT_PARAMETERS = "PIPELINE_DOES_NOT_SUPPORT_PARAMETERS"
     PIPELINE_NOT_FOUND = "PIPELINE_NOT_FOUND"
+    PIPELINE_RUNS_LIMIT_REACHED = "PIPELINE_RUNS_LIMIT_REACHED"
     PIPELINE_VERSION_NOT_FOUND = "PIPELINE_VERSION_NOT_FOUND"
     TABLE_NOT_FOUND = "TABLE_NOT_FOUND"
     WORKSPACE_NOT_FOUND = "WORKSPACE_NOT_FOUND"
@@ -583,6 +612,7 @@ class PipelineRunStatus(str, Enum):
     failed = "failed"
     queued = "queued"
     running = "running"
+    skipped = "skipped"
     stopped = "stopped"
     success = "success"
     terminating = "terminating"
@@ -597,6 +627,15 @@ class PipelineRunTrigger(str, Enum):
 class PipelineTemplateError(str, Enum):
     PERMISSION_DENIED = "PERMISSION_DENIED"
     PIPELINE_TEMPLATE_NOT_FOUND = "PIPELINE_TEMPLATE_NOT_FOUND"
+
+
+class PipelineTemplateOrderBy(str, Enum):
+    CREATED_AT_ASC = "CREATED_AT_ASC"
+    CREATED_AT_DESC = "CREATED_AT_DESC"
+    NAME_ASC = "NAME_ASC"
+    NAME_DESC = "NAME_DESC"
+    PIPELINES_COUNT_ASC = "PIPELINES_COUNT_ASC"
+    PIPELINES_COUNT_DESC = "PIPELINES_COUNT_DESC"
 
 
 class PipelineType(str, Enum):
@@ -629,6 +668,10 @@ class RegisterError(str, Enum):
 
 class RemoveFromFavoritesError(str, Enum):
     WEBAPP_NOT_FOUND = "WEBAPP_NOT_FOUND"
+
+
+class RemoveWebappFromShortcutsError(str, Enum):
+    ITEM_NOT_FOUND = "ITEM_NOT_FOUND"
 
 
 class RequestAccessmodAccessError(str, Enum):
@@ -725,8 +768,22 @@ class UpdateMembershipError(str, Enum):
     PERMISSION_DENIED = "PERMISSION_DENIED"
 
 
+class UpdateOrganizationError(str, Enum):
+    INVALID_LOGO = "INVALID_LOGO"
+    INVALID_SHORT_NAME = "INVALID_SHORT_NAME"
+    NAME_DUPLICATE = "NAME_DUPLICATE"
+    NOT_FOUND = "NOT_FOUND"
+    PERMISSION_DENIED = "PERMISSION_DENIED"
+    SHORT_NAME_DUPLICATE = "SHORT_NAME_DUPLICATE"
+
+
 class UpdateOrganizationMemberError(str, Enum):
     INVALID_ROLE = "INVALID_ROLE"
+    NOT_FOUND = "NOT_FOUND"
+    PERMISSION_DENIED = "PERMISSION_DENIED"
+
+
+class UpdateOrganizationSubscriptionError(str, Enum):
     NOT_FOUND = "NOT_FOUND"
     PERMISSION_DENIED = "PERMISSION_DENIED"
 
@@ -789,6 +846,13 @@ class UpgradePipelineVersionFromTemplateError(str, Enum):
 class VerifyDeviceError(str, Enum):
     INVALID_OTP = "INVALID_OTP"
     NO_DEVICE = "NO_DEVICE"
+
+
+class WebappType(str, Enum):
+    BUNDLE = "BUNDLE"
+    HTML = "HTML"
+    IFRAME = "IFRAME"
+    SUPERSET = "SUPERSET"
 
 
 class WorkspaceInvitationStatus(str, Enum):
