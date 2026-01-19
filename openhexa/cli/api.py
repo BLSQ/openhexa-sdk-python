@@ -153,7 +153,7 @@ def _detect_graphql_breaking_changes(token):
         click.secho("This could lead to unexpected results.", fg="red")
         if current_version == latest_version:
             click.secho(
-                "The server has schema changes not yet supported by the latest SDK. "
+                "The SDK has schema changes not yet supported by the server. "
                 "To ensure compatibility with the server, it might be required to use a older version of the SDK.",
                 fg="red",
             )
