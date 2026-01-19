@@ -79,7 +79,7 @@ def app(ctx):
     if settings.last_version_check is None or now_timestamp - settings.last_version_check > ONE_HOUR:
         installed_version, latest_version = get_library_versions()
         settings.last_version_check = now_timestamp
-        if installed_version != latest_version or True:
+        if installed_version != latest_version:
             click.secho(
                 "\n".join(
                     (
