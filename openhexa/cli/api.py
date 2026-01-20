@@ -150,12 +150,19 @@ def _detect_graphql_breaking_changes(token):
         )
         for change in breaking_changes:
             click.secho(f"- {change.description}", fg="yellow")
-        click.secho(
-            "This could lead to unexpected results.\n"
-            f"Please update the SDK to the latest version {latest_version} "
-            f"(using `pip install openhexa-sdk=={latest_version}`) or use a version of the SDK compatible with the server.",
-            fg="red",
-        )
+        click.secho("This could lead to unexpected results.", fg="red")
+        if current_version == latest_version:
+            click.secho(
+                "The SDK has schema changes not yet supported by the server. "
+                "To ensure compatibility with the server, it might be required to use a older version of the SDK.",
+                fg="red",
+            )
+        else:
+            click.secho(
+                f"Please update the SDK to the latest version {latest_version} "
+                f"(using `pip install openhexa-sdk=={latest_version}`) to ensure compatibility.",
+                fg="red",
+            )
 
 
 def graphql(query: str, variables=None, token=None):

@@ -16,6 +16,7 @@ from .enums import (
     PermissionMode,
     PipelineFunctionalType,
     PipelineNotificationLevel,
+    WebappType,
     WorkspaceMembershipRole,
 )
 
@@ -34,6 +35,10 @@ class AddPipelineOutputInput(BaseModel):
 
 class AddToFavoritesInput(BaseModel):
     webapp_id: str = Field(alias="webappId")
+
+
+class AddWebappToShortcutsInput(BaseModel):
+    webapp_id: Any = Field(alias="webappId")
 
 
 class ApproveAccessmodAccessRequestInput(BaseModel):
@@ -135,6 +140,16 @@ class CreateMembershipInput(BaseModel):
     user_email: str = Field(alias="userEmail")
 
 
+class CreateOrganizationInput(BaseModel):
+    limits: "ResourceCountsInput"
+    name: str
+    owner_email: str = Field(alias="ownerEmail")
+    plan_code: str = Field(alias="planCode")
+    subscription_end_date: Any = Field(alias="subscriptionEndDate")
+    subscription_id: Any = Field(alias="subscriptionId")
+    subscription_start_date: Any = Field(alias="subscriptionStartDate")
+
+
 class CreatePipelineFromTemplateVersionInput(BaseModel):
     pipeline_template_version_id: Any = Field(alias="pipelineTemplateVersionId")
     workspace_slug: str = Field(alias="workspaceSlug")
@@ -176,6 +191,7 @@ class CreateWebappInput(BaseModel):
     description: Optional[str] = None
     icon: Optional[str] = None
     name: str
+    type: WebappType
     url: str
     workspace_slug: str = Field(alias="workspaceSlug")
 
@@ -238,6 +254,10 @@ class DeleteMembershipInput(BaseModel):
 class DeleteMetadataAttributeInput(BaseModel):
     key: str
     target_id: Any = Field(alias="targetId")
+
+
+class DeleteOrganizationInput(BaseModel):
+    id: Any
 
 
 class DeleteOrganizationInvitationInput(BaseModel):
@@ -343,6 +363,11 @@ class InviteWorkspaceMemberInput(BaseModel):
     workspace_slug: str = Field(alias="workspaceSlug")
 
 
+class IssueWorkspaceTokenInput(BaseModel):
+    workspace_id: Optional[Any] = Field(alias="workspaceId", default=None)
+    workspace_slug: Optional[str] = Field(alias="workspaceSlug", default=None)
+
+
 class JoinWorkspaceInput(BaseModel):
     invitation_id: Any = Field(alias="invitationId")
 
@@ -421,6 +446,7 @@ class PrepareDownloadURLInput(BaseModel):
 
 
 class PrepareObjectDownloadInput(BaseModel):
+    force_attachment: Optional[bool] = Field(alias="forceAttachment", default=True)
     object_key: str = Field(alias="objectKey")
     workspace_slug: str = Field(alias="workspaceSlug")
 
@@ -447,6 +473,10 @@ class RemoveFromFavoritesInput(BaseModel):
     webapp_id: str = Field(alias="webappId")
 
 
+class RemoveWebappFromShortcutsInput(BaseModel):
+    webapp_id: Any = Field(alias="webappId")
+
+
 class RequestAccessmodAccessInput(BaseModel):
     accept_tos: bool = Field(alias="acceptTos")
     email: str
@@ -464,6 +494,12 @@ class ResendWorkspaceInvitationInput(BaseModel):
 
 class ResetPasswordInput(BaseModel):
     email: str
+
+
+class ResourceCountsInput(BaseModel):
+    pipeline_runs: int = Field(alias="pipelineRuns")
+    users: int
+    workspaces: int
 
 
 class RunDAGInput(BaseModel):
@@ -590,12 +626,28 @@ class UpdateMembershipInput(BaseModel):
     role: MembershipRole
 
 
+class UpdateOrganizationInput(BaseModel):
+    id: Any
+    logo: Optional[str] = None
+    name: Optional[str] = None
+    short_name: Optional[str] = Field(alias="shortName", default=None)
+
+
 class UpdateOrganizationMemberInput(BaseModel):
     id: Any
     role: OrganizationMembershipRole
     workspace_permissions: Optional[List["WorkspacePermissionInput"]] = Field(
         alias="workspacePermissions", default=None
     )
+
+
+class UpdateOrganizationSubscriptionInput(BaseModel):
+    limits: "ResourceCountsInput"
+    organization_id: Any = Field(alias="organizationId")
+    plan_code: str = Field(alias="planCode")
+    subscription_end_date: Any = Field(alias="subscriptionEndDate")
+    subscription_id: Any = Field(alias="subscriptionId")
+    subscription_start_date: Any = Field(alias="subscriptionStartDate")
 
 
 class UpdatePipelineInput(BaseModel):
@@ -663,6 +715,7 @@ class UpdateWebappInput(BaseModel):
     icon: Optional[str] = None
     id: Any
     name: Optional[str] = None
+    type: Optional[WebappType] = None
     url: Optional[str] = None
 
 
@@ -718,10 +771,12 @@ class WorkspacePermissionInput(BaseModel):
 
 CreateAccessmodProjectInput.model_rebuild()
 CreateConnectionInput.model_rebuild()
+CreateOrganizationInput.model_rebuild()
 CreateWorkspaceInput.model_rebuild()
 InviteOrganizationMemberInput.model_rebuild()
 UpdateConnectionInput.model_rebuild()
 UpdateDAGInput.model_rebuild()
 UpdateOrganizationMemberInput.model_rebuild()
+UpdateOrganizationSubscriptionInput.model_rebuild()
 UpdateWorkspaceInput.model_rebuild()
 UploadPipelineInput.model_rebuild()

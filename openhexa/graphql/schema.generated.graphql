@@ -358,6 +358,23 @@ type AddToFavoritesResult {
   success: Boolean!
 }
 
+"""Represents the error message for adding a webapp to shortcuts."""
+enum AddWebappToShortcutsError {
+  ITEM_ALREADY_EXISTS
+  ITEM_NOT_FOUND
+}
+
+"""Represents the input for adding a webapp to shortcuts."""
+input AddWebappToShortcutsInput {
+  webappId: UUID!
+}
+
+"""Represents the result of adding a webapp to shortcuts."""
+type AddWebappToShortcutsResult {
+  errors: [AddWebappToShortcutsError!]!
+  success: Boolean!
+}
+
 enum ApproveAccessmodAccessRequestError {
   INVALID
 }
@@ -766,6 +783,70 @@ type CreateMembershipResult {
 }
 
 """
+The CreateOrganizationError enum represents the possible errors that can occur during the createOrganization mutation.
+"""
+enum CreateOrganizationError {
+  """Indicates that the provided email is invalid."""
+  INVALID_EMAIL
+
+  """Indicates that an organization with the same name already exists."""
+  NAME_DUPLICATE
+
+  """
+  Indicates that the user does not have permission to create an organization.
+  """
+  PERMISSION_DENIED
+}
+
+"""
+The CreateOrganizationInput type represents the input for the createOrganization mutation.
+Used by the Bluesquare Console to provision new organizations after Stripe payment.
+"""
+input CreateOrganizationInput {
+  """The resource limits for the organization."""
+  limits: ResourceCountsInput!
+
+  """The name of the organization."""
+  name: String!
+
+  """
+  The email address of the organization owner. Creates user if doesn't exist.
+  """
+  ownerEmail: String!
+
+  """The subscription plan code (e.g., "openhexa_starter")."""
+  planCode: String!
+
+  """The date when the subscription ends."""
+  subscriptionEndDate: Date!
+
+  """The external subscription ID from the Bluesquare Console."""
+  subscriptionId: UUID!
+
+  """The date when the subscription starts."""
+  subscriptionStartDate: Date!
+}
+
+"""
+The CreateOrganizationResult type represents the result of the createOrganization mutation.
+"""
+type CreateOrganizationResult {
+  """
+  The list of errors that occurred during the createOrganization mutation.
+  """
+  errors: [CreateOrganizationError!]!
+
+  """The created organization object."""
+  organization: Organization
+
+  """Indicates whether the createOrganization mutation was successful."""
+  success: Boolean!
+
+  """The owner user object (created or existing)."""
+  user: User
+}
+
+"""
 Enum representing the possible errors that can occur when creating a pipeline from a template version.
 """
 enum CreatePipelineFromTemplateVersionError {
@@ -907,6 +988,7 @@ input CreateWebappInput {
   description: String
   icon: String
   name: String!
+  type: WebappType!
   url: String!
   workspaceSlug: String!
 }
@@ -925,6 +1007,7 @@ enum CreateWorkspaceError {
   INVALID_SLUG
   ORGANIZATION_NOT_FOUND
   PERMISSION_DENIED
+  WORKSPACES_LIMIT_REACHED
 }
 
 """Represents the input for creating a workspace."""
@@ -1102,6 +1185,7 @@ type DHIS2QueryResultPage {
 
 type Database {
   credentials: DatabaseCredentials
+  readOnlyCredentials: DatabaseCredentials
   table(name: String!): DatabaseTable
   tables(page: Int, perPage: Int): DatabaseTablePage!
 }
@@ -1542,6 +1626,27 @@ type DeleteMetadataAttributeResult {
 }
 
 """
+The DeleteOrganizationError enum represents the possible errors that can occur during the deleteOrganization mutation.
+"""
+enum DeleteOrganizationError {
+  """Indicates that the organization was not found."""
+  NOT_FOUND
+
+  """
+  Indicates that the user does not have permission to delete the organization.
+  """
+  PERMISSION_DENIED
+}
+
+"""
+The DeleteOrganizationInput type represents the input for the deleteOrganization mutation.
+"""
+input DeleteOrganizationInput {
+  """The unique identifier of the organization."""
+  id: UUID!
+}
+
+"""
 The DeleteOrganizationInvitationError enum represents the possible errors that can occur during the deleteOrganizationInvitation mutation.
 """
 enum DeleteOrganizationInvitationError {
@@ -1601,6 +1706,19 @@ type DeleteOrganizationMemberResult {
   """
   Indicates whether the deleteOrganizationMember mutation was successful.
   """
+  success: Boolean!
+}
+
+"""
+The DeleteOrganizationResult type represents the result of the deleteOrganization mutation.
+"""
+type DeleteOrganizationResult {
+  """
+  The list of errors that occurred during the deleteOrganization mutation.
+  """
+  errors: [DeleteOrganizationError!]!
+
+  """Indicates whether the deleteOrganization mutation was successful."""
   success: Boolean!
 }
 
@@ -2084,6 +2202,11 @@ enum InviteOrganizationMemberError {
   """
   PERMISSION_DENIED
 
+  """
+  Indicates that the organization has reached its user limit (SaaS only).
+  """
+  USERS_LIMIT_REACHED
+
   """Indicates that one or more workspaces were not found."""
   WORKSPACE_NOT_FOUND
 }
@@ -2142,6 +2265,33 @@ enum InviteWorkspaceMembershipError {
   PERMISSION_DENIED
   USER_NOT_FOUND
   WORKSPACE_NOT_FOUND
+}
+
+"""Represents the error types for issuing a workspace token."""
+enum IssueWorkspaceTokenError {
+  AUTH_UNAUTHENTICATED
+  CLOCK_ERROR
+  CONFIG_MISSING_PRIVATE_KEY
+  INPUT_INVALID
+  MEMBERSHIP_REQUIRED
+  ROLE_UNRESOLVED
+  WORKSPACE_NOT_FOUND
+}
+
+"""Represents the input for issuing a workspace JWT token."""
+input IssueWorkspaceTokenInput {
+  workspaceId: UUID
+  workspaceSlug: String
+}
+
+"""Represents the result of issuing a workspace JWT token."""
+type IssueWorkspaceTokenPayload {
+  errors: [IssueWorkspaceTokenError!]!
+  expiresAt: DateTime
+  role: WorkspaceMembershipRole
+  success: Boolean!
+  token: String
+  workspace: WorkspaceRef
 }
 
 scalar JSON
@@ -2396,6 +2546,7 @@ type Mutation {
   """Adds a recipient to a pipeline."""
   addPipelineRecipient(input: CreatePipelineRecipientInput!): AddPipelineRecipientResult!
   addToFavorites(input: AddToFavoritesInput!): AddToFavoritesResult!
+  addWebappToShortcuts(input: AddWebappToShortcutsInput!): AddWebappToShortcutsResult!
   approveAccessmodAccessRequest(input: ApproveAccessmodAccessRequestInput!): ApproveAccessmodAccessRequestResult!
   archiveWorkspace(input: ArchiveWorkspaceInput!): ArchiveWorkspaceResult!
   createAccessmodAccessibilityAnalysis(input: CreateAccessmodAccessibilityAnalysisInput): CreateAccessmodAccessibilityAnalysisResult!
@@ -2418,6 +2569,7 @@ type Mutation {
   """Create a new file in a dataset version."""
   createDatasetVersionFile(input: CreateDatasetVersionFileInput!): CreateDatasetVersionFileResult!
   createMembership(input: CreateMembershipInput!): CreateMembershipResult!
+  createOrganization(input: CreateOrganizationInput!): CreateOrganizationResult!
 
   """Creates a new pipeline."""
   createPipeline(input: CreatePipelineInput!): CreatePipelineResult!
@@ -2450,6 +2602,7 @@ type Mutation {
 
   """Delete an metadata attribute from an object instance"""
   deleteMetadataAttribute(input: DeleteMetadataAttributeInput!): DeleteMetadataAttributeResult!
+  deleteOrganization(input: DeleteOrganizationInput!): DeleteOrganizationResult!
   deleteOrganizationInvitation(input: DeleteOrganizationInvitationInput!): DeleteOrganizationInvitationResult!
   deleteOrganizationMember(input: DeleteOrganizationMemberInput!): DeleteOrganizationMemberResult!
 
@@ -2494,11 +2647,15 @@ type Mutation {
   """Generates a new password for a database."""
   generateNewDatabasePassword(input: GenerateNewDatabasePasswordInput!): GenerateNewDatabasePasswordResult!
 
+  """Generates a new password for the read-only database user."""
+  generateNewDatabaseRoPassword(input: GenerateNewDatabasePasswordInput!): GenerateNewDatabasePasswordResult!
+
   """Generates a webhook URL for a pipeline."""
   generatePipelineWebhookUrl(input: GeneratePipelineWebhookUrlInput!): GeneratePipelineWebhookUrlResult!
   generateWorkspaceToken(input: GenerateWorkspaceTokenInput!): GenerateWorkspaceTokenResult!
   inviteOrganizationMember(input: InviteOrganizationMemberInput!): InviteOrganizationMemberResult!
   inviteWorkspaceMember(input: InviteWorkspaceMemberInput!): InviteWorkspaceMemberResult!
+  issueWorkspaceToken(input: IssueWorkspaceTokenInput!): IssueWorkspaceTokenPayload!
   joinWorkspace(input: JoinWorkspaceInput!): JoinWorkspaceResult!
   launchAccessmodAnalysis(input: LaunchAccessmodAnalysisInput): LaunchAccessmodAnalysisResult!
   launchNotebookServer(input: LaunchNotebookServerInput!): LaunchNotebookServerResult!
@@ -2537,6 +2694,7 @@ type Mutation {
   """Registers a new user."""
   register(input: RegisterInput!): RegisterResult!
   removeFromFavorites(input: RemoveFromFavoritesInput!): RemoveFromFavoritesResult!
+  removeWebappFromShortcuts(input: RemoveWebappFromShortcutsInput!): RemoveWebappFromShortcutsResult!
   requestAccessmodAccess(input: RequestAccessmodAccessInput!): RequestAccessmodAccessInputResult!
   resendOrganizationInvitation(input: ResendOrganizationInvitationInput!): ResendOrganizationInvitationResult!
   resendWorkspaceInvitation(input: ResendWorkspaceInvitationInput!): ResendWorkspaceInvitationResult!
@@ -2571,7 +2729,9 @@ type Mutation {
   """Update a dataset version."""
   updateDatasetVersion(input: UpdateDatasetVersionInput!): UpdateDatasetVersionResult!
   updateMembership(input: UpdateMembershipInput!): UpdateMembershipResult!
+  updateOrganization(input: UpdateOrganizationInput!): UpdateOrganizationResult!
   updateOrganizationMember(input: UpdateOrganizationMemberInput!): UpdateOrganizationMemberResult!
+  updateOrganizationSubscription(input: UpdateOrganizationSubscriptionInput!): UpdateOrganizationSubscriptionResult!
 
   """Updates an existing pipeline."""
   updatePipeline(input: UpdatePipelineInput!): UpdatePipelineResult!
@@ -2645,6 +2805,9 @@ type Organization {
   """The invitations sent to join the organization."""
   invitations(includeAccepted: Boolean, page: Int, perPage: Int): OrganizationInvitationPage!
 
+  """The logo of the organization (base64 encoded)."""
+  logo: String
+
   """The members of the organization."""
   members(page: Int, perPage: Int, role: OrganizationMembershipRole, term: String): OrganizationMembershipPage!
 
@@ -2668,11 +2831,17 @@ type Organization {
   """The short name of the organization."""
   shortName: String
 
+  """Subscription details with limits. Null for self-hosted deployments."""
+  subscription: Subscription
+
   """The type of the organization."""
   type: String!
 
   """The URL of the organization."""
   url: String!
+
+  """Current resource usage counts."""
+  usage: ResourceCounts!
 
   """The workspaces associated with the organization."""
   workspaces(page: Int, perPage: Int): WorkspacePage!
@@ -2755,8 +2924,10 @@ enum OrganizationMembershipRole {
 type OrganizationPermissions {
   archiveWorkspace: Boolean!
   createWorkspace: Boolean!
+  delete: Boolean!
   manageMembers: Boolean!
   manageOwners: Boolean!
+  update: Boolean!
 }
 
 """Represents a workspace invitation within an organization invitation."""
@@ -2886,6 +3057,7 @@ enum PipelineError {
   PIPELINE_CODE_PARSING_ERROR
   PIPELINE_DOES_NOT_SUPPORT_PARAMETERS
   PIPELINE_NOT_FOUND
+  PIPELINE_RUNS_LIMIT_REACHED
   PIPELINE_VERSION_NOT_FOUND
   TABLE_NOT_FOUND
   WORKSPACE_NOT_FOUND
@@ -2977,6 +3149,7 @@ type PipelineRun {
   duration: Int
   enableDebugLogs: Boolean!
   executionDate: DateTime
+  hasErrorMessages: Boolean!
   id: UUID!
   logs: String
   messages: [PipelineRunMessage!]!
@@ -3024,6 +3197,7 @@ enum PipelineRunStatus {
   failed
   queued
   running
+  skipped
   stopped
   success
   terminating
@@ -3044,10 +3218,13 @@ type PipelineTemplate {
   functionalType: PipelineFunctionalType
   id: UUID!
   name: String!
+  organization: Organization
   permissions: PipelineTemplatePermissions!
+  pipelinesCount: Int!
   sourcePipeline: Pipeline
   tags: [Tag!]!
   updatedAt: DateTime!
+  validatedAt: DateTime
   versions(page: Int, perPage: Int): TemplateVersionPage!
   workspace: Workspace
 }
@@ -3055,6 +3232,16 @@ type PipelineTemplate {
 enum PipelineTemplateError {
   PERMISSION_DENIED
   PIPELINE_TEMPLATE_NOT_FOUND
+}
+
+"""Enum representing the possible orderings for pipeline templates."""
+enum PipelineTemplateOrderBy {
+  CREATED_AT_ASC
+  CREATED_AT_DESC
+  NAME_ASC
+  NAME_DESC
+  PIPELINES_COUNT_ASC
+  PIPELINES_COUNT_DESC
 }
 
 """Represents paged result of fetching pipeline templates."""
@@ -3232,6 +3419,7 @@ enum PrepareObjectDownloadError {
 }
 
 input PrepareObjectDownloadInput {
+  forceAttachment: Boolean = true
   objectKey: String!
   workspaceSlug: String!
 }
@@ -3361,13 +3549,13 @@ type Query {
   pipelineTemplateVersion(id: UUID!): PipelineTemplateVersion
 
   """Retrieves a page of pipeline templates."""
-  pipelineTemplates(functionalType: PipelineFunctionalType, page: Int = 1, perPage: Int = 15, search: String, tags: [String!], workspaceSlug: String): PipelineTemplatePage!
+  pipelineTemplates(functionalType: PipelineFunctionalType, isValidated: Boolean, orderBy: PipelineTemplateOrderBy, page: Int = 1, perPage: Int = 15, search: String, tags: [String!], workspaceSlug: String): PipelineTemplatePage!
 
   """Retrieves a pipeline version by ID."""
   pipelineVersion(id: UUID!): PipelineVersion
 
   """Retrieves a page of pipelines ordered by relevant name."""
-  pipelines(functionalType: PipelineFunctionalType, name: String, page: Int, perPage: Int, search: String, tags: [String!], workspaceSlug: String): PipelinesPage!
+  pipelines(functionalType: PipelineFunctionalType, lastRunStates: [PipelineRunStatus!], name: String, page: Int, perPage: Int, search: String, tags: [String!], workspaceSlug: String): PipelinesPage!
   searchDatabaseTables(organizationId: UUID, page: Int = 1, perPage: Int = 15, query: String!, workspaceSlugs: [String]): DatabaseTableResultPage!
   searchDatasets(organizationId: UUID, page: Int = 1, perPage: Int = 15, query: String!, workspaceSlugs: [String]): DatasetResultPage!
   searchFiles(organizationId: UUID, page: Int = 1, perPage: Int = 15, prefix: String, query: String!, workspaceSlugs: [String]): FileResultPage!
@@ -3381,7 +3569,7 @@ type Query {
 
   """Search users."""
   users(organizationId: UUID, query: String!, workspaceSlug: String): [User!]!
-  webapp(workspaceSlug: String!, slug: String!): Webapp
+  webapp(slug: String!, workspaceSlug: String!): Webapp
   webapps(favorite: Boolean, page: Int, perPage: Int, workspaceSlug: String): WebappsPage!
   workspace(slug: String!): Workspace
   workspaces(organizationId: UUID, page: Int, perPage: Int, query: String): WorkspacePage!
@@ -3449,6 +3637,22 @@ input RemoveFromFavoritesInput {
 """Represents the result of removing a web app from favorites."""
 type RemoveFromFavoritesResult {
   errors: [RemoveFromFavoritesError!]!
+  success: Boolean!
+}
+
+"""Represents the error message for removing a webapp from shortcuts."""
+enum RemoveWebappFromShortcutsError {
+  ITEM_NOT_FOUND
+}
+
+"""Represents the input for removing a webapp from shortcuts."""
+input RemoveWebappFromShortcutsInput {
+  webappId: UUID!
+}
+
+"""Represents the result of removing a webapp from shortcuts."""
+type RemoveWebappFromShortcutsResult {
+  errors: [RemoveWebappFromShortcutsError!]!
   success: Boolean!
 }
 
@@ -3525,6 +3729,30 @@ The ResetPasswordResult type represents the result of the resetPassword mutation
 type ResetPasswordResult {
   """Indicates whether the password reset was successful."""
   success: Boolean!
+}
+
+"""Resource counts"""
+type ResourceCounts {
+  """Number of pipeline runs."""
+  pipelineRuns: Int!
+
+  """Number of users."""
+  users: Int!
+
+  """Number of workspaces."""
+  workspaces: Int!
+}
+
+"""Input type for resource counts (used for subscription limits)."""
+input ResourceCountsInput {
+  """Number of pipeline runs."""
+  pipelineRuns: Int!
+
+  """Number of users."""
+  users: Int!
+
+  """Number of workspaces."""
+  workspaces: Int!
 }
 
 enum RunDAGError {
@@ -3690,6 +3918,14 @@ type SetPasswordResult {
   success: Boolean!
 }
 
+"""Represents a shortcut item in the sidebar."""
+type ShortcutItem {
+  id: UUID!
+  name: String!
+  order: Int!
+  url: String!
+}
+
 scalar SimplifiedExtentType
 
 scalar StackPriorities
@@ -3703,6 +3939,24 @@ input StopPipelineInput {
 type StopPipelineResult {
   errors: [PipelineError!]!
   success: Boolean!
+}
+
+"""Subscription details from the Bluesquare Console."""
+type Subscription {
+  """The date when the subscription ends."""
+  endDate: Date!
+
+  """Resource limits for this subscription."""
+  limits: ResourceCounts!
+
+  """The subscription plan code (e.g., "openhexa_starter")."""
+  planCode: String!
+
+  """The date when the subscription starts."""
+  startDate: Date!
+
+  """The external subscription ID from the Bluesquare Console."""
+  subscriptionId: UUID!
 }
 
 type TableColumn {
@@ -4023,6 +4277,52 @@ type UpdateMembershipResult {
 }
 
 """
+The UpdateOrganizationError enum represents the possible errors that can occur during the updateOrganization mutation.
+"""
+enum UpdateOrganizationError {
+  """Indicates that the provided logo is in an invalid format."""
+  INVALID_LOGO
+
+  """
+  Indicates that the provided short name is invalid (must be max 5 uppercase letters).
+  """
+  INVALID_SHORT_NAME
+
+  """Indicates that an organization with the same name already exists."""
+  NAME_DUPLICATE
+
+  """Indicates that the organization was not found."""
+  NOT_FOUND
+
+  """
+  Indicates that the user does not have permission to update the organization.
+  """
+  PERMISSION_DENIED
+
+  """
+  Indicates that an organization with the same short name already exists.
+  """
+  SHORT_NAME_DUPLICATE
+}
+
+"""
+The UpdateOrganizationInput type represents the input for the updateOrganization mutation.
+"""
+input UpdateOrganizationInput {
+  """The unique identifier of the organization."""
+  id: UUID!
+
+  """The updated logo of the organization (base64 encoded)."""
+  logo: String
+
+  """The updated name of the organization."""
+  name: String
+
+  """The updated short name of the organization."""
+  shortName: String
+}
+
+"""
 The UpdateOrganizationMemberError enum represents the possible errors that can occur during the updateOrganizationMember mutation.
 """
 enum UpdateOrganizationMemberError {
@@ -4066,6 +4366,83 @@ type UpdateOrganizationMemberResult {
 
   """
   Indicates whether the updateOrganizationMember mutation was successful.
+  """
+  success: Boolean!
+}
+
+"""
+The UpdateOrganizationResult type represents the result of the updateOrganization mutation.
+"""
+type UpdateOrganizationResult {
+  """
+  The list of errors that occurred during the updateOrganization mutation.
+  """
+  errors: [UpdateOrganizationError!]!
+
+  """The updated organization object."""
+  organization: Organization
+
+  """Indicates whether the updateOrganization mutation was successful."""
+  success: Boolean!
+}
+
+"""
+The UpdateOrganizationSubscriptionError enum represents the possible errors that can occur.
+"""
+enum UpdateOrganizationSubscriptionError {
+  """Indicates that the organization was not found."""
+  NOT_FOUND
+
+  """
+  Indicates that the user does not have permission to update the organization subscription.
+  """
+  PERMISSION_DENIED
+}
+
+"""
+The UpdateOrganizationSubscriptionInput type represents the input for updating organization subscription.
+Used by the Bluesquare Console to update subscription when it changes.
+
+Behavior: If a subscription with the given subscriptionId exists, it will be updated.
+Otherwise, a new subscription record will be created (used for downgrades/renewals).
+"""
+input UpdateOrganizationSubscriptionInput {
+  """The resource limits for the organization."""
+  limits: ResourceCountsInput!
+
+  """The unique identifier of the organization."""
+  organizationId: UUID!
+
+  """The updated subscription plan code."""
+  planCode: String!
+
+  """The subscription end date."""
+  subscriptionEndDate: Date!
+
+  """
+  The external subscription ID from the Bluesquare Console.
+  Used as lookup key - if exists, update; if not, create new record.
+  """
+  subscriptionId: UUID!
+
+  """The subscription start date."""
+  subscriptionStartDate: Date!
+}
+
+"""
+The UpdateOrganizationSubscriptionResult type represents the result of the updateOrganizationSubscription mutation.
+"""
+type UpdateOrganizationSubscriptionResult {
+  """
+  The list of errors that occurred during the updateOrganizationSubscription mutation.
+  """
+  errors: [UpdateOrganizationSubscriptionError!]!
+
+  """The updated organization object."""
+  organization: Organization
+
+  """
+  Indicates whether the updateOrganizationSubscription mutation was successful.
   """
   success: Boolean!
 }
@@ -4292,6 +4669,7 @@ input UpdateWebappInput {
   icon: String
   id: UUID!
   name: String
+  type: WebappType
   url: String
 }
 
@@ -4477,8 +4855,11 @@ type Webapp {
   icon: String
   id: UUID!
   isFavorite: Boolean!
+  isShortcut: Boolean!
   name: String!
   permissions: WebappPermissions!
+  slug: String!
+  type: WebappType!
   url: String!
   workspace: Workspace!
 }
@@ -4487,6 +4868,14 @@ type Webapp {
 type WebappPermissions {
   delete: Boolean!
   update: Boolean!
+}
+
+"""Represents the type of a web app."""
+enum WebappType {
+  BUNDLE
+  HTML
+  IFRAME
+  SUPERSET
 }
 
 """Represents a page of webapps."""
@@ -4519,8 +4908,10 @@ type Workspace {
   name: String!
   organization: Organization
   permissions: WorkspacePermissions!
+  pipelineLastRunStatuses: [PipelineRunStatus!]!
   pipelineTags: [String!]!
   pipelineTemplateTags: [String!]!
+  shortcuts: [ShortcutItem!]!
   slug: String!
   updatedAt: DateTime
 }
@@ -4635,4 +5026,10 @@ type WorkspacePermissions {
   launchNotebookServer: Boolean!
   manageMembers: Boolean!
   update: Boolean!
+}
+
+"""Represents a minimal workspace reference in the token payload."""
+type WorkspaceRef {
+  id: UUID!
+  slug: String!
 }
