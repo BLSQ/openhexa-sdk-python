@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.16.1](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.16.0...v2.16.1) (2026-01-20)
+
+
+### Bug Fixes
+
+* breaking changes mechanism (HEXA-1469) ([#340](https://github.com/BLSQ/openhexa-sdk-python/issues/340)) ([0e821aa](https://github.com/BLSQ/openhexa-sdk-python/commit/0e821aa09b94616430f43940ebdeb133f64bb29a))
+
 ## [2.16.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.15.2...v2.16.0) (2025-12-08)
 
 
