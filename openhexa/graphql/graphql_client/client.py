@@ -16,6 +16,10 @@ from .base_client import BaseClient
 from .base_model import UNSET, UnsetType
 from .create_connection import CreateConnection, CreateConnectionCreateConnection
 from .create_dataset import CreateDataset, CreateDatasetCreateDataset
+from .create_organization import (
+    CreateOrganization,
+    CreateOrganizationCreateOrganization,
+)
 from .create_pipeline import CreatePipeline, CreatePipelineCreatePipeline
 from .create_pipeline_from_template_version import (
     CreatePipelineFromTemplateVersion,
@@ -50,6 +54,7 @@ from .input_types import (
     ArchiveWorkspaceInput,
     CreateConnectionInput,
     CreateDatasetInput,
+    CreateOrganizationInput,
     CreatePipelineFromTemplateVersionInput,
     CreatePipelineInput,
     CreatePipelineRecipientInput,
@@ -67,6 +72,7 @@ from .input_types import (
     StopPipelineInput,
     UpdateConnectionInput,
     UpdateDatasetInput,
+    UpdateOrganizationInput,
     UpdateWebappInput,
     UpdateWorkspaceInput,
     UpgradePipelineVersionFromTemplateInput,
@@ -76,6 +82,8 @@ from .invite_workspace_member import (
     InviteWorkspaceMember,
     InviteWorkspaceMemberInviteWorkspaceMember,
 )
+from .organization import Organization, OrganizationOrganization
+from .organizations import Organizations, OrganizationsOrganizations
 from .pipeline import Pipeline, PipelinePipelineByCode
 from .pipelines import Pipelines, PipelinesPipelines
 from .remove_webapp_from_favorites import (
@@ -85,6 +93,10 @@ from .remove_webapp_from_favorites import (
 from .stop_pipeline import StopPipeline, StopPipelineStopPipeline
 from .update_connection import UpdateConnection, UpdateConnectionUpdateConnection
 from .update_dataset import UpdateDataset, UpdateDatasetUpdateDataset
+from .update_organization import (
+    UpdateOrganization,
+    UpdateOrganizationUpdateOrganization,
+)
 from .update_pipeline_heartbeat import (
     UpdatePipelineHeartbeat,
     UpdatePipelineHeartbeatUpdatePipelineHeartbeat,
@@ -859,6 +871,126 @@ class Client(BaseClient):
         )
         data = self.get_data(response)
         return DeleteConnection.model_validate(data).delete_connection
+
+    def organization(
+        self, id: Any, **kwargs: Any
+    ) -> Optional[OrganizationOrganization]:
+        query = gql(
+            """
+            query Organization($id: UUID!) {
+              organization(id: $id) {
+                id
+                name
+                shortName
+                workspaces {
+                  items {
+                    slug
+                    name
+                    countries {
+                      code
+                    }
+                  }
+                }
+                permissions {
+                  createWorkspace
+                  archiveWorkspace
+                }
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"id": id}
+        response = self.execute(
+            query=query, operation_name="Organization", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return Organization.model_validate(data).organization
+
+    def organizations(self, **kwargs: Any) -> List[OrganizationsOrganizations]:
+        query = gql(
+            """
+            query Organizations {
+              organizations {
+                id
+                name
+                workspaces {
+                  items {
+                    slug
+                    name
+                  }
+                }
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {}
+        response = self.execute(
+            query=query, operation_name="Organizations", variables=variables, **kwargs
+        )
+        data = self.get_data(response)
+        return Organizations.model_validate(data).organizations
+
+    def create_organization(
+        self, input: CreateOrganizationInput, **kwargs: Any
+    ) -> CreateOrganizationCreateOrganization:
+        query = gql(
+            """
+            mutation CreateOrganization($input: CreateOrganizationInput!) {
+              createOrganization(input: $input) {
+                success
+                errors
+                organization {
+                  id
+                  name
+                  shortName
+                }
+                user {
+                  id
+                  email
+                  displayName
+                }
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"input": input}
+        response = self.execute(
+            query=query,
+            operation_name="CreateOrganization",
+            variables=variables,
+            **kwargs
+        )
+        data = self.get_data(response)
+        return CreateOrganization.model_validate(data).create_organization
+
+    def update_organization(
+        self, input: UpdateOrganizationInput, **kwargs: Any
+    ) -> UpdateOrganizationUpdateOrganization:
+        query = gql(
+            """
+            mutation UpdateOrganization($input: UpdateOrganizationInput!) {
+              updateOrganization(input: $input) {
+                success
+                errors
+                organization {
+                  id
+                  name
+                  shortName
+                  logo
+                }
+              }
+            }
+            """
+        )
+        variables: Dict[str, object] = {"input": input}
+        response = self.execute(
+            query=query,
+            operation_name="UpdateOrganization",
+            variables=variables,
+            **kwargs
+        )
+        data = self.get_data(response)
+        return UpdateOrganization.model_validate(data).update_organization
 
     def get_users(
         self, query: str, workspace_slug: str, **kwargs: Any
