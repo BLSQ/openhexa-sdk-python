@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.17.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.16.1...v2.17.0) (2026-01-28)
+
+
+### Features
+
+* add organization management functionality with create and update operations ([#344](https://github.com/BLSQ/openhexa-sdk-python/issues/344)) ([8bb6660](https://github.com/BLSQ/openhexa-sdk-python/commit/8bb66609dc66a16558c3c91a3856ec58a4cb103f))
+
 ## [2.16.1](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.16.0...v2.16.1) (2026-01-20)
 
 
