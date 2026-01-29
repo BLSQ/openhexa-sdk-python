@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.18.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.17.0...v2.18.0) (2026-01-29)
+
+
+### Features
+
+* add usage metrics to the client organization query ([#346](https://github.com/BLSQ/openhexa-sdk-python/issues/346)) ([3ba609c](https://github.com/BLSQ/openhexa-sdk-python/commit/3ba609c2c4a1ceecf0984a5a934e532c0217abfb))
+
 ## [2.17.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.16.1...v2.17.0) (2026-01-28)
 
 
