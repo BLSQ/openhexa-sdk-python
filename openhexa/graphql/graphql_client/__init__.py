@@ -391,6 +391,7 @@ from .organization import (
 from .organizations import (
     Organizations,
     OrganizationsOrganizations,
+    OrganizationsOrganizationsUsage,
     OrganizationsOrganizationsWorkspaces,
     OrganizationsOrganizationsWorkspacesItems,
 )
@@ -716,6 +717,7 @@ __all__ = [
     "OrganizationOrganizationWorkspacesItemsCountries",
     "Organizations",
     "OrganizationsOrganizations",
+    "OrganizationsOrganizationsUsage",
     "OrganizationsOrganizationsWorkspaces",
     "OrganizationsOrganizationsWorkspacesItems",
     "ParameterInput",

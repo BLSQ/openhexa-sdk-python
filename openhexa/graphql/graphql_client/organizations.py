@@ -3,6 +3,8 @@
 
 from typing import Any, List
 
+from pydantic import Field
+
 from .base_model import BaseModel
 
 
@@ -14,6 +16,7 @@ class OrganizationsOrganizations(BaseModel):
     id: Any
     name: str
     workspaces: "OrganizationsOrganizationsWorkspaces"
+    usage: "OrganizationsOrganizationsUsage"
 
 
 class OrganizationsOrganizationsWorkspaces(BaseModel):
@@ -23,6 +26,12 @@ class OrganizationsOrganizationsWorkspaces(BaseModel):
 class OrganizationsOrganizationsWorkspacesItems(BaseModel):
     slug: str
     name: str
+
+
+class OrganizationsOrganizationsUsage(BaseModel):
+    pipeline_runs: int = Field(alias="pipelineRuns")
+    users: int
+    workspaces: int
 
 
 Organizations.model_rebuild()

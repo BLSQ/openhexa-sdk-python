@@ -919,6 +919,11 @@ class Client(BaseClient):
                     name
                   }
                 }
+                usage {
+                  pipelineRuns
+                  users
+                  workspaces
+                }
               }
             }
             """
