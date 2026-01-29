@@ -18,6 +18,7 @@ class OrganizationOrganization(BaseModel):
     short_name: Optional[str] = Field(alias="shortName")
     workspaces: "OrganizationOrganizationWorkspaces"
     permissions: "OrganizationOrganizationPermissions"
+    usage: "OrganizationOrganizationUsage"
 
 
 class OrganizationOrganizationWorkspaces(BaseModel):
@@ -37,6 +38,12 @@ class OrganizationOrganizationWorkspacesItemsCountries(BaseModel):
 class OrganizationOrganizationPermissions(BaseModel):
     create_workspace: bool = Field(alias="createWorkspace")
     archive_workspace: bool = Field(alias="archiveWorkspace")
+
+
+class OrganizationOrganizationUsage(BaseModel):
+    pipeline_runs: int = Field(alias="pipelineRuns")
+    users: int
+    workspaces: int
 
 
 Organization.model_rebuild()
