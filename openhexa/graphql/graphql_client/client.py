@@ -895,6 +895,11 @@ class Client(BaseClient):
                   createWorkspace
                   archiveWorkspace
                 }
+                usage {
+                  pipelineRuns
+                  users
+                  workspaces
+                }
               }
             }
             """

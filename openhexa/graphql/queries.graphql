@@ -351,6 +351,11 @@ query Organization($id: UUID!) {
       createWorkspace
       archiveWorkspace
     }
+      usage {
+            pipelineRuns
+            users
+            workspaces
+      }
   }
 }
 
