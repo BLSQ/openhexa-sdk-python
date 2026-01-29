@@ -364,6 +364,12 @@ query Organizations {
         name
       }
     }
+      usage {
+          pipelineRuns
+          users
+          workspaces
+
+      }
   }
 }
 
