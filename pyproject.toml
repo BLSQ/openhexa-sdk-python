@@ -54,7 +54,7 @@ examples = [
     "pandas>=2.3,<2.4",
     "rasterio~=1.4.1",
     "rasterstats>=0.20,<0.21",
-    "setuptools>=80.9.0,<80.10.0",
+    "setuptools>=80.10.2,<80.11.0",
     "SQLAlchemy~=2.0.9",
     "psycopg2",
 ]
