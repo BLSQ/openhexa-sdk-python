@@ -665,7 +665,9 @@ def pipelines_list():
                     version = "Jupyter notebook"
                 click.echo(f"* {pipeline.code} - {pipeline.name} ({version})")
 
-            if page >= response.total_pages or not click.confirm(f"\nLoad more? (page {page}/{response.total_pages})", default=True):
+            if page >= response.total_pages or not click.confirm(
+                f"\nLoad more? (page {page}/{response.total_pages})", default=True
+            ):
                 break
             page += 1
 
