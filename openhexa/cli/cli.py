@@ -33,6 +33,7 @@ from openhexa.cli.api import (
     upload_pipeline,
 )
 from openhexa.cli.settings import settings, setup_logging
+from openhexa.graphql.graphql_client.enums import PipelineType
 from openhexa.sdk.pipelines.exceptions import PipelineNotFound
 from openhexa.sdk.pipelines.runtime import get_pipeline
 
@@ -647,17 +648,33 @@ def pipelines_list():
         _terminate("No workspace activated", err=True)
 
     with OpenHexaClient() as client:
-        workspace_pipelines = client.pipelines(workspace_slug=settings.current_workspace).items
-    if len(workspace_pipelines) == 0:
-        click.echo(f"No pipelines in workspace {settings.current_workspace}")
-        return
-    click.echo("Pipelines:")
-    for pipeline in workspace_pipelines:
-        if pipeline.type == "zipFile":
-            current_version = f"v{pipeline.current_version.version_number}" if pipeline.current_version else "N/A"
-        else:
-            current_version = "Jupyter notebook"
-        click.echo(f"* {pipeline.code} - {pipeline.name} ({current_version})")
+        page = 1
+
+        while True:
+            response = client.pipelines(workspace_slug=settings.current_workspace, page=page, per_page=10)
+
+            if page == 1 and not response.items:
+                click.echo(f"No pipelines in workspace {settings.current_workspace}")
+                return
+
+            if page == 1:
+                click.echo(f"Pipelines ({response.total_items}):")
+
+            for pipeline in response.items:
+                pipeline_version = ""
+                if pipeline.type == PipelineType.zipFile:
+                    pipeline_version = (
+                        f"v{pipeline.current_version.version_number}" if pipeline.current_version else "N/A"
+                    )
+                elif pipeline.type == PipelineType.notebook:
+                    pipeline_version = "Jupyter notebook"
+                click.echo(f"* {pipeline.code} - {pipeline.name} ({pipeline_version})")
+
+            if page >= response.total_pages or not click.confirm(
+                f"\nShow more? (page {page}/{response.total_pages})", default=True
+            ):
+                break
+            page += 1
 
 
 def _terminate(message: str, exception: Exception = None, err: bool = False):

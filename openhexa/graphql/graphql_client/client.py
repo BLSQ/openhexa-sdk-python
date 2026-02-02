@@ -135,6 +135,7 @@ class Client(BaseClient):
                 perPage: $perPage
               ) {
                 totalPages
+                totalItems
                 items {
                   id
                   code

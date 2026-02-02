@@ -15,6 +15,7 @@ class GetWorkspacePipelines(BaseModel):
 
 class GetWorkspacePipelinesPipelines(BaseModel):
     total_pages: int = Field(alias="totalPages")
+    total_items: int = Field(alias="totalItems")
     items: List["GetWorkspacePipelinesPipelinesItems"]
 
 
