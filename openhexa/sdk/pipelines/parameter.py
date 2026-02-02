@@ -524,6 +524,8 @@ class Parameter:
         normalized_value = self.type.normalize(value)
         if normalized_value is None and self.default is not None:
             normalized_value = self.default
+        elif normalized_value is None and isinstance(self.type, Boolean):
+            normalized_value = False  # Booleans default to False when no default is set
 
         if normalized_value is None:
             if self.required:
