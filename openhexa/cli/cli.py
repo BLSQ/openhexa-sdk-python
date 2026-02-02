@@ -649,7 +649,6 @@ def pipelines_list():
 
     with OpenHexaClient() as client:
         page = 1
-        click.echo("Pipelines:")
 
         while True:
             response = client.pipelines(workspace_slug=settings.current_workspace, page=page, per_page=10)
@@ -658,15 +657,19 @@ def pipelines_list():
                 click.echo(f"No pipelines in workspace {settings.current_workspace}")
                 return
 
+            if page == 1:
+                click.echo(f"Pipelines ({response.total_items}):")
+
             for pipeline in response.items:
+                pipeline_version = ""
                 if pipeline.type == PipelineType.zipFile:
-                    version = f"v{pipeline.current_version.version_number}" if pipeline.current_version else "N/A"
-                else:  # notebook type
-                    version = "Jupyter notebook"
-                click.echo(f"* {pipeline.code} - {pipeline.name} ({version})")
+                    pipeline_version = f"v{pipeline.current_version.version_number}" if pipeline.current_version else "N/A"
+                elif pipeline.type == PipelineType.notebook:
+                    pipeline_version = "Jupyter notebook"
+                click.echo(f"* {pipeline.code} - {pipeline.name} ({pipeline_version})")
 
             if page >= response.total_pages or not click.confirm(
-                f"\nLoad more? (page {page}/{response.total_pages})", default=True
+                f"\nShow more? (page {page}/{response.total_pages})", default=True
             ):
                 break
             page += 1
