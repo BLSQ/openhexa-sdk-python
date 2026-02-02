@@ -663,7 +663,9 @@ def pipelines_list():
             for pipeline in response.items:
                 pipeline_version = ""
                 if pipeline.type == PipelineType.zipFile:
-                    pipeline_version = f"v{pipeline.current_version.version_number}" if pipeline.current_version else "N/A"
+                    pipeline_version = (
+                        f"v{pipeline.current_version.version_number}" if pipeline.current_version else "N/A"
+                    )
                 elif pipeline.type == PipelineType.notebook:
                     pipeline_version = "Jupyter notebook"
                 click.echo(f"* {pipeline.code} - {pipeline.name} ({pipeline_version})")
