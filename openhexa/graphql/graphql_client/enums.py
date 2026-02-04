@@ -110,6 +110,14 @@ class ConnectionType(str, Enum):
     S3 = "S3"
 
 
+class ConvertExternalCollaboratorToMemberError(str, Enum):
+    NOT_EXTERNAL_COLLABORATOR = "NOT_EXTERNAL_COLLABORATOR"
+    ORGANIZATION_NOT_FOUND = "ORGANIZATION_NOT_FOUND"
+    PERMISSION_DENIED = "PERMISSION_DENIED"
+    USERS_LIMIT_REACHED = "USERS_LIMIT_REACHED"
+    USER_NOT_FOUND = "USER_NOT_FOUND"
+
+
 class CreateAccessmodAccessibilityAnalysisError(str, Enum):
     NAME_DUPLICATE = "NAME_DUPLICATE"
 
@@ -178,6 +186,7 @@ class CreateMembershipError(str, Enum):
 
 class CreateOrganizationError(str, Enum):
     INVALID_EMAIL = "INVALID_EMAIL"
+    INVALID_SHORT_NAME = "INVALID_SHORT_NAME"
     NAME_DUPLICATE = "NAME_DUPLICATE"
     PERMISSION_DENIED = "PERMISSION_DENIED"
 
@@ -312,6 +321,12 @@ class DeleteDatasetLinkError(str, Enum):
 class DeleteDatasetVersionError(str, Enum):
     PERMISSION_DENIED = "PERMISSION_DENIED"
     VERSION_NOT_FOUND = "VERSION_NOT_FOUND"
+
+
+class DeleteExternalCollaboratorError(str, Enum):
+    ORGANIZATION_NOT_FOUND = "ORGANIZATION_NOT_FOUND"
+    PERMISSION_DENIED = "PERMISSION_DENIED"
+    USER_NOT_FOUND = "USER_NOT_FOUND"
 
 
 class DeleteMembershipError(str, Enum):
@@ -713,6 +728,10 @@ class SetPasswordError(str, Enum):
     USER_NOT_FOUND = "USER_NOT_FOUND"
 
 
+class SignupError(str, Enum):
+    SELF_REGISTRATION_DISABLED = "SELF_REGISTRATION_DISABLED"
+
+
 class UpdateAccessmodAccessibilityAnalysisError(str, Enum):
     NAME_DUPLICATE = "NAME_DUPLICATE"
     NOT_FOUND = "NOT_FOUND"
@@ -762,6 +781,12 @@ class UpdateDatasetVersionError(str, Enum):
     VERSION_NOT_FOUND = "VERSION_NOT_FOUND"
 
 
+class UpdateExternalCollaboratorError(str, Enum):
+    ORGANIZATION_NOT_FOUND = "ORGANIZATION_NOT_FOUND"
+    PERMISSION_DENIED = "PERMISSION_DENIED"
+    USER_NOT_FOUND = "USER_NOT_FOUND"
+
+
 class UpdateMembershipError(str, Enum):
     INVALID_ROLE = "INVALID_ROLE"
     NOT_FOUND = "NOT_FOUND"
@@ -774,7 +799,6 @@ class UpdateOrganizationError(str, Enum):
     NAME_DUPLICATE = "NAME_DUPLICATE"
     NOT_FOUND = "NOT_FOUND"
     PERMISSION_DENIED = "PERMISSION_DENIED"
-    SHORT_NAME_DUPLICATE = "SHORT_NAME_DUPLICATE"
 
 
 class UpdateOrganizationMemberError(str, Enum):

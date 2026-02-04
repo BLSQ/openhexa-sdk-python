@@ -55,6 +55,12 @@ class ConnectionFieldInput(BaseModel):
     value: Optional[str] = None
 
 
+class ConvertExternalCollaboratorToMemberInput(BaseModel):
+    organization_id: Any = Field(alias="organizationId")
+    role: OrganizationMembershipRole
+    user_id: Any = Field(alias="userId")
+
+
 class CountryInput(BaseModel):
     alpha_3: Optional[str] = Field(alias="alpha3", default=None)
     code: str
@@ -145,6 +151,7 @@ class CreateOrganizationInput(BaseModel):
     name: str
     owner_email: str = Field(alias="ownerEmail")
     plan_code: str = Field(alias="planCode")
+    short_name: Optional[str] = Field(alias="shortName", default=None)
     subscription_end_date: Any = Field(alias="subscriptionEndDate")
     subscription_id: Any = Field(alias="subscriptionId")
     subscription_start_date: Any = Field(alias="subscriptionStartDate")
@@ -245,6 +252,11 @@ class DeleteDatasetLinkInput(BaseModel):
 
 class DeleteDatasetVersionInput(BaseModel):
     version_id: str = Field(alias="versionId")
+
+
+class DeleteExternalCollaboratorInput(BaseModel):
+    organization_id: Any = Field(alias="organizationId")
+    user_id: Any = Field(alias="userId")
 
 
 class DeleteMembershipInput(BaseModel):
@@ -537,6 +549,10 @@ class SetPasswordInput(BaseModel):
     uidb_64: str = Field(alias="uidb64")
 
 
+class SignupInput(BaseModel):
+    email: str
+
+
 class StopPipelineInput(BaseModel):
     run_id: Any = Field(alias="runId")
 
@@ -619,6 +635,14 @@ class UpdateDatasetVersionInput(BaseModel):
     changelog: Optional[str] = None
     name: Optional[str] = None
     version_id: str = Field(alias="versionId")
+
+
+class UpdateExternalCollaboratorInput(BaseModel):
+    organization_id: Any = Field(alias="organizationId")
+    user_id: Any = Field(alias="userId")
+    workspace_permissions: Optional[List["WorkspacePermissionInput"]] = Field(
+        alias="workspacePermissions", default=None
+    )
 
 
 class UpdateMembershipInput(BaseModel):
@@ -776,6 +800,7 @@ CreateWorkspaceInput.model_rebuild()
 InviteOrganizationMemberInput.model_rebuild()
 UpdateConnectionInput.model_rebuild()
 UpdateDAGInput.model_rebuild()
+UpdateExternalCollaboratorInput.model_rebuild()
 UpdateOrganizationMemberInput.model_rebuild()
 UpdateOrganizationSubscriptionInput.model_rebuild()
 UpdateWorkspaceInput.model_rebuild()
