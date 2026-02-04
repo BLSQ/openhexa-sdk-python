@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.18.3](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.18.2...v2.18.3) (2026-02-04)
+
+
+### Miscellaneous
+
+* **deps:** update dependency ruff to &gt;=0.15.0,&lt;0.16.0 ([#353](https://github.com/BLSQ/openhexa-sdk-python/issues/353)) ([cd477c6](https://github.com/BLSQ/openhexa-sdk-python/commit/cd477c6946f49fdb7fdd0d4d39f610abe165d789))
+* **deps:** update dependency setuptools to &gt;=80.10.2,&lt;80.11.0 ([#342](https://github.com/BLSQ/openhexa-sdk-python/issues/342)) ([525a8e9](https://github.com/BLSQ/openhexa-sdk-python/commit/525a8e9e1b9714408633fb516e5434c7d3e5b325))
+
 ## [2.18.2](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.18.1...v2.18.2) (2026-02-04)
 
 
