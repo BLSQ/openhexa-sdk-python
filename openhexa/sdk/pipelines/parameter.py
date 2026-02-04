@@ -527,7 +527,7 @@ class Parameter:
 
         if normalized_value is None:
             if isinstance(self.type, Boolean):
-                normalized_value = False  
+                normalized_value = False
             elif self.required:
                 raise ParameterValueError(f"{self.code} is required")
             else:
