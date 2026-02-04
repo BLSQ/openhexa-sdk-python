@@ -526,10 +526,12 @@ class Parameter:
             normalized_value = self.default
 
         if normalized_value is None:
-            if self.required:
+            if isinstance(self.type, Boolean):
+                normalized_value = False
+            elif self.required:
                 raise ParameterValueError(f"{self.code} is required")
-
-            return None
+            else:
+                return None
 
         pre_validated = self.type.validate(normalized_value)
         if self.choices is not None and pre_validated not in self.choices:
