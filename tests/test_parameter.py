@@ -287,9 +287,13 @@ def test_parameter_validate_single():
     parameter_2 = Parameter("arg2", type=int, default=3)
     assert parameter_2.validate(None) == 3
 
-    # not required, no default
+    # not required, no default - booleans default to False
     parameter_3 = Parameter("arg3", type=bool, required=False)
-    assert parameter_3.validate(None) is None
+    assert parameter_3.validate(None) is False
+
+    # required, no default - booleans default to False
+    parameter_5 = Parameter("arg5", type=bool, required=True)
+    assert parameter_5.validate(None) is False
 
     # choices
     parameter_4 = Parameter("arg4", type=str, choices=["ab", "cd"])
