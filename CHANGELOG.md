@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.18.2](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.18.1...v2.18.2) (2026-02-04)
+
+
+### Bug Fixes
+
+* breaking change ([#354](https://github.com/BLSQ/openhexa-sdk-python/issues/354)) ([f48b3eb](https://github.com/BLSQ/openhexa-sdk-python/commit/f48b3eb46abee80020454d112bc56ae46e47e1a1))
+* pipelines list only returns first page(Hexa-1441) ([#350](https://github.com/BLSQ/openhexa-sdk-python/issues/350)) ([fef42b7](https://github.com/BLSQ/openhexa-sdk-python/commit/fef42b7b2ea462d18de5e68c714fb08b6c32863a))
+
 ## [2.18.1](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.18.0...v2.18.1) (2026-01-29)
 
 
