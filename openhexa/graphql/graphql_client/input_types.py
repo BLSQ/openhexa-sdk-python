@@ -509,6 +509,14 @@ class ResetPasswordInput(BaseModel):
 
 
 class ResourceCountsInput(BaseModel):
+    max_pipeline_timeout: Optional[int] = Field(
+        alias="maxPipelineTimeout", default=None
+    )
+    notebook_profile: Optional[str] = Field(alias="notebookProfile", default=None)
+    pipeline_cpu_limit: Optional[str] = Field(alias="pipelineCpuLimit", default=None)
+    pipeline_memory_limit: Optional[str] = Field(
+        alias="pipelineMemoryLimit", default=None
+    )
     pipeline_runs: int = Field(alias="pipelineRuns")
     users: int
     workspaces: int
