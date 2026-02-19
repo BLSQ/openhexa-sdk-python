@@ -224,8 +224,8 @@ class CurrentWorkspace:
         connection_fields = {}
         connection_type = os.getenv(env_variable_prefix).upper()
 
-        # Get fields for the connection type
-        _fields = fields(ConnectionClasses[connection_type])
+        # Get fields for the connection type, excluding base Connection fields
+        _fields = [f for f in fields(ConnectionClasses[connection_type]) if f.name != "identifier"]
 
         if _fields:
             for field in _fields:
