@@ -2,12 +2,12 @@
 """
 Check for breaking changes between the SDK's bundled GraphQL schema and live server schemas for our production and demo environments.
 
-Exits 1 if breaking changes are found so that the CI step is visibly marked as failed.
-The CI job uses continue-on-error: true so it does not block merging.
+Exits 0 regardless of outcome. Emits ::warning:: annotations when running in GitHub Actions
+so breaking changes are visible without affecting the job status.
 """
 
 import os
-import sys
+from pathlib import Path
 
 import requests
 from graphql import build_client_schema, build_schema, get_introspection_query
@@ -16,6 +16,8 @@ from graphql.utilities import find_breaking_changes
 from openhexa.graphql import BUNDLED_SCHEMA_PATH
 
 GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
+REPO_ROOT = Path(__file__).parent.parent
+SCHEMA_RELATIVE_PATH = BUNDLED_SCHEMA_PATH.relative_to(REPO_ROOT)
 
 URLS = [
     "https://api.demo.openhexa.org",
@@ -48,7 +50,7 @@ def check_url(stored_schema, url: str) -> list:
         for change in breaking_changes:
             print(f"    - {change.description}")
             if GITHUB_ACTIONS:
-                print(f"::warning title=GraphQL schema breaking change ({url})::{change.description}")
+                print(f"::warning file={SCHEMA_RELATIVE_PATH},line=1,title=GraphQL schema breaking change ({url})::{change.description}")
     else:
         print("  ✅ No breaking changes detected.")
     return breaking_changes
@@ -68,7 +70,6 @@ def main():
             "\nUpdate the bundled schema by copying the latest schema from the OpenHEXA monorepo"
             " and re-running: python -m ariadne_codegen"
         )
-        sys.exit(1)
 
 
 if __name__ == "__main__":
