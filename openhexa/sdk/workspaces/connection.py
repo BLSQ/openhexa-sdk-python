@@ -7,7 +7,7 @@ import dataclasses
 class Connection:
     """Abstract base class for connections."""
 
-    _: dataclasses.KW_ONLY 
+    _: dataclasses.KW_ONLY
     identifier: str = ""
 
 
