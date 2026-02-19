@@ -24,7 +24,7 @@ from graphql.utilities import find_breaking_changes
 from jinja2 import Template
 
 from openhexa.cli.settings import settings
-from openhexa.graphql import BaseOpenHexaClient
+from openhexa.graphql import BUNDLED_SCHEMA_PATH, BaseOpenHexaClient
 from openhexa.sdk.pipelines import get_local_workspace_config
 from openhexa.sdk.pipelines.runtime import get_pipeline
 from openhexa.utils import create_requests_session, stringcase
@@ -134,9 +134,7 @@ def _detect_graphql_breaking_changes_if_needed(token):
 
 def _detect_graphql_breaking_changes(token):
     """Detect breaking changes between the schema referenced in the SDK and the server using graphql-core."""
-    stored_schema_obj = build_schema(
-        (Path(__file__).parent.parent / "graphql" / "schema.generated.graphql").open().read()
-    )
+    stored_schema_obj = build_schema(BUNDLED_SCHEMA_PATH.read_text())
     server_schema_obj = build_client_schema(
         _query_graphql(get_introspection_query(input_value_deprecation=True), token=token)
     )
