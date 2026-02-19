@@ -45,6 +45,7 @@ jobs:
   schema-compatibility:
     name: Check schema compatibility with demo server
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - name: Checkout
         uses: actions/checkout@v6

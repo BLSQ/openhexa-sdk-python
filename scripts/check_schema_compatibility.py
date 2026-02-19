@@ -2,10 +2,12 @@
 """
 Check for breaking changes between the SDK's bundled GraphQL schema and live server schemas for our production and demo environments.
 
-Exits 0 regardless of outcome; prints a warning summary if breaking changes are found.
+Exits 1 if breaking changes are found so that the CI step is visibly marked as failed.
+The CI job uses continue-on-error: true so it does not block merging.
 """
 
 import os
+import sys
 
 import requests
 from graphql import build_client_schema, build_schema, get_introspection_query
@@ -66,6 +68,7 @@ def main():
             "\nUpdate the bundled schema by copying the latest schema from the OpenHEXA monorepo"
             " and re-running: python -m ariadne_codegen"
         )
+        sys.exit(1)
 
 
 if __name__ == "__main__":
