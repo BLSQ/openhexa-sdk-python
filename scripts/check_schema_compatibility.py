@@ -5,11 +5,15 @@ Check for breaking changes between the SDK's bundled GraphQL schema and live ser
 Exits 0 regardless of outcome; prints a warning summary if breaking changes are found.
 """
 
+import os
+
 import requests
 from graphql import build_client_schema, build_schema, get_introspection_query
 from graphql.utilities import find_breaking_changes
 
 from openhexa.graphql import BUNDLED_SCHEMA_PATH
+
+GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 
 URLS = [
     "https://api.demo.openhexa.org",
@@ -41,12 +45,15 @@ def check_url(stored_schema, url: str) -> list:
         print(f"  ⚠️  {len(breaking_changes)} breaking change(s) detected:")
         for change in breaking_changes:
             print(f"    - {change.description}")
+            if GITHUB_ACTIONS:
+                print(f"::warning title=GraphQL schema breaking change ({url})::{change.description}")
     else:
         print("  ✅ No breaking changes detected.")
     return breaking_changes
 
 
 def main():
+    """Execute main function."""
     stored_schema = build_schema(BUNDLED_SCHEMA_PATH.read_text())
 
     all_breaking_changes = []
