@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import datetime
 import typing
+from functools import wraps
 
 import openhexa.sdk.pipelines.pipeline
 
@@ -127,18 +128,23 @@ class Task:
         return self.name
 
 
-class PipelineWithTask:
+P = typing.ParamSpec("P")
+R = typing.TypeVar("R")
+
+
+class PipelineWithTask(typing.Generic[P, R]):
     """Pipeline with attached tasks, usually through the @task decorator."""
 
     def __init__(
         self,
-        function: typing.Callable,
+        function: typing.Callable[P, R],
         pipeline: openhexa.sdk.pipelines.Pipeline,
     ):
         self.function = function
         self.pipeline = pipeline
+        wraps(function)(self)
 
-    def __call__(self, *task_args, **task_kwargs) -> Task:
+    def __call__(self, *task_args: typing.Any, **task_kwargs: typing.Any) -> Task:
         """Attach the new task to the decorated pipeline and return it."""
         task = Task(self.function)(*task_args, **task_kwargs)
         self.pipeline.tasks.append(task)
