@@ -1,5 +1,26 @@
 # Changelog
 
+## [2.19.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.18.2...v2.19.0) (2026-02-19)
+
+
+### Features
+
+* timeout, profile and limits ([#358](https://github.com/BLSQ/openhexa-sdk-python/issues/358)) ([f175247](https://github.com/BLSQ/openhexa-sdk-python/commit/f175247819b4ed5c372317dd430792b72b8f2ed6))
+
+
+### Bug Fixes
+
+* boolean parameter without defaullt value defaults to False ([#352](https://github.com/BLSQ/openhexa-sdk-python/issues/352)) ([d2d563d](https://github.com/BLSQ/openhexa-sdk-python/commit/d2d563da8d6a5843315f8b6a0cde4348297f7615))
+* **deps:** update dependency rasterio to ~=1.5.0 ([#339](https://github.com/BLSQ/openhexa-sdk-python/issues/339)) ([9d47e28](https://github.com/BLSQ/openhexa-sdk-python/commit/9d47e28dc5097daab39e8ef220c159a8ed48eba1))
+
+
+### Miscellaneous
+
+* **deps:** update dependency python to 3.14 ([#322](https://github.com/BLSQ/openhexa-sdk-python/issues/322)) ([26bd385](https://github.com/BLSQ/openhexa-sdk-python/commit/26bd3859583556354984cdae3ca29b5afba41db9))
+* **deps:** update dependency ruff to &gt;=0.15.0,&lt;0.16.0 ([#353](https://github.com/BLSQ/openhexa-sdk-python/issues/353)) ([cd477c6](https://github.com/BLSQ/openhexa-sdk-python/commit/cd477c6946f49fdb7fdd0d4d39f610abe165d789))
+* **deps:** update dependency setuptools to &gt;=80.10.2,&lt;80.11.0 ([#342](https://github.com/BLSQ/openhexa-sdk-python/issues/342)) ([525a8e9](https://github.com/BLSQ/openhexa-sdk-python/commit/525a8e9e1b9714408633fb516e5434c7d3e5b325))
+* **deps:** update dependency setuptools to v82 ([#357](https://github.com/BLSQ/openhexa-sdk-python/issues/357)) ([1f1d791](https://github.com/BLSQ/openhexa-sdk-python/commit/1f1d791d2a11ad49a33037f8abcbcc5f65fc607e))
+
 ## [2.18.2](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.18.1...v2.18.2) (2026-02-04)
 
 
