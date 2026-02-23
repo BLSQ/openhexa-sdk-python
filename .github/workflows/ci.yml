@@ -43,7 +43,7 @@ jobs:
         run: pytest --cov=. --cov-report html --cov-report term --cov-fail-under=25
 
   schema-compatibility:
-    name: Check schema compatibility with demo server
+    name: Check schema compatibility with production server
     runs-on: ubuntu-latest
     if: startsWith(github.head_ref, 'release-please')
     steps:
