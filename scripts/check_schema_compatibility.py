@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 """
-Check for breaking changes between the SDK's bundled GraphQL schema and live server schemas for our production and demo environments.
+Check for breaking changes between the SDK's bundled GraphQL schema and the production server schema.
 
-Exits 0 regardless of outcome. Emits ::warning:: annotations when running in GitHub Actions
-so breaking changes are visible without affecting the job status.
+Exits with code 1 when breaking changes are found. Emits ::warning:: annotations when running
+in GitHub Actions so breaking changes are visible in the PR.
 """
 
 import os
+import sys
 from pathlib import Path
 
 import requests
@@ -19,10 +20,7 @@ GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 REPO_ROOT = Path(__file__).parent.parent
 SCHEMA_RELATIVE_PATH = BUNDLED_SCHEMA_PATH.relative_to(REPO_ROOT)
 
-URLS = [
-    "https://api.demo.openhexa.org",
-    "https://api.openhexa.org",
-]
+PRODUCTION_URL = "https://api.openhexa.org"
 
 
 def fetch_server_schema(graphql_url: str):
@@ -39,37 +37,28 @@ def fetch_server_schema(graphql_url: str):
     return build_client_schema(body["data"])
 
 
-def check_url(stored_schema, url: str) -> list:
-    """Check breaking changes for a single server URL. Returns the list of breaking changes."""
-    graphql_url = url.rstrip("/") + "/graphql/"
-    server_schema = fetch_server_schema(graphql_url)
-
-    breaking_changes = find_breaking_changes(stored_schema, server_schema)
-    if breaking_changes:
-        print(f"  ⚠️  {len(breaking_changes)} breaking change(s) detected:")
-        for change in breaking_changes:
-            print(f"    - {change.description}")
-            if GITHUB_ACTIONS:
-                print(f"::warning file={SCHEMA_RELATIVE_PATH},line=1,title=GraphQL schema breaking change ({url})::{change.description}")
-    else:
-        print("  ✅ No breaking changes detected.")
-    return breaking_changes
-
-
 def main():
     """Execute main function."""
     stored_schema = build_schema(BUNDLED_SCHEMA_PATH.read_text())
+    server_schema = fetch_server_schema(f"{PRODUCTION_URL}/graphql/")
 
-    all_breaking_changes = []
-    for url in URLS:
-        all_breaking_changes.extend(check_url(stored_schema, url))
-
-    if all_breaking_changes:
+    breaking_changes = find_breaking_changes(stored_schema, server_schema)
+    if breaking_changes:
+        print(f"⚠️  {len(breaking_changes)} breaking change(s) detected:")
+        for change in breaking_changes:
+            print(f"  - {change.description}")
+            if GITHUB_ACTIONS:
+                print(
+                    f"::warning file={SCHEMA_RELATIVE_PATH},line=1,title=GraphQL schema breaking change ({PRODUCTION_URL})::{change.description}"
+                )
         print(
             "\nThe server schema has diverged from openhexa/graphql/schema.generated.graphql."
             "\nUpdate the bundled schema by copying the latest schema from the OpenHEXA monorepo"
             " and re-running: python -m ariadne_codegen"
         )
+        sys.exit(1)
+    else:
+        print("✅ No breaking changes detected.")
 
 
 if __name__ == "__main__":
