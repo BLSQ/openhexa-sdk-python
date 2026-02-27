@@ -7,7 +7,8 @@ import dataclasses
 class Connection:
     """Abstract base class for connections."""
 
-    pass
+    _: dataclasses.KW_ONLY  # Ensures `identifier` is always passed as a keyword argument, preventing positional conflicts with subclass fields
+    identifier: str = ""
 
 
 @dataclasses.dataclass
@@ -100,7 +101,7 @@ class CustomConnection(Connection):
 
 
 @dataclasses.dataclass
-class IASOConnection:
+class IASOConnection(Connection):
     """IASO connection.
 
     See https://github.com/BLSQ/iaso for more information.

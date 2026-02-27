@@ -224,8 +224,8 @@ class CurrentWorkspace:
         connection_fields = {}
         connection_type = os.getenv(env_variable_prefix).upper()
 
-        # Get fields for the connection type
-        _fields = fields(ConnectionClasses[connection_type])
+        # Get fields for the connection type, excluding base Connection fields
+        _fields = [f for f in fields(ConnectionClasses[connection_type]) if f.name != "identifier"]
 
         if _fields:
             for field in _fields:
@@ -305,7 +305,7 @@ class CurrentWorkspace:
         # different from the offline ones
         if connection_type == "S3":
             secret_access_key = connection_fields.pop("access_key_secret")
-            return S3Connection(secret_access_key=secret_access_key, **connection_fields)
+            return S3Connection(secret_access_key=secret_access_key, identifier=identifier, **connection_fields)
 
         if connection_type == "POSTGRESQL":
             db_name = connection_fields.pop("db_name")
@@ -313,6 +313,7 @@ class CurrentWorkspace:
             return PostgreSQLConnection(
                 database_name=db_name,
                 port=port,
+                identifier=identifier,
                 **connection_fields,
             )
 
@@ -323,9 +324,9 @@ class CurrentWorkspace:
                 bases=(CustomConnection,),
                 repr=False,
             )
-            return dataclass(**connection_fields)
+            return dataclass(identifier=identifier, **connection_fields)
 
-        return ConnectionClasses[connection_type](**connection_fields)
+        return ConnectionClasses[connection_type](identifier=identifier, **connection_fields)
 
     def dhis2_connection(self, identifier: str = None, slug: str = None) -> DHIS2Connection:
         """Get a DHIS2 connection by its identifier.
