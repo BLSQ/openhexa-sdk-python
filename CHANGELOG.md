@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.19.1](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.19.0...v2.19.1) (2026-03-03)
+
+
+### Bug Fixes
+
+* expose connection identifier on connection objects ([#360](https://github.com/BLSQ/openhexa-sdk-python/issues/360)) ([04ce390](https://github.com/BLSQ/openhexa-sdk-python/commit/04ce390fba87e60d1b7f7ea31e77e7a4b1fe0d10))
+* Schema compatibility Slack message ([5430275](https://github.com/BLSQ/openhexa-sdk-python/commit/5430275f29f7982d9f32ce28adbcc4f304f7deac))
+
+
+### Miscellaneous
+
+* Add a schema compatibility check to the CI for the OH CLI ([#359](https://github.com/BLSQ/openhexa-sdk-python/issues/359)) ([429eba1](https://github.com/BLSQ/openhexa-sdk-python/commit/429eba152389b005f84224ec7eb34f154971989d))
+* Update GraphQL schema to latest release ([#364](https://github.com/BLSQ/openhexa-sdk-python/issues/364)) ([b89aab5](https://github.com/BLSQ/openhexa-sdk-python/commit/b89aab58e440668214350172b6c271400a8686c5))
+
 ## [2.19.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.18.2...v2.19.0) (2026-02-19)
 
 
