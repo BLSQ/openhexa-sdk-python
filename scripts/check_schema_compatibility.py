@@ -18,7 +18,11 @@ from openhexa.graphql import BUNDLED_SCHEMA_PATH
 
 GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 REPO_ROOT = Path(__file__).parent.parent
-SCHEMA_RELATIVE_PATH = BUNDLED_SCHEMA_PATH.relative_to(REPO_ROOT)
+try:
+    SCHEMA_RELATIVE_PATH = BUNDLED_SCHEMA_PATH.relative_to(REPO_ROOT)
+except ValueError:
+    # When installed as a package, the schema lives in site-packages, not the repo.
+    SCHEMA_RELATIVE_PATH = Path("openhexa/graphql/schema.generated.graphql")
 
 PRODUCTION_URL = "https://api.openhexa.org"
 
