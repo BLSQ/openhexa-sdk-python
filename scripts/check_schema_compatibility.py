@@ -39,7 +39,7 @@ def fetch_server_schema(graphql_url: str):
 
 def main():
     """Execute main function."""
-    stored_schema = build_schema(BUNDLED_SCHEMA_PATH.read_text())
+    stored_schema = build_schema(BUNDLED_SCHEMA_PATH.read_text(), assume_valid_sdl=True)
     server_schema = fetch_server_schema(f"{PRODUCTION_URL}/graphql/")
 
     breaking_changes = find_breaking_changes(stored_schema, server_schema)
