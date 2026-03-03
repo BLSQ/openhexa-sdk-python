@@ -1052,6 +1052,8 @@ enum CreateTemplateVersionPermissionReason {
 enum CreateWebappError {
   ALREADY_EXISTS
   PERMISSION_DENIED
+  SUPERSET_INSTANCE_NOT_FOUND
+  SUPERSET_NOT_CONFIGURED
   WORKSPACE_NOT_FOUND
 }
 
@@ -1060,8 +1062,7 @@ input CreateWebappInput {
   description: String
   icon: String
   name: String!
-  type: WebappType!
-  url: String!
+  source: WebappSourceInput!
   workspaceSlug: String!
 }
 
@@ -1447,6 +1448,7 @@ type DatasetVersionFile implements MetadataObject {
   filename: String!
   id: ID!
   properties: JSON
+  rows: Int
   size: BigInt!
   targetId: OpaqueID!
   uri: String!
@@ -2198,6 +2200,7 @@ input GenerateDatasetUploadUrlInput {
 """Result of creating an upload url"""
 type GenerateDatasetUploadUrlResult {
   errors: [CreateDatasetVersionFileError!]!
+  headers: JSON
   success: Boolean!
   uploadUrl: String
 }
@@ -2319,6 +2322,15 @@ type IASOQueryResultPage {
   success: Boolean!
   totalItems: Int!
   totalPages: Int!
+}
+
+type IframeSource {
+  url: String!
+}
+
+"""Iframe webapp source."""
+input IframeSourceInput {
+  url: String!
 }
 
 """
@@ -2852,6 +2864,7 @@ type Mutation {
 
   """Stops a pipeline."""
   stopPipeline(input: StopPipelineInput!): StopPipelineResult!
+  testConnection(input: TestConnectionInput!): TestConnectionResult!
   updateAccessmodAccessibilityAnalysis(input: UpdateAccessmodAccessibilityAnalysisInput): UpdateAccessmodAccessibilityAnalysisResult!
   updateAccessmodFileset(input: UpdateAccessmodFilesetInput!): UpdateAccessmodFilesetResult!
   updateAccessmodProject(input: UpdateAccessmodProjectInput!): UpdateAccessmodProjectResult!
@@ -3237,6 +3250,14 @@ enum PipelineNotificationLevel {
   ERROR
 }
 
+"""Enum representing the possible orderings for pipelines."""
+enum PipelineOrderBy {
+  LAST_RUN_DATE_ASC
+  LAST_RUN_DATE_DESC
+  NAME_ASC
+  NAME_DESC
+}
+
 """Represents a parameter of a pipeline."""
 type PipelineParameter {
   choices: [Generic!]
@@ -3605,6 +3626,7 @@ The result of preparing to upload an object to a workspace's bucket. It contains
 """
 type PrepareObjectUploadResult {
   errors: [PrepareObjectUploadError!]!
+  headers: JSON
   success: Boolean!
 
   """
@@ -3708,12 +3730,13 @@ type Query {
   pipelineVersion(id: UUID!): PipelineVersion
 
   """Retrieves a page of pipelines ordered by relevant name."""
-  pipelines(functionalType: PipelineFunctionalType, lastRunStates: [PipelineRunStatus!], name: String, page: Int, perPage: Int, search: String, tags: [String!], workspaceSlug: String): PipelinesPage!
+  pipelines(functionalType: PipelineFunctionalType, lastRunStates: [PipelineRunStatus!], name: String, orderBy: PipelineOrderBy, page: Int, perPage: Int, search: String, tags: [String!], workspaceSlug: String): PipelinesPage!
   searchDatabaseTables(organizationId: UUID, page: Int = 1, perPage: Int = 15, query: String!, workspaceSlugs: [String]): DatabaseTableResultPage!
   searchDatasets(organizationId: UUID, page: Int = 1, perPage: Int = 15, query: String!, workspaceSlugs: [String]): DatasetResultPage!
   searchFiles(organizationId: UUID, page: Int = 1, perPage: Int = 15, prefix: String, query: String!, workspaceSlugs: [String]): FileResultPage!
   searchPipelineTemplates(organizationId: UUID, page: Int = 1, perPage: Int = 15, query: String!, workspaceSlugs: [String]): PipelineTemplateResultPage!
   searchPipelines(functionalType: PipelineFunctionalType, organizationId: UUID, page: Int = 1, perPage: Int = 15, query: String!, workspaceSlugs: [String]): PipelineResultPage!
+  supersetInstances(workspaceSlug: String!): [SupersetInstance!]!
   team(id: UUID!): Team
   teams(page: Int, perPage: Int, term: String): TeamPage!
 
@@ -4154,6 +4177,24 @@ type Subscription {
   subscriptionId: UUID!
 }
 
+"""Represents a Superset instance."""
+type SupersetInstance {
+  id: UUID!
+  name: String!
+  url: String!
+}
+
+type SupersetSource {
+  dashboardId: String!
+  instance: SupersetInstance!
+}
+
+"""Superset dashboard source."""
+input SupersetSourceInput {
+  dashboardId: String!
+  instanceId: UUID!
+}
+
 type TableColumn {
   name: String!
   type: String!
@@ -4236,6 +4277,24 @@ type TemplateVersionPage {
   pageNumber: Int!
   totalItems: Int!
   totalPages: Int!
+}
+
+"""Represents the input for testing a connection."""
+input TestConnectionInput {
+  """The fields containing the connection parameters to test."""
+  fields: [ConnectionFieldInput!]!
+
+  """The type of the connection to test."""
+  type: ConnectionType!
+
+  """The workspace in which the connection is being tested."""
+  workspaceSlug: String!
+}
+
+"""Represents the result of testing a connection."""
+type TestConnectionResult {
+  errors: String
+  success: Boolean!
 }
 
 scalar TimeThresholds
@@ -4897,6 +4956,9 @@ type UpdateUserResult {
 """Represents the error message for a web app update."""
 enum UpdateWebappError {
   PERMISSION_DENIED
+  SUPERSET_INSTANCE_NOT_FOUND
+  SUPERSET_NOT_CONFIGURED
+  TYPE_MISMATCH
   WEBAPP_NOT_FOUND
 }
 
@@ -4906,8 +4968,7 @@ input UpdateWebappInput {
   icon: String
   id: UUID!
   name: String
-  type: WebappType
-  url: String
+  source: UpdateWebappSourceInput
 }
 
 """Represents the result of updating a web app."""
@@ -4915,6 +4976,12 @@ type UpdateWebappResult {
   errors: [UpdateWebappError!]!
   success: Boolean!
   webapp: Webapp
+}
+
+"""Source update for a webapp - exactly one field must be provided."""
+input UpdateWebappSourceInput @oneOf {
+  iframe: IframeSourceInput
+  superset: SupersetSourceInput
 }
 
 """
@@ -5096,6 +5163,7 @@ type Webapp {
   name: String!
   permissions: WebappPermissions!
   slug: String!
+  source: WebappSource!
   type: WebappType!
   url: String!
   workspace: Workspace!
@@ -5105,6 +5173,16 @@ type Webapp {
 type WebappPermissions {
   delete: Boolean!
   update: Boolean!
+}
+
+union WebappSource = IframeSource | SupersetSource
+
+"""
+Source configuration for a webapp - exactly one field must be provided.
+"""
+input WebappSourceInput @oneOf {
+  iframe: IframeSourceInput
+  superset: SupersetSourceInput
 }
 
 """Represents the type of a web app."""
