@@ -1,0 +1,34 @@
+name: Schema compatibility check (daily)
+on:
+  schedule:
+    - cron: "0 9 * * *"       # daily at 09:00 UTC
+  workflow_dispatch:            # allow manual trigger
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - run: pip install openhexa.sdk
+
+      - run: pip install requests
+
+      - name: Check schema compatibility
+        run: python scripts/check_schema_compatibility.py
+
+      - name: Notify Slack on failure
+        if: failure()
+        uses: slackapi/slack-github-action@v2.1.0
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            {
+              "channel": "#openhexa-alerts",
+              "text": "⚠️ GraphQL schema compatibility check failed.\nThe latest released OpenHEXA CLI has breaking changes against production.\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View run>"
+            }
