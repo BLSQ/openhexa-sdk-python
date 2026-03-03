@@ -23,12 +23,14 @@ jobs:
 
       - name: Notify Slack on failure
         if: failure()
-        uses: slackapi/slack-github-action@v2.1.0
-        with:
-          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-          webhook-type: incoming-webhook
-          payload: |
-            {
-              "channel": "#openhexa-alerts",
-              "text": "⚠️ GraphQL schema compatibility check failed.\nThe latest released OpenHEXA CLI has breaking changes against production.\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View run>"
-            }
+        uses: rtCamp/action-slack-notify@v2.3.3
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_CHANNEL: "#openhexa-alerts"
+          SLACK_USERNAME: "Schema Compatibility Check"
+          SLACK_COLOR: failure
+          SLACK_ICON_EMOJI: ":warning:"
+          SLACK_TITLE: "GraphQL schema compatibility check failed"
+          SLACK_MESSAGE: "The latest released OpenHEXA SDK has breaking changes against production. <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View run>"
+          SLACK_FOOTER: "-"
+          MSG_MINIMAL: true
