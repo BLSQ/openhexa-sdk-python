@@ -893,7 +893,10 @@ class Client(BaseClient):
                   }
                 }
                 permissions {
-                  createWorkspace
+                  createWorkspace {
+                    isAllowed
+                    reasons
+                  }
                   archiveWorkspace
                 }
                 usage {

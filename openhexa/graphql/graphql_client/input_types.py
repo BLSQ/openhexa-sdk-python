@@ -16,7 +16,6 @@ from .enums import (
     PermissionMode,
     PipelineFunctionalType,
     PipelineNotificationLevel,
-    WebappType,
     WorkspaceMembershipRole,
 )
 
@@ -197,9 +196,9 @@ class CreateTeamInput(BaseModel):
 class CreateWebappInput(BaseModel):
     description: Optional[str] = None
     icon: Optional[str] = None
+    is_public: Optional[bool] = Field(alias="isPublic", default=None)
     name: str
-    type: WebappType
-    url: str
+    source: "WebappSourceInput"
     workspace_slug: str = Field(alias="workspaceSlug")
 
 
@@ -358,6 +357,10 @@ class GenerateWorkspaceTokenInput(BaseModel):
 class IASOQueryFilterInput(BaseModel):
     type: str
     value: List[int]
+
+
+class IframeSourceInput(BaseModel):
+    url: str
 
 
 class InviteOrganizationMemberInput(BaseModel):
@@ -565,6 +568,17 @@ class StopPipelineInput(BaseModel):
     run_id: Any = Field(alias="runId")
 
 
+class SupersetSourceInput(BaseModel):
+    dashboard_id: str = Field(alias="dashboardId")
+    instance_id: Any = Field(alias="instanceId")
+
+
+class TestConnectionInput(BaseModel):
+    fields: List["ConnectionFieldInput"]
+    type: ConnectionType
+    workspace_slug: str = Field(alias="workspaceSlug")
+
+
 class UpdateAccessmodAccessibilityAnalysisInput(BaseModel):
     algorithm: Optional[AccessmodAccessibilityAnalysisAlgorithm] = None
     barrier_id: Optional[str] = Field(alias="barrierId", default=None)
@@ -736,6 +750,13 @@ class UpdateTemplateVersionInput(BaseModel):
     id: Any
 
 
+class UpdateUserAiSettingsInput(BaseModel):
+    api_key: Optional[str] = Field(alias="apiKey", default=None)
+    enabled: Optional[bool] = None
+    model: Optional[str] = None
+    provider: Optional[str] = None
+
+
 class UpdateUserInput(BaseModel):
     first_name: Optional[str] = Field(alias="firstName", default=None)
     language: Optional[str] = None
@@ -746,9 +767,14 @@ class UpdateWebappInput(BaseModel):
     description: Optional[str] = None
     icon: Optional[str] = None
     id: Any
+    is_public: Optional[bool] = Field(alias="isPublic", default=None)
     name: Optional[str] = None
-    type: Optional[WebappType] = None
-    url: Optional[str] = None
+    source: Optional["UpdateWebappSourceInput"] = None
+
+
+class UpdateWebappSourceInput(BaseModel):
+    iframe: Optional["IframeSourceInput"] = None
+    superset: Optional["SupersetSourceInput"] = None
 
 
 class UpdateWorkspaceInput(BaseModel):
@@ -790,6 +816,11 @@ class VerifyDeviceInput(BaseModel):
     token: Optional[str] = None
 
 
+class WebappSourceInput(BaseModel):
+    iframe: Optional["IframeSourceInput"] = None
+    superset: Optional["SupersetSourceInput"] = None
+
+
 class WorkspaceInvitationInput(BaseModel):
     role: WorkspaceMembershipRole
     workspace_name: str = Field(alias="workspaceName")
@@ -801,15 +832,27 @@ class WorkspacePermissionInput(BaseModel):
     workspace_slug: str = Field(alias="workspaceSlug")
 
 
+class WriteFileContentInput(BaseModel):
+    content: str
+    file_path: str = Field(alias="filePath")
+    overwrite: Optional[bool] = False
+    workspace_slug: str = Field(alias="workspaceSlug")
+
+
 CreateAccessmodProjectInput.model_rebuild()
 CreateConnectionInput.model_rebuild()
 CreateOrganizationInput.model_rebuild()
+CreateWebappInput.model_rebuild()
 CreateWorkspaceInput.model_rebuild()
 InviteOrganizationMemberInput.model_rebuild()
+TestConnectionInput.model_rebuild()
 UpdateConnectionInput.model_rebuild()
 UpdateDAGInput.model_rebuild()
 UpdateExternalCollaboratorInput.model_rebuild()
 UpdateOrganizationMemberInput.model_rebuild()
 UpdateOrganizationSubscriptionInput.model_rebuild()
+UpdateWebappInput.model_rebuild()
+UpdateWebappSourceInput.model_rebuild()
 UpdateWorkspaceInput.model_rebuild()
 UploadPipelineInput.model_rebuild()
+WebappSourceInput.model_rebuild()

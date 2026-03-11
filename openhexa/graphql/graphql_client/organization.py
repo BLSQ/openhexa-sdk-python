@@ -6,6 +6,7 @@ from typing import Any, List, Optional
 from pydantic import Field
 
 from .base_model import BaseModel
+from .enums import CreateWorkspacePermissionReason
 
 
 class Organization(BaseModel):
@@ -36,8 +37,15 @@ class OrganizationOrganizationWorkspacesItemsCountries(BaseModel):
 
 
 class OrganizationOrganizationPermissions(BaseModel):
-    create_workspace: bool = Field(alias="createWorkspace")
+    create_workspace: "OrganizationOrganizationPermissionsCreateWorkspace" = Field(
+        alias="createWorkspace"
+    )
     archive_workspace: bool = Field(alias="archiveWorkspace")
+
+
+class OrganizationOrganizationPermissionsCreateWorkspace(BaseModel):
+    is_allowed: bool = Field(alias="isAllowed")
+    reasons: List[CreateWorkspacePermissionReason]
 
 
 class OrganizationOrganizationUsage(BaseModel):
@@ -50,3 +58,4 @@ Organization.model_rebuild()
 OrganizationOrganization.model_rebuild()
 OrganizationOrganizationWorkspaces.model_rebuild()
 OrganizationOrganizationWorkspacesItems.model_rebuild()
+OrganizationOrganizationPermissions.model_rebuild()

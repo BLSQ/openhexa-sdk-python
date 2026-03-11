@@ -349,7 +349,10 @@ query Organization($id: UUID!) {
       }
     }
     permissions {
-      createWorkspace
+      createWorkspace {
+          isAllowed
+          reasons
+      }
       archiveWorkspace
     }
       usage {
