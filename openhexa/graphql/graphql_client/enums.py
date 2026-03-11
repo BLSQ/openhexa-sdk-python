@@ -87,6 +87,16 @@ class AddWebappToShortcutsError(str, Enum):
     ITEM_NOT_FOUND = "ITEM_NOT_FOUND"
 
 
+class AiModel(str, Enum):
+    haiku = "haiku"
+    opus = "opus"
+    sonnet = "sonnet"
+
+
+class AiProvider(str, Enum):
+    anthropic = "anthropic"
+
+
 class ApproveAccessmodAccessRequestError(str, Enum):
     INVALID = "INVALID"
 
@@ -149,6 +159,7 @@ class CreateAccessmodZonalStatisticsError(str, Enum):
 
 class CreateBucketFolderError(str, Enum):
     ALREADY_EXISTS = "ALREADY_EXISTS"
+    INVALID_PATH = "INVALID_PATH"
     NOT_FOUND = "NOT_FOUND"
     PERMISSION_DENIED = "PERMISSION_DENIED"
 
@@ -220,13 +231,21 @@ class CreateTemplateVersionPermissionReason(str, Enum):
 
 class CreateWebappError(str, Enum):
     ALREADY_EXISTS = "ALREADY_EXISTS"
+    INVALID_URL = "INVALID_URL"
     PERMISSION_DENIED = "PERMISSION_DENIED"
+    SUPERSET_INSTANCE_NOT_FOUND = "SUPERSET_INSTANCE_NOT_FOUND"
+    SUPERSET_NOT_CONFIGURED = "SUPERSET_NOT_CONFIGURED"
     WORKSPACE_NOT_FOUND = "WORKSPACE_NOT_FOUND"
 
 
 class CreateWorkspaceError(str, Enum):
     INVALID_SLUG = "INVALID_SLUG"
     ORGANIZATION_NOT_FOUND = "ORGANIZATION_NOT_FOUND"
+    PERMISSION_DENIED = "PERMISSION_DENIED"
+    WORKSPACES_LIMIT_REACHED = "WORKSPACES_LIMIT_REACHED"
+
+
+class CreateWorkspacePermissionReason(str, Enum):
     PERMISSION_DENIED = "PERMISSION_DENIED"
     WORKSPACES_LIMIT_REACHED = "WORKSPACES_LIMIT_REACHED"
 
@@ -299,6 +318,7 @@ class DeleteAccessmodProjectMemberError(str, Enum):
 
 
 class DeleteBucketObjectError(str, Enum):
+    INVALID_PATH = "INVALID_PATH"
     NOT_FOUND = "NOT_FOUND"
     PERMISSION_DENIED = "PERMISSION_DENIED"
 
@@ -610,6 +630,13 @@ class PipelineNotificationLevel(str, Enum):
     ERROR = "ERROR"
 
 
+class PipelineOrderBy(str, Enum):
+    LAST_RUN_DATE_ASC = "LAST_RUN_DATE_ASC"
+    LAST_RUN_DATE_DESC = "LAST_RUN_DATE_DESC"
+    NAME_ASC = "NAME_ASC"
+    NAME_DESC = "NAME_DESC"
+
+
 class PipelineRecipientError(str, Enum):
     ALREADY_EXISTS = "ALREADY_EXISTS"
     PERMISSION_DENIED = "PERMISSION_DENIED"
@@ -659,17 +686,28 @@ class PipelineType(str, Enum):
 
 
 class PrepareObjectDownloadError(str, Enum):
+    INVALID_PATH = "INVALID_PATH"
     NOT_FOUND = "NOT_FOUND"
     PERMISSION_DENIED = "PERMISSION_DENIED"
 
 
 class PrepareObjectUploadError(str, Enum):
+    INVALID_PATH = "INVALID_PATH"
     PERMISSION_DENIED = "PERMISSION_DENIED"
 
 
 class PrepareVersionFileDownloadError(str, Enum):
     FILE_NOT_FOUND = "FILE_NOT_FOUND"
     FILE_NOT_UPLOADED = "FILE_NOT_UPLOADED"
+    PERMISSION_DENIED = "PERMISSION_DENIED"
+
+
+class ReadFileContentError(str, Enum):
+    FILE_TOO_LARGE = "FILE_TOO_LARGE"
+    INVALID_PATH = "INVALID_PATH"
+    NOT_A_FILE = "NOT_A_FILE"
+    NOT_FOUND = "NOT_FOUND"
+    NOT_UTF8 = "NOT_UTF8"
     PERMISSION_DENIED = "PERMISSION_DENIED"
 
 
@@ -841,13 +879,22 @@ class UpdateTemplateVersionError(str, Enum):
     PERMISSION_DENIED = "PERMISSION_DENIED"
 
 
+class UpdateUserAiSettingsError(str, Enum):
+    INCOMPLETE_CONFIG = "INCOMPLETE_CONFIG"
+    PERMISSION_DENIED = "PERMISSION_DENIED"
+
+
 class UpdateUserError(str, Enum):
     INVALID_LANGUAGE = "INVALID_LANGUAGE"
     PERMISSION_DENIED = "PERMISSION_DENIED"
 
 
 class UpdateWebappError(str, Enum):
+    INVALID_URL = "INVALID_URL"
     PERMISSION_DENIED = "PERMISSION_DENIED"
+    SUPERSET_INSTANCE_NOT_FOUND = "SUPERSET_INSTANCE_NOT_FOUND"
+    SUPERSET_NOT_CONFIGURED = "SUPERSET_NOT_CONFIGURED"
+    TYPE_MISMATCH = "TYPE_MISMATCH"
     WEBAPP_NOT_FOUND = "WEBAPP_NOT_FOUND"
 
 
@@ -889,3 +936,11 @@ class WorkspaceMembershipRole(str, Enum):
     ADMIN = "ADMIN"
     EDITOR = "EDITOR"
     VIEWER = "VIEWER"
+
+
+class WriteFileContentError(str, Enum):
+    ALREADY_EXISTS = "ALREADY_EXISTS"
+    FILE_TOO_LARGE = "FILE_TOO_LARGE"
+    INVALID_PATH = "INVALID_PATH"
+    NOT_FOUND = "NOT_FOUND"
+    PERMISSION_DENIED = "PERMISSION_DENIED"
