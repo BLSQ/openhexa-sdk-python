@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.19.2](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.19.1...v2.19.2) (2026-03-11)
+
+
+### Bug Fixes
+
+* Handle when BUNDLED_SCHEMA_PATH resolves to site-packages... ([1394b51](https://github.com/BLSQ/openhexa-sdk-python/commit/1394b513b36cfde50abe37dc2da9c861667bf7d2))
+* Make sure we install the latest release for the... ([d964299](https://github.com/BLSQ/openhexa-sdk-python/commit/d9642998e16f8335a81536ba2e0d0c3e5ef475b8))
+* schema & codegen ([#366](https://github.com/BLSQ/openhexa-sdk-python/issues/366)) ([ba40dac](https://github.com/BLSQ/openhexa-sdk-python/commit/ba40dac30f2f0493667f86539755d1db9837f57f))
+
 ## [2.19.1](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.19.0...v2.19.1) (2026-03-03)
 
 
