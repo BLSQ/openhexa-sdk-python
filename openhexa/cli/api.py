@@ -134,7 +134,7 @@ def _detect_graphql_breaking_changes_if_needed(token):
 
 def _detect_graphql_breaking_changes(token):
     """Detect breaking changes between the schema referenced in the SDK and the server using graphql-core."""
-    stored_schema_obj = build_schema(BUNDLED_SCHEMA_PATH.read_text())
+    stored_schema_obj = build_schema(BUNDLED_SCHEMA_PATH.read_text(), assume_valid_sdl=True)
     server_schema_obj = build_client_schema(
         _query_graphql(get_introspection_query(input_value_deprecation=True), token=token)
     )
