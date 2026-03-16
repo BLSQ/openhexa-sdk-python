@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.19.3](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.19.2...v2.19.3) (2026-03-16)
+
+
+### Bug Fixes
+
+* Schema compatibility check ([#367](https://github.com/BLSQ/openhexa-sdk-python/issues/367)) ([30cc2d1](https://github.com/BLSQ/openhexa-sdk-python/commit/30cc2d19d225d6b70307c10f393e22b8a0e3b758))
+
 ## [2.19.2](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.19.1...v2.19.2) (2026-03-11)
 
 
