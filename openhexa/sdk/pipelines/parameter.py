@@ -445,6 +445,7 @@ class Parameter:
             | S3Connection
             | CustomConnection
             | Dataset
+            | File
         ],
         name: str | None = None,
         choices: typing.Sequence | None = None,
@@ -628,6 +629,7 @@ def parameter(
         | S3Connection
         | CustomConnection
         | Dataset
+        | File
     ],
     name: str | None = None,
     choices: typing.Sequence | None = None,
@@ -647,7 +649,7 @@ def parameter(
     ----------
     code : str
         The parameter identifier (must be unique for a given pipeline)
-    type : {str, int, bool, float, DHIS2Connection, IASOConnection, PostgreSQLConnection, GCSConnection, S3Connection}
+    type : {str, int, bool, float, DHIS2Connection, IASOConnection, PostgreSQLConnection, GCSConnection, S3Connection, CustomConnection, Dataset, File}
         The parameter Python type
     name : str, optional
         A name for the parameter (will be used instead of the code in the web interface)
@@ -668,7 +670,7 @@ def parameter(
         Whether this parameter should be provided multiple values (if True, the value must be provided as a list of
         values of the chosen type)
     directory : str, optional
-        An optional parameter to force file selection to specific directory (only used for parater type File). If the directory does not exist, it will be ignored.
+        An optional parameter to force file selection to specific directory (only used for parameter type File). If the directory does not exist, it will be ignored.
 
     Returns
     -------
