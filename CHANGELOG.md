@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.19.4](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.19.3...v2.19.4) (2026-04-01)
+
+
+### Bug Fixes
+
+* parameter typing for File ([#371](https://github.com/BLSQ/openhexa-sdk-python/issues/371)) ([c19a404](https://github.com/BLSQ/openhexa-sdk-python/commit/c19a4048d840a849e7df0669ea100417521417e1))
+
+
+### Miscellaneous
+
+* **deps:** update dependency python to 3.14 ([#363](https://github.com/BLSQ/openhexa-sdk-python/issues/363)) ([178b0a7](https://github.com/BLSQ/openhexa-sdk-python/commit/178b0a763455393be282ca9602db25f6182b6471))
+
 ## [2.19.3](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.19.2...v2.19.3) (2026-03-16)
 
 
