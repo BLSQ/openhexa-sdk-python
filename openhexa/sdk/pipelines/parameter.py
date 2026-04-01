@@ -389,11 +389,74 @@ class FileType(ParameterType):
             raise ParameterValueError(str(e))
 
 
+class Secret:
+    """Marker type for secret/password pipeline parameters.
+
+    Use as the ``type`` argument of the ``@parameter`` decorator to indicate that the parameter value is sensitive
+    and should be hidden in the OpenHEXA web interface. The pipeline function will receive the value as a plain
+    ``str`` at runtime.
+
+    Example::
+
+        @parameter("iaso_token", type=Secret, name="IASO token", required=True)
+        @pipeline("my-pipeline")
+        def my_pipeline(iaso_token: str):
+            ...
+    """
+
+    pass
+
+
+class SecretType(ParameterType):
+    """Type class for secret/password string parameters. Values are treated as plain strings at runtime."""
+
+    @property
+    def spec_type(self) -> str:
+        """Return a type string for the specs that are sent to the backend."""
+        return "secret"
+
+    @property
+    def expected_type(self) -> type:
+        """Returns the python type expected for values."""
+        return str
+
+    @property
+    def accepts_choices(self) -> bool:
+        """Secrets don't support choices."""
+        return False
+
+    @property
+    def accepts_multiple(self) -> bool:
+        """Secrets don't support multiple values."""
+        return False
+
+    @staticmethod
+    def normalize(value: typing.Any) -> str | None:
+        """Strip whitespace and convert empty strings to None."""
+        if isinstance(value, str):
+            normalized_value = value.strip()
+        else:
+            normalized_value = value
+
+        if normalized_value == "":
+            return None
+
+        return normalized_value
+
+    def validate_default(self, value: typing.Any | None):
+        """Validate the default value configured for this type."""
+        if value == "":
+            raise ParameterValueError("Empty values are not accepted.")
+
+        super().validate_default(value)
+
+
 TYPES_BY_PYTHON_TYPE = {
     "str": StringType,
     "bool": Boolean,
     "int": Integer,
     "float": Float,
+    "Secret": SecretType,
     "DHIS2Connection": DHIS2ConnectionType,
     "PostgreSQLConnection": PostgreSQLConnectionType,
     "IASOConnection": IASOConnectionType,
@@ -438,6 +501,7 @@ class Parameter:
             | int
             | bool
             | float
+            | Secret
             | DHIS2Connection
             | IASOConnection
             | PostgreSQLConnection
@@ -621,6 +685,7 @@ def parameter(
         | int
         | bool
         | float
+        | Secret
         | DHIS2Connection
         | IASOConnection
         | PostgreSQLConnection

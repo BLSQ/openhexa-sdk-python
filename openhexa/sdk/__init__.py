@@ -3,7 +3,7 @@
 from .datasets import Dataset
 from .files import File
 from .pipelines import current_pipeline, current_run, parameter, pipeline
-from .pipelines.parameter import DHIS2Widget, IASOWidget
+from .pipelines.parameter import DHIS2Widget, IASOWidget, Secret
 from .utils import OpenHexaClient
 from .workspaces import workspace
 from .workspaces.connection import (
@@ -32,4 +32,5 @@ __all__ = [
     "Dataset",
     "OpenHexaClient",
     "File",
+    "Secret",
 ]

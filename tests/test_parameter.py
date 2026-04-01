@@ -32,6 +32,8 @@ from openhexa.sdk.pipelines.parameter import (
     ParameterValueError,
     PostgreSQLConnectionType,
     S3ConnectionType,
+    Secret,
+    SecretType,
     StringType,
     parameter,
 )
@@ -90,6 +92,54 @@ def test_parameter_types_validate():
     assert boolean_parameter_type.validate(False) is False
     with pytest.raises(ParameterValueError):
         boolean_parameter_type.validate(86)
+
+
+def test_secret_type_normalize():
+    """Check normalization for SecretType."""
+    secret_type = SecretType()
+    assert secret_type.normalize("my-token") == "my-token"
+    assert secret_type.normalize("  my-token  ") == "my-token"
+    assert secret_type.normalize("") is None
+    assert secret_type.normalize(" ") is None
+
+
+def test_secret_type_validate():
+    """Check validation for SecretType."""
+    secret_type = SecretType()
+    assert secret_type.validate("my-token") == "my-token"
+    with pytest.raises(ParameterValueError):
+        secret_type.validate(123)
+
+
+def test_secret_type_does_not_accept_choices():
+    """Secret parameters don't support choices."""
+    with pytest.raises(InvalidParameterError):
+        Parameter("token", type=Secret, choices=["a", "b"])
+
+
+def test_secret_type_does_not_accept_multiple():
+    """Secret parameters don't support multiple values."""
+    with pytest.raises(InvalidParameterError):
+        Parameter("token", type=Secret, multiple=True)
+
+
+def test_secret_parameter_spec_type():
+    """Secret parameters serialize with spec_type 'secret'."""
+    p = Parameter("token", type=Secret)
+    assert p.to_dict()["type"] == "secret"
+
+
+def test_secret_parameter_validates_string():
+    """Secret parameters validate and return plain strings."""
+    p = Parameter("token", type=Secret)
+    assert p.validate("my-secret-token") == "my-secret-token"
+
+
+def test_secret_parameter_required():
+    """Secret parameters respect required constraint."""
+    p = Parameter("token", type=Secret, required=True)
+    with pytest.raises(ParameterValueError):
+        p.validate(None)
 
 
 def test_validate_postgres_connection():
