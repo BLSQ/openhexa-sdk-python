@@ -524,7 +524,10 @@ class Parameter:
         self.code = code
 
         try:
-            self.type = TYPES_BY_PYTHON_TYPE[type.__name__]()
+            if isinstance(type, ParameterType):
+                self.type = type
+            else:
+                self.type = TYPES_BY_PYTHON_TYPE[type.__name__]()
         except (KeyError, AttributeError):
             valid_parameter_types = [k for k in TYPES_BY_PYTHON_TYPE.keys()]
             raise InvalidParameterError(
