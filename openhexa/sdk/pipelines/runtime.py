@@ -308,7 +308,7 @@ def get_pipeline(pipeline_path: Path) -> Pipeline:
                 # Convert args spec to parameter kwargs
                 param_kwargs = {k: v["value"] for k, v in parameter_args.items()}
 
-                parameter = Parameter(type=type_class, **param_kwargs)
+                parameter = Parameter(type=type_class.expected_type, **param_kwargs)
                 pipeline_parameters.append(parameter)
 
             except KeyError as e:

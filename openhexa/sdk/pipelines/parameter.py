@@ -389,7 +389,7 @@ class FileType(ParameterType):
             raise ParameterValueError(str(e))
 
 
-class Secret:
+class Secret(str):
     """Marker type for secret/password pipeline parameters.
 
     Use as the ``type`` argument of the ``@parameter`` decorator to indicate that the parameter value is sensitive
@@ -418,7 +418,7 @@ class SecretType(ParameterType):
     @property
     def expected_type(self) -> type:
         """Returns the python type expected for values."""
-        return str
+        return Secret
 
     @property
     def accepts_choices(self) -> bool:
@@ -431,8 +431,8 @@ class SecretType(ParameterType):
         return False
 
     @staticmethod
-    def normalize(value: typing.Any) -> str | None:
-        """Strip whitespace and convert empty strings to None."""
+    def normalize(value: typing.Any) -> Secret | None:
+        """Strip whitespace, convert empty strings to None, and wrap as Secret."""
         if isinstance(value, str):
             normalized_value = value.strip()
         else:
@@ -440,6 +440,9 @@ class SecretType(ParameterType):
 
         if normalized_value == "":
             return None
+
+        if isinstance(normalized_value, str):
+            return Secret(normalized_value)
 
         return normalized_value
 
@@ -524,10 +527,7 @@ class Parameter:
         self.code = code
 
         try:
-            if isinstance(type, ParameterType):
-                self.type = type
-            else:
-                self.type = TYPES_BY_PYTHON_TYPE[type.__name__]()
+            self.type = TYPES_BY_PYTHON_TYPE[type.__name__]()
         except (KeyError, AttributeError):
             valid_parameter_types = [k for k in TYPES_BY_PYTHON_TYPE.keys()]
             raise InvalidParameterError(
