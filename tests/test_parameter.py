@@ -106,7 +106,7 @@ def test_secret_type_normalize():
 def test_secret_type_validate():
     """Check validation for SecretType."""
     secret_type = SecretType()
-    assert secret_type.validate("my-token") == "my-token"
+    assert secret_type.validate(Secret("my-token")) == "my-token"
     with pytest.raises(ParameterValueError):
         secret_type.validate(123)
 
