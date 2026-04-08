@@ -389,7 +389,7 @@ class FileType(ParameterType):
             raise ParameterValueError(str(e))
 
 
-class Secret:
+class Secret(str):
     """Marker type for secret/password pipeline parameters.
 
     Use as the ``type`` argument of the ``@parameter`` decorator to indicate that the parameter value is sensitive
@@ -418,7 +418,7 @@ class SecretType(ParameterType):
     @property
     def expected_type(self) -> type:
         """Returns the python type expected for values."""
-        return str
+        return Secret
 
     @property
     def accepts_choices(self) -> bool:
@@ -431,8 +431,8 @@ class SecretType(ParameterType):
         return False
 
     @staticmethod
-    def normalize(value: typing.Any) -> str | None:
-        """Strip whitespace and convert empty strings to None."""
+    def normalize(value: typing.Any) -> Secret | None:
+        """Strip whitespace, convert empty strings to None, and wrap as Secret."""
         if isinstance(value, str):
             normalized_value = value.strip()
         else:
@@ -440,6 +440,9 @@ class SecretType(ParameterType):
 
         if normalized_value == "":
             return None
+
+        if isinstance(normalized_value, str):
+            return Secret(normalized_value)
 
         return normalized_value
 
@@ -509,6 +512,7 @@ class Parameter:
             | S3Connection
             | CustomConnection
             | Dataset
+            | File
         ],
         name: str | None = None,
         choices: typing.Sequence | None = None,
@@ -524,10 +528,7 @@ class Parameter:
         self.code = code
 
         try:
-            if isinstance(type, ParameterType):
-                self.type = type
-            else:
-                self.type = TYPES_BY_PYTHON_TYPE[type.__name__]()
+            self.type = TYPES_BY_PYTHON_TYPE[type.__name__]()
         except (KeyError, AttributeError):
             valid_parameter_types = [k for k in TYPES_BY_PYTHON_TYPE.keys()]
             raise InvalidParameterError(
@@ -696,6 +697,7 @@ def parameter(
         | S3Connection
         | CustomConnection
         | Dataset
+        | File
     ],
     name: str | None = None,
     choices: typing.Sequence | None = None,
@@ -715,7 +717,7 @@ def parameter(
     ----------
     code : str
         The parameter identifier (must be unique for a given pipeline)
-    type : {str, int, bool, float, DHIS2Connection, IASOConnection, PostgreSQLConnection, GCSConnection, S3Connection}
+    type : {str, int, bool, float, DHIS2Connection, IASOConnection, PostgreSQLConnection, GCSConnection, S3Connection, CustomConnection, Dataset, File}
         The parameter Python type
     name : str, optional
         A name for the parameter (will be used instead of the code in the web interface)
@@ -736,7 +738,7 @@ def parameter(
         Whether this parameter should be provided multiple values (if True, the value must be provided as a list of
         values of the chosen type)
     directory : str, optional
-        An optional parameter to force file selection to specific directory (only used for parater type File). If the directory does not exist, it will be ignored.
+        An optional parameter to force file selection to specific directory (only used for parameter type File). If the directory does not exist, it will be ignored.
 
     Returns
     -------
