@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.19.5](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.19.4...v2.19.5) (2026-04-08)
+
+
+### Bug Fixes
+
+* current_workspace.database_url ([#375](https://github.com/BLSQ/openhexa-sdk-python/issues/375)) ([f13d400](https://github.com/BLSQ/openhexa-sdk-python/commit/f13d400ba2d02989c0e691a6a672490d9c6b5059))
+
 ## [2.19.4](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.19.3...v2.19.4) (2026-04-01)
 
 
