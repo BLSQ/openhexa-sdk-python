@@ -187,7 +187,7 @@ class CurrentWorkspace:
         try:
             # First try the environment variable. In case we're inside a pipeline,
             # we add some extra parameters to the URL.
-            return os.environ.get("WORKSPACE_DATABASE_URL")
+            return os.environ["WORKSPACE_DATABASE_URL"]
         except KeyError:
             return (
                 f"postgresql://{self.database_username}:{self.database_password}"
