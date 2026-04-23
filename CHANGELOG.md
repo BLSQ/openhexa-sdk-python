@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.20.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.19.5...v2.20.0) (2026-04-23)
+
+
+### Features
+
+* add secret parameter type for pipeline parameters(HEXA-1457 ) ([#373](https://github.com/BLSQ/openhexa-sdk-python/issues/373)) ([0dfc82e](https://github.com/BLSQ/openhexa-sdk-python/commit/0dfc82e21ad46e4fc15d2241886edef171ec7fb9))
+
+
+### Miscellaneous
+
+* **deps:** update dependency python to 3.14 ([#372](https://github.com/BLSQ/openhexa-sdk-python/issues/372)) ([99bbeee](https://github.com/BLSQ/openhexa-sdk-python/commit/99bbeeec8705510b1843970d1ea61ed71d58004a))
+* **deps:** update googleapis/release-please-action action to v4.4.1 ([#377](https://github.com/BLSQ/openhexa-sdk-python/issues/377)) ([af4b166](https://github.com/BLSQ/openhexa-sdk-python/commit/af4b166406bda38bf81166b673d45ff41738024a))
+* **deps:** update googleapis/release-please-action action to v5 ([#380](https://github.com/BLSQ/openhexa-sdk-python/issues/380)) ([a1ba71d](https://github.com/BLSQ/openhexa-sdk-python/commit/a1ba71d03e179906ae3f82364d9859a8976f6ab7))
+
 ## [2.19.5](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.19.4...v2.19.5) (2026-04-08)
 
 
