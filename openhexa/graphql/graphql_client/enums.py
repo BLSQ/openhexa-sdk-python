@@ -571,6 +571,7 @@ class ParameterType(str, Enum):
     int = "int"
     postgresql = "postgresql"
     s3 = "s3"
+    secret = "secret"
     str = "str"
 
 

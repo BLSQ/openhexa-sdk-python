@@ -3180,6 +3180,7 @@ enum ParameterType {
   int
   postgresql
   s3
+  secret
   str
 }
 
