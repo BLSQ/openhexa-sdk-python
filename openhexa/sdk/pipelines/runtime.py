@@ -181,9 +181,7 @@ def _get_decorator_arg_value(decorator: ast.Call, arg: Argument, index: int) -> 
                 # Extract positional arg (path) and keyword args (column, format override)
                 pos_args = [a.value for a in keyword.value.args if isinstance(a, ast.Constant)]
                 kw_args = {
-                    kw.arg: kw.value.value
-                    for kw in keyword.value.keywords
-                    if isinstance(kw.value, ast.Constant)
+                    kw.arg: kw.value.value for kw in keyword.value.keywords if isinstance(kw.value, ast.Constant)
                 }
                 if pos_args:
                     kw_args.setdefault("path", pos_args[0])

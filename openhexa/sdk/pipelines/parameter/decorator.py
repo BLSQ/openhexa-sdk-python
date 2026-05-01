@@ -16,7 +16,7 @@ from openhexa.sdk.workspaces.connection import (
 )
 
 from .choices import FileChoices
-from .types import Boolean, DHIS2ConnectionType, IASOConnectionType, Secret, TYPES_BY_PYTHON_TYPE
+from .types import TYPES_BY_PYTHON_TYPE, Boolean, DHIS2ConnectionType, IASOConnectionType, Secret
 from .widgets import DHIS2Widget, IASOWidget
 
 

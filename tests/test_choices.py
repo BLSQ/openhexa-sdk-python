@@ -5,11 +5,9 @@ from unittest import TestCase
 
 import pytest
 
-from openhexa.sdk.pipelines.exceptions import InvalidParameterError, ParameterValueError
+from openhexa.sdk.pipelines.exceptions import InvalidParameterError
 from openhexa.sdk.pipelines.parameter import FileChoices, Parameter, parameter
-from openhexa.sdk.pipelines.parameter.choices import _SUPPORTED_FORMATS
 from openhexa.sdk.pipelines.runtime import get_pipeline
-
 
 # ---------------------------------------------------------------------------
 # FileChoices construction
