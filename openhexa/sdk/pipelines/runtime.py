@@ -17,6 +17,7 @@ from openhexa.sdk.pipelines.exceptions import InvalidParameterError, PipelineNot
 from openhexa.sdk.pipelines.parameter import (
     TYPES_BY_PYTHON_TYPE,
     DHIS2Widget,
+    FileChoices,
     IASOWidget,
     Parameter,
     validate_parameters,
@@ -172,6 +173,21 @@ def _get_decorator_arg_value(decorator: ast.Call, arg: Argument, index: int) -> 
                 return (keyword.value.id, True)
             elif isinstance(keyword.value, ast.List):
                 return ([el.value for el in keyword.value.elts], True)
+            elif isinstance(keyword.value, ast.Call):
+                func = keyword.value.func
+                func_name = func.id if isinstance(func, ast.Name) else None
+                if func_name != "FileChoices":
+                    raise ValueError(f"Unsupported call in choices argument: {func_name}")
+                # Extract positional arg (path) and keyword args (column, format override)
+                pos_args = [a.value for a in keyword.value.args if isinstance(a, ast.Constant)]
+                kw_args = {
+                    kw.arg: kw.value.value
+                    for kw in keyword.value.keywords
+                    if isinstance(kw.value, ast.Constant)
+                }
+                if pos_args:
+                    kw_args.setdefault("path", pos_args[0])
+                return (FileChoices(**kw_args), True)
             elif isinstance(keyword.value, ast.Attribute):
                 if keyword.value.attr in DHIS2Widget.__members__:
                     return getattr(DHIS2Widget, keyword.value.attr), True
@@ -287,7 +303,7 @@ def get_pipeline(pipeline_path: Path) -> Pipeline:
                     Argument("code", [ast.Constant]),
                     Argument("type", [ast.Name]),
                     Argument("name", [ast.Constant]),
-                    Argument("choices", [ast.List]),
+                    Argument("choices", [ast.List, ast.Call]),
                     Argument("help", [ast.Constant]),
                     Argument("default", [ast.Constant, ast.List]),
                     Argument("widget", [ast.Attribute]),
