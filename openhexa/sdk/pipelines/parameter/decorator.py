@@ -138,7 +138,11 @@ class Parameter:
                 return None
 
         pre_validated = self.type.validate(normalized_value)
-        if self.choices is not None and not isinstance(self.choices, ChoicesFromFile) and pre_validated not in self.choices:
+        if (
+            self.choices is not None
+            and not isinstance(self.choices, ChoicesFromFile)
+            and pre_validated not in self.choices
+        ):
             raise ParameterValueError(f"The provided value for {self.code} is not included in the provided choices.")
 
         return pre_validated
