@@ -40,12 +40,14 @@ class ChoicesFromFile:
         return "yaml" if ext == "yml" else ext
 
     def validate_spec(self):
+        """Validate the path and column specification."""
         if not self.path or not isinstance(self.path, str):
             raise InvalidParameterError("ChoicesFromFile path must be a non-empty string.")
         if self.column is not None and not isinstance(self.column, str):
             raise InvalidParameterError("ChoicesFromFile column must be a string.")
 
     def to_dict(self) -> dict:
+        """Return a dictionary representation of the choices spec."""
         return {
             "format": self.format,
             "path": self.path,
