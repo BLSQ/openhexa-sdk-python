@@ -17,7 +17,7 @@ from openhexa.sdk.pipelines.exceptions import InvalidParameterError, PipelineNot
 from openhexa.sdk.pipelines.parameter import (
     TYPES_BY_PYTHON_TYPE,
     DHIS2Widget,
-    FileChoices,
+    ChoicesFromFile,
     IASOWidget,
     Parameter,
     validate_parameters,
@@ -176,7 +176,7 @@ def _get_decorator_arg_value(decorator: ast.Call, arg: Argument, index: int) -> 
             elif isinstance(keyword.value, ast.Call):
                 func = keyword.value.func
                 func_name = func.id if isinstance(func, ast.Name) else None
-                if func_name != "FileChoices":
+                if func_name != "ChoicesFromFile":
                     raise ValueError(f"Unsupported call in choices argument: {func_name}")
                 # Extract positional arg (path) and keyword args (column, format override)
                 pos_args = [a.value for a in keyword.value.args if isinstance(a, ast.Constant)]
@@ -185,7 +185,7 @@ def _get_decorator_arg_value(decorator: ast.Call, arg: Argument, index: int) -> 
                 }
                 if pos_args:
                     kw_args.setdefault("path", pos_args[0])
-                return (FileChoices(**kw_args), True)
+                return (ChoicesFromFile(**kw_args), True)
             elif isinstance(keyword.value, ast.Attribute):
                 if keyword.value.attr in DHIS2Widget.__members__:
                     return getattr(DHIS2Widget, keyword.value.attr), True

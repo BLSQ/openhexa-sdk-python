@@ -15,7 +15,7 @@ from openhexa.sdk.workspaces.connection import (
     S3Connection,
 )
 
-from .choices import FileChoices
+from .choices import ChoicesFromFile
 from .types import TYPES_BY_PYTHON_TYPE, Boolean, DHIS2ConnectionType, IASOConnectionType, Secret
 from .widgets import DHIS2Widget, IASOWidget
 
@@ -43,7 +43,7 @@ class Parameter:
             | File
         ],
         name: str | None = None,
-        choices: typing.Sequence | FileChoices | None = None,
+        choices: typing.Sequence | ChoicesFromFile | None = None,
         help: str | None = None,
         default: typing.Any | None = None,
         widget: DHIS2Widget | IASOWidget | None = None,
@@ -67,8 +67,8 @@ class Parameter:
         if choices is not None:
             if not self.type.accepts_choices:
                 raise InvalidParameterError(f"Parameters of type {self.type} don't accept choices.")
-            if isinstance(choices, FileChoices):
-                # validate_spec() already ran in FileChoices.__init__; nothing more to check here
+            if isinstance(choices, ChoicesFromFile):
+                # validate_spec() already ran in ChoicesFromFile.__init__; nothing more to check here
                 pass
             else:
                 if len(choices) == 0:
@@ -110,7 +110,7 @@ class Parameter:
             "code": self.code,
             "type": self.type.spec_type,
             "name": self.name,
-            "choices": None if isinstance(self.choices, FileChoices) else self.choices,
+            "choices": None if isinstance(self.choices, ChoicesFromFile) else self.choices,
             "help": self.help,
             "default": self.default,
             "widget": self.widget.value if self.widget else None,
@@ -119,8 +119,8 @@ class Parameter:
             "multiple": self.multiple,
             "directory": self.directory,
         }
-        if isinstance(self.choices, FileChoices):
-            d["file_choices"] = self.choices.to_dict()
+        if isinstance(self.choices, ChoicesFromFile):
+            d["choices_from_file"] = self.choices.to_dict()
         return d
 
     def _validate_single(self, value: typing.Any):
@@ -138,7 +138,7 @@ class Parameter:
                 return None
 
         pre_validated = self.type.validate(normalized_value)
-        if self.choices is not None and not isinstance(self.choices, FileChoices) and pre_validated not in self.choices:
+        if self.choices is not None and not isinstance(self.choices, ChoicesFromFile) and pre_validated not in self.choices:
             raise ParameterValueError(f"The provided value for {self.code} is not included in the provided choices.")
 
         return pre_validated
@@ -163,7 +163,7 @@ class Parameter:
         pre_validated = [self.type.validate(single_value) for single_value in normalized_value]
         if (
             self.choices is not None
-            and not isinstance(self.choices, FileChoices)
+            and not isinstance(self.choices, ChoicesFromFile)
             and any(v not in self.choices for v in pre_validated)
         ):
             raise ParameterValueError(
@@ -187,7 +187,7 @@ class Parameter:
         except ParameterValueError:
             raise InvalidParameterError(f"The default value for {self.code} is not valid.")
 
-        if self.choices is not None and not isinstance(self.choices, FileChoices):
+        if self.choices is not None and not isinstance(self.choices, ChoicesFromFile):
             if isinstance(default, list):
                 if not all(d in self.choices for d in default):
                     raise InvalidParameterError(
@@ -240,7 +240,7 @@ def parameter(
         | File
     ],
     name: str | None = None,
-    choices: typing.Sequence | FileChoices | None = None,
+    choices: typing.Sequence | ChoicesFromFile | None = None,
     help: str | None = None,
     widget: DHIS2Widget | IASOWidget | None = None,
     connection: str | None = None,

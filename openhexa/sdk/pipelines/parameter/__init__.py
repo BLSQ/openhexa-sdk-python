@@ -5,7 +5,7 @@ See https://github.com/BLSQ/openhexa/wiki/Writing-OpenHEXA-pipelines#pipeline-pa
 
 from openhexa.sdk.pipelines.exceptions import InvalidParameterError, ParameterValueError
 
-from .choices import FileChoices
+from .choices import ChoicesFromFile
 from .decorator import FunctionWithParameter, Parameter, parameter, validate_parameters
 from .types import (
     TYPES_BY_PYTHON_TYPE,
@@ -58,7 +58,7 @@ __all__ = [
     # Registry
     "TYPES_BY_PYTHON_TYPE",
     # Dynamic choices
-    "FileChoices",
+    "ChoicesFromFile",
     # Widgets
     "DHIS2Widget",
     "IASOWidget",

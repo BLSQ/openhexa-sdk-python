@@ -5,7 +5,7 @@ from openhexa.sdk.pipelines.exceptions import InvalidParameterError
 _SUPPORTED_FORMATS = {"csv", "json", "yaml", "yml"}
 
 
-class FileChoices:
+class ChoicesFromFile:
     """Descriptor for choices loaded dynamically from a file in the workspace file system.
 
     The file format is inferred from the path extension (.csv, .json, .yaml, .yml).
@@ -27,9 +27,10 @@ class FileChoices:
         self.format = self._detect_format(path)
         self.validate_spec()
 
-    def _detect_format(self, path: str) -> str:
+    @staticmethod
+    def _detect_format(path: str) -> str:
         if not path or not isinstance(path, str):
-            raise InvalidParameterError("FileChoices path must be a non-empty string.")
+            raise InvalidParameterError("ChoicesFromFile path must be a non-empty string.")
         ext = path.rsplit(".", 1)[-1].lower() if "." in path else ""
         if ext not in _SUPPORTED_FORMATS:
             raise InvalidParameterError(
@@ -40,9 +41,9 @@ class FileChoices:
 
     def validate_spec(self):
         if not self.path or not isinstance(self.path, str):
-            raise InvalidParameterError("FileChoices path must be a non-empty string.")
+            raise InvalidParameterError("ChoicesFromFile path must be a non-empty string.")
         if self.column is not None and not isinstance(self.column, str):
-            raise InvalidParameterError("FileChoices column must be a string.")
+            raise InvalidParameterError("ChoicesFromFile column must be a string.")
 
     def to_dict(self) -> dict:
         return {
