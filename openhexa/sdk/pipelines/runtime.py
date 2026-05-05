@@ -22,6 +22,12 @@ from openhexa.sdk.pipelines.parameter import (
     Parameter,
     validate_parameters,
 )
+
+# Maps AST function names to classes that support from_ast_call().
+# Add an entry here when introducing a new AstConstructible type.
+_AST_CALLABLE_TYPES: dict[str, type] = {
+    "ChoicesFromFile": ChoicesFromFile,
+}
 from openhexa.sdk.utils import Settings
 
 from .pipeline import Pipeline
@@ -176,16 +182,9 @@ def _get_decorator_arg_value(decorator: ast.Call, arg: Argument, index: int) -> 
             elif isinstance(keyword.value, ast.Call):
                 func = keyword.value.func
                 func_name = func.id if isinstance(func, ast.Name) else None
-                if func_name != "ChoicesFromFile":
+                if func_name not in _AST_CALLABLE_TYPES:
                     raise ValueError(f"Unsupported call in choices argument: {func_name}")
-                # Extract positional arg (path) and keyword args (column, format override)
-                pos_args = [a.value for a in keyword.value.args if isinstance(a, ast.Constant)]
-                kw_args = {
-                    kw.arg: kw.value.value for kw in keyword.value.keywords if isinstance(kw.value, ast.Constant)
-                }
-                if pos_args:
-                    kw_args.setdefault("path", pos_args[0])
-                return (ChoicesFromFile(**kw_args), True)
+                return _AST_CALLABLE_TYPES[func_name].from_ast_call(keyword.value), True
             elif isinstance(keyword.value, ast.Attribute):
                 if keyword.value.attr in DHIS2Widget.__members__:
                     return getattr(DHIS2Widget, keyword.value.attr), True

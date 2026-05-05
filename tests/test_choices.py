@@ -150,6 +150,16 @@ class TestAstChoicesFromFile(TestCase):
             param_dict = p.to_dict()["parameters"][0]
             assert param_dict["choices_from_file"] == {"format": "csv", "path": "data/districts.csv", "column": "code"}
 
+    def test_file_choices_csv_with_column_positional(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            self._write_pipeline(
+                tmpdir,
+                "@parameter('district', type=str, choices=ChoicesFromFile('data/districts.csv', 'code'))",
+            )
+            p = get_pipeline(tmpdir)
+            param_dict = p.to_dict()["parameters"][0]
+            assert param_dict["choices_from_file"] == {"format": "csv", "path": "data/districts.csv", "column": "code"}
+
     def test_file_choices_json(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             self._write_pipeline(

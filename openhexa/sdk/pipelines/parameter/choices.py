@@ -2,10 +2,12 @@
 
 from openhexa.sdk.pipelines.exceptions import InvalidParameterError
 
+from .ast_constructible import AstConstructible
+
 _SUPPORTED_FORMATS = {"csv", "json", "yaml", "yml"}
 
 
-class ChoicesFromFile:
+class ChoicesFromFile(AstConstructible):
     """Descriptor for choices loaded dynamically from a file in the workspace file system.
 
     The file format is inferred from the path extension (.csv, .json, .yaml, .yml).
