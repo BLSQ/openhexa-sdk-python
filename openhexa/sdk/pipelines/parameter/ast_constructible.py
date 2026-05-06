@@ -26,9 +26,5 @@ class AstConstructible:
             for i, arg in enumerate(node.args)
             if isinstance(arg, ast.Constant) and i < len(param_names)
         }
-        kwargs |= {
-            kw.arg: kw.value.value
-            for kw in node.keywords
-            if isinstance(kw.value, ast.Constant)
-        }
+        kwargs |= {kw.arg: kw.value.value for kw in node.keywords if isinstance(kw.value, ast.Constant)}
         return cls(**kwargs)
