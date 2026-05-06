@@ -23,15 +23,15 @@ from openhexa.sdk.pipelines.parameter import (
     Parameter,
     validate_parameters,
 )
+from openhexa.sdk.utils import Settings
+
+from .pipeline import Pipeline
 
 # Maps AST function names to classes that support from_ast_call().
 # Add an entry here when introducing a new AstConstructible type.
 _AST_CALLABLE_TYPES: dict[str, type] = {
     "ChoicesFromFile": ChoicesFromFile,
 }
-from openhexa.sdk.utils import Settings
-
-from .pipeline import Pipeline
 
 
 @dataclass

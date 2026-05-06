@@ -26,13 +26,11 @@ class ChoicesFromFile(AstConstructible):
     def __init__(self, path: str, column: str | None = None):
         self.path = path
         self.column = column
-        self.format = self._detect_format(path)
         self.validate_spec()
+        self.format = self._detect_format(path)
 
     @staticmethod
     def _detect_format(path: str) -> str:
-        if not path or not isinstance(path, str):
-            raise InvalidParameterError("ChoicesFromFile path must be a non-empty string.")
         ext = path.rsplit(".", 1)[-1].lower() if "." in path else ""
         if ext not in _SUPPORTED_FORMATS:
             raise InvalidParameterError(
@@ -47,6 +45,19 @@ class ChoicesFromFile(AstConstructible):
             raise InvalidParameterError("ChoicesFromFile path must be a non-empty string.")
         if self.column is not None and not isinstance(self.column, str):
             raise InvalidParameterError("ChoicesFromFile column must be a string.")
+
+    def __repr__(self) -> str:
+        if self.column is not None:
+            return f"ChoicesFromFile({self.path!r}, column={self.column!r})"
+        return f"ChoicesFromFile({self.path!r})"
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, ChoicesFromFile):
+            return NotImplemented
+        return self.path == other.path and self.column == other.column
+
+    def __hash__(self) -> int:
+        return hash((self.path, self.column))
 
     def to_dict(self) -> dict:
         """Return a dictionary representation of the choices spec."""

@@ -69,10 +69,7 @@ class Parameter:
                 raise InvalidParameterError(f"Parameters of type {self.type} don't accept choices.")
             if isinstance(choices, str):
                 choices = ChoicesFromFile(choices)
-            if isinstance(choices, ChoicesFromFile):
-                # validate_spec() already ran in ChoicesFromFile.__init__; nothing more to check here
-                pass
-            else:
+            elif not isinstance(choices, ChoicesFromFile):
                 if len(choices) == 0:
                     raise InvalidParameterError("Choices, if provided, cannot be empty.")
                 try:
