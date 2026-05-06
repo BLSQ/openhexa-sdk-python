@@ -38,7 +38,7 @@ _AST_CALLABLE_TYPES: dict[str, type] = {
 class Argument:
     """Argument of a decorator."""
 
-    name: str # Use str instead of string
+    name: str  # Use str instead of string
     types: list[type] = field(default_factory=list)
     default_value: Any = None
     transform: Callable | None = None
