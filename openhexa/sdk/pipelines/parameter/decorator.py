@@ -43,7 +43,7 @@ class Parameter:
             | File
         ],
         name: str | None = None,
-        choices: typing.Sequence | ChoicesFromFile | None = None,
+        choices: typing.Sequence | ChoicesFromFile | str | None = None,
         help: str | None = None,
         default: typing.Any | None = None,
         widget: DHIS2Widget | IASOWidget | None = None,
@@ -67,6 +67,8 @@ class Parameter:
         if choices is not None:
             if not self.type.accepts_choices:
                 raise InvalidParameterError(f"Parameters of type {self.type} don't accept choices.")
+            if isinstance(choices, str):
+                choices = ChoicesFromFile(choices)
             if isinstance(choices, ChoicesFromFile):
                 # validate_spec() already ran in ChoicesFromFile.__init__; nothing more to check here
                 pass
@@ -244,7 +246,7 @@ def parameter(
         | File
     ],
     name: str | None = None,
-    choices: typing.Sequence | ChoicesFromFile | None = None,
+    choices: typing.Sequence | ChoicesFromFile | str | None = None,
     help: str | None = None,
     widget: DHIS2Widget | IASOWidget | None = None,
     connection: str | None = None,

@@ -58,6 +58,196 @@ class TestChoicesFromFileConstruction:
 
 
 # ---------------------------------------------------------------------------
+# String shorthand — Parameter.__init__
+# ---------------------------------------------------------------------------
+
+
+class TestStringShorthand:
+    # --- happy paths ---
+
+    def test_string_shorthand_csv(self):
+        p = Parameter(code="district", type=str, choices="districts.csv")
+        assert isinstance(p.choices, ChoicesFromFile)
+        assert p.choices.path == "districts.csv"
+        assert p.choices.format == "csv"
+        assert p.choices.column is None
+
+    def test_string_shorthand_json(self):
+        p = Parameter(code="district", type=str, choices="data/regions.json")
+        assert isinstance(p.choices, ChoicesFromFile)
+        assert p.choices.format == "json"
+
+    def test_string_shorthand_yaml(self):
+        p = Parameter(code="district", type=str, choices="list.yaml")
+        assert isinstance(p.choices, ChoicesFromFile)
+        assert p.choices.format == "yaml"
+
+    def test_string_shorthand_yml(self):
+        p = Parameter(code="district", type=str, choices="list.yml")
+        assert isinstance(p.choices, ChoicesFromFile)
+        assert p.choices.format == "yaml"
+
+    def test_string_shorthand_leading_slash_stripped(self):
+        p = Parameter(code="district", type=str, choices="/choices.csv")
+        assert p.choices.path == "/choices.csv"  # ChoicesFromFile stores as-is; stripping is app-side
+
+    def test_string_shorthand_serialises_same_as_explicit(self):
+        shorthand = Parameter(code="district", type=str, choices="districts.csv").to_dict()
+        explicit = Parameter(code="district", type=str, choices=ChoicesFromFile("districts.csv")).to_dict()
+        assert shorthand == explicit
+
+    # --- static list still works ---
+
+    def test_static_list_unaffected(self):
+        p = Parameter(code="country", type=str, choices=["UG", "KE"])
+        assert p.choices == ["UG", "KE"]
+
+    def test_explicit_choices_from_file_unaffected(self):
+        p = Parameter(code="district", type=str, choices=ChoicesFromFile("districts.csv", column="code"))
+        assert p.choices.column == "code"
+
+    # --- invalid strings raise clearly ---
+
+    def test_string_no_extension_raises(self):
+        with pytest.raises(InvalidParameterError, match="Supported extensions"):
+            Parameter(code="district", type=str, choices="nodot")
+
+    def test_string_unsupported_extension_raises(self):
+        with pytest.raises(InvalidParameterError, match="Supported extensions"):
+            Parameter(code="district", type=str, choices="file.xlsx")
+
+    def test_empty_string_raises(self):
+        with pytest.raises(InvalidParameterError):
+            Parameter(code="district", type=str, choices="")
+
+    # --- column cannot be specified via shorthand ---
+
+    def test_shorthand_has_no_column(self):
+        p = Parameter(code="district", type=str, choices="districts.csv")
+        assert p.choices.column is None
+
+    def test_decorator_with_string_shorthand(self):
+        @parameter(code="district", type=str, choices="districts.csv")
+        def my_pipeline(district):
+            pass
+
+        params = my_pipeline.get_all_parameters()
+        assert isinstance(params[0].choices, ChoicesFromFile)
+
+
+# ---------------------------------------------------------------------------
+# String shorthand — AST round-trip
+# ---------------------------------------------------------------------------
+
+
+class TestAstStringShorthand(TestCase):
+    def _write_pipeline(self, tmpdir, param_line):
+        with open(f"{tmpdir}/pipeline.py", "w") as f:
+            f.write(
+                "\n".join(
+                    [
+                        "from openhexa.sdk.pipelines import pipeline, parameter",
+                        "",
+                        param_line,
+                        "@pipeline(name='Test pipeline')",
+                        "def test_pipeline(district):",
+                        "    pass",
+                    ]
+                )
+            )
+
+    def test_ast_string_shorthand_csv(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            self._write_pipeline(
+                tmpdir,
+                "@parameter('district', type=str, choices='districts.csv')",
+            )
+            p = get_pipeline(tmpdir)
+            param_dict = p.to_dict()["parameters"][0]
+            assert param_dict["choices"] is None
+            assert param_dict["choices_from_file"] == {"format": "csv", "path": "districts.csv", "column": None}
+
+    def test_ast_string_shorthand_json(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            self._write_pipeline(
+                tmpdir,
+                "@parameter('district', type=str, choices='regions.json')",
+            )
+            p = get_pipeline(tmpdir)
+            assert p.to_dict()["parameters"][0]["choices_from_file"]["format"] == "json"
+
+    def test_ast_string_shorthand_yaml(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            self._write_pipeline(
+                tmpdir,
+                "@parameter('district', type=str, choices='list.yml')",
+            )
+            p = get_pipeline(tmpdir)
+            assert p.to_dict()["parameters"][0]["choices_from_file"]["format"] == "yaml"
+
+    def test_ast_string_shorthand_same_output_as_explicit(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            self._write_pipeline(
+                tmpdir,
+                "@parameter('district', type=str, choices='districts.csv')",
+            )
+            shorthand_dict = get_pipeline(tmpdir).to_dict()["parameters"][0]
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            self._write_pipeline(
+                tmpdir,
+                "@parameter('district', type=str, choices=ChoicesFromFile('districts.csv'))",
+            )
+            # need the import for the explicit form
+            with open(f"{tmpdir}/pipeline.py", "w") as f:
+                f.write(
+                    "\n".join(
+                        [
+                            "from openhexa.sdk.pipelines import pipeline, parameter",
+                            "from openhexa.sdk.pipelines.parameter import ChoicesFromFile",
+                            "",
+                            "@parameter('district', type=str, choices=ChoicesFromFile('districts.csv'))",
+                            "@pipeline(name='Test pipeline')",
+                            "def test_pipeline(district):",
+                            "    pass",
+                        ]
+                    )
+                )
+            explicit_dict = get_pipeline(tmpdir).to_dict()["parameters"][0]
+
+        assert shorthand_dict == explicit_dict
+
+    def test_ast_static_list_unaffected(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            self._write_pipeline(
+                tmpdir,
+                "@parameter('country', type=str, choices=['UG', 'KE'])",
+            )
+            p = get_pipeline(tmpdir)
+            param_dict = p.to_dict()["parameters"][0]
+            assert param_dict["choices"] == ["UG", "KE"]
+            assert "choices_from_file" not in param_dict
+
+    def test_ast_string_no_extension_raises(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            self._write_pipeline(
+                tmpdir,
+                "@parameter('district', type=str, choices='nodot')",
+            )
+            with self.assertRaises(InvalidParameterError):
+                get_pipeline(tmpdir)
+
+    def test_ast_string_unsupported_extension_raises(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            self._write_pipeline(
+                tmpdir,
+                "@parameter('district', type=str, choices='file.xlsx')",
+            )
+            with self.assertRaises(InvalidParameterError):
+                get_pipeline(tmpdir)
+
+
+# ---------------------------------------------------------------------------
 # Parameter integration
 # ---------------------------------------------------------------------------
 

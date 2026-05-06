@@ -8,7 +8,7 @@ import os
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 from zipfile import ZipFile
 
 import requests
@@ -37,9 +37,10 @@ from .pipeline import Pipeline
 class Argument:
     """Argument of a decorator."""
 
-    name: str  # Use str instead of string
+    name: str
     types: list[type] = field(default_factory=list)
     default_value: Any = None
+    transform: Callable | None = None
 
 
 def import_pipeline(pipeline_dir_path: str) -> Pipeline:
@@ -214,6 +215,8 @@ def _get_decorator_spec(decorator: ast.Call, args: tuple[Argument, ...]) -> dict
     args_spec = {}
     for i, arg in enumerate(args):
         value, is_keyword = _get_decorator_arg_value(decorator, arg, i)
+        if arg.transform is not None:
+            value = arg.transform(value)
         args_spec[arg.name] = {"value": value, "is_keyword": is_keyword}
     return args_spec
 
@@ -300,7 +303,11 @@ def get_pipeline(pipeline_path: Path) -> Pipeline:
                     Argument("code", [ast.Constant]),
                     Argument("type", [ast.Name]),
                     Argument("name", [ast.Constant]),
-                    Argument("choices", [ast.List, ast.Call]),
+                    Argument(
+                        "choices",
+                        [ast.List, ast.Call, ast.Constant],
+                        transform=lambda v: ChoicesFromFile(v) if isinstance(v, str) else v,
+                    ),
                     Argument("help", [ast.Constant]),
                     Argument("default", [ast.Constant, ast.List]),
                     Argument("widget", [ast.Attribute]),
