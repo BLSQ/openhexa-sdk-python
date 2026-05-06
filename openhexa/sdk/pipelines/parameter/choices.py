@@ -26,7 +26,7 @@ class ChoicesFromFile(AstConstructible):
     def __init__(self, path: str, column: str | None = None):
         self.path = path
         self.column = column
-        self.validate_spec()
+        self._validate_spec()
         self.format = self._detect_format(path)
 
     @staticmethod
@@ -39,7 +39,7 @@ class ChoicesFromFile(AstConstructible):
             )
         return "yaml" if ext == "yml" else ext
 
-    def validate_spec(self):
+    def _validate_spec(self):
         """Validate the path and column specification."""
         if not self.path or not isinstance(self.path, str):
             raise InvalidParameterError("ChoicesFromFile path must be a non-empty string.")

@@ -277,7 +277,7 @@ def parameter(
         An optional default value for the parameter (should be of the type defined by the type parameter)
     required : bool, default=True
         Whether the parameter is mandatory
-    multiple : bool, default=True
+    multiple : bool, default=False
         Whether this parameter should be provided multiple values (if True, the value must be provided as a list of
         values of the chosen type)
     directory : str, optional

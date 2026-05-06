@@ -67,10 +67,7 @@ class TestStringShorthand:
 
     def test_string_shorthand_csv(self):
         p = Parameter(code="district", type=str, choices="districts.csv")
-        assert isinstance(p.choices, ChoicesFromFile)
-        assert p.choices.path == "districts.csv"
-        assert p.choices.format == "csv"
-        assert p.choices.column is None
+        assert p.choices == ChoicesFromFile("districts.csv")
 
     def test_string_shorthand_json(self):
         p = Parameter(code="district", type=str, choices="data/regions.json")
@@ -104,7 +101,7 @@ class TestStringShorthand:
 
     def test_explicit_choices_from_file_unaffected(self):
         p = Parameter(code="district", type=str, choices=ChoicesFromFile("districts.csv", column="code"))
-        assert p.choices.column == "code"
+        assert p.choices == ChoicesFromFile("districts.csv", column="code")
 
     # --- invalid strings raise clearly ---
 
@@ -124,7 +121,7 @@ class TestStringShorthand:
 
     def test_shorthand_has_no_column(self):
         p = Parameter(code="district", type=str, choices="districts.csv")
-        assert p.choices.column is None
+        assert p.choices == ChoicesFromFile("districts.csv")
 
     def test_decorator_with_string_shorthand(self):
         @parameter(code="district", type=str, choices="districts.csv")
