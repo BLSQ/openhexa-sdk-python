@@ -47,16 +47,19 @@ class ChoicesFromFile(AstConstructible):
             raise InvalidParameterError("ChoicesFromFile column must be a string.")
 
     def __repr__(self) -> str:
+        """Return a string representation of the ChoicesFromFile instance."""
         if self.column is not None:
             return f"ChoicesFromFile({self.path!r}, column={self.column!r})"
         return f"ChoicesFromFile({self.path!r})"
 
     def __eq__(self, other: object) -> bool:
+        """Check equality based on path and column."""
         if not isinstance(other, ChoicesFromFile):
             return NotImplemented
         return self.path == other.path and self.column == other.column
 
     def __hash__(self) -> int:
+        """Return hash based on path and column."""
         return hash((self.path, self.column))
 
     def to_dict(self) -> dict:
