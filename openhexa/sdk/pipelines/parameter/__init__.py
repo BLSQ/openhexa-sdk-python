@@ -7,6 +7,7 @@ from openhexa.sdk.pipelines.exceptions import InvalidParameterError, ParameterVa
 
 from .decorator import FunctionWithParameter, Parameter, parameter, validate_parameters
 from .types import (
+    TYPES_BY_PYTHON_TYPE,
     Boolean,
     ConnectionParameterType,
     CustomConnectionType,
@@ -23,7 +24,6 @@ from .types import (
     Secret,
     SecretType,
     StringType,
-    TYPES_BY_PYTHON_TYPE,
 )
 from .widgets import DHIS2Widget, IASOWidget
 
