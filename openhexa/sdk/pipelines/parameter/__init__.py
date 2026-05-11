@@ -5,7 +5,10 @@ See https://github.com/BLSQ/openhexa/wiki/Writing-OpenHEXA-pipelines#pipeline-pa
 
 from openhexa.sdk.pipelines.exceptions import InvalidParameterError, ParameterValueError
 
+<<<<<<< HEAD
 from .choices import ChoicesFromFile
+=======
+>>>>>>> HEXA-1620-parameters-refactor
 from .decorator import FunctionWithParameter, Parameter, parameter, validate_parameters
 from .types import (
     TYPES_BY_PYTHON_TYPE,
