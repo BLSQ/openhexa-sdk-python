@@ -4,7 +4,7 @@ from openhexa.sdk.pipelines.exceptions import InvalidParameterError
 
 from .ast_constructible import AstConstructible
 
-_SUPPORTED_FORMATS = {"csv", "json", "yaml"}
+_SUPPORTED_FORMATS = {"csv", "json", "yaml", "yml"}
 
 
 class ChoicesFromFile(AstConstructible):
