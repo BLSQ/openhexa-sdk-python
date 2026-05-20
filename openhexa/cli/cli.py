@@ -461,20 +461,29 @@ def pipelines_push(
             click.confirm(confirmation_message, default=True, abort=True)
 
         normalized_tags = [normalize_tag(t) for t in tag] if tag else []
-        selected_pipeline = selected_pipeline or create_pipeline(
-            pipeline.name, functional_type=functional_type, tags=normalized_tags
-        )
         uploaded_pipeline_version = None
         try:
-            uploaded_pipeline_version = upload_pipeline(
-                selected_pipeline["code"],
-                path,
-                name,
-                description=description,
-                link=link,
-                functional_type=functional_type,
-                tags=normalized_tags,
-            )
+            if selected_pipeline:
+                uploaded_pipeline_version = upload_pipeline(
+                    selected_pipeline["code"],
+                    path,
+                    name,
+                    description=description,
+                    link=link,
+                    functional_type=functional_type,
+                    tags=normalized_tags,
+                )
+            else:
+                uploaded_pipeline_version = create_pipeline(
+                    pipeline.name,
+                    path,
+                    version_name=name,
+                    description=description,
+                    link=link,
+                    functional_type=functional_type,
+                    tags=normalized_tags,
+                )
+                selected_pipeline = uploaded_pipeline_version["pipeline"]
             version_url = click.style(
                 f"{settings.public_api_url}/workspaces/{workspace}/pipelines/{selected_pipeline['code']}",
                 fg="bright_blue",
