@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.21.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.20.2...v2.21.0) (2026-05-20)
+
+
+### Features
+
+* SDK - pipeline run parameters - dynamic choices (HEXA-1620) ([#385](https://github.com/BLSQ/openhexa-sdk-python/issues/385)) ([a1ed63f](https://github.com/BLSQ/openhexa-sdk-python/commit/a1ed63f457d9c3eafb71bb818714271eb5db1c5c))
+
 ## [2.20.2](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.20.1...v2.20.2) (2026-05-18)
 
 
