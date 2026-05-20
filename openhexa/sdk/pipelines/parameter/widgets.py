@@ -1,0 +1,24 @@
+"""Widget enums for DHIS2 and IASO pipeline parameters."""
+
+from enum import StrEnum
+
+
+class IASOWidget(StrEnum):
+    """Enum for IASO widgets."""
+
+    IASO_FORMS = "IASO_FORMS"
+    IASO_ORG_UNITS = "IASO_ORG_UNITS"
+    IASO_PROJECTS = "IASO_PROJECTS"
+
+
+class DHIS2Widget(StrEnum):
+    """Enum for DHIS2 widgets."""
+
+    ORG_UNITS = "DHIS2_ORG_UNITS"
+    ORG_UNIT_GROUPS = "DHIS2_ORG_UNIT_GROUPS"
+    ORG_UNIT_LEVELS = "DHIS2_ORG_UNIT_LEVELS"
+    DATASETS = "DHIS2_DATASETS"
+    DATA_ELEMENTS = "DHIS2_DATA_ELEMENTS"
+    DATA_ELEMENT_GROUPS = "DHIS2_DATA_ELEMENT_GROUPS"
+    INDICATORS = "DHIS2_INDICATORS"
+    INDICATOR_GROUPS = "DHIS2_INDICATOR_GROUPS"
