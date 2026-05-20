@@ -247,6 +247,79 @@ class CliRunTest(TestCase):
     @patch("openhexa.cli.cli.get_pipeline")
     @patch("openhexa.cli.cli.get_pipelines_pages")
     @patch("openhexa.cli.cli.upload_pipeline")
+    @patch("openhexa.cli.cli.create_pipeline")
+    @patch.dict(os.environ, {"HEXA_API_URL": "https://www.bluesquarehub.com/", "HEXA_WORKSPACE": "workspace"})
+    def test_push_pipeline_creates_new_atomically(
+        self,
+        mock_create_pipeline,
+        mock_upload_pipeline,
+        mock_get_pipelines_pages,
+        mock_get_pipeline,
+        mock_graphql,
+    ):
+        """When the user picks 'Create a new pipeline', a single atomic create_pipeline call happens."""
+        with self.runner.isolated_filesystem() as tmp:
+            with open(Path(tmp) / python_file_name, "w") as f:
+                f.write(python_code)
+            mock_graphql.return_value = setup_graphql_response()
+            mock_pipeline = MagicMock(spec=Pipeline)
+            mock_pipeline.name = pipeline_name
+            mock_get_pipeline.return_value = mock_pipeline
+            mock_get_pipelines_pages.return_value = {
+                "items": [
+                    {"name": "Pipeline1", "code": "code1"},
+                    {"name": "Pipeline2", "code": "code2"},
+                ],
+                "totalPages": 1,  # single page so no "enter code" option appears
+            }
+            mock_create_pipeline.return_value = {
+                "pipeline": {
+                    "id": pipeline_id,
+                    "code": "pipeline-1234",
+                    "permissions": {"createTemplateVersion": {"isAllowed": False}},
+                    "template": None,
+                },
+                "pipelineVersion": {
+                    "id": pipeline_version_id,
+                    "versionName": version,
+                    "pipeline": {
+                        "id": pipeline_id,
+                        "code": "pipeline-1234",
+                        "permissions": {"createTemplateVersion": {"isAllowed": False}},
+                        "template": None,
+                    },
+                },
+            }
+
+            # choices: [P1, P2, "Create a new ...", "Cancel"]  → "3" = create new
+            # then "Y" to confirm push
+            result = self.runner.invoke(
+                pipelines_push,
+                [tmp, "--name", version, "--description", "first", "--link", "https://github.com/"],
+                input="\n".join(["3", "Y"]) + "\n",
+            )
+
+            self.assertEqual(result.exit_code, 0)
+            self.assertTrue(mock_create_pipeline.called)
+            self.assertFalse(mock_upload_pipeline.called, "upload_pipeline must not be called on first push")
+
+            call_kwargs = mock_create_pipeline.call_args.kwargs
+            call_args = mock_create_pipeline.call_args.args
+            assert call_args[0] == pipeline_name  # pipeline name (positional)
+            assert call_kwargs["version_name"] == version
+            assert call_kwargs["version_description"] == "first"
+            assert call_kwargs["version_external_link"] == "https://github.com/"
+
+            self.assertIn(
+                f"✅ New version '{version}' created! "
+                "You can view the pipeline in OpenHEXA on https://www.bluesquarehub.com/workspaces/workspace/pipelines/pipeline-1234",
+                result.output,
+            )
+
+    @patch("openhexa.cli.api.graphql")
+    @patch("openhexa.cli.cli.get_pipeline")
+    @patch("openhexa.cli.cli.get_pipelines_pages")
+    @patch("openhexa.cli.cli.upload_pipeline")
     @patch.dict(os.environ, {"HEXA_API_URL": "https://www.bluesquarehub.com/", "HEXA_WORKSPACE": "workspace"})
     def test_push_pipeline_with_code_flag(
         self, mock_upload_pipeline, mock_get_pipelines_pages, mock_get_pipeline, mock_graphql
