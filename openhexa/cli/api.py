@@ -295,8 +295,47 @@ def get_pipeline_from_code(pipeline_code: str) -> dict[str, typing.Any]:
     return data["pipelineByCode"]
 
 
-def create_pipeline(pipeline_name: str, functional_type: str = None, tags: list[str] = None):
-    """Create a pipeline using the API."""
+def _build_pipeline_version_input(
+    pipeline,
+    pipeline_directory_path: str | Path,
+    name: str = None,
+    description: str = None,
+    external_link: str = None,
+) -> dict:
+    """Build the GraphQL input to create a new pipeline version."""
+    zip_file = generate_zip_file(pipeline_directory_path.absolute())
+
+    if settings.debug:
+        # Write zip_file to disk for debugging
+        with open("pipeline.zip", "wb") as debug_file:
+            debug_file.write(zip_file.read())
+        zip_file.seek(0)
+
+    return {
+        "name": name,
+        "description": description,
+        "externalLink": external_link,
+        "zipfile": base64.b64encode(zip_file.read()).decode("ascii"),
+        "parameters": [p.to_dict() for p in pipeline.parameters],
+        "timeout": pipeline.timeout,
+    }
+
+
+def create_pipeline(
+    pipeline_name: str,
+    pipeline_directory_path: str | Path = None,
+    version_name: str = None,
+    version_description: str = None,
+    version_external_link: str = None,
+    functional_type: str = None,
+    tags: list[str] = None,
+):
+    """Create a pipeline, optionally with its first version in a single atomic call.
+
+    When ``pipeline_directory_path`` is provided, the directory is zipped and sent as
+    the first version (atomic on the backend). The returned dict then carries both the
+    ``pipeline`` and the ``pipelineVersion`` keys; otherwise only ``pipeline`` is set.
+    """
     if settings.current_workspace is None:
         raise NoActiveWorkspaceError
 
@@ -311,27 +350,64 @@ def create_pipeline(pipeline_name: str, functional_type: str = None, tags: list[
     if tags:
         input_data["tags"] = tags
 
+    if pipeline_directory_path is not None:
+        pipeline = get_pipeline(pipeline_directory_path.absolute())
+        input_data["version"] = _build_pipeline_version_input(
+            pipeline,
+            pipeline_directory_path,
+            name=version_name,
+            description=version_description,
+            external_link=version_external_link,
+        )
+
     data = graphql(
         """
-    mutation createPipeline($input: CreatePipelineInput!) {
-        createPipeline(input: $input) {
-            success
-            errors
-            pipeline {
-                id
-                code
-                name
+            mutation createPipeline($input: CreatePipelineInput!) {
+                createPipeline(input: $input) {
+                    success
+                    errors
+                    pipeline {
+                        id
+                        code
+                        permissions {
+                            createTemplateVersion {
+                                isAllowed
+                            }
+                        }
+                        template {
+                            id
+                            code
+                            name
+                        }
+                    }
+                    pipelineVersion {
+                        id
+                        versionName
+                        pipeline {
+                            id
+                            code
+                            permissions {
+                                createTemplateVersion {
+                                    isAllowed
+                                }
+                            }
+                            template {
+                                id
+                                code
+                                name
+                            }
+                        }
+                    }
+                }
             }
-        }
-    }
-    """,
+        """,
         {"input": input_data},
     )
 
     if not data["createPipeline"]["success"]:
         raise Exception(data["createPipeline"]["errors"])
 
-    return data["createPipeline"]["pipeline"]
+    return data["createPipeline"]
 
 
 def download_pipeline_sourcecode(pipeline_code, output_path: Path = None, force_overwrite=False):
@@ -628,27 +704,18 @@ def upload_pipeline(
     if settings.current_workspace is None:
         raise NoActiveWorkspaceError
 
-    directory = pipeline_directory_path.absolute()
-    pipeline = get_pipeline(directory)
-    zip_file = generate_zip_file(directory)
-
-    if settings.debug:
-        # Write zip_file to disk for debugging
-        with open("pipeline.zip", "wb") as debug_file:
-            debug_file.write(zip_file.read())
-        zip_file.seek(0)
-
-    base64_content = base64.b64encode(zip_file.read()).decode("ascii")
+    pipeline = get_pipeline(pipeline_directory_path.absolute())
 
     input_data = {
         "workspaceSlug": settings.current_workspace,
         "code": target_pipeline_code,
-        "name": name,
-        "description": description,
-        "externalLink": link,
-        "zipfile": base64_content,
-        "parameters": [p.to_dict() for p in pipeline.parameters],
-        "timeout": pipeline.timeout,
+        **_build_pipeline_version_input(
+            pipeline,
+            pipeline_directory_path,
+            name=name,
+            description=description,
+            external_link=link,
+        ),
     }
 
     if functional_type or pipeline.functional_type:
