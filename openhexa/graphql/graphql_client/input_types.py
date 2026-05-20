@@ -9,6 +9,8 @@ from .base_model import BaseModel
 from .enums import (
     AccessmodAccessibilityAnalysisAlgorithm,
     ConnectionType,
+    FileEncoding,
+    LinkedObjectType,
     MembershipRole,
     MessagePriority,
     OrganizationMembershipRole,
@@ -16,6 +18,7 @@ from .enums import (
     PermissionMode,
     PipelineFunctionalType,
     PipelineNotificationLevel,
+    WebappOperationScope,
     WorkspaceMembershipRole,
 )
 
@@ -107,6 +110,15 @@ class CreateAccessmodZonalStatisticsInput(BaseModel):
     project_id: str = Field(alias="projectId")
 
 
+class CreateAssistantConversationInput(BaseModel):
+    instruction_set: Optional[str] = Field(alias="instructionSet", default=None)
+    linked_object_id: Optional[Any] = Field(alias="linkedObjectId", default=None)
+    linked_object_type: Optional[LinkedObjectType] = Field(
+        alias="linkedObjectType", default=None
+    )
+    workspace_slug: str = Field(alias="workspaceSlug")
+
+
 class CreateBucketFolderInput(BaseModel):
     folder_key: str = Field(alias="folderKey")
     workspace_slug: str = Field(alias="workspaceSlug")
@@ -123,6 +135,7 @@ class CreateConnectionInput(BaseModel):
 
 class CreateDatasetInput(BaseModel):
     description: Optional[str] = None
+    files: Optional[List["DatasetVersionFileContentInput"]] = None
     name: str
     workspace_slug: str = Field(alias="workspaceSlug")
 
@@ -136,6 +149,7 @@ class CreateDatasetVersionFileInput(BaseModel):
 class CreateDatasetVersionInput(BaseModel):
     changelog: Optional[str] = None
     dataset_id: str = Field(alias="datasetId")
+    files: Optional[List["DatasetVersionFileContentInput"]] = None
     name: str
 
 
@@ -163,12 +177,14 @@ class CreatePipelineFromTemplateVersionInput(BaseModel):
 
 class CreatePipelineInput(BaseModel):
     code: Optional[str] = None
+    description: Optional[str] = None
     functional_type: Optional[PipelineFunctionalType] = Field(
         alias="functionalType", default=None
     )
     name: str
     notebook_path: Optional[str] = Field(alias="notebookPath", default=None)
     tags: Optional[List[str]] = None
+    version: Optional["CreatePipelineVersionInput"] = None
     workspace_slug: str = Field(alias="workspaceSlug")
 
 
@@ -189,11 +205,24 @@ class CreatePipelineTemplateVersionInput(BaseModel):
     workspace_slug: str = Field(alias="workspaceSlug")
 
 
+class CreatePipelineVersionInput(BaseModel):
+    config: Optional[Any] = None
+    description: Optional[str] = None
+    external_link: Optional[Any] = Field(alias="externalLink", default=None)
+    name: Optional[str] = None
+    parameters: Optional[List["ParameterInput"]] = None
+    timeout: Optional[int] = None
+    zipfile: str
+
+
 class CreateTeamInput(BaseModel):
     name: str
 
 
 class CreateWebappInput(BaseModel):
+    allowed_operations: Optional[List[WebappOperationScope]] = Field(
+        alias="allowedOperations", default=None
+    )
     description: Optional[str] = None
     icon: Optional[str] = None
     is_public: Optional[bool] = Field(alias="isPublic", default=None)
@@ -210,6 +239,12 @@ class CreateWorkspaceInput(BaseModel):
     name: str
     organization_id: Optional[Any] = Field(alias="organizationId", default=None)
     slug: Optional[str] = None
+
+
+class DatasetVersionFileContentInput(BaseModel):
+    content: str
+    content_type: str = Field(alias="contentType")
+    uri: str
 
 
 class DeclineWorkspaceInvitationInput(BaseModel):
@@ -708,6 +743,9 @@ class UpdatePipelineInput(BaseModel):
     id: Any
     name: Optional[str] = None
     schedule: Optional[str] = None
+    scheduled_pipeline_version_id: Optional[Any] = Field(
+        alias="scheduledPipelineVersionId", default=None
+    )
     tags: Optional[List[str]] = None
     webhook_enabled: Optional[bool] = Field(alias="webhookEnabled", default=None)
 
@@ -764,12 +802,20 @@ class UpdateUserInput(BaseModel):
 
 
 class UpdateWebappInput(BaseModel):
+    allowed_operations: Optional[List[WebappOperationScope]] = Field(
+        alias="allowedOperations", default=None
+    )
     description: Optional[str] = None
+    files: Optional[List["WebappFileInput"]] = None
     icon: Optional[str] = None
     id: Any
     is_public: Optional[bool] = Field(alias="isPublic", default=None)
     name: Optional[str] = None
+    published_version_id: Optional[str] = Field(
+        alias="publishedVersionId", default=None
+    )
     source: Optional["UpdateWebappSourceInput"] = None
+    subdomain: Optional[str] = None
 
 
 class UpdateWebappSourceInput(BaseModel):
@@ -816,8 +862,15 @@ class VerifyDeviceInput(BaseModel):
     token: Optional[str] = None
 
 
+class WebappFileInput(BaseModel):
+    content: str
+    encoding: Optional[FileEncoding] = FileEncoding.TEXT
+    path: str
+
+
 class WebappSourceInput(BaseModel):
     iframe: Optional["IframeSourceInput"] = None
+    static: Optional[List["WebappFileInput"]] = None
     superset: Optional["SupersetSourceInput"] = None
 
 
@@ -841,7 +894,11 @@ class WriteFileContentInput(BaseModel):
 
 CreateAccessmodProjectInput.model_rebuild()
 CreateConnectionInput.model_rebuild()
+CreateDatasetInput.model_rebuild()
+CreateDatasetVersionInput.model_rebuild()
 CreateOrganizationInput.model_rebuild()
+CreatePipelineInput.model_rebuild()
+CreatePipelineVersionInput.model_rebuild()
 CreateWebappInput.model_rebuild()
 CreateWorkspaceInput.model_rebuild()
 InviteOrganizationMemberInput.model_rebuild()
