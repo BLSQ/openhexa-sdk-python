@@ -6,6 +6,7 @@ import importlib
 import io
 import os
 import sys
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -16,6 +17,7 @@ import requests
 from openhexa.sdk.pipelines.exceptions import InvalidParameterError, PipelineNotFound
 from openhexa.sdk.pipelines.parameter import (
     TYPES_BY_PYTHON_TYPE,
+    ChoicesFromFile,
     DHIS2Widget,
     IASOWidget,
     Parameter,
@@ -25,6 +27,12 @@ from openhexa.sdk.utils import Settings
 
 from .pipeline import Pipeline
 
+# Maps AST function names to classes that support from_ast_call().
+# Add an entry here when introducing a new AstConstructible type.
+_AST_CALLABLE_TYPES: dict[str, type] = {
+    "ChoicesFromFile": ChoicesFromFile,
+}
+
 
 @dataclass
 class Argument:
@@ -33,6 +41,7 @@ class Argument:
     name: str  # Use str instead of string
     types: list[type] = field(default_factory=list)
     default_value: Any = None
+    transform: Callable | None = None
 
 
 def import_pipeline(pipeline_dir_path: str) -> Pipeline:
@@ -172,6 +181,12 @@ def _get_decorator_arg_value(decorator: ast.Call, arg: Argument, index: int) -> 
                 return (keyword.value.id, True)
             elif isinstance(keyword.value, ast.List):
                 return ([el.value for el in keyword.value.elts], True)
+            elif isinstance(keyword.value, ast.Call):
+                func = keyword.value.func
+                func_name = func.id if isinstance(func, ast.Name) else None
+                if func_name not in _AST_CALLABLE_TYPES:
+                    raise ValueError(f"Unsupported call in choices argument: {func_name}")
+                return _AST_CALLABLE_TYPES[func_name].from_ast_call(keyword.value), True
             elif isinstance(keyword.value, ast.Attribute):
                 if keyword.value.attr in DHIS2Widget.__members__:
                     return getattr(DHIS2Widget, keyword.value.attr), True
@@ -201,6 +216,8 @@ def _get_decorator_spec(decorator: ast.Call, args: tuple[Argument, ...]) -> dict
     args_spec = {}
     for i, arg in enumerate(args):
         value, is_keyword = _get_decorator_arg_value(decorator, arg, i)
+        if arg.transform is not None:
+            value = arg.transform(value)
         args_spec[arg.name] = {"value": value, "is_keyword": is_keyword}
     return args_spec
 
@@ -287,7 +304,11 @@ def get_pipeline(pipeline_path: Path) -> Pipeline:
                     Argument("code", [ast.Constant]),
                     Argument("type", [ast.Name]),
                     Argument("name", [ast.Constant]),
-                    Argument("choices", [ast.List]),
+                    Argument(
+                        "choices",
+                        [ast.List, ast.Call, ast.Constant],
+                        transform=lambda v: ChoicesFromFile(v) if isinstance(v, str) else v,
+                    ),
                     Argument("help", [ast.Constant]),
                     Argument("default", [ast.Constant, ast.List]),
                     Argument("widget", [ast.Attribute]),
