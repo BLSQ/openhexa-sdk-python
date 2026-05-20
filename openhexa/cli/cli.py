@@ -478,8 +478,8 @@ def pipelines_push(
                     pipeline.name,
                     path,
                     version_name=name,
-                    description=description,
-                    link=link,
+                    version_description=description,
+                    version_external_link=link,
                     functional_type=functional_type,
                     tags=normalized_tags,
                 )
