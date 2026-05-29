@@ -1042,8 +1042,8 @@ input CreatePipelineInput {
   name: String!
   notebookPath: String
   tags: [String!]
+  version: CreatePipelineVersionInput
   workspaceSlug: String!
-  zipfile: String
 }
 
 """Represents the input for adding a recipient to a pipeline."""
@@ -1090,6 +1090,20 @@ type CreatePipelineTemplateVersionResult {
   errors: [CreatePipelineTemplateVersionError!]
   pipelineTemplate: PipelineTemplate
   success: Boolean!
+}
+
+"""
+Configures the first pipeline version, created atomically alongside the pipeline.
+Providing this sub-input signals that a first version should be created.
+"""
+input CreatePipelineVersionInput {
+  config: JSON
+  description: String
+  externalLink: URL
+  name: String
+  parameters: [ParameterInput!]
+  timeout: Int
+  zipfile: String!
 }
 
 """
@@ -2240,10 +2254,19 @@ type File {
   updatedAt: DateTime
 }
 
+"""
+How the `content` field of a FileNode (or WebappFileInput) is encoded over the wire.
+"""
+enum FileEncoding {
+  BASE64
+  TEXT
+}
+
 """Represents a file or directory node in a flattened structure."""
 type FileNode {
   autoSelect: Boolean!
   content: String
+  encoding: FileEncoding
   id: String!
   language: String
   lineCount: Int
@@ -3322,6 +3345,7 @@ type PinDatasetResult {
 
 """Represents a pipeline."""
 type Pipeline {
+  assistantConversations: [AssistantConversation!]!
   autoUpdateFromTemplate: Boolean!
   code: String!
   config: JSON!
@@ -5409,8 +5433,16 @@ type Webapp {
   workspace: Workspace!
 }
 
+"""
+A file to write to a webapp's git repository.
+
+`content` is interpreted according to `encoding`:
+  * TEXT (default)  — content is a UTF-8 string; suitable for hand-written or AI-generated code.
+  * BASE64          — content is base64-encoded raw bytes; required for binary files (images, fonts, …).
+"""
 input WebappFileInput {
   content: String!
+  encoding: FileEncoding = TEXT
   path: String!
 }
 
