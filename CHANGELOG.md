@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.21.1](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.21.0...v2.21.1) (2026-05-29)
+
+
+### Bug Fixes
+
+* pipeline push should rollback on failure (HEXA-1661) ([#391](https://github.com/BLSQ/openhexa-sdk-python/issues/391)) ([ad4e725](https://github.com/BLSQ/openhexa-sdk-python/commit/ad4e72586c6380349ae6251bcc09a07aa809fd6d))
+
 ## [2.21.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.20.2...v2.21.0) (2026-05-20)
 
 
