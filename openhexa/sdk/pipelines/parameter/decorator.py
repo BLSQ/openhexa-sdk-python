@@ -119,7 +119,7 @@ class Parameter:
             "directory": self.directory,
         }
         if isinstance(self.choices, ChoicesFromFile):
-            d["choices_from_file"] = self.choices.to_dict()
+            d["choicesFromFile"] = self.choices.to_dict()
         return d
 
     def _validate_single(self, value: typing.Any):
