@@ -611,6 +611,20 @@ def generate_zip_file(pipeline_directory_path: str | Path) -> io.BytesIO:
     return zip_file
 
 
+def _parameter_to_graphql_input(parameter) -> dict:
+    """Serialize a pipeline parameter into a GraphQL ``ParameterInput``.
+
+    ``Parameter.to_dict()`` uses snake_case keys for the parameter spec, but the
+    GraphQL ``ParameterInput`` type expects camelCase field names. Most keys are
+    single words and match in both conventions; ``choices_from_file`` is the
+    exception and must be renamed to ``choicesFromFile``.
+    """
+    spec = parameter.to_dict()
+    if "choices_from_file" in spec:
+        spec["choicesFromFile"] = spec.pop("choices_from_file")
+    return spec
+
+
 def upload_pipeline(
     target_pipeline_code: str,
     pipeline_directory_path: str | Path,
@@ -647,7 +661,7 @@ def upload_pipeline(
         "description": description,
         "externalLink": link,
         "zipfile": base64_content,
-        "parameters": [p.to_dict() for p in pipeline.parameters],
+        "parameters": [_parameter_to_graphql_input(p) for p in pipeline.parameters],
         "timeout": pipeline.timeout,
     }
 
