@@ -94,6 +94,10 @@ class Parameter:
         self.connection = connection
         self.directory = directory
         self.disables = list(disables) if disables else None
+        if self.disables and not isinstance(self.type, Boolean):
+            raise InvalidParameterError(
+                f"Only boolean parameters can use 'disables'. Parameter '{self.code}' is of type {self.type}."
+            )
 
         self._validate_default(default, multiple)
         self.default = default
@@ -215,10 +219,6 @@ def validate_parameters(parameters: list[Parameter]):
     for parameter in parameters:
         if not parameter.disables:
             continue
-        if not isinstance(parameter.type, Boolean):
-            raise InvalidParameterError(
-                f"Only boolean parameters can use 'disables'. Parameter '{parameter.code}' is of type {parameter.type}."
-            )
         for target_code in parameter.disables:
             if target_code == parameter.code:
                 raise InvalidParameterError(f"Parameter '{parameter.code}' cannot disable itself.")

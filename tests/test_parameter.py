@@ -443,12 +443,10 @@ def test_validate_parameters_disables_ok():
     validate_parameters([controller, data_input])
 
 
-def test_validate_parameters_disables_must_be_boolean():
-    """Only boolean parameters can use 'disables'."""
-    controller = Parameter("mode", type=str, disables=["data_input"])
-    data_input = Parameter("data_input", type=str)
+def test_disables_must_be_boolean():
+    """Only boolean parameters can use 'disables' — rejected at construction time."""
     with pytest.raises(InvalidParameterError):
-        validate_parameters([controller, data_input])
+        Parameter("mode", type=str, disables=["data_input"])
 
 
 def test_validate_parameters_disables_unknown_target():
