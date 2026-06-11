@@ -434,6 +434,19 @@ def test_parameter_disables_serialization():
     controller = Parameter("run_report_only", type=bool, disables=["data_input", "year"])
     assert controller.disables == ["data_input", "year"]
     assert controller.to_dict()["disables"] == ["data_input", "year"]
+    assert controller.to_dict()["disable_when"] is True
+
+
+def test_parameter_disables_dedup_preserves_order():
+    """Duplicate disables targets are removed while keeping declaration order."""
+    controller = Parameter("toggle", type=bool, disables=["b", "a", "b", "a"])
+    assert controller.disables == ["b", "a"]
+
+
+def test_disable_when_must_be_boolean():
+    """'disable_when' must be a boolean — rejected at construction time."""
+    with pytest.raises(InvalidParameterError):
+        Parameter("toggle", type=bool, disables=["x_param"], disable_when="yes")
 
 
 def test_validate_parameters_disables_ok():

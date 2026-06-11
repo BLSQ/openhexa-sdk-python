@@ -145,15 +145,15 @@ class Pipeline:
         """Return the codes of parameters disabled by an active controller in the given config.
 
         A controller is a boolean parameter declaring ``disables=[...]``. It is "active" when its effective
-        value (from the config, falling back to its default) is truthy. A parameter is disabled if any active
-        controller lists it.
+        value (from the config, falling back to its default) equals its ``disable_when`` (``True`` by default).
+        A parameter is disabled if any active controller lists it.
         """
         disabled_codes: set[str] = set()
         for parameter in self.parameters:
             if not parameter.disables:
                 continue
             effective_value = config.get(parameter.code, parameter.default)
-            if effective_value:
+            if bool(effective_value) == parameter.disable_when:
                 disabled_codes.update(parameter.disables)
         return disabled_codes
 

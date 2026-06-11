@@ -87,6 +87,32 @@ def test_pipeline_run_inactive_controller_still_validates():
         pipeline.run({"run_report_only": False})
 
 
+def test_pipeline_run_disable_when_false_disables_while_off():
+    """With disable_when=False, listed params are disabled while the controller is off (default)."""
+    pipeline_func = Mock()
+    controller = Parameter("enable_advanced", type=bool, default=False, disables=["tuning"], disable_when=False)
+    tuning = Parameter("tuning", type=str, required=True)
+    pipeline = Pipeline("pipeline", pipeline_func, [controller, tuning])
+
+    pipeline.run({"enable_advanced": False})
+
+    pipeline_func.assert_called_once_with(enable_advanced=False, tuning=None)
+
+
+def test_pipeline_run_disable_when_false_validates_while_on():
+    """With disable_when=False, listed params are required again once the controller is on."""
+    pipeline_func = Mock()
+    controller = Parameter("enable_advanced", type=bool, default=False, disables=["tuning"], disable_when=False)
+    tuning = Parameter("tuning", type=str, required=True)
+    pipeline = Pipeline("pipeline", pipeline_func, [controller, tuning])
+
+    with pytest.raises(ParameterValueError):
+        pipeline.run({"enable_advanced": True})
+
+    pipeline.run({"enable_advanced": True, "tuning": "fast"})
+    pipeline_func.assert_called_once_with(enable_advanced=True, tuning="fast")
+
+
 @patch.dict(
     os.environ,
     {"HEXA_SERVER_URL": "https://test.openhexa.org"},

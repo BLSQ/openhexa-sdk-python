@@ -52,6 +52,7 @@ class Parameter:
         multiple: bool = False,
         directory: str | None = None,
         disables: typing.Sequence[str] | None = None,
+        disable_when: bool = True,
     ):
         validate_pipeline_parameter_code(code)
         self.code = code
@@ -93,10 +94,15 @@ class Parameter:
         self.widget = widget
         self.connection = connection
         self.directory = directory
-        self.disables = list(disables) if disables else None
+        self.disables = list(dict.fromkeys(disables)) if disables else None
+        self.disable_when = disable_when
         if self.disables and not isinstance(self.type, Boolean):
             raise InvalidParameterError(
                 f"Only boolean parameters can use 'disables'. Parameter '{self.code}' is of type {self.type}."
+            )
+        if not isinstance(self.disable_when, bool):
+            raise InvalidParameterError(
+                f"'disable_when' must be a boolean for parameter '{self.code}' (got {disable_when!r})."
             )
 
         self._validate_default(default, multiple)
@@ -124,6 +130,7 @@ class Parameter:
             "multiple": self.multiple,
             "directory": self.directory,
             "disables": self.disables,
+            "disable_when": self.disable_when,
         }
         if isinstance(self.choices, ChoicesFromFile):
             d["choices_from_file"] = self.choices.to_dict()
@@ -277,6 +284,7 @@ def parameter(
     multiple: bool = False,
     directory: str | None = None,
     disables: typing.Sequence[str] | None = None,
+    disable_when: bool = True,
 ):
     """Decorate a pipeline function by attaching a parameter to it..
 
@@ -309,9 +317,13 @@ def parameter(
     directory : str, optional
         An optional parameter to force file selection to specific directory (only used for parameter type File). If the directory does not exist, it will be ignored.
     disables : sequence of str, optional
-        An optional list of parameter codes to disable when this (boolean) parameter is set to ``True``. Disabled
-        parameters are hidden/greyed out in the run form, their required check is skipped, and they are omitted from
-        the run config (the pipeline function receives their default value). Only boolean parameters can use this.
+        An optional list of parameter codes to disable when this (boolean) parameter's value matches ``disable_when``.
+        Disabled parameters are hidden/greyed out in the run form, their required check is skipped, and they are
+        omitted from the run config (the pipeline function receives their default value). Only boolean parameters can
+        use this.
+    disable_when : bool, default=True
+        The boolean value of this parameter that triggers the disabling of the parameters listed in ``disables``.
+        Use ``disable_when=False`` for an "enable" toggle (the listed parameters are disabled while it is unticked).
 
     Returns
     -------
@@ -336,6 +348,7 @@ def parameter(
                 multiple=multiple,
                 directory=directory,
                 disables=disables,
+                disable_when=disable_when,
             ),
         )
 
