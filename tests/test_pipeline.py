@@ -52,6 +52,41 @@ def test_pipeline_run_extra_config():
         pipeline.run({"arg1": "ok", "arg2": "extra"})
 
 
+def test_pipeline_run_disabled_required_parameter_skipped():
+    """A required parameter disabled by an active controller is skipped and receives its default."""
+    pipeline_func = Mock()
+    controller = Parameter("run_report_only", type=bool, default=False, disables=["data_input"])
+    data_input = Parameter("data_input", type=str, required=True)
+    pipeline = Pipeline("pipeline", pipeline_func, [controller, data_input])
+
+    pipeline.run({"run_report_only": True})
+
+    pipeline_func.assert_called_once_with(run_report_only=True, data_input=None)
+
+
+def test_pipeline_run_disabled_parameter_value_ignored():
+    """A dummy value provided for a disabled parameter is ignored in favor of its default."""
+    pipeline_func = Mock()
+    controller = Parameter("run_report_only", type=bool, default=False, disables=["year"])
+    year = Parameter("year", type=int, required=True, default=2024)
+    pipeline = Pipeline("pipeline", pipeline_func, [controller, year])
+
+    pipeline.run({"run_report_only": True, "year": 1})
+
+    pipeline_func.assert_called_once_with(run_report_only=True, year=2024)
+
+
+def test_pipeline_run_inactive_controller_still_validates():
+    """When the controller is not active, disabled parameters are still validated as usual."""
+    pipeline_func = Mock()
+    controller = Parameter("run_report_only", type=bool, default=False, disables=["data_input"])
+    data_input = Parameter("data_input", type=str, required=True)
+    pipeline = Pipeline("pipeline", pipeline_func, [controller, data_input])
+
+    with pytest.raises(ParameterValueError):
+        pipeline.run({"run_report_only": False})
+
+
 @patch.dict(
     os.environ,
     {"HEXA_SERVER_URL": "https://test.openhexa.org"},
