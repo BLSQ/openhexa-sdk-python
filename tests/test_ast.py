@@ -155,7 +155,7 @@ class AstTest(TestCase):
                             "required": True,
                             "directory": None,
                             "disables": None,
-                            "disable_when": True,
+                            "disableWhen": True,
                         }
                     ],
                     "timeout": None,
@@ -184,7 +184,7 @@ class AstTest(TestCase):
             pipeline = get_pipeline(tmpdirname)
             params = {p["code"]: p for p in pipeline.to_dict()["parameters"]}
             self.assertEqual(params["run_report_only"]["disables"], ["data_input"])
-            self.assertEqual(params["run_report_only"]["disable_when"], True)
+            self.assertEqual(params["run_report_only"]["disableWhen"], True)
             self.assertIsNone(params["data_input"]["disables"])
 
     def test_pipeline_with_disable_when_false(self):
@@ -208,7 +208,7 @@ class AstTest(TestCase):
             pipeline = get_pipeline(tmpdirname)
             params = {p["code"]: p for p in pipeline.to_dict()["parameters"]}
             self.assertEqual(params["enable_advanced"]["disables"], ["tuning"])
-            self.assertEqual(params["enable_advanced"]["disable_when"], False)
+            self.assertEqual(params["enable_advanced"]["disableWhen"], False)
 
     def test_pipeline_with_multiple_param(self):
         """The file contains a @pipeline decorator and a @parameter decorator with multiple=True."""
@@ -248,7 +248,7 @@ class AstTest(TestCase):
                             "required": True,
                             "directory": None,
                             "disables": None,
-                            "disable_when": True,
+                            "disableWhen": True,
                         }
                     ],
                     "timeout": None,
@@ -295,7 +295,7 @@ class AstTest(TestCase):
                             "required": False,
                             "directory": None,
                             "disables": None,
-                            "disable_when": True,
+                            "disableWhen": True,
                         }
                     ],
                     "timeout": None,
@@ -341,7 +341,7 @@ class AstTest(TestCase):
                             "required": True,
                             "directory": None,
                             "disables": None,
-                            "disable_when": True,
+                            "disableWhen": True,
                         }
                     ],
                     "timeout": None,
@@ -415,7 +415,7 @@ class AstTest(TestCase):
                             "required": True,
                             "directory": None,
                             "disables": None,
-                            "disable_when": True,
+                            "disableWhen": True,
                         }
                     ],
                     "timeout": None,
@@ -462,7 +462,7 @@ class AstTest(TestCase):
                             "required": True,
                             "directory": None,
                             "disables": None,
-                            "disable_when": True,
+                            "disableWhen": True,
                         },
                         {
                             "choices": ["a", "b"],
@@ -477,7 +477,7 @@ class AstTest(TestCase):
                             "required": True,
                             "directory": None,
                             "disables": None,
-                            "disable_when": True,
+                            "disableWhen": True,
                         },
                     ],
                     "timeout": None,
@@ -546,7 +546,7 @@ class AstTest(TestCase):
                             "required": True,
                             "directory": None,
                             "disables": None,
-                            "disable_when": True,
+                            "disableWhen": True,
                         },
                         {
                             "code": "data_element_ids",
@@ -561,7 +561,7 @@ class AstTest(TestCase):
                             "required": True,
                             "directory": None,
                             "disables": None,
-                            "disable_when": True,
+                            "disableWhen": True,
                         },
                     ],
                     "timeout": None,
@@ -612,7 +612,7 @@ class AstTest(TestCase):
                             "required": True,
                             "directory": None,
                             "disables": None,
-                            "disable_when": True,
+                            "disableWhen": True,
                         },
                         {
                             "code": "org_units",
@@ -627,7 +627,7 @@ class AstTest(TestCase):
                             "required": True,
                             "directory": None,
                             "disables": None,
-                            "disable_when": True,
+                            "disableWhen": True,
                         },
                         {
                             "code": "projects",
@@ -642,7 +642,7 @@ class AstTest(TestCase):
                             "required": True,
                             "directory": None,
                             "disables": None,
-                            "disable_when": True,
+                            "disableWhen": True,
                         },
                         {
                             "code": "forms",
@@ -657,7 +657,7 @@ class AstTest(TestCase):
                             "required": True,
                             "directory": None,
                             "disables": None,
-                            "disable_when": True,
+                            "disableWhen": True,
                         },
                     ],
                     "timeout": None,

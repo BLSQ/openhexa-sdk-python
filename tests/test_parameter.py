@@ -434,7 +434,7 @@ def test_parameter_disables_serialization():
     controller = Parameter("run_report_only", type=bool, disables=["data_input", "year"])
     assert controller.disables == ["data_input", "year"]
     assert controller.to_dict()["disables"] == ["data_input", "year"]
-    assert controller.to_dict()["disable_when"] is True
+    assert controller.to_dict()["disableWhen"] is True
 
 
 def test_parameter_disables_dedup_preserves_order():
