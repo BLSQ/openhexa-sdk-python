@@ -130,7 +130,7 @@ class Parameter:
             "multiple": self.multiple,
             "directory": self.directory,
             "disables": self.disables,
-            "disable_when": self.disable_when,
+            "disableWhen": self.disable_when,
         }
         if isinstance(self.choices, ChoicesFromFile):
             d["choices_from_file"] = self.choices.to_dict()
