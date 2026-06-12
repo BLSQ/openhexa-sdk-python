@@ -168,7 +168,7 @@ class TestAstStringShorthand(TestCase):
             p = get_pipeline(tmpdir)
             param_dict = p.to_dict()["parameters"][0]
             assert param_dict["choices"] is None
-            assert param_dict["choices_from_file"] == {"format": None, "path": "districts.csv", "column": None}
+            assert param_dict["choicesFromFile"] == {"format": None, "path": "districts.csv", "column": None}
 
     def test_ast_string_shorthand_json(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -177,7 +177,7 @@ class TestAstStringShorthand(TestCase):
                 "@parameter('district', type=str, choices='regions.json')",
             )
             p = get_pipeline(tmpdir)
-            assert p.to_dict()["parameters"][0]["choices_from_file"]["format"] is None
+            assert p.to_dict()["parameters"][0]["choicesFromFile"]["format"] is None
 
     def test_ast_string_shorthand_any_extension(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -186,7 +186,7 @@ class TestAstStringShorthand(TestCase):
                 "@parameter('district', type=str, choices='list.yml')",
             )
             p = get_pipeline(tmpdir)
-            assert p.to_dict()["parameters"][0]["choices_from_file"]["format"] is None
+            assert p.to_dict()["parameters"][0]["choicesFromFile"]["format"] is None
 
     def test_ast_string_shorthand_same_output_as_explicit(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -229,7 +229,7 @@ class TestAstStringShorthand(TestCase):
             p = get_pipeline(tmpdir)
             param_dict = p.to_dict()["parameters"][0]
             assert param_dict["choices"] == ["UG", "KE"]
-            assert "choices_from_file" not in param_dict
+            assert "choicesFromFile" not in param_dict
 
     def test_ast_string_no_extension_accepted(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -238,7 +238,7 @@ class TestAstStringShorthand(TestCase):
                 "@parameter('district', type=str, choices='nodot')",
             )
             p = get_pipeline(tmpdir)
-            assert p.to_dict()["parameters"][0]["choices_from_file"]["format"] is None
+            assert p.to_dict()["parameters"][0]["choicesFromFile"]["format"] is None
 
     def test_ast_string_any_extension_accepted(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -247,7 +247,7 @@ class TestAstStringShorthand(TestCase):
                 "@parameter('district', type=str, choices='file.xlsx')",
             )
             p = get_pipeline(tmpdir)
-            assert p.to_dict()["parameters"][0]["choices_from_file"]["format"] is None
+            assert p.to_dict()["parameters"][0]["choicesFromFile"]["format"] is None
 
 
 # ---------------------------------------------------------------------------
@@ -264,13 +264,13 @@ class TestParameterWithChoicesFromFile:
         p = Parameter(code="district", type=str, choices=ChoicesFromFile("districts.csv", column="code", format="csv"))
         d = p.to_dict()
         assert d["choices"] is None
-        assert d["choices_from_file"] == {"format": "csv", "path": "districts.csv", "column": "code"}
+        assert d["choicesFromFile"] == {"format": "csv", "path": "districts.csv", "column": "code"}
 
     def test_to_dict_no_file_choices_key_for_static_choices(self):
         p = Parameter(code="country", type=str, choices=["UG", "KE"])
         d = p.to_dict()
         assert d["choices"] == ["UG", "KE"]
-        assert "choices_from_file" not in d
+        assert "choicesFromFile" not in d
 
     def test_rejects_file_choices_on_bool_type(self):
         with pytest.raises(InvalidParameterError, match="don't accept choices"):
@@ -331,7 +331,7 @@ class TestAstChoicesFromFile(TestCase):
             p = get_pipeline(tmpdir)
             param_dict = p.to_dict()["parameters"][0]
             assert param_dict["choices"] is None
-            assert param_dict["choices_from_file"] == {"format": None, "path": "districts.csv", "column": None}
+            assert param_dict["choicesFromFile"] == {"format": None, "path": "districts.csv", "column": None}
 
     def test_file_choices_with_column(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -341,7 +341,7 @@ class TestAstChoicesFromFile(TestCase):
             )
             p = get_pipeline(tmpdir)
             param_dict = p.to_dict()["parameters"][0]
-            assert param_dict["choices_from_file"] == {"format": None, "path": "data/districts.csv", "column": "code"}
+            assert param_dict["choicesFromFile"] == {"format": None, "path": "data/districts.csv", "column": "code"}
 
     def test_file_choices_with_column_positional(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -351,7 +351,7 @@ class TestAstChoicesFromFile(TestCase):
             )
             p = get_pipeline(tmpdir)
             param_dict = p.to_dict()["parameters"][0]
-            assert param_dict["choices_from_file"] == {"format": None, "path": "data/districts.csv", "column": "code"}
+            assert param_dict["choicesFromFile"] == {"format": None, "path": "data/districts.csv", "column": "code"}
 
     def test_file_choices_explicit_format(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -361,7 +361,7 @@ class TestAstChoicesFromFile(TestCase):
             )
             p = get_pipeline(tmpdir)
             param_dict = p.to_dict()["parameters"][0]
-            assert param_dict["choices_from_file"]["format"] == "json"
+            assert param_dict["choicesFromFile"]["format"] == "json"
 
     def test_file_choices_format_none_by_default(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -371,7 +371,7 @@ class TestAstChoicesFromFile(TestCase):
             )
             p = get_pipeline(tmpdir)
             param_dict = p.to_dict()["parameters"][0]
-            assert param_dict["choices_from_file"]["format"] is None
+            assert param_dict["choicesFromFile"]["format"] is None
 
     def test_unsupported_call_in_choices_raises(self):
         with tempfile.TemporaryDirectory() as tmpdir:
