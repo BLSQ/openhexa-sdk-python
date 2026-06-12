@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.21.1](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.21.0...v2.21.1) (2026-06-12)
+
+
+### Bug Fixes
+
+* ChoicesFromFiles snake_case to camelCase ([#393](https://github.com/BLSQ/openhexa-sdk-python/issues/393)) ([0842110](https://github.com/BLSQ/openhexa-sdk-python/commit/0842110fcce6e79d4c0a56f69cb2249265382ec7))
+* pipeline push should rollback on failure (HEXA-1661) ([#391](https://github.com/BLSQ/openhexa-sdk-python/issues/391)) ([ad4e725](https://github.com/BLSQ/openhexa-sdk-python/commit/ad4e72586c6380349ae6251bcc09a07aa809fd6d))
+
+
+### Miscellaneous
+
+* **deps:** update rtcamp/action-slack-notify action to v2.4.0 ([#395](https://github.com/BLSQ/openhexa-sdk-python/issues/395)) ([222ebd1](https://github.com/BLSQ/openhexa-sdk-python/commit/222ebd1e141d2f3d2ffc145bd34c1104796bf0f9))
+* Update GraphQL schema ([#397](https://github.com/BLSQ/openhexa-sdk-python/issues/397)) ([2db4a52](https://github.com/BLSQ/openhexa-sdk-python/commit/2db4a52ff8cb584e032608bbb2bf35c77c853d63))
+
 ## [2.21.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.20.2...v2.21.0) (2026-05-20)
 
 
