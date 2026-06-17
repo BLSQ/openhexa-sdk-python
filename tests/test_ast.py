@@ -154,12 +154,61 @@ class AstTest(TestCase):
                             "help": "Param help",
                             "required": True,
                             "directory": None,
+                            "disables": None,
+                            "disableWhen": True,
                         }
                     ],
                     "timeout": None,
                     "functional_type": None,
                 },
             )
+
+    def test_pipeline_with_disables_param(self):
+        """The @parameter decorator's 'disables' list is parsed from the pipeline code."""
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            with open(f"{tmpdirname}/pipeline.py", "w") as f:
+                f.write(
+                    "\n".join(
+                        [
+                            "from openhexa.sdk.pipelines import pipeline, parameter",
+                            "",
+                            "@parameter('run_report_only', type=bool, default=False, disables=['data_input'])",
+                            "@parameter('data_input', type=str)",
+                            "@pipeline('Test pipeline')",
+                            "def test_pipeline():",
+                            "    pass",
+                            "",
+                        ]
+                    )
+                )
+            pipeline = get_pipeline(tmpdirname)
+            params = {p["code"]: p for p in pipeline.to_dict()["parameters"]}
+            self.assertEqual(params["run_report_only"]["disables"], ["data_input"])
+            self.assertEqual(params["run_report_only"]["disableWhen"], True)
+            self.assertIsNone(params["data_input"]["disables"])
+
+    def test_pipeline_with_disable_when_false(self):
+        """The @parameter decorator's 'disable_when' is parsed from the pipeline code."""
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            with open(f"{tmpdirname}/pipeline.py", "w") as f:
+                f.write(
+                    "\n".join(
+                        [
+                            "from openhexa.sdk.pipelines import pipeline, parameter",
+                            "",
+                            "@parameter('enable_advanced', type=bool, default=False, disables=['tuning'], disable_when=False)",
+                            "@parameter('tuning', type=str)",
+                            "@pipeline('Test pipeline')",
+                            "def test_pipeline():",
+                            "    pass",
+                            "",
+                        ]
+                    )
+                )
+            pipeline = get_pipeline(tmpdirname)
+            params = {p["code"]: p for p in pipeline.to_dict()["parameters"]}
+            self.assertEqual(params["enable_advanced"]["disables"], ["tuning"])
+            self.assertEqual(params["enable_advanced"]["disableWhen"], False)
 
     def test_pipeline_with_multiple_param(self):
         """The file contains a @pipeline decorator and a @parameter decorator with multiple=True."""
@@ -198,6 +247,8 @@ class AstTest(TestCase):
                             "help": "Param help",
                             "required": True,
                             "directory": None,
+                            "disables": None,
+                            "disableWhen": True,
                         }
                     ],
                     "timeout": None,
@@ -243,6 +294,8 @@ class AstTest(TestCase):
                             "help": "Dataset",
                             "required": False,
                             "directory": None,
+                            "disables": None,
+                            "disableWhen": True,
                         }
                     ],
                     "timeout": None,
@@ -287,6 +340,8 @@ class AstTest(TestCase):
                             "help": "Param help",
                             "required": True,
                             "directory": None,
+                            "disables": None,
+                            "disableWhen": True,
                         }
                     ],
                     "timeout": None,
@@ -359,6 +414,8 @@ class AstTest(TestCase):
                             "help": "Param help",
                             "required": True,
                             "directory": None,
+                            "disables": None,
+                            "disableWhen": True,
                         }
                     ],
                     "timeout": None,
@@ -404,6 +461,8 @@ class AstTest(TestCase):
                             "help": "Param help",
                             "required": True,
                             "directory": None,
+                            "disables": None,
+                            "disableWhen": True,
                         },
                         {
                             "choices": ["a", "b"],
@@ -417,6 +476,8 @@ class AstTest(TestCase):
                             "help": "Param help 2",
                             "required": True,
                             "directory": None,
+                            "disables": None,
+                            "disableWhen": True,
                         },
                     ],
                     "timeout": None,
@@ -484,6 +545,8 @@ class AstTest(TestCase):
                             "help": None,
                             "required": True,
                             "directory": None,
+                            "disables": None,
+                            "disableWhen": True,
                         },
                         {
                             "code": "data_element_ids",
@@ -497,6 +560,8 @@ class AstTest(TestCase):
                             "help": None,
                             "required": True,
                             "directory": None,
+                            "disables": None,
+                            "disableWhen": True,
                         },
                     ],
                     "timeout": None,
@@ -546,6 +611,8 @@ class AstTest(TestCase):
                             "help": None,
                             "required": True,
                             "directory": None,
+                            "disables": None,
+                            "disableWhen": True,
                         },
                         {
                             "code": "org_units",
@@ -559,6 +626,8 @@ class AstTest(TestCase):
                             "help": None,
                             "required": True,
                             "directory": None,
+                            "disables": None,
+                            "disableWhen": True,
                         },
                         {
                             "code": "projects",
@@ -572,6 +641,8 @@ class AstTest(TestCase):
                             "help": None,
                             "required": True,
                             "directory": None,
+                            "disables": None,
+                            "disableWhen": True,
                         },
                         {
                             "code": "forms",
@@ -585,6 +656,8 @@ class AstTest(TestCase):
                             "help": None,
                             "required": True,
                             "directory": None,
+                            "disables": None,
+                            "disableWhen": True,
                         },
                     ],
                     "timeout": None,

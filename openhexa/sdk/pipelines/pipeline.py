@@ -123,9 +123,16 @@ class Pipeline:
         ParameterValueError
             If the config contains invalid keys or parameter validation fails.
         """
+        disabled_codes = self._get_disabled_codes(config)
+
         validated_config = {}
         for parameter in self.parameters:
             value = config.pop(parameter.code, None)
+            if parameter.code in disabled_codes:
+                # Parameter is disabled by an active controller: ignore the (possibly dummy or missing)
+                # value, skip required/type validation, and fall back to its default.
+                validated_config[parameter.code] = parameter.default
+                continue
             validated_value = parameter.validate(value)
             validated_config[parameter.code] = validated_value
 
@@ -133,6 +140,22 @@ class Pipeline:
             raise ParameterValueError(f"The provided config contains invalid key(s): {', '.join(list(config.keys()))}")
 
         return validated_config
+
+    def _get_disabled_codes(self, config: dict[str, typing.Any]) -> set[str]:
+        """Return the codes of parameters disabled by an active controller in the given config.
+
+        A controller is a boolean parameter declaring ``disables=[...]``. It is "active" when its effective
+        value (from the config, falling back to its default) equals its ``disable_when`` (``True`` by default).
+        A parameter is disabled if any active controller lists it.
+        """
+        disabled_codes: set[str] = set()
+        for parameter in self.parameters:
+            if not parameter.disables:
+                continue
+            effective_value = config.get(parameter.code, parameter.default)
+            if bool(effective_value) == parameter.disable_when:
+                disabled_codes.update(parameter.disables)
+        return disabled_codes
 
     def _execute_tasks(self, pool):
         """Execute all tasks using the provided multiprocessing pool.

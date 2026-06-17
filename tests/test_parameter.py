@@ -36,6 +36,7 @@ from openhexa.sdk.pipelines.parameter import (
     SecretType,
     StringType,
     parameter,
+    validate_parameters,
 )
 from openhexa.utils import stringcase
 
@@ -422,3 +423,63 @@ def test_parameter_decorator():
     assert function_parameters[1].default == ["yo"]
     assert function_parameters[1].required is False
     assert function_parameters[1].multiple is True
+
+
+def test_parameter_disables_serialization():
+    """The 'disables' option is normalized to a list and serialized in to_dict."""
+    no_disables = Parameter("plain", type=str)
+    assert no_disables.disables is None
+    assert no_disables.to_dict()["disables"] is None
+
+    controller = Parameter("run_report_only", type=bool, disables=["data_input", "year"])
+    assert controller.disables == ["data_input", "year"]
+    assert controller.to_dict()["disables"] == ["data_input", "year"]
+    assert controller.to_dict()["disableWhen"] is True
+
+
+def test_parameter_disables_dedup_preserves_order():
+    """Duplicate disables targets are removed while keeping declaration order."""
+    controller = Parameter("toggle", type=bool, disables=["b", "a", "b", "a"])
+    assert controller.disables == ["b", "a"]
+
+
+def test_disable_when_must_be_boolean():
+    """'disable_when' must be a boolean — rejected at construction time."""
+    with pytest.raises(InvalidParameterError):
+        Parameter("toggle", type=bool, disables=["x_param"], disable_when="yes")
+
+
+def test_validate_parameters_disables_ok():
+    """A valid disabling setup passes validation."""
+    controller = Parameter("run_report_only", type=bool, default=False, disables=["data_input"])
+    data_input = Parameter("data_input", type=str, required=True)
+    validate_parameters([controller, data_input])
+
+
+def test_disables_must_be_boolean():
+    """Only boolean parameters can use 'disables' — rejected at construction time."""
+    with pytest.raises(InvalidParameterError):
+        Parameter("mode", type=str, disables=["data_input"])
+
+
+def test_validate_parameters_disables_unknown_target():
+    """Disabling a non-existing parameter raises."""
+    controller = Parameter("run_report_only", type=bool, disables=["does_not_exist"])
+    with pytest.raises(InvalidParameterError):
+        validate_parameters([controller])
+
+
+def test_validate_parameters_disables_self_reference():
+    """A parameter cannot disable itself."""
+    controller = Parameter("run_report_only", type=bool, disables=["run_report_only"])
+    with pytest.raises(InvalidParameterError):
+        validate_parameters([controller])
+
+
+def test_validate_parameters_disables_no_chaining():
+    """A disabling parameter cannot disable another disabling parameter."""
+    controller_a = Parameter("toggle_a", type=bool, disables=["toggle_b"])
+    controller_b = Parameter("toggle_b", type=bool, disables=["plain_c"])
+    plain_c = Parameter("plain_c", type=str)
+    with pytest.raises(InvalidParameterError):
+        validate_parameters([controller_a, controller_b, plain_c])

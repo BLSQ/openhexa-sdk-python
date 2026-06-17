@@ -316,6 +316,8 @@ def get_pipeline(pipeline_path: Path) -> Pipeline:
                     Argument("required", [ast.Constant], default_value=True),
                     Argument("multiple", [ast.Constant], default_value=False),
                     Argument("directory", [ast.Constant]),
+                    Argument("disables", [ast.List]),
+                    Argument("disable_when", [ast.Constant], default_value=True),
                 ),
             )
 
