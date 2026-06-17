@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.22.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.21.1...v2.22.0) (2026-06-17)
+
+
+### Features
+
+* Conditional parameters (HEXA-1687) ([#396](https://github.com/BLSQ/openhexa-sdk-python/issues/396)) ([eb581d7](https://github.com/BLSQ/openhexa-sdk-python/commit/eb581d765914a117c36304dfe969863f5a33f3db))
+
+
+### Bug Fixes
+
+* Schema compatibility check ([#398](https://github.com/BLSQ/openhexa-sdk-python/issues/398)) ([9638745](https://github.com/BLSQ/openhexa-sdk-python/commit/96387458c00567448eda5b1e5c5cbe70ad7c8fe4))
+
 ## [2.21.1](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.21.0...v2.21.1) (2026-06-12)
 
 
