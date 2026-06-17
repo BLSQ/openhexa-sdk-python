@@ -11,7 +11,8 @@ import sys
 from pathlib import Path
 
 import requests
-from graphql import build_client_schema, build_schema, get_introspection_query
+from graphql import GraphQLSchema, build_client_schema, build_schema, get_introspection_query
+from graphql.type import specified_directives
 from graphql.utilities import find_breaking_changes
 
 from openhexa.graphql import BUNDLED_SCHEMA_PATH
@@ -25,6 +26,19 @@ except ValueError:
     SCHEMA_RELATIVE_PATH = Path("openhexa/graphql/schema.generated.graphql")
 
 PRODUCTION_URL = "https://api.openhexa.org"
+
+SPEC_DIRECTIVE_NAMES = {directive.name for directive in specified_directives}
+
+
+def strip_spec_directives(schema: GraphQLSchema) -> GraphQLSchema:
+    """Remove built-in spec directives (@deprecated, @skip, ...) so the diff only covers directives the API owns.
+
+    Built-in directives vary with the graphql-core version on each side of the comparison
+    and produce false-positive breaking changes.
+    """
+    kwargs = schema.to_kwargs()
+    kwargs["directives"] = tuple(d for d in kwargs["directives"] if d.name not in SPEC_DIRECTIVE_NAMES)
+    return GraphQLSchema(**kwargs)
 
 
 def fetch_server_schema(graphql_url: str):
@@ -46,7 +60,10 @@ def main():
     stored_schema = build_schema(BUNDLED_SCHEMA_PATH.read_text(), assume_valid_sdl=True)
     server_schema = fetch_server_schema(f"{PRODUCTION_URL}/graphql/")
 
-    breaking_changes = find_breaking_changes(stored_schema, server_schema)
+    breaking_changes = find_breaking_changes(
+        strip_spec_directives(stored_schema),
+        strip_spec_directives(server_schema),
+    )
     if breaking_changes:
         print(f"⚠️  {len(breaking_changes)} breaking change(s) detected:")
         for change in breaking_changes:
