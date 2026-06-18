@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.22.1](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.22.0...v2.22.1) (2026-06-18)
+
+
+### Miscellaneous
+
+* **deps:** update conda-incubator/setup-miniconda action to v4 ([#382](https://github.com/BLSQ/openhexa-sdk-python/issues/382)) ([c708355](https://github.com/BLSQ/openhexa-sdk-python/commit/c70835572b07e96fc48ad4c030cde1754b0642d4))
+* Update GraphQL schema ([5e6df92](https://github.com/BLSQ/openhexa-sdk-python/commit/5e6df926185fa0e26d3688ded13ce6b13b882588))
+
 ## [2.22.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.21.1...v2.22.0) (2026-06-17)
 
 
