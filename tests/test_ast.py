@@ -154,8 +154,6 @@ class AstTest(TestCase):
                             "help": "Param help",
                             "required": True,
                             "directory": None,
-                            "disables": None,
-                            "disableWhen": True,
                         }
                     ],
                     "timeout": None,
@@ -185,7 +183,7 @@ class AstTest(TestCase):
             params = {p["code"]: p for p in pipeline.to_dict()["parameters"]}
             self.assertEqual(params["run_report_only"]["disables"], ["data_input"])
             self.assertEqual(params["run_report_only"]["disableWhen"], True)
-            self.assertIsNone(params["data_input"]["disables"])
+            self.assertNotIn("disables", params["data_input"])
 
     def test_pipeline_with_disable_when_false(self):
         """The @parameter decorator's 'disable_when' is parsed from the pipeline code."""
@@ -247,8 +245,6 @@ class AstTest(TestCase):
                             "help": "Param help",
                             "required": True,
                             "directory": None,
-                            "disables": None,
-                            "disableWhen": True,
                         }
                     ],
                     "timeout": None,
@@ -294,8 +290,6 @@ class AstTest(TestCase):
                             "help": "Dataset",
                             "required": False,
                             "directory": None,
-                            "disables": None,
-                            "disableWhen": True,
                         }
                     ],
                     "timeout": None,
@@ -340,8 +334,6 @@ class AstTest(TestCase):
                             "help": "Param help",
                             "required": True,
                             "directory": None,
-                            "disables": None,
-                            "disableWhen": True,
                         }
                     ],
                     "timeout": None,
@@ -414,8 +406,6 @@ class AstTest(TestCase):
                             "help": "Param help",
                             "required": True,
                             "directory": None,
-                            "disables": None,
-                            "disableWhen": True,
                         }
                     ],
                     "timeout": None,
@@ -461,8 +451,6 @@ class AstTest(TestCase):
                             "help": "Param help",
                             "required": True,
                             "directory": None,
-                            "disables": None,
-                            "disableWhen": True,
                         },
                         {
                             "choices": ["a", "b"],
@@ -476,8 +464,6 @@ class AstTest(TestCase):
                             "help": "Param help 2",
                             "required": True,
                             "directory": None,
-                            "disables": None,
-                            "disableWhen": True,
                         },
                     ],
                     "timeout": None,
@@ -545,8 +531,6 @@ class AstTest(TestCase):
                             "help": None,
                             "required": True,
                             "directory": None,
-                            "disables": None,
-                            "disableWhen": True,
                         },
                         {
                             "code": "data_element_ids",
@@ -560,8 +544,6 @@ class AstTest(TestCase):
                             "help": None,
                             "required": True,
                             "directory": None,
-                            "disables": None,
-                            "disableWhen": True,
                         },
                     ],
                     "timeout": None,
@@ -611,8 +593,6 @@ class AstTest(TestCase):
                             "help": None,
                             "required": True,
                             "directory": None,
-                            "disables": None,
-                            "disableWhen": True,
                         },
                         {
                             "code": "org_units",
@@ -626,8 +606,6 @@ class AstTest(TestCase):
                             "help": None,
                             "required": True,
                             "directory": None,
-                            "disables": None,
-                            "disableWhen": True,
                         },
                         {
                             "code": "projects",
@@ -641,8 +619,6 @@ class AstTest(TestCase):
                             "help": None,
                             "required": True,
                             "directory": None,
-                            "disables": None,
-                            "disableWhen": True,
                         },
                         {
                             "code": "forms",
@@ -656,8 +632,6 @@ class AstTest(TestCase):
                             "help": None,
                             "required": True,
                             "directory": None,
-                            "disables": None,
-                            "disableWhen": True,
                         },
                     ],
                     "timeout": None,
