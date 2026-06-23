@@ -129,11 +129,15 @@ class Parameter:
             "required": self.required,
             "multiple": self.multiple,
             "directory": self.directory,
-            "disables": self.disables,
-            "disableWhen": self.disable_when,
         }
         if isinstance(self.choices, ChoicesFromFile):
             d["choicesFromFile"] = self.choices.to_dict()
+        # Only emit the conditional-parameters fields when the feature is actually used: the
+        # backend ``ParameterInput`` type does not define them, and GraphQL rejects the whole
+        # mutation on any unknown input field (see HEXA-1687).
+        if self.disables:
+            d["disables"] = self.disables
+            d["disableWhen"] = self.disable_when
         return d
 
     def _validate_single(self, value: typing.Any):

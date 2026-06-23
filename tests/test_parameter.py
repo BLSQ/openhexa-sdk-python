@@ -18,6 +18,7 @@ from openhexa.sdk import (
 )
 from openhexa.sdk.pipelines.parameter import (
     Boolean,
+    ChoicesFromFile,
     CustomConnectionType,
     DatasetType,
     DHIS2ConnectionType,
@@ -426,15 +427,74 @@ def test_parameter_decorator():
 
 
 def test_parameter_disables_serialization():
-    """The 'disables' option is normalized to a list and serialized in to_dict."""
+    """The 'disables'/'disableWhen' keys are only serialized for controller parameters.
+
+    The backend ``ParameterInput`` GraphQL type does not define these fields, so emitting
+    them for every parameter breaks ``uploadPipeline``. They must be omitted entirely unless
+    the parameter actually uses the conditional-parameters feature.
+    """
     no_disables = Parameter("plain", type=str)
     assert no_disables.disables is None
-    assert no_disables.to_dict()["disables"] is None
+    assert "disables" not in no_disables.to_dict()
+    assert "disableWhen" not in no_disables.to_dict()
 
     controller = Parameter("run_report_only", type=bool, disables=["data_input", "year"])
     assert controller.disables == ["data_input", "year"]
     assert controller.to_dict()["disables"] == ["data_input", "year"]
     assert controller.to_dict()["disableWhen"] is True
+
+
+def _parameter_input_fields() -> set[str]:
+    """Field names defined by the backend ``ParameterInput`` GraphQL input type.
+
+    Parsed from the schema bundled in the SDK (kept in sync with the server by
+    ``ariadne-codegen``), which is exactly the contract ``uploadPipeline`` validates against.
+    """
+    from graphql import build_schema
+
+    from openhexa.graphql import BUNDLED_SCHEMA_PATH
+
+    schema = build_schema(BUNDLED_SCHEMA_PATH.read_text(), assume_valid_sdl=True)
+    return set(schema.type_map["ParameterInput"].fields.keys())
+
+
+def test_to_dict_baseline_keys_are_valid_parameter_input_fields():
+    """Guard against future ``to_dict()`` regressions.
+
+    Every key emitted by a plain ``Parameter.to_dict()`` must be a field defined by the backend
+    ``ParameterInput`` type. GraphQL rejects the entire ``uploadPipeline`` mutation on any unknown
+    input field, so an *unconditional* new key the schema does not define breaks every pipeline
+    push — exactly the HEXA-1687 regression this test exists to prevent. Adding a new always-on
+    field here must go hand in hand with the backend schema change that defines it.
+    """
+    emitted = set(Parameter("plain", type=str).to_dict())
+    unknown = emitted - _parameter_input_fields()
+    assert not unknown, f"to_dict() emits keys not defined by ParameterInput: {sorted(unknown)}"
+
+
+def test_to_dict_choices_from_file_key_is_valid_parameter_input_field():
+    """The conditionally-emitted ``choicesFromFile`` key must also exist in ``ParameterInput``."""
+    emitted = set(Parameter("district", type=str, choices=ChoicesFromFile("districts.csv")).to_dict())
+    unknown = emitted - _parameter_input_fields()
+    assert not unknown, f"to_dict() emits keys not defined by ParameterInput: {sorted(unknown)}"
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason="Backend ParameterInput does not yet define 'disables'/'disableWhen' (HEXA-1687 "
+    "backend pending). Pipelines using conditional parameters cannot be pushed until the server "
+    "schema is regenerated. Remove this marker once it is — strict xfail will flag the XPASS.",
+)
+def test_to_dict_controller_keys_are_valid_parameter_input_fields():
+    """Document that conditional-parameter controllers are not yet pushable.
+
+    A controller emits ``disables``/``disableWhen``, which the current backend ``ParameterInput``
+    rejects. When the server schema gains these fields (and the bundled schema is regenerated),
+    this xfail flips to an unexpected pass and the strict marker fails the suite, prompting removal.
+    """
+    emitted = set(Parameter("controller", type=bool, disables=["plain"]).to_dict())
+    unknown = emitted - _parameter_input_fields()
+    assert not unknown, f"to_dict() emits keys not defined by ParameterInput: {sorted(unknown)}"
 
 
 def test_parameter_disables_dedup_preserves_order():
