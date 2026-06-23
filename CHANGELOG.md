@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.22.2](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.22.1...v2.22.2) (2026-06-23)
+
+
+### Bug Fixes
+
+* conditional params safeguard ([#402](https://github.com/BLSQ/openhexa-sdk-python/issues/402)) ([b4ffc79](https://github.com/BLSQ/openhexa-sdk-python/commit/b4ffc79dd20c2f1a7ff0250cc7e0e05a75ca4cbb))
+
 ## [2.22.1](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.22.0...v2.22.1) (2026-06-18)
 
 
