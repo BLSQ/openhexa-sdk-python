@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Python
         uses: actions/setup-python@v6
@@ -29,7 +29,7 @@ jobs:
         python-version: [ "3.11", "3.12", "3.13", "3.14"]
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v6
@@ -46,7 +46,7 @@ jobs:
     name: Conda build check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup Miniconda
         uses: conda-incubator/setup-miniconda@v4
