@@ -479,19 +479,8 @@ def test_to_dict_choices_from_file_key_is_valid_parameter_input_field():
     assert not unknown, f"to_dict() emits keys not defined by ParameterInput: {sorted(unknown)}"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="Backend ParameterInput does not yet define 'disables'/'disableWhen' (HEXA-1687 "
-    "backend pending). Pipelines using conditional parameters cannot be pushed until the server "
-    "schema is regenerated. Remove this marker once it is — strict xfail will flag the XPASS.",
-)
 def test_to_dict_controller_keys_are_valid_parameter_input_fields():
-    """Document that conditional-parameter controllers are not yet pushable.
-
-    A controller emits ``disables``/``disableWhen``, which the current backend ``ParameterInput``
-    rejects. When the server schema gains these fields (and the bundled schema is regenerated),
-    this xfail flips to an unexpected pass and the strict marker fails the suite, prompting removal.
-    """
+    """Conditional-parameter controllers emit keys the backend accepts."""
     emitted = set(Parameter("controller", type=bool, disables=["plain"]).to_dict())
     unknown = emitted - _parameter_input_fields()
     assert not unknown, f"to_dict() emits keys not defined by ParameterInput: {sorted(unknown)}"
