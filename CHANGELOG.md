@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.22.3](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.22.2...v2.22.3) (2026-07-10)
+
+
+### Bug Fixes
+
+* update GraphQL schema ([#406](https://github.com/BLSQ/openhexa-sdk-python/issues/406)) ([a8ef836](https://github.com/BLSQ/openhexa-sdk-python/commit/a8ef8366c5fccef75360ab2d01e15a6e0dd63ad8))
+
+
+### Miscellaneous
+
+* **deps:** update actions/checkout action to v7 ([#401](https://github.com/BLSQ/openhexa-sdk-python/issues/401)) ([014b646](https://github.com/BLSQ/openhexa-sdk-python/commit/014b646be257d2312c14e6c44242e016e0b7b72b))
+
 ## [2.22.2](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.22.1...v2.22.2) (2026-06-23)
 
 
