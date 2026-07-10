@@ -18,6 +18,7 @@ from .enums import (
     PermissionMode,
     PipelineFunctionalType,
     PipelineNotificationLevel,
+    PipelineParameterChoicesFileFormat,
     WebappOperationScope,
     WorkspaceMembershipRole,
 )
@@ -199,9 +200,14 @@ class CreatePipelineTemplateVersionInput(BaseModel):
     code: Optional[str] = None
     config: Optional[str] = None
     description: Optional[str] = None
+    documentation: Optional[str] = None
+    extract_documentation_from_readme: Optional[bool] = Field(
+        alias="extractDocumentationFromReadme", default=None
+    )
     name: Optional[str] = None
     pipeline_id: Any = Field(alias="pipelineId")
     pipeline_version_id: Any = Field(alias="pipelineVersionId")
+    version_name: Optional[str] = Field(alias="versionName", default=None)
     workspace_slug: str = Field(alias="workspaceSlug")
 
 
@@ -209,10 +215,11 @@ class CreatePipelineVersionInput(BaseModel):
     config: Optional[Any] = None
     description: Optional[str] = None
     external_link: Optional[Any] = Field(alias="externalLink", default=None)
+    files: Optional[List["PipelineFileInput"]] = None
     name: Optional[str] = None
     parameters: Optional[List["ParameterInput"]] = None
     timeout: Optional[int] = None
-    zipfile: str
+    zipfile: Optional[str] = None
 
 
 class CreateTeamInput(BaseModel):
@@ -367,6 +374,14 @@ class DisableTwoFactorInput(BaseModel):
     token: str
 
 
+class EditWebappFileInput(BaseModel):
+    id: Any
+    new_string: str = Field(alias="newString")
+    old_string: str = Field(alias="oldString")
+    path: str
+    replace_all: Optional[bool] = Field(alias="replaceAll", default=None)
+
+
 class EnableTwoFactorInput(BaseModel):
     email: Optional[str] = None
 
@@ -456,10 +471,15 @@ class OrganizationInput(BaseModel):
 
 class ParameterInput(BaseModel):
     choices: Optional[List[Any]] = None
+    choices_from_file: Optional["PipelineParameterChoicesFromFileInput"] = Field(
+        alias="choicesFromFile", default=None
+    )
     code: str
     connection: Optional[str] = None
     default: Optional[Any] = None
     directory: Optional[str] = None
+    disable_when: Optional[bool] = Field(alias="disableWhen", default=None)
+    disables: Optional[List[str]] = None
     help: Optional[str] = None
     multiple: Optional[bool] = None
     name: Optional[str] = None
@@ -471,6 +491,18 @@ class ParameterInput(BaseModel):
 class PinDatasetInput(BaseModel):
     link_id: str = Field(alias="linkId")
     pinned: bool
+
+
+class PipelineFileInput(BaseModel):
+    content: str
+    encoding: Optional[FileEncoding] = FileEncoding.TEXT
+    path: str
+
+
+class PipelineParameterChoicesFromFileInput(BaseModel):
+    column: Optional[str] = None
+    format: Optional[PipelineParameterChoicesFileFormat] = None
+    path: str
 
 
 class PipelineTokenInput(BaseModel):
@@ -550,6 +582,7 @@ class ResourceCountsInput(BaseModel):
     max_pipeline_timeout: Optional[int] = Field(
         alias="maxPipelineTimeout", default=None
     )
+    monthly_ai_budget: Optional[int] = Field(alias="monthlyAiBudget", default=None)
     notebook_profile: Optional[str] = Field(alias="notebookProfile", default=None)
     pipeline_cpu_limit: Optional[str] = Field(alias="pipelineCpuLimit", default=None)
     pipeline_memory_limit: Optional[str] = Field(
@@ -707,6 +740,14 @@ class UpdateMembershipInput(BaseModel):
     role: MembershipRole
 
 
+class UpdateOrganizationAiSettingsInput(BaseModel):
+    api_key: Optional[str] = Field(alias="apiKey", default=None)
+    enabled: Optional[bool] = None
+    model: Optional[str] = None
+    organization_id: Any = Field(alias="organizationId")
+    provider: Optional[str] = None
+
+
 class UpdateOrganizationInput(BaseModel):
     id: Any
     logo: Optional[str] = None
@@ -785,14 +826,9 @@ class UpdateTemplateInput(BaseModel):
 
 class UpdateTemplateVersionInput(BaseModel):
     changelog: Optional[str] = None
+    documentation: Optional[str] = None
     id: Any
-
-
-class UpdateUserAiSettingsInput(BaseModel):
-    api_key: Optional[str] = Field(alias="apiKey", default=None)
-    enabled: Optional[bool] = None
-    model: Optional[str] = None
-    provider: Optional[str] = None
+    name: Optional[str] = None
 
 
 class UpdateUserInput(BaseModel):
@@ -807,6 +843,7 @@ class UpdateWebappInput(BaseModel):
     )
     description: Optional[str] = None
     files: Optional[List["WebappFileInput"]] = None
+    files_to_delete: Optional[List[str]] = Field(alias="filesToDelete", default=None)
     icon: Optional[str] = None
     id: Any
     is_public: Optional[bool] = Field(alias="isPublic", default=None)
@@ -846,6 +883,7 @@ class UploadPipelineInput(BaseModel):
     config: Optional[Any] = None
     description: Optional[str] = None
     external_link: Optional[Any] = Field(alias="externalLink", default=None)
+    files: Optional[List["PipelineFileInput"]] = None
     functional_type: Optional[PipelineFunctionalType] = Field(
         alias="functionalType", default=None
     )
@@ -855,7 +893,7 @@ class UploadPipelineInput(BaseModel):
     tags: Optional[List[str]] = None
     timeout: Optional[int] = None
     workspace_slug: str = Field(alias="workspaceSlug")
-    zipfile: str
+    zipfile: Optional[str] = None
 
 
 class VerifyDeviceInput(BaseModel):
@@ -902,6 +940,7 @@ CreatePipelineVersionInput.model_rebuild()
 CreateWebappInput.model_rebuild()
 CreateWorkspaceInput.model_rebuild()
 InviteOrganizationMemberInput.model_rebuild()
+ParameterInput.model_rebuild()
 TestConnectionInput.model_rebuild()
 UpdateConnectionInput.model_rebuild()
 UpdateDAGInput.model_rebuild()

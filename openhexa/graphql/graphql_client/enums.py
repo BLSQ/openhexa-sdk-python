@@ -95,6 +95,7 @@ class AiModel(str, Enum):
 
 class AiProvider(str, Enum):
     anthropic = "anthropic"
+    managed = "managed"
 
 
 class ApproveAccessmodAccessRequestError(str, Enum):
@@ -104,6 +105,22 @@ class ApproveAccessmodAccessRequestError(str, Enum):
 class ArchiveWorkspaceError(str, Enum):
     NOT_FOUND = "NOT_FOUND"
     PERMISSION_DENIED = "PERMISSION_DENIED"
+
+
+class AssistantToolName(str, Enum):
+    create_pipeline = "create_pipeline"
+    get_dataset = "get_dataset"
+    get_help_or_doc = "get_help_or_doc"
+    get_pipeline = "get_pipeline"
+    get_static_webapp_file = "get_static_webapp_file"
+    list_connections = "list_connections"
+    list_datasets = "list_datasets"
+    list_files = "list_files"
+    list_pipelines = "list_pipelines"
+    preview_dataset_file = "preview_dataset_file"
+    propose_pipeline_version = "propose_pipeline_version"
+    propose_webapp_version = "propose_webapp_version"
+    read_file = "read_file"
 
 
 class BucketObjectType(str, Enum):
@@ -439,9 +456,29 @@ class DisableTwoFactorError(str, Enum):
     NOT_ENABLED = "NOT_ENABLED"
 
 
+class EditWebappFileError(str, Enum):
+    BINARY_FILE = "BINARY_FILE"
+    NO_CHANGE = "NO_CHANGE"
+    PATH_NOT_FOUND = "PATH_NOT_FOUND"
+    PERMISSION_DENIED = "PERMISSION_DENIED"
+    SAVE_FAILED = "SAVE_FAILED"
+    STRING_NOT_FOUND = "STRING_NOT_FOUND"
+    STRING_NOT_UNIQUE = "STRING_NOT_UNIQUE"
+    TYPE_MISMATCH = "TYPE_MISMATCH"
+    WEBAPPS_NOT_CONFIGURED = "WEBAPPS_NOT_CONFIGURED"
+    WEBAPP_NOT_FOUND = "WEBAPP_NOT_FOUND"
+
+
 class EnableTwoFactorError(str, Enum):
     ALREADY_ENABLED = "ALREADY_ENABLED"
     EMAIL_MISMATCH = "EMAIL_MISMATCH"
+
+
+class ExecuteSQLError(str, Enum):
+    MULTIPLE_STATEMENTS = "MULTIPLE_STATEMENTS"
+    PERMISSION_DENIED = "PERMISSION_DENIED"
+    QUERY_ERROR = "QUERY_ERROR"
+    QUERY_TIMEOUT = "QUERY_TIMEOUT"
 
 
 class FileEncoding(str, Enum):
@@ -542,6 +579,7 @@ class LinkDatasetError(str, Enum):
 
 class LinkedObjectType(str, Enum):
     Pipeline = "Pipeline"
+    StaticWebapp = "StaticWebapp"
 
 
 class LoginError(str, Enum):
@@ -628,6 +666,7 @@ class PipelineError(str, Enum):
     FILE_NOT_FOUND = "FILE_NOT_FOUND"
     INVALID_CONFIG = "INVALID_CONFIG"
     INVALID_TIMEOUT_VALUE = "INVALID_TIMEOUT_VALUE"
+    INVALID_VERSION_FILES = "INVALID_VERSION_FILES"
     PERMISSION_DENIED = "PERMISSION_DENIED"
     PIPELINE_ALREADY_COMPLETED = "PIPELINE_ALREADY_COMPLETED"
     PIPELINE_ALREADY_STOPPED = "PIPELINE_ALREADY_STOPPED"
@@ -653,10 +692,19 @@ class PipelineNotificationLevel(str, Enum):
 
 
 class PipelineOrderBy(str, Enum):
+    CREATED_AT_ASC = "CREATED_AT_ASC"
+    CREATED_AT_DESC = "CREATED_AT_DESC"
     LAST_RUN_DATE_ASC = "LAST_RUN_DATE_ASC"
     LAST_RUN_DATE_DESC = "LAST_RUN_DATE_DESC"
     NAME_ASC = "NAME_ASC"
     NAME_DESC = "NAME_DESC"
+
+
+class PipelineParameterChoicesFileFormat(str, Enum):
+    csv = "csv"
+    json = "json"
+    yaml = "yaml"
+    yml = "yml"
 
 
 class PipelineRecipientError(str, Enum):
@@ -733,6 +781,13 @@ class ReadFileContentError(str, Enum):
     PERMISSION_DENIED = "PERMISSION_DENIED"
 
 
+class ReadWebappFileError(str, Enum):
+    BINARY_FILE = "BINARY_FILE"
+    PATH_NOT_FOUND = "PATH_NOT_FOUND"
+    WEBAPPS_NOT_CONFIGURED = "WEBAPPS_NOT_CONFIGURED"
+    WEBAPP_NOT_FOUND = "WEBAPP_NOT_FOUND"
+
+
 class RegisterError(str, Enum):
     ALREADY_LOGGED_IN = "ALREADY_LOGGED_IN"
     EMAIL_TAKEN = "EMAIL_TAKEN"
@@ -762,6 +817,11 @@ class ResendOrganizationInvitationError(str, Enum):
 
 class ResendWorkspaceInvitationError(str, Enum):
     INVITATION_NOT_FOUND = "INVITATION_NOT_FOUND"
+    PERMISSION_DENIED = "PERMISSION_DENIED"
+
+
+class ResolveAssistantProposalError(str, Enum):
+    NOT_FOUND = "NOT_FOUND"
     PERMISSION_DENIED = "PERMISSION_DENIED"
 
 
@@ -853,6 +913,12 @@ class UpdateMembershipError(str, Enum):
     PERMISSION_DENIED = "PERMISSION_DENIED"
 
 
+class UpdateOrganizationAiSettingsError(str, Enum):
+    INCOMPLETE_CONFIG = "INCOMPLETE_CONFIG"
+    NOT_FOUND = "NOT_FOUND"
+    PERMISSION_DENIED = "PERMISSION_DENIED"
+
+
 class UpdateOrganizationError(str, Enum):
     INVALID_LOGO = "INVALID_LOGO"
     INVALID_SHORT_NAME = "INVALID_SHORT_NAME"
@@ -881,6 +947,7 @@ class UpdatePipelineError(str, Enum):
 
 
 class UpdatePipelineVersionError(str, Enum):
+    INVALID_CONFIG = "INVALID_CONFIG"
     NOT_FOUND = "NOT_FOUND"
     PERMISSION_DENIED = "PERMISSION_DENIED"
 
@@ -899,11 +966,6 @@ class UpdateTemplateError(str, Enum):
 
 class UpdateTemplateVersionError(str, Enum):
     NOT_FOUND = "NOT_FOUND"
-    PERMISSION_DENIED = "PERMISSION_DENIED"
-
-
-class UpdateUserAiSettingsError(str, Enum):
-    INCOMPLETE_CONFIG = "INCOMPLETE_CONFIG"
     PERMISSION_DENIED = "PERMISSION_DENIED"
 
 
