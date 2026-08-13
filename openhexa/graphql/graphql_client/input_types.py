@@ -222,6 +222,18 @@ class CreatePipelineVersionInput(BaseModel):
     zipfile: Optional[str] = None
 
 
+class CreateSavedQueryInput(BaseModel):
+    content: str
+    description: Optional[str] = None
+    name: str
+    workspace_slug: str = Field(alias="workspaceSlug")
+
+
+class CreateSelfHostedOrganizationInput(BaseModel):
+    name: str
+    short_name: Optional[str] = Field(alias="shortName", default=None)
+
+
 class CreateTeamInput(BaseModel):
     name: str
 
@@ -244,7 +256,7 @@ class CreateWorkspaceInput(BaseModel):
     description: Optional[str] = None
     load_sample_data: Optional[bool] = Field(alias="loadSampleData", default=None)
     name: str
-    organization_id: Optional[Any] = Field(alias="organizationId", default=None)
+    organization_id: Any = Field(alias="organizationId")
     slug: Optional[str] = None
 
 
@@ -335,6 +347,10 @@ class DeletePipelineTemplateInput(BaseModel):
 
 class DeletePipelineVersionInput(BaseModel):
     id: Any
+
+
+class DeleteSavedQueryInput(BaseModel):
+    id: str
 
 
 class DeleteTeamInput(BaseModel):
@@ -805,6 +821,13 @@ class UpdatePipelineVersionInput(BaseModel):
     description: Optional[str] = None
     external_link: Optional[Any] = Field(alias="externalLink", default=None)
     id: Any
+    name: Optional[str] = None
+
+
+class UpdateSavedQueryInput(BaseModel):
+    content: Optional[str] = None
+    description: Optional[str] = None
+    id: str
     name: Optional[str] = None
 
 

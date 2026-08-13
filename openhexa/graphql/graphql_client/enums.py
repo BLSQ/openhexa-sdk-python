@@ -110,6 +110,8 @@ class ArchiveWorkspaceError(str, Enum):
 class AssistantToolName(str, Enum):
     create_pipeline = "create_pipeline"
     get_dataset = "get_dataset"
+    get_db_schema = "get_db_schema"
+    get_db_table_schema = "get_db_table_schema"
     get_help_or_doc = "get_help_or_doc"
     get_pipeline = "get_pipeline"
     get_static_webapp_file = "get_static_webapp_file"
@@ -241,6 +243,11 @@ class CreatePipelineTemplateVersionError(str, Enum):
     PIPELINE_NOT_FOUND = "PIPELINE_NOT_FOUND"
     PIPELINE_VERSION_NOT_FOUND = "PIPELINE_VERSION_NOT_FOUND"
     UNKNOWN_ERROR = "UNKNOWN_ERROR"
+    WORKSPACE_NOT_FOUND = "WORKSPACE_NOT_FOUND"
+
+
+class CreateSavedQueryError(str, Enum):
+    PERMISSION_DENIED = "PERMISSION_DENIED"
     WORKSPACE_NOT_FOUND = "WORKSPACE_NOT_FOUND"
 
 
@@ -410,6 +417,11 @@ class DeletePipelineVersionError(str, Enum):
     PIPELINE_VERSION_NOT_FOUND = "PIPELINE_VERSION_NOT_FOUND"
 
 
+class DeleteSavedQueryError(str, Enum):
+    PERMISSION_DENIED = "PERMISSION_DENIED"
+    SAVED_QUERY_NOT_FOUND = "SAVED_QUERY_NOT_FOUND"
+
+
 class DeleteTeamError(str, Enum):
     NOT_FOUND = "NOT_FOUND"
     PERMISSION_DENIED = "PERMISSION_DENIED"
@@ -479,6 +491,11 @@ class ExecuteSQLError(str, Enum):
     PERMISSION_DENIED = "PERMISSION_DENIED"
     QUERY_ERROR = "QUERY_ERROR"
     QUERY_TIMEOUT = "QUERY_TIMEOUT"
+
+
+class ExecuteSQLOrigin(str, Enum):
+    DATA_STUDIO = "DATA_STUDIO"
+    OTHER = "OTHER"
 
 
 class FileEncoding(str, Enum):
@@ -830,6 +847,13 @@ class RunDAGError(str, Enum):
     INVALID_CONFIG = "INVALID_CONFIG"
 
 
+class SavedQueryOrderBy(str, Enum):
+    NAME_ASC = "NAME_ASC"
+    NAME_DESC = "NAME_DESC"
+    UPDATED_AT_ASC = "UPDATED_AT_ASC"
+    UPDATED_AT_DESC = "UPDATED_AT_DESC"
+
+
 class SetDAGRunFavoriteError(str, Enum):
     INVALID = "INVALID"
     MISSING_LABEL = "MISSING_LABEL"
@@ -950,6 +974,11 @@ class UpdatePipelineVersionError(str, Enum):
     INVALID_CONFIG = "INVALID_CONFIG"
     NOT_FOUND = "NOT_FOUND"
     PERMISSION_DENIED = "PERMISSION_DENIED"
+
+
+class UpdateSavedQueryError(str, Enum):
+    PERMISSION_DENIED = "PERMISSION_DENIED"
+    SAVED_QUERY_NOT_FOUND = "SAVED_QUERY_NOT_FOUND"
 
 
 class UpdateTeamError(str, Enum):
