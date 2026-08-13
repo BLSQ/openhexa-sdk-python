@@ -477,6 +477,8 @@ registry (`hexa.assistant.agents.all_agent_tool_names`) — a unit test enforces
 enum AssistantToolName {
   create_pipeline
   get_dataset
+  get_db_schema
+  get_db_table_schema
   get_help_or_doc
   get_pipeline
   get_static_webapp_file
@@ -1169,6 +1171,42 @@ input CreatePipelineVersionInput {
   zipfile: String
 }
 
+"""Errors that can occur when creating a saved query."""
+enum CreateSavedQueryError {
+  PERMISSION_DENIED
+  WORKSPACE_NOT_FOUND
+}
+
+"""Input for creating a saved query."""
+input CreateSavedQueryInput {
+  content: String!
+  description: String
+  name: String!
+  workspaceSlug: String!
+}
+
+"""Result of creating a saved query."""
+type CreateSavedQueryResult {
+  errors: [CreateSavedQueryError!]!
+  savedQuery: SavedQuery
+  success: Boolean!
+}
+
+"""
+The CreateSelfHostedOrganizationInput type represents the input for the createSelfHostedOrganization mutation.
+Used by superusers to provision a subscription-less organization (self-hosted mode).
+"""
+input CreateSelfHostedOrganizationInput {
+  """The name of the organization."""
+  name: String!
+
+  """
+  The short name of the organization (max 5 uppercase letters).
+  If not provided, it will be auto-generated from the name.
+  """
+  shortName: String
+}
+
 """
 The CreateTeamError enum represents the possible errors that can occur during the createTeam mutation.
 """
@@ -1264,7 +1302,7 @@ input CreateWorkspaceInput {
   description: String
   loadSampleData: Boolean
   name: String!
-  organizationId: UUID
+  organizationId: UUID!
   slug: String
 }
 
@@ -1444,10 +1482,10 @@ type DHIS2QueryResultPage {
 
 type Database {
   credentials: DatabaseCredentials
-  executeSQL(maxRows: Int, query: String!): ExecuteSQLResult!
+  executeSQL(maxRows: Int, origin: ExecuteSQLOrigin, query: String!): ExecuteSQLResult!
   readOnlyCredentials: DatabaseCredentials
   table(name: String!): DatabaseTable
-  tables(page: Int, perPage: Int): DatabaseTablePage!
+  tables(page: Int, perPage: Int, withColumns: Boolean = false, withCounts: Boolean = true): DatabaseTablePage!
 }
 
 type DatabaseCredentials {
@@ -2084,6 +2122,23 @@ type DeletePipelineVersionResult {
   success: Boolean!
 }
 
+"""Errors that can occur when deleting a saved query."""
+enum DeleteSavedQueryError {
+  PERMISSION_DENIED
+  SAVED_QUERY_NOT_FOUND
+}
+
+"""Input for deleting a saved query."""
+input DeleteSavedQueryInput {
+  id: ID!
+}
+
+"""Result of deleting a saved query."""
+type DeleteSavedQueryResult {
+  errors: [DeleteSavedQueryError!]!
+  success: Boolean!
+}
+
 """
 The DeleteTeamError enum represents the possible errors that can occur during the deleteTeam mutation.
 """
@@ -2340,11 +2395,25 @@ enum ExecuteSQLError {
 }
 
 """
+The origin of a SQL query, recorded for auditing and to build a per-user query history.
+"""
+enum ExecuteSQLOrigin {
+  """The query originates from the Data Studio frontend."""
+  DATA_STUDIO
+
+  """The client did not identify where the query comes from."""
+  OTHER
+}
+
+"""
 Represents the result of executing a SQL query against the workspace database.
 """
 type ExecuteSQLResult {
   """The names of the columns returned by the query."""
   columns: [String!]
+
+  """The server-side execution time of the query, in milliseconds."""
+  durationMs: Int
 
   """The underlying database error message, when the query failed."""
   errorMessage: String
@@ -2897,7 +2966,6 @@ type MePermissions {
 
   """Indicates whether the user has permission to create a team."""
   createTeam: Boolean!
-  createWorkspace: Boolean!
   manageAccessmodAccessRequests: Boolean!
 
   """Indicates whether the user has superuser privileges."""
@@ -3033,6 +3101,10 @@ type Mutation {
 
   """Creates a new pipeline template version."""
   createPipelineTemplateVersion(input: CreatePipelineTemplateVersionInput!): CreatePipelineTemplateVersionResult!
+
+  """Creates a new saved query in a workspace."""
+  createSavedQuery(input: CreateSavedQueryInput!): CreateSavedQueryResult!
+  createSelfHostedOrganization(input: CreateSelfHostedOrganizationInput!): CreateOrganizationResult!
   createTeam(input: CreateTeamInput!): CreateTeamResult!
   createWebapp(input: CreateWebappInput!): CreateWebappResult!
   createWorkspace(input: CreateWorkspaceInput!): CreateWorkspaceResult!
@@ -3074,6 +3146,9 @@ type Mutation {
 
   """Deletes a pipeline version."""
   deletePipelineVersion(input: DeletePipelineVersionInput!): DeletePipelineVersionResult!
+
+  """Deletes a saved query."""
+  deleteSavedQuery(input: DeleteSavedQueryInput!): DeleteSavedQueryResult!
   deleteTeam(input: DeleteTeamInput!): DeleteTeamResult!
 
   """Deletes a template version."""
@@ -3218,6 +3293,9 @@ type Mutation {
 
   """Updates a pipeline version."""
   updatePipelineVersion(input: UpdatePipelineVersionInput!): UpdatePipelineVersionResult!
+
+  """Updates an existing saved query."""
+  updateSavedQuery(input: UpdateSavedQueryInput!): UpdateSavedQueryResult!
   updateTeam(input: UpdateTeamInput!): UpdateTeamResult!
 
   """Updates a template version."""
@@ -4128,6 +4206,11 @@ type Query {
   """Read the text content of a file from a workspace's bucket."""
   readFileContent(endLine: Int, filePath: String!, startLine: Int, workspaceSlug: String!): ReadFileContentResult!
   readWebappFile(endLine: Int, path: String!, startLine: Int, webappSlug: String!, workspaceSlug: String!): ReadWebappFileResult!
+
+  """
+  Retrieves a saved query by its id. When a workspace slug is given, the lookup is scoped to that workspace.
+  """
+  savedQuery(id: ID!, workspaceSlug: String): SavedQuery
   searchDatabaseTables(organizationId: UUID, page: Int = 1, perPage: Int = 15, query: String!, workspaceSlugs: [String]): DatabaseTableResultPage!
   searchDatasets(organizationId: UUID, page: Int = 1, perPage: Int = 15, query: String!, workspaceSlugs: [String]): DatasetResultPage!
   searchFiles(organizationId: UUID, page: Int = 1, perPage: Int = 15, prefix: String, query: String!, workspaceSlugs: [String]): FileResultPage!
@@ -4472,6 +4555,47 @@ type S3ObjectPage {
   pageNumber: Int!
   totalItems: Int!
   totalPages: Int!
+}
+
+"""
+A SQL query saved by a user in the Data Studio. Saved queries belong to a
+workspace and are visible to all of its members.
+"""
+type SavedQuery {
+  content: String!
+  createdAt: DateTime!
+  createdBy: User
+  description: String
+  id: ID!
+  name: String!
+  permissions: SavedQueryPermissions!
+  updatedAt: DateTime!
+  workspace: Workspace!
+}
+
+"""Enum representing the possible orderings for saved queries."""
+enum SavedQueryOrderBy {
+  NAME_ASC
+  NAME_DESC
+  UPDATED_AT_ASC
+  UPDATED_AT_DESC
+}
+
+"""A page of saved queries."""
+type SavedQueryPage {
+  items: [SavedQuery!]!
+  pageNumber: Int!
+  totalItems: Int!
+  totalPages: Int!
+}
+
+"""Permissions of a saved query."""
+type SavedQueryPermissions {
+  """Permission to delete the saved query."""
+  delete: Boolean!
+
+  """Permission to edit the saved query."""
+  update: Boolean!
 }
 
 interface SearchResult {
@@ -5336,6 +5460,27 @@ type UpdatePipelineVersionResult {
   success: Boolean!
 }
 
+"""Errors that can occur when updating a saved query."""
+enum UpdateSavedQueryError {
+  PERMISSION_DENIED
+  SAVED_QUERY_NOT_FOUND
+}
+
+"""Input for updating a saved query."""
+input UpdateSavedQueryInput {
+  content: String
+  description: String
+  id: ID!
+  name: String
+}
+
+"""Result of updating a saved query."""
+type UpdateSavedQueryResult {
+  errors: [UpdateSavedQueryError!]!
+  savedQuery: SavedQuery
+  success: Boolean!
+}
+
 """
 The UpdateTeamError enum represents the possible errors that can occur during the updateTeam mutation.
 """
@@ -5611,6 +5756,9 @@ type UploadPipelineResult {
 
 """The User type represents a user in the system."""
 type User {
+  """Whether the user has consented to product analytics tracking."""
+  analyticsEnabled: Boolean!
+
   """The avatar of the user."""
   avatar: Avatar!
 
@@ -5808,11 +5956,14 @@ type Workspace {
   invitations(includeAccepted: Boolean, page: Int, perPage: Int): WorkspaceInvitationPage!
   members(page: Int, perPage: Int): WorkspaceMembershipPage!
   name: String!
-  organization: Organization
+  organization: Organization!
   permissions: WorkspacePermissions!
   pipelineLastRunStatuses: [PipelineRunStatus!]!
   pipelineTags: [String!]!
   pipelineTemplateTags: [String!]!
+
+  """The saved queries of the workspace."""
+  savedQueries(orderBy: SavedQueryOrderBy! = UPDATED_AT_DESC, page: Int = 1, perPage: Int = 15, query: String): SavedQueryPage!
   shortcuts: [ShortcutItem!]!
   slug: String!
   updatedAt: DateTime
@@ -5918,6 +6069,9 @@ type WorkspacePermissions {
   createObject: Boolean!
   createPipeline: Boolean!
   createPipelineTemplateVersion: Boolean!
+
+  """Permission to create a saved query in the workspace."""
+  createSavedQuery: Boolean!
   delete: Boolean!
   deleteDatabaseTable: Boolean!
 
