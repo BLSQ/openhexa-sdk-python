@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.22.5](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.22.4...v2.22.5) (2026-08-13)
+
+
+### Bug Fixes
+
+* update GraphQL schema ([#413](https://github.com/BLSQ/openhexa-sdk-python/issues/413)) ([af35613](https://github.com/BLSQ/openhexa-sdk-python/commit/af35613bbd67088f429ee829ec0c9175fe0d92ff))
+
 ## [2.22.4](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.22.3...v2.22.4) (2026-07-13)
 
 
