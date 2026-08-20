@@ -1,12 +1,14 @@
 """Dataset test module."""
 
 import os
+from io import StringIO
 from unittest import TestCase
 from unittest.mock import patch
 
 from httmock import HTTMock, all_requests, response
 
 from openhexa.sdk.datasets import Dataset
+from openhexa.sdk.datasets.dataset import DatasetVersion
 from openhexa.sdk.workspaces import workspace
 
 
@@ -104,3 +106,77 @@ class DatasetTest(TestCase):
         self.assertEqual(v.id, "<newVersionId>")
         v = d.create_version("Second version")
         self.assertEqual(v.id, "<newVersionId>")
+
+    @patch.dict(
+        os.environ,
+        {
+            "HEXA_WORKSPACE": "workspace-slug",
+            "HEXA_TOKEN": "token",
+            "HEXA_SERVER_URL": "server",
+        },
+    )
+    @patch("openhexa.sdk.datasets.dataset.requests.put")
+    @patch("openhexa.sdk.datasets.dataset.graphql")
+    def test_add_file_to_azure_blob_storage(self, mock_graphql, mock_put):
+        """Uploads to Azure Blob Storage must specify the blob type, on top of the content type."""
+        version = DatasetVersion(dataset=None, id="version_id", name="v1", created_at=None)
+        upload_url = "https://account.blob.core.windows.net/hexa-datasets/version_id/file.csv?sig=signature"
+        mock_graphql.side_effect = [
+            {"generateDatasetUploadUrl": {"success": True, "uploadUrl": upload_url, "errors": []}},
+            {
+                "createDatasetVersionFile": {
+                    "success": True,
+                    "errors": [],
+                    "file": {
+                        "id": "file_id",
+                        "filename": "file.csv",
+                        "uri": "file.csv",
+                        "contentType": "text/csv",
+                        "createdAt": "2021-01-01T00:00:00.000Z",
+                    },
+                }
+            },
+        ]
+
+        version.add_file(StringIO("foo,bar"), filename="file.csv")
+
+        self.assertEqual(mock_put.call_args.args[0], upload_url)
+        self.assertEqual(
+            mock_put.call_args.kwargs["headers"],
+            {"Content-Type": "application/octet-stream", "x-ms-blob-type": "BlockBlob"},
+        )
+
+    @patch.dict(
+        os.environ,
+        {
+            "HEXA_WORKSPACE": "workspace-slug",
+            "HEXA_TOKEN": "token",
+            "HEXA_SERVER_URL": "server",
+        },
+    )
+    @patch("openhexa.sdk.datasets.dataset.requests.put")
+    @patch("openhexa.sdk.datasets.dataset.graphql")
+    def test_add_file_to_gcs(self, mock_graphql, mock_put):
+        """Uploads to other storage backends must not carry Azure-specific headers."""
+        version = DatasetVersion(dataset=None, id="version_id", name="v1", created_at=None)
+        upload_url = "https://storage.googleapis.com/hexa-datasets/version_id/file.csv?X-Goog-Signature=signature"
+        mock_graphql.side_effect = [
+            {"generateDatasetUploadUrl": {"success": True, "uploadUrl": upload_url, "errors": []}},
+            {
+                "createDatasetVersionFile": {
+                    "success": True,
+                    "errors": [],
+                    "file": {
+                        "id": "file_id",
+                        "filename": "file.csv",
+                        "uri": "file.csv",
+                        "contentType": "text/csv",
+                        "createdAt": "2021-01-01T00:00:00.000Z",
+                    },
+                }
+            },
+        ]
+
+        version.add_file(StringIO("foo,bar"), filename="file.csv")
+
+        self.assertEqual(mock_put.call_args.kwargs["headers"], {"Content-Type": "application/octet-stream"})

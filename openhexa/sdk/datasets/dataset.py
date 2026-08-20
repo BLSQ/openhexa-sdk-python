@@ -8,10 +8,20 @@ import mimetypes
 import typing
 from os import PathLike
 from pathlib import Path
+from urllib.parse import urlparse
 
 import requests
 
 from openhexa.sdk.utils import Iterator, Page, Settings, graphql, read_content
+
+
+def is_azure_blob_url(url: str) -> bool:
+    """Return whether the given URL points to an Azure Blob Storage endpoint.
+
+    Azure Blob Storage endpoints look like <account>.blob.core.windows.net. The domain varies across
+    Azure clouds (public, China, US Gov, Germany), but always contains ".blob.core.".
+    """
+    return ".blob.core." in urlparse(url).netloc
 
 
 class DatasetFile:
@@ -260,10 +270,12 @@ class DatasetVersion:
             self.raise_upload_exception(errors)
 
         upload_url = upload_url_result["generateDatasetUploadUrl"]["uploadUrl"]
+        headers = {"Content-Type": mime_type}
+        if is_azure_blob_url(upload_url):
+            # The Azure Blob Storage "Put Blob" API rejects requests that do not specify the blob type
+            headers["x-ms-blob-type"] = "BlockBlob"
         with read_content(source) as content:
-            response = requests.put(
-                upload_url, data=content, headers={"Content-Type": mime_type}, verify=Settings.verify_ssl()
-            )
+            response = requests.put(upload_url, data=content, headers=headers, verify=Settings.verify_ssl())
         response.raise_for_status()
 
         data = graphql(
