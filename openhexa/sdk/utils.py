@@ -275,3 +275,21 @@ def read_content(source: str | os.PathLike[str] | typing.IO | bytes):
     finally:
         if hasattr(source, "close"):
             source.close()
+
+
+def content_size(content: typing.IO | bytes) -> int | None:
+    """Return the size in bytes of a content opened by read_content, or None if it cannot be determined."""
+    if isinstance(content, bytes):
+        return len(content)
+    try:
+        return os.fstat(content.fileno()).st_size
+    except (AttributeError, OSError, ValueError):
+        pass
+    # Non-file objects (BytesIO, StringIO...) still expose their size if they are seekable
+    try:
+        position = content.tell()
+        size = content.seek(0, os.SEEK_END)
+        content.seek(position)
+        return size
+    except (AttributeError, OSError, ValueError):
+        return None
