@@ -4,14 +4,20 @@ See https://github.com/BLSQ/openhexa/wiki/User-manual#datasets and
 https://github.com/BLSQ/openhexa/wiki/Using-the-OpenHEXA-SDK#working-with-datasets for more information about datasets.
 """
 
+import base64
+import io
 import mimetypes
 import typing
 from os import PathLike
 from pathlib import Path
+from urllib.parse import quote
 
 import requests
 
-from openhexa.sdk.utils import Iterator, Page, Settings, graphql, read_content
+from openhexa.sdk.utils import Iterator, Page, Settings, content_size, graphql, read_content
+
+AZURE_MAX_SINGLE_PUT_SIZE = 5000 * 1024 * 1024  # 5 GiB
+AZURE_BLOCK_SIZE = 64 * 1024 * 1024  # 64 MiB to keep memory low
 
 
 class DatasetFile:
@@ -225,6 +231,77 @@ class DatasetVersion:
             created_at=file["createdAt"],
         )
 
+    def _generate_upload_url(self, filename: str, content_type: str) -> tuple[str, dict]:
+        """Ask the backend for a signed upload URL, along with the headers that URL was signed for."""
+        data = graphql(
+            """
+            mutation generateDatasetUploadUrl ($input: GenerateDatasetUploadUrlInput!) {
+                generateDatasetUploadUrl(input: $input) {
+                    uploadUrl
+                    headers
+                    success
+                    errors
+                }
+            }
+            """,
+            {"input": {"versionId": self.id, "contentType": content_type, "uri": filename}},
+        )
+        result = data["generateDatasetUploadUrl"]
+        if result["success"] is False:
+            self.raise_upload_exception(result["errors"])
+
+        # The backend tells us which headers the signed URL expects: Azure Blob Storage rejects a "Put Blob"
+        # request that does not specify the blob type. Other backends only need the content type.
+        return result["uploadUrl"], result["headers"] or {"Content-Type": content_type}
+
+    def _azure_put(self, upload_url: str, query: str, filename: str, content_type: str, **kwargs) -> str:
+        """Send a single upload request, and return the URL it was sent to.
+
+        Signed URLs expire after an hour, which a large upload can outlive. When that happens we simply ask
+        for a fresh one and try again, hence the URL being returned to the caller.
+        """
+        response = requests.put(f"{upload_url}&{query}", verify=Settings.verify_ssl(), **kwargs)
+        if response.status_code in (401, 403):
+            upload_url, _ = self._generate_upload_url(filename, content_type)
+            response = requests.put(f"{upload_url}&{query}", verify=Settings.verify_ssl(), **kwargs)
+        response.raise_for_status()
+
+        return upload_url
+
+    def _azure_upload_by_blocks(self, content: typing.IO | bytes, upload_url: str, filename: str, content_type: str):
+        """Upload content to Azure Blob Storage block by block, then commit the blocks as a single blob.
+
+        See https://learn.microsoft.com/en-us/rest/api/storageservices/put-block
+        """
+        if isinstance(content, bytes):
+            content = io.BytesIO(content)
+
+        block_ids = []
+        while block := content.read(AZURE_BLOCK_SIZE):
+            if isinstance(block, str):
+                block = block.encode()
+            # Block ids must be unique within the blob and share the same length once decoded
+            block_id = base64.b64encode(f"{len(block_ids):032d}".encode()).decode()
+            upload_url = self._azure_put(
+                upload_url,
+                f"comp=block&blockid={quote(block_id, safe='')}",
+                filename,
+                content_type,
+                data=block,
+            )
+            block_ids.append(block_id)
+
+        blocks = "".join(f"<Latest>{block_id}</Latest>" for block_id in block_ids)
+        self._azure_put(
+            upload_url,
+            "comp=blocklist",
+            filename,
+            content_type,
+            data=f'<?xml version="1.0" encoding="utf-8"?><BlockList>{blocks}</BlockList>'.encode(),
+            # The content type of the blob itself, as opposed to the content type of this request
+            headers={"x-ms-blob-content-type": content_type},
+        )
+
     def add_file(
         self,
         source: str | PathLike[str] | typing.IO | bytes,
@@ -243,28 +320,15 @@ class DatasetVersion:
         if mime_type is None:
             mime_type = "application/octet-stream"
 
-        upload_url_result = graphql(
-            """
-            mutation generateDatasetUploadUrl ($input: GenerateDatasetUploadUrlInput!) {
-                generateDatasetUploadUrl(input: $input) {
-                    uploadUrl
-                    success
-                    errors
-                }
-            }
-            """,
-            {"input": {"versionId": self.id, "contentType": mime_type, "uri": filename}},
-        )
-        if upload_url_result["generateDatasetUploadUrl"]["success"] is False:
-            errors = upload_url_result["generateDatasetUploadUrl"]["errors"]
-            self.raise_upload_exception(errors)
-
-        upload_url = upload_url_result["generateDatasetUploadUrl"]["uploadUrl"]
+        upload_url, headers = self._generate_upload_url(filename, mime_type)
         with read_content(source) as content:
-            response = requests.put(
-                upload_url, data=content, headers={"Content-Type": mime_type}, verify=Settings.verify_ssl()
-            )
-        response.raise_for_status()
+            size = content_size(content)
+            # upload block by block for very large files (>5GiB) when on Azure
+            if headers.get("x-ms-blob-type") and (size is None or size > AZURE_MAX_SINGLE_PUT_SIZE):
+                self._azure_upload_by_blocks(content, upload_url, filename, mime_type)
+            else:
+                response = requests.put(upload_url, data=content, headers=headers, verify=Settings.verify_ssl())
+                response.raise_for_status()
 
         data = graphql(
             """
@@ -429,7 +493,7 @@ class Dataset:
         if self._latest_version is None:
             data = graphql(
                 """
-                query getLatestVersion($datasetId: ID!) { 
+                query getLatestVersion($datasetId: ID!) {
                     dataset(id: $datasetId) {
                         latestVersion {
                             id
