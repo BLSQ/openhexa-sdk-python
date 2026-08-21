@@ -16,13 +16,8 @@ import requests
 
 from openhexa.sdk.utils import Iterator, Page, Settings, content_size, graphql, read_content
 
-# Azure Blob Storage refuses to store more than 5000 MiB through a single "Put Blob" request. Larger
-# files have to be uploaded block by block, then committed as a whole.
-# See https://learn.microsoft.com/en-us/rest/api/storageservices/put-blob
-AZURE_MAX_SINGLE_PUT_SIZE = 5000 * 1024 * 1024
-# A block can hold up to 4000 MiB and a blob can hold up to 50.000 blocks. We use smaller blocks to keep
-# the memory footprint of an upload low: 64 MiB blocks still allow for blobs of about 3 TiB.
-AZURE_BLOCK_SIZE = 64 * 1024 * 1024
+AZURE_MAX_SINGLE_PUT_SIZE = 5000 * 1024 * 1024  # 5 GiB
+AZURE_BLOCK_SIZE = 64 * 1024 * 1024  # 64 MiB to keep memory low
 
 
 class DatasetFile:
@@ -259,7 +254,7 @@ class DatasetVersion:
         # request that does not specify the blob type. Other backends only need the content type.
         return result["uploadUrl"], result["headers"] or {"Content-Type": content_type}
 
-    def _put(self, upload_url: str, query: str, filename: str, content_type: str, **kwargs) -> str:
+    def _azure_put(self, upload_url: str, query: str, filename: str, content_type: str, **kwargs) -> str:
         """Send a single upload request, and return the URL it was sent to.
 
         Signed URLs expire after an hour, which a large upload can outlive. When that happens we simply ask
@@ -273,7 +268,7 @@ class DatasetVersion:
 
         return upload_url
 
-    def _upload_by_blocks(self, content: typing.IO | bytes, upload_url: str, filename: str, content_type: str):
+    def _azure_upload_by_blocks(self, content: typing.IO | bytes, upload_url: str, filename: str, content_type: str):
         """Upload content to Azure Blob Storage block by block, then commit the blocks as a single blob.
 
         See https://learn.microsoft.com/en-us/rest/api/storageservices/put-block
@@ -287,7 +282,7 @@ class DatasetVersion:
                 block = block.encode()
             # Block ids must be unique within the blob and share the same length once decoded
             block_id = base64.b64encode(f"{len(block_ids):032d}".encode()).decode()
-            upload_url = self._put(
+            upload_url = self._azure_put(
                 upload_url,
                 f"comp=block&blockid={quote(block_id, safe='')}",
                 filename,
@@ -297,7 +292,7 @@ class DatasetVersion:
             block_ids.append(block_id)
 
         blocks = "".join(f"<Latest>{block_id}</Latest>" for block_id in block_ids)
-        self._put(
+        self._azure_put(
             upload_url,
             "comp=blocklist",
             filename,
@@ -328,10 +323,9 @@ class DatasetVersion:
         upload_url, headers = self._generate_upload_url(filename, mime_type)
         with read_content(source) as content:
             size = content_size(content)
-            # An Azure Blob Storage upload has to be split in blocks when the file is too large for a single
-            # request, or when we cannot tell its size (a request without a Content-Length is rejected).
+            # upload block by block for very large files (>5GiB) when on Azure
             if headers.get("x-ms-blob-type") and (size is None or size > AZURE_MAX_SINGLE_PUT_SIZE):
-                self._upload_by_blocks(content, upload_url, filename, mime_type)
+                self._azure_upload_by_blocks(content, upload_url, filename, mime_type)
             else:
                 response = requests.put(upload_url, data=content, headers=headers, verify=Settings.verify_ssl())
                 response.raise_for_status()
@@ -499,7 +493,7 @@ class Dataset:
         if self._latest_version is None:
             data = graphql(
                 """
-                query getLatestVersion($datasetId: ID!) { 
+                query getLatestVersion($datasetId: ID!) {
                     dataset(id: $datasetId) {
                         latestVersion {
                             id
