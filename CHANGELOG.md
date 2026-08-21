@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.22.6](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.22.5...v2.22.6) (2026-08-21)
+
+
+### Bug Fixes
+
+* **deps:** update dependency ruff to &gt;=0.16.4,&lt;0.17.0 ([#410](https://github.com/BLSQ/openhexa-sdk-python/issues/410)) ([79d4faa](https://github.com/BLSQ/openhexa-sdk-python/commit/79d4faa4c2cd3c8c10a6c94a435e473481ca891b))
+* **deps:** update dependency setuptools to v84 ([#411](https://github.com/BLSQ/openhexa-sdk-python/issues/411)) ([035c1a4](https://github.com/BLSQ/openhexa-sdk-python/commit/035c1a455f3bab42eda9498b7c46c2b0f52b92f2))
+* Support Azure backend for dataset files (HEXA-1781) ([#416](https://github.com/BLSQ/openhexa-sdk-python/issues/416)) ([3f64679](https://github.com/BLSQ/openhexa-sdk-python/commit/3f64679a7cd6e914e79db82fff92a9f468142aef))
+
+
+### Miscellaneous
+
+* **deps:** update actions/setup-python action to v7 ([#409](https://github.com/BLSQ/openhexa-sdk-python/issues/409)) ([851895e](https://github.com/BLSQ/openhexa-sdk-python/commit/851895ebe5d5d9c158eed9cbe9a18a2db3012053))
+
 ## [2.22.5](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.22.4...v2.22.5) (2026-08-13)
 
 
