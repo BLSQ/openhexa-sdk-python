@@ -12,7 +12,7 @@ from datetime import datetime
 from importlib.metadata import version
 from pathlib import Path
 from typing import Any
-from zipfile import ZipFile
+from zipfile import ZIP_DEFLATED, ZipFile
 
 import click
 import docker
@@ -201,7 +201,9 @@ def _query_graphql(query: str, variables=None, token=None):
         handle_ssl_error(e)
         raise
     except requests.exceptions.HTTPError as e:
-        raise GraphQLError(str(e))
+        # include server/proxy response in the logging
+        body = " ".join(e.response.text.split())[:1000]
+        raise GraphQLError(f"{e}\nResponse: {body}" if body else str(e))
 
     data = response.json()
 
@@ -658,7 +660,7 @@ def generate_zip_file(pipeline_directory_path: str | Path) -> io.BytesIO:
     except FileNotFoundError:
         # No workspace.yaml file found, we can ignore this error and assume the default value of WORKSPACE_FILES_PATH
         pass
-    with ZipFile(zip_file, "w") as zipObj:
+    with ZipFile(zip_file, "w", compression=ZIP_DEFLATED) as zipObj:
         for path in pipeline_directory_path.glob("**/*"):
             if path.name == "python":
                 # We are in a virtual environment
