@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.22.7](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.22.6...v2.22.7) (2026-09-10)
+
+
+### Bug Fixes
+
+* Add compression when uploading pipeline version ([#417](https://github.com/BLSQ/openhexa-sdk-python/issues/417)) ([48e609f](https://github.com/BLSQ/openhexa-sdk-python/commit/48e609fd72d8b5f121ca9ac45b475153814d78c3))
+
 ## [2.22.6](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.22.5...v2.22.6) (2026-08-21)
 
 
