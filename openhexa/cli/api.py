@@ -201,7 +201,9 @@ def _query_graphql(query: str, variables=None, token=None):
         handle_ssl_error(e)
         raise
     except requests.exceptions.HTTPError as e:
-        raise GraphQLError(str(e))
+        # include server/proxy response in the logging
+        body = " ".join(e.response.text.split())[:1000]
+        raise GraphQLError(f"{e}\nResponse: {body}" if body else str(e))
 
     data = response.json()
 
