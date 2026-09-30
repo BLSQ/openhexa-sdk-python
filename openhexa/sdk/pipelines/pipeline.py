@@ -10,6 +10,7 @@ import os
 import sys
 import time
 import typing
+from functools import wraps
 from logging import getLogger
 from pathlib import Path
 
@@ -20,7 +21,7 @@ from openhexa.sdk.utils import Environment, Settings, get_environment, get_times
 
 from .heartbeat import heartbeat_manager
 from .parameter import FunctionWithParameter, Parameter, ParameterValueError
-from .task import PipelineWithTask, Task
+from .task import P, R, Task
 from .utils import get_local_workspace_config
 
 logger = getLogger(__name__)
@@ -60,7 +61,7 @@ class Pipeline:
         self.functional_type = functional_type
         self.tasks = []
 
-    def task(self, function) -> PipelineWithTask:
+    def task(self, function: typing.Callable[P, R]) -> typing.Callable[P, R]:
         """Task decorator.
 
         Examples
@@ -78,7 +79,23 @@ class Pipeline:
         ... def task_2(foo: int):
         ...     pass
         """
-        return PipelineWithTask(function, self)
+
+        @wraps(function)
+        def wrapper(*task_args: P.args, **task_kwargs: P.kwargs) -> R:
+            """Attach task to the decorated pipeline and return it.
+
+            NB: We claim to return type R but we actually return a Task object.
+            This is for better DX when writing pipeline DAGs in IDEs.
+            """
+            task = Task(function)(*task_args, **task_kwargs)
+            self.tasks.append(task)
+            return task  # type: ignore[return-value]
+
+        # store references to original function
+        wrapper._original_function = function  # type: ignore
+        wrapper._pipeline = self  # type: ignore
+
+        return wrapper
 
     def run(self, config: dict[str, typing.Any]):
         """Run the pipeline using the provided config.
