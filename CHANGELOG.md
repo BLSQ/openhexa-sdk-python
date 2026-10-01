@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.22.8](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.22.7...v2.22.8) (2026-10-01)
+
+
+### Bug Fixes
+
+* **deps:** update dependency pandas to v3 ([#412](https://github.com/BLSQ/openhexa-sdk-python/issues/412)) ([4501c07](https://github.com/BLSQ/openhexa-sdk-python/commit/4501c0745ef8be749ae794279242db62234fca36))
+
 ## [2.22.7](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.22.6...v2.22.7) (2026-09-10)
 
 
