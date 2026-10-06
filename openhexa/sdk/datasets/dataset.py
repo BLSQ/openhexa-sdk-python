@@ -1,7 +1,7 @@
 """Dataset-related classes and functions.
 
-See https://github.com/BLSQ/openhexa/wiki/User-manual#datasets and
-https://github.com/BLSQ/openhexa/wiki/Using-the-OpenHEXA-SDK#working-with-datasets for more information about datasets.
+See https://docs.openhexa.com/datasets/ and
+https://docs.openhexa.com/sdk/#working-with-datasets for more information about datasets.
 """
 
 import base64
@@ -425,7 +425,7 @@ class DatasetVersion:
 class Dataset:
     """Datasets are versioned, documented files.
 
-    See https://github.com/BLSQ/openhexa/wiki/Using-the-OpenHEXA-SDK#working-with-datasets for more information.
+    See https://docs.openhexa.com/sdk/#working-with-datasets for more information.
     """
 
     _latest_version = None

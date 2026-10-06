@@ -1,7 +1,7 @@
 """Datasets package.
 
-See https://github.com/BLSQ/openhexa/wiki/User-manual#datasets and
-https://github.com/BLSQ/openhexa/wiki/Using-the-OpenHEXA-SDK#working-with-datasets for more information about OpenHEXA
+See https://docs.openhexa.com/datasets/ and
+https://docs.openhexa.com/sdk/#working-with-datasets for more information about OpenHEXA
 dataset.
 """
 

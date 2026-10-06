@@ -1,6 +1,6 @@
 """Workspaces package.
 
-See https://github.com/BLSQ/openhexa/wiki/User-manual#about-workspaces for more information about OpenHEXA workspaces.
+See https://docs.openhexa.com/workspaces/ for more information about OpenHEXA workspaces.
 """
 
 from .current_workspace import CurrentWorkspace

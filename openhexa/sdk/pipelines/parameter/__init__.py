@@ -1,6 +1,6 @@
 """Pipeline parameters classes and functions.
 
-See https://github.com/BLSQ/openhexa/wiki/Writing-OpenHEXA-pipelines#pipeline-parameters for more information.
+See https://docs.openhexa.com/writing-pipelines/#pipeline-parameters for more information.
 """
 
 from openhexa.sdk.pipelines.exceptions import InvalidParameterError, ParameterValueError

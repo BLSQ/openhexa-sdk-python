@@ -1,13 +1,13 @@
 """File-related classes and functions.
 
-See https://github.com/BLSQ/openhexa/wiki/Writing-OpenHEXA-pipelines#using-file-parameters
+See https://docs.openhexa.com/writing-pipelines/#using-file-parameters
 """
 
 
 class File:
     """File class.
 
-    See https://github.com/BLSQ/openhexa/wiki/Writing-OpenHEXA-pipelines#using-file-parameters
+    See https://docs.openhexa.com/writing-pipelines/#using-file-parameters
     """
 
     def __init__(

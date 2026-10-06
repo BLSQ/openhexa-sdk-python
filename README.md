@@ -18,13 +18,13 @@ OpenHEXA is an open-source data integration platform developed by [Bluesquare](h
 Its goal is to facilitate data integration and analysis workflows, in particular in the context of public health
 projects.
 
-Please refer to the [OpenHEXA wiki](https://github.com/BLSQ/openhexa/wiki/Home) for more information about OpenHEXA.
+Please refer to the [OpenHEXA documentation](https://docs.openhexa.com/) for more information about OpenHEXA.
 
 This repository contains the code of the OpenHEXA SDK, a library allows you to write code for the OpenHEXA platform.
 It is particularly useful to write OpenHEXA data pipelines, but can also be used in the OpenHEXA notebooks environment.
 
-The OpenHEXA wiki has a section dedicated to the SDK:
-[Using the OpenHEXA SDK](https://github.com/BLSQ/openhexa/wiki/Using-the-OpenHEXA-SDK).
+The OpenHEXA documentation has a section dedicated to the SDK:
+[Using the OpenHEXA SDK](https://docs.openhexa.com/sdk/).
 
 Requirements
 ------------
@@ -116,7 +116,7 @@ pip install -e ".[dev]"  # Necessary to be able to run the openhexa CLI
 
 While it is possible to run pipelines locally using only the SDK, if you want to run OpenHEXA in a more realistic
 setting you will need to install the OpenHEXA app and frontend components. Please refer to the
-[installation instructions](https://github.com/BLSQ/openhexa/wiki/Installation-instructions) for more information.
+[installation instructions](https://docs.openhexa.com/installation/) for more information.
 
 You can then configure the OpenHEXA CLI to connect to your local backend:
 

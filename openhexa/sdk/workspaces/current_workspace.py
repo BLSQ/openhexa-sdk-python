@@ -1,6 +1,6 @@
 """Workspace-related classes and functions.
 
-See https://github.com/BLSQ/openhexa/wiki/User-manual#about-workspaces for more information.
+See https://docs.openhexa.com/workspaces/ for more information.
 """
 
 import os
