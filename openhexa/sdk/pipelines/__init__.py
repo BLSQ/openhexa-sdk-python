@@ -1,7 +1,7 @@
 """Pipelines package.
 
-See https://github.com/BLSQ/openhexa/wiki/User-manual#using-pipelines and
-https://github.com/BLSQ/openhexa/wiki/Writing-OpenHEXA-pipelines for more information about OpenHEXA pipelines.
+See https://docs.openhexa.com/pipelines/ and
+https://docs.openhexa.com/writing-pipelines/ for more information about OpenHEXA pipelines.
 """
 
 from .parameter import parameter

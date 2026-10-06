@@ -628,7 +628,7 @@ def pipelines_run(
 
             click.secho("Open your pipeline directory with VSCode and start the debugging session")
             click.secho(
-                "Visit the wiki for more information: https://github.com/BLSQ/openhexa/wiki/Writing-OpenHEXA-pipelines#debugging-and-troubleshooting-your-pipelines",
+                "Visit the documentation for more information: https://docs.openhexa.com/writing-pipelines/#debugging-and-troubleshooting-your-pipelines",
                 fg="blue",
             )
 
