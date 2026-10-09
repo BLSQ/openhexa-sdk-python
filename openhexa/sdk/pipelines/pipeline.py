@@ -98,10 +98,14 @@ class Pipeline:
         with heartbeat_manager(current_run, interval=30):
             # Execute pipeline function
             self.function(**validated_config)
-            # Execute tasks using Pool's built-in context manager
-            context = get_context("spawn")
-            with context.Pool() as pool:  # FIXME: set max size of pool
-                self._execute_tasks(pool)
+            if _should_run_tasks_in_process():
+                # Debuggers can't follow tasks into spawned subprocesses
+                self._execute_tasks_in_process()
+            else:
+                # Execute tasks using Pool's built-in context manager
+                context = get_context("spawn")
+                with context.Pool() as pool:  # FIXME: set max size of pool
+                    self._execute_tasks(pool)
 
         print(f'{get_timestamp()} Successfully completed pipeline "{self.name}"')
 
@@ -218,6 +222,29 @@ class Pipeline:
                     # busy loop
                     time.sleep(0.3)
 
+    def _execute_tasks_in_process(self):
+        """Execute all tasks sequentially in the current process, in dependency order.
+
+        Raises
+        ------
+        PipelineRunError
+            If any task fails during execution.
+        """
+        total = len(self.tasks)
+        completed = 0
+
+        while tasks := self._get_available_tasks():
+            for task in tasks:
+                print(f'{get_timestamp()} Started task "{task.compute.__name__}"')
+                try:
+                    task.run()
+                except Exception as e:  # NOQA
+                    raise PipelineRunError(f"Pipeline {self.name} failed: {e}") from e
+
+                completed += 1
+                print(f'{get_timestamp()} Finished task "{task.compute.__name__}"')
+                self._update_progress(int(completed / total * 100))
+
     def to_dict(self):
         """Return a dictionary representation of the pipeline."""
         return {
@@ -299,6 +326,19 @@ class Pipeline:
                 config = {}
 
         self.run(config)
+
+
+def _should_run_tasks_in_process() -> bool:
+    """Determine whether tasks should run in the current process instead of a multiprocessing pool.
+
+    This is the case when a debugger is in use, as debuggers do not follow tasks into the spawned worker processes:
+    either when running with "openhexa pipelines run --debug", or when a debugger (VS Code / debugpy, PyCharm /
+    pydevd) is attached to the current process.
+    """
+    if os.environ.get("REMOTE_DEBUGGER", "").strip().lower() == "true":
+        return True
+
+    return any(module in sys.modules for module in ("debugpy", "pydevd"))
 
 
 def pipeline(
