@@ -1,6 +1,7 @@
 """Pipeline test module."""
 
 import os
+import sys
 import time
 from unittest import TestCase
 from unittest.mock import Mock, patch
@@ -17,7 +18,7 @@ from openhexa.sdk import (
 from openhexa.sdk.pipelines.heartbeat import HeartbeatThread
 from openhexa.sdk.pipelines.log_level import LogLevel
 from openhexa.sdk.pipelines.parameter import Parameter, ParameterValueError
-from openhexa.sdk.pipelines.pipeline import Pipeline
+from openhexa.sdk.pipelines.pipeline import Pipeline, PipelineRunError, _should_run_tasks_in_process
 from openhexa.sdk.utils import Environment
 
 
@@ -333,6 +334,97 @@ def test_pipeline_continues_execution_when_heartbeat_fails(mock_get_environment,
     assert (
         mock_client_instance.update_pipeline_heartbeat.call_count >= 2
     ), "Heartbeat should have been attempted multiple times despite failures"
+
+
+@patch.dict(os.environ, {"REMOTE_DEBUGGER": "true"})
+def test_pipeline_run_tasks_in_process():
+    """In debug mode, tasks are executed in the current process, in dependency order."""
+    calls = []
+
+    def pipeline_func():
+        task_3(task_1(), task_2())
+
+    pipeline = Pipeline("pipeline", pipeline_func, [])
+
+    @pipeline.task
+    def task_1():
+        calls.append("task_1")
+        return 1
+
+    @pipeline.task
+    def task_2():
+        calls.append("task_2")
+        return 2
+
+    @pipeline.task
+    def task_3(a, b):
+        calls.append("task_3")
+        return a + b
+
+    pipeline.run({})
+
+    assert calls[-1] == "task_3"
+    assert sorted(calls[:2]) == ["task_1", "task_2"]
+    assert pipeline.tasks[-1].result == 3
+
+
+@patch.dict(os.environ, {"REMOTE_DEBUGGER": "true"})
+def test_pipeline_run_tasks_in_process_failure():
+    """In debug mode, a failing task raises a PipelineRunError chained to the original exception."""
+
+    def pipeline_func():
+        failing_task()
+
+    pipeline = Pipeline("pipeline", pipeline_func, [])
+
+    @pipeline.task
+    def failing_task():
+        raise ValueError("boom")
+
+    with pytest.raises(PipelineRunError, match="boom") as exc_info:
+        pipeline.run({})
+    assert isinstance(exc_info.value.__cause__, ValueError)
+
+
+@pytest.mark.parametrize(
+    "env, debugger_module, expected",
+    [
+        ({}, None, False),
+        ({"REMOTE_DEBUGGER": "false"}, None, False),
+        ({"REMOTE_DEBUGGER": "true"}, None, True),
+        ({}, "debugpy", True),
+        ({}, "pydevd", True),
+    ],
+)
+def test_should_run_tasks_in_process(env, debugger_module, expected):
+    """Tasks run in process only when a debugger is in use."""
+    with patch.dict(os.environ, env, clear=True), patch.dict(sys.modules):
+        sys.modules.pop("debugpy", None)
+        sys.modules.pop("pydevd", None)
+        if debugger_module:
+            sys.modules[debugger_module] = Mock()
+        assert _should_run_tasks_in_process() is expected
+
+
+@patch("openhexa.sdk.pipelines.pipeline.get_context")
+def test_pipeline_run_tasks_in_process_when_debugger_attached(mock_get_context):
+    """When a debugger is attached, tasks run in the current process instead of a multiprocessing pool."""
+    task_pids = []
+
+    def pipeline_func():
+        task_1()
+
+    pipeline = Pipeline("pipeline", pipeline_func, [])
+
+    @pipeline.task
+    def task_1():
+        task_pids.append(os.getpid())
+
+    with patch.dict(os.environ, {}, clear=True), patch.dict(sys.modules, {"debugpy": Mock()}):
+        pipeline.run({})
+
+    mock_get_context.assert_not_called()
+    assert task_pids == [os.getpid()]
 
 
 class TestLogLevel(TestCase):
