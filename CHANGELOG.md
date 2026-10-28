@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.23.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.22.7...v2.23.0) (2026-10-28)
+
+
+### Features
+
+* add a header with the pipeline run UUID (HEXA-1858) ([#427](https://github.com/BLSQ/openhexa-sdk-python/issues/427)) ([afdb60c](https://github.com/BLSQ/openhexa-sdk-python/commit/afdb60c24c2542a392cd73b1517fd9c202cc1eaf))
+
+
+### Bug Fixes
+
+* **deps:** update dependency pandas to v3 ([#412](https://github.com/BLSQ/openhexa-sdk-python/issues/412)) ([4501c07](https://github.com/BLSQ/openhexa-sdk-python/commit/4501c0745ef8be749ae794279242db62234fca36))
+* documentation link (HEXA-1823)([#422](https://github.com/BLSQ/openhexa-sdk-python/issues/422)) ([0939fc5](https://github.com/BLSQ/openhexa-sdk-python/commit/0939fc5765f6592399c173bab74d8a5124a794bb))
+
 ## [2.22.7](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.22.6...v2.22.7) (2026-09-10)
 
 
