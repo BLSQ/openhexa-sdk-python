@@ -1,11 +1,11 @@
 """OpenHexaClient implementation for GraphQL API interaction."""
 
 import logging
-from importlib.metadata import version
 
 import httpx
 
 from openhexa.graphql.graphql_client import Client
+from openhexa.utils.session import get_user_agent
 
 
 class BaseOpenHexaClient(Client):
@@ -21,7 +21,7 @@ class BaseOpenHexaClient(Client):
         """
         self.token = token
         headers = {
-            "User-Agent": f"openhexa-sdk/{version('openhexa.sdk')}",
+            "User-Agent": get_user_agent(),
             "Authorization": f"Bearer {self.token}",
         }
         http_client = httpx.Client(headers=headers, verify=verify)
