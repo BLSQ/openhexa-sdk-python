@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.23.1](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.23.0...v2.23.1) (2026-11-02)
+
+
+### Bug Fixes
+
+* add context to headers urrllib and requests (HEXA-1877) ([#429](https://github.com/BLSQ/openhexa-sdk-python/issues/429)) ([f34a331](https://github.com/BLSQ/openhexa-sdk-python/commit/f34a3310143e598f02c9c97d976525327e623092))
+
 ## [2.23.0](https://github.com/BLSQ/openhexa-sdk-python/compare/v2.22.7...v2.23.0) (2026-10-28)
 
 
