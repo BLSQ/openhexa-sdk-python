@@ -109,20 +109,38 @@ class ArchiveWorkspaceError(str, Enum):
 
 class AssistantToolName(str, Enum):
     create_pipeline = "create_pipeline"
+    create_saved_query = "create_saved_query"
+    create_static_webapp = "create_static_webapp"
     get_dataset = "get_dataset"
     get_db_schema = "get_db_schema"
     get_db_table_schema = "get_db_table_schema"
     get_help_or_doc = "get_help_or_doc"
     get_pipeline = "get_pipeline"
-    get_static_webapp_file = "get_static_webapp_file"
+    get_pipeline_run = "get_pipeline_run"
+    get_saved_query = "get_saved_query"
+    get_workspace = "get_workspace"
+    glob_files = "glob_files"
+    glob_webapp_files = "glob_webapp_files"
+    grep_files = "grep_files"
+    grep_webapp_files = "grep_webapp_files"
     list_connections = "list_connections"
     list_datasets = "list_datasets"
     list_files = "list_files"
     list_pipelines = "list_pipelines"
+    list_saved_queries = "list_saved_queries"
     preview_dataset_file = "preview_dataset_file"
     propose_pipeline_version = "propose_pipeline_version"
     propose_webapp_version = "propose_webapp_version"
     read_file = "read_file"
+    read_webapp_file = "read_webapp_file"
+    update_saved_query = "update_saved_query"
+
+
+class AuthorizeMCPConnectionError(str, Enum):
+    CLIENT_NOT_FOUND = "CLIENT_NOT_FOUND"
+    ORGANIZATION_NOT_FOUND = "ORGANIZATION_NOT_FOUND"
+    TOOL_NOT_FOUND = "TOOL_NOT_FOUND"
+    WORKSPACE_NOT_FOUND = "WORKSPACE_NOT_FOUND"
 
 
 class BucketObjectType(str, Enum):
@@ -247,7 +265,10 @@ class CreatePipelineTemplateVersionError(str, Enum):
 
 
 class CreateSavedQueryError(str, Enum):
+    INVALID_PARAMETERS = "INVALID_PARAMETERS"
+    INVALID_TEMPLATE = "INVALID_TEMPLATE"
     PERMISSION_DENIED = "PERMISSION_DENIED"
+    VERSIONING_UNAVAILABLE = "VERSIONING_UNAVAILABLE"
     WORKSPACE_NOT_FOUND = "WORKSPACE_NOT_FOUND"
 
 
@@ -324,6 +345,12 @@ class DHIS2MetadataType(str, Enum):
     ORG_UNITS = "ORG_UNITS"
     ORG_UNIT_GROUPS = "ORG_UNIT_GROUPS"
     ORG_UNIT_LEVELS = "ORG_UNIT_LEVELS"
+
+
+class DatasetVisibility(str, Enum):
+    ORGANIZATION = "ORGANIZATION"
+    PUBLIC = "PUBLIC"
+    WORKSPACE = "WORKSPACE"
 
 
 class DeclineWorkspaceInvitationError(str, Enum):
@@ -470,6 +497,7 @@ class DisableTwoFactorError(str, Enum):
 
 class EditWebappFileError(str, Enum):
     BINARY_FILE = "BINARY_FILE"
+    FILE_TOO_LARGE = "FILE_TOO_LARGE"
     NO_CHANGE = "NO_CHANGE"
     PATH_NOT_FOUND = "PATH_NOT_FOUND"
     PERMISSION_DENIED = "PERMISSION_DENIED"
@@ -487,10 +515,16 @@ class EnableTwoFactorError(str, Enum):
 
 
 class ExecuteSQLError(str, Enum):
+    INVALID_CURSOR = "INVALID_CURSOR"
+    INVALID_ORDER_BY = "INVALID_ORDER_BY"
+    INVALID_PAGINATION = "INVALID_PAGINATION"
+    INVALID_PARAMETERS = "INVALID_PARAMETERS"
     MULTIPLE_STATEMENTS = "MULTIPLE_STATEMENTS"
     PERMISSION_DENIED = "PERMISSION_DENIED"
     QUERY_ERROR = "QUERY_ERROR"
     QUERY_TIMEOUT = "QUERY_TIMEOUT"
+    SAVED_QUERY_NOT_FOUND = "SAVED_QUERY_NOT_FOUND"
+    TEMPLATE_ERROR = "TEMPLATE_ERROR"
 
 
 class ExecuteSQLOrigin(str, Enum):
@@ -535,6 +569,25 @@ class GenerateWorkspaceTokenError(str, Enum):
     WORKSPACE_NOT_FOUND = "WORKSPACE_NOT_FOUND"
 
 
+class GlobFilesError(str, Enum):
+    INVALID_PATH = "INVALID_PATH"
+    NOT_FOUND = "NOT_FOUND"
+    PERMISSION_DENIED = "PERMISSION_DENIED"
+
+
+class GrepFilesError(str, Enum):
+    INVALID_PATH = "INVALID_PATH"
+    INVALID_PATTERN = "INVALID_PATTERN"
+    NOT_FOUND = "NOT_FOUND"
+    PERMISSION_DENIED = "PERMISSION_DENIED"
+
+
+class GrepOutputMode(str, Enum):
+    CONTENT = "CONTENT"
+    COUNT = "COUNT"
+    FILES_WITH_MATCHES = "FILES_WITH_MATCHES"
+
+
 class IASOConnectionError(str, Enum):
     REQUEST_ERROR = "REQUEST_ERROR"
     UNKNOWN_ERROR = "UNKNOWN_ERROR"
@@ -548,6 +601,7 @@ class IASOMetadataType(str, Enum):
 
 class InviteOrganizationMemberError(str, Enum):
     ALREADY_MEMBER = "ALREADY_MEMBER"
+    INVALID_LANGUAGE = "INVALID_LANGUAGE"
     ORGANIZATION_NOT_FOUND = "ORGANIZATION_NOT_FOUND"
     PERMISSION_DENIED = "PERMISSION_DENIED"
     USERS_LIMIT_REACHED = "USERS_LIMIT_REACHED"
@@ -556,6 +610,7 @@ class InviteOrganizationMemberError(str, Enum):
 
 class InviteWorkspaceMembershipError(str, Enum):
     ALREADY_EXISTS = "ALREADY_EXISTS"
+    INVALID_LANGUAGE = "INVALID_LANGUAGE"
     PERMISSION_DENIED = "PERMISSION_DENIED"
     USER_NOT_FOUND = "USER_NOT_FOUND"
     WORKSPACE_NOT_FOUND = "WORKSPACE_NOT_FOUND"
@@ -603,6 +658,19 @@ class LoginError(str, Enum):
     INVALID_CREDENTIALS = "INVALID_CREDENTIALS"
     INVALID_OTP = "INVALID_OTP"
     OTP_REQUIRED = "OTP_REQUIRED"
+    TOO_MANY_ATTEMPTS = "TOO_MANY_ATTEMPTS"
+
+
+class MCPResource(str, Enum):
+    CONNECTIONS = "CONNECTIONS"
+    DATABASES = "DATABASES"
+    DATASETS = "DATASETS"
+    FILES = "FILES"
+    PIPELINES = "PIPELINES"
+    SAVED_QUERIES = "SAVED_QUERIES"
+    TEMPLATES = "TEMPLATES"
+    WEBAPPS = "WEBAPPS"
+    WORKSPACES = "WORKSPACES"
 
 
 class MembershipRole(str, Enum):
@@ -682,6 +750,7 @@ class PipelineError(str, Enum):
     DUPLICATE_PIPELINE_VERSION_NAME = "DUPLICATE_PIPELINE_VERSION_NAME"
     FILE_NOT_FOUND = "FILE_NOT_FOUND"
     INVALID_CONFIG = "INVALID_CONFIG"
+    INVALID_PROFILE = "INVALID_PROFILE"
     INVALID_TIMEOUT_VALUE = "INVALID_TIMEOUT_VALUE"
     INVALID_VERSION_FILES = "INVALID_VERSION_FILES"
     PERMISSION_DENIED = "PERMISSION_DENIED"
@@ -800,6 +869,7 @@ class ReadFileContentError(str, Enum):
 
 class ReadWebappFileError(str, Enum):
     BINARY_FILE = "BINARY_FILE"
+    FILE_TOO_LARGE = "FILE_TOO_LARGE"
     PATH_NOT_FOUND = "PATH_NOT_FOUND"
     WEBAPPS_NOT_CONFIGURED = "WEBAPPS_NOT_CONFIGURED"
     WEBAPP_NOT_FOUND = "WEBAPP_NOT_FOUND"
@@ -842,6 +912,10 @@ class ResolveAssistantProposalError(str, Enum):
     PERMISSION_DENIED = "PERMISSION_DENIED"
 
 
+class RevokeMCPConnectionError(str, Enum):
+    NOT_FOUND = "NOT_FOUND"
+
+
 class RunDAGError(str, Enum):
     DAG_NOT_FOUND = "DAG_NOT_FOUND"
     INVALID_CONFIG = "INVALID_CONFIG"
@@ -852,6 +926,20 @@ class SavedQueryOrderBy(str, Enum):
     NAME_DESC = "NAME_DESC"
     UPDATED_AT_ASC = "UPDATED_AT_ASC"
     UPDATED_AT_DESC = "UPDATED_AT_DESC"
+
+
+class SavedQueryParameterType(str, Enum):
+    BOOLEAN = "BOOLEAN"
+    DATE = "DATE"
+    FLOAT = "FLOAT"
+    INTEGER = "INTEGER"
+    STRING = "STRING"
+
+
+class SavedQueryVisibility(str, Enum):
+    PRIVATE = "PRIVATE"
+    PUBLIC = "PUBLIC"
+    WORKSPACE = "WORKSPACE"
 
 
 class SetDAGRunFavoriteError(str, Enum):
@@ -918,6 +1006,10 @@ class UpdateDAGError(str, Enum):
 class UpdateDatasetError(str, Enum):
     DATASET_NOT_FOUND = "DATASET_NOT_FOUND"
     PERMISSION_DENIED = "PERMISSION_DENIED"
+    PUBLIC_SLUG_INVALID_FORMAT = "PUBLIC_SLUG_INVALID_FORMAT"
+    PUBLIC_SLUG_LOCKED = "PUBLIC_SLUG_LOCKED"
+    PUBLIC_SLUG_RESERVED = "PUBLIC_SLUG_RESERVED"
+    PUBLIC_SLUG_TAKEN = "PUBLIC_SLUG_TAKEN"
 
 
 class UpdateDatasetVersionError(str, Enum):
@@ -929,6 +1021,13 @@ class UpdateExternalCollaboratorError(str, Enum):
     ORGANIZATION_NOT_FOUND = "ORGANIZATION_NOT_FOUND"
     PERMISSION_DENIED = "PERMISSION_DENIED"
     USER_NOT_FOUND = "USER_NOT_FOUND"
+
+
+class UpdateMCPConnectionError(str, Enum):
+    NOT_FOUND = "NOT_FOUND"
+    ORGANIZATION_NOT_FOUND = "ORGANIZATION_NOT_FOUND"
+    TOOL_NOT_FOUND = "TOOL_NOT_FOUND"
+    WORKSPACE_NOT_FOUND = "WORKSPACE_NOT_FOUND"
 
 
 class UpdateMembershipError(str, Enum):
@@ -977,8 +1076,11 @@ class UpdatePipelineVersionError(str, Enum):
 
 
 class UpdateSavedQueryError(str, Enum):
+    INVALID_PARAMETERS = "INVALID_PARAMETERS"
+    INVALID_TEMPLATE = "INVALID_TEMPLATE"
     PERMISSION_DENIED = "PERMISSION_DENIED"
     SAVED_QUERY_NOT_FOUND = "SAVED_QUERY_NOT_FOUND"
+    VERSIONING_UNAVAILABLE = "VERSIONING_UNAVAILABLE"
 
 
 class UpdateTeamError(str, Enum):
@@ -1023,6 +1125,7 @@ class UpdateWebappError(str, Enum):
 
 
 class UpdateWorkspaceError(str, Enum):
+    INVALID_TAG = "INVALID_TAG"
     NOT_FOUND = "NOT_FOUND"
     PERMISSION_DENIED = "PERMISSION_DENIED"
 
@@ -1044,6 +1147,7 @@ class VerifyDeviceError(str, Enum):
 
 
 class WebappOperationScope(str, Enum):
+    DATABASE_READ = "DATABASE_READ"
     DATASETS_READ = "DATASETS_READ"
     DATASETS_WRITE = "DATASETS_WRITE"
     FILES_READ = "FILES_READ"

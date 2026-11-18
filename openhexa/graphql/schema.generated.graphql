@@ -1,4 +1,4 @@
-directive @loginRequired(withoutTwoFactor: Boolean) on FIELD_DEFINITION
+directive @loginRequired(allowPublicWebapp: Boolean, withoutTwoFactor: Boolean) on FIELD_DEFINITION
 
 type AccessmodAccessRequest {
   acceptedTos: Boolean!
@@ -476,20 +476,31 @@ registry (`hexa.assistant.agents.all_agent_tool_names`) — a unit test enforces
 """
 enum AssistantToolName {
   create_pipeline
+  create_saved_query
+  create_static_webapp
   get_dataset
   get_db_schema
   get_db_table_schema
   get_help_or_doc
   get_pipeline
-  get_static_webapp_file
+  get_pipeline_run
+  get_saved_query
+  get_workspace
+  glob_files
+  glob_webapp_files
+  grep_files
+  grep_webapp_files
   list_connections
   list_datasets
   list_files
   list_pipelines
+  list_saved_queries
   preview_dataset_file
   propose_pipeline_version
   propose_webapp_version
   read_file
+  read_webapp_file
+  update_saved_query
 }
 
 type AssistantToolSegment {
@@ -513,6 +524,30 @@ type AssistantToolSegment {
   """
   toolName: String!
   toolOutput: JSON
+}
+
+enum AuthorizeMCPConnectionError {
+  CLIENT_NOT_FOUND
+  ORGANIZATION_NOT_FOUND
+  TOOL_NOT_FOUND
+  WORKSPACE_NOT_FOUND
+}
+
+"""
+The grant a user picks on the consent screen, before the client holds a token.
+Creates the connection if this is the client's first authorization.
+"""
+input AuthorizeMCPConnectionInput {
+  clientId: String!
+  organizationIds: [UUID!]
+  tools: [String!]
+  workspaceSlugs: [String!]
+}
+
+type AuthorizeMCPConnectionResult {
+  errors: [AuthorizeMCPConnectionError!]!
+  mcpConnection: MCPConnection
+  success: Boolean!
 }
 
 """The Avatar type represents the avatar of a user."""
@@ -1031,6 +1066,12 @@ input CreateOrganizationInput {
   planCode: String!
 
   """
+  Whether to email the owner (invitation link for a new user, notification for an existing one).
+  Defaults to true. The caller can pass false and send the owner to invitationUrl itself.
+  """
+  sendInvitationEmail: Boolean
+
+  """
   The short name of the organization (max 5 uppercase letters).
   If not provided, it will be auto-generated from the name.
   """
@@ -1054,6 +1095,11 @@ type CreateOrganizationResult {
   The list of errors that occurred during the createOrganization mutation.
   """
   errors: [CreateOrganizationError!]!
+
+  """
+  The registration link for a new owner (null when the owner already had an account). Valid for 48 hours.
+  """
+  invitationUrl: String
 
   """The created organization object."""
   organization: Organization
@@ -1173,7 +1219,14 @@ input CreatePipelineVersionInput {
 
 """Errors that can occur when creating a saved query."""
 enum CreateSavedQueryError {
+  INVALID_PARAMETERS
+  INVALID_TEMPLATE
   PERMISSION_DENIED
+
+  """
+  The query's history could not be recorded, so nothing was saved. Retrying is safe.
+  """
+  VERSIONING_UNAVAILABLE
   WORKSPACE_NOT_FOUND
 }
 
@@ -1182,6 +1235,10 @@ input CreateSavedQueryInput {
   content: String!
   description: String
   name: String!
+  parameters: [SavedQueryParameterInput!]
+
+  """Defaults to PRIVATE when omitted."""
+  visibility: SavedQueryVisibility
   workspaceSlug: String!
 }
 
@@ -1482,6 +1539,13 @@ type DHIS2QueryResultPage {
 
 type Database {
   credentials: DatabaseCredentials
+
+  """
+  Runs a read-only SQL query against the workspace database and returns the result.
+  `maxRows` caps the number of returned rows; it defaults to 50 when omitted and is
+  itself capped to a server-side hard limit. `origin` identifies where the query comes
+  from for auditing purposes; it defaults to OTHER.
+  """
   executeSQL(maxRows: Int, origin: ExecuteSQLOrigin, query: String!): ExecuteSQLResult!
   readOnlyCredentials: DatabaseCredentials
   table(name: String!): DatabaseTable
@@ -1568,12 +1632,18 @@ type Dataset implements MetadataObject {
   links(page: Int = 1, perPage: Int = 15): DatasetLinkPage!
   name: String!
   permissions: DatasetPermissions!
-  sharedWithOrganization: Boolean!
+
+  """
+  Slug unique across the whole instance, used for permalinks. Only set once the dataset needs one.
+  """
+  publicSlug: String
+  sharedWithOrganization: Boolean! @deprecated(reason: "Use `visibility`.")
   slug: String!
   targetId: OpaqueID!
   updatedAt: DateTime!
   version(id: ID!): DatasetVersion
   versions(page: Int = 1, perPage: Int = 15): DatasetVersionPage!
+  visibility: DatasetVisibility!
   workspace: Workspace
 }
 
@@ -1628,6 +1698,11 @@ type DatasetPermissions {
   """Permissions to delete the dataset"""
   delete: Boolean!
 
+  """
+  Permission to make the dataset public, or to take a public dataset back to the organization or workspace.
+  """
+  share: Boolean!
+
   """Permissions to edit the dataset"""
   update: Boolean!
 }
@@ -1665,6 +1740,9 @@ type DatasetVersion implements MetadataObject {
 """A file in a dataset version."""
 type DatasetVersionFile implements MetadataObject {
   attributes: [MetadataAttribute!]!
+
+  """Column names in file order, when profiling succeeded."""
+  columns: [String!]
   contentType: String!
   createdAt: DateTime!
   createdBy: User
@@ -1712,6 +1790,18 @@ type DatasetVersionPermissions {
 
   """Permissions to update the dataset version"""
   update: Boolean!
+}
+
+"""Who a dataset is visible to."""
+enum DatasetVisibility {
+  """Every member of the organization."""
+  ORGANIZATION
+
+  """For now, every member of the organization."""
+  PUBLIC
+
+  """The members of the workspaces the dataset is shared with."""
+  WORKSPACE
 }
 
 scalar Date
@@ -2315,6 +2405,7 @@ type DisableTwoFactorResult {
 """Represents the error message for a web app file edit."""
 enum EditWebappFileError {
   BINARY_FILE
+  FILE_TOO_LARGE
   NO_CHANGE
   PATH_NOT_FOUND
   PERMISSION_DENIED
@@ -2376,6 +2467,24 @@ Possible errors when executing a SQL query against the workspace database.
 """
 enum ExecuteSQLError {
   """
+  The `after` cursor is forged, or was built for another query or ordering.
+  """
+  INVALID_CURSOR
+
+  """
+  An `orderBy` entry names a column the result does not have, or one that is ambiguous,
+  or a cursor was sent without the `orderBy` it was built for.
+  """
+  INVALID_ORDER_BY
+
+  """
+  The pagination arguments contradict each other, are out of range, or were sent for a
+  statement that cannot be paginated (e.g. an EXPLAIN).
+  """
+  INVALID_PAGINATION
+  INVALID_PARAMETERS
+
+  """
   More than one SQL statement was submitted; only a single statement is allowed.
   """
   MULTIPLE_STATEMENTS
@@ -2392,6 +2501,8 @@ enum ExecuteSQLError {
 
   """The query was cancelled because it exceeded the statement timeout."""
   QUERY_TIMEOUT
+  SAVED_QUERY_NOT_FOUND
+  TEMPLATE_ERROR
 }
 
 """
@@ -2421,6 +2532,11 @@ type ExecuteSQLResult {
   """The errors that occurred while executing the query."""
   errors: [ExecuteSQLError!]!
 
+  """
+  Where this result sits in the full result set. Null only when the query failed.
+  """
+  pageInfo: QueryResultPageInfo
+
   """The number of rows returned by the query (after any truncation)."""
   rowCount: Int
 
@@ -2433,9 +2549,55 @@ type ExecuteSQLResult {
   success: Boolean!
 
   """
-  Whether the result was truncated because it exceeded the maximum number of rows.
+  Whether more rows exist than were returned. Same value as `pageInfo.hasNextPage`.
   """
-  truncated: Boolean
+  truncated: Boolean @deprecated(reason: "Use pageInfo.hasNextPage.")
+}
+
+"""
+Input for executing a saved query.
+
+Three options:
+1. Pagination with offset/limit by sending `page`
+2. Pagination with cursor by sending `after` (forward) or `before` (backward)
+3. No pagination: runs the query as saved, capped to `perPage` rows
+
+Note: `orderBy` alone returns the first page of both pagination methods.
+"""
+input ExecuteSavedQueryInput {
+  """
+  The `endCursor` of the previous page. Requires the `orderBy` it was built for.
+  """
+  after: String
+
+  """
+  The `startCursor` of the next page: returns the `perPage` rows before it. Requires the `orderBy` it was built for and cannot be combined with `after`.
+  """
+  before: String
+
+  """
+  Also count the total number of rows, not available with a cursor. Note that this adds the cost of a second scan of the query.
+  """
+  includeTotalItems: Boolean
+  maxRows: Int @deprecated(reason: "Use perPage.")
+
+  """
+  Sorts the result, overriding any ORDER BY of the query itself. For cursor pagination,
+  sort on non-nullable columns and end with a unique one.
+  """
+  orderBy: [QueryResultOrderBy!]
+
+  """The 1-based page to return. Cannot be combined with a cursor."""
+  page: Int
+
+  """Parameter values for the saved query, supplied as a name-to-value map."""
+  parameters: JSON
+
+  """
+  The number of rows per page; defaults to 50 and is capped to a server-side hard limit. Ignored for an EXPLAIN.
+  """
+  perPage: Int
+  slug: String!
 }
 
 """
@@ -2494,6 +2656,8 @@ type FileNode {
   name: String!
   parentId: String
   path: String!
+  size: Int
+  tooLarge: Boolean
   type: FileType!
 }
 
@@ -2643,6 +2807,70 @@ type GitSource {
   repositoryUrl: String!
 }
 
+enum GlobFilesError {
+  INVALID_PATH
+  NOT_FOUND
+  PERMISSION_DENIED
+}
+
+type GlobFilesResult {
+  errors: [GlobFilesError!]!
+  notice: String
+
+  """Matching paths, sorted, at most 100."""
+  paths: [String!]
+  success: Boolean!
+
+  """True when more paths match than were returned."""
+  truncated: Boolean
+}
+
+type GrepFileCount {
+  count: Int!
+  path: String!
+}
+
+enum GrepFilesError {
+  INVALID_PATH
+  INVALID_PATTERN
+  NOT_FOUND
+  PERMISSION_DENIED
+}
+
+type GrepFilesResult {
+  """With outputMode CONTENT."""
+  content: String
+
+  """With outputMode COUNT."""
+  counts: [GrepFileCount!]
+  errors: [GrepFilesError!]!
+
+  """With outputMode FILES_WITH_MATCHES."""
+  files: [String!]
+  notice: String
+  success: Boolean!
+
+  """With outputMode COUNT: matches across all files."""
+  total: Int
+
+  """
+  True when there are more entries past headLimit, or the search stopped early.
+  """
+  truncated: Boolean
+}
+
+"""How grepFiles reports its matches."""
+enum GrepOutputMode {
+  """Matching lines as `path:line:text`, context lines as `path-line-text`."""
+  CONTENT
+
+  """Number of matches per file, and their total."""
+  COUNT
+
+  """Paths of the files that match."""
+  FILES_WITH_MATCHES
+}
+
 """IASO connection object"""
 type IASOConnection implements Connection {
   createdAt: DateTime!
@@ -2708,6 +2936,9 @@ enum InviteOrganizationMemberError {
   """Indicates that the user is already a member of the organization."""
   ALREADY_MEMBER
 
+  """Indicates that the provided language is not supported."""
+  INVALID_LANGUAGE
+
   """Indicates that the organization was not found."""
   ORGANIZATION_NOT_FOUND
 
@@ -2729,6 +2960,11 @@ enum InviteOrganizationMemberError {
 The InviteOrganizationMemberInput type represents the input for the inviteOrganizationMember mutation.
 """
 input InviteOrganizationMemberInput {
+  """
+  The language of the invitation email for users without an account. Defaults to the inviter's language.
+  """
+  language: String
+
   """The unique identifier of the organization."""
   organizationId: UUID!
 
@@ -2759,6 +2995,7 @@ type InviteOrganizationMemberResult {
 
 """Represents the input for inviting a member to a workspace."""
 input InviteWorkspaceMemberInput {
+  language: String
   role: WorkspaceMembershipRole!
   userEmail: String!
   workspaceSlug: String!
@@ -2776,6 +3013,7 @@ Enum representing the possible errors that can occur when inviting a user to a w
 """
 enum InviteWorkspaceMembershipError {
   ALREADY_EXISTS
+  INVALID_LANGUAGE
   PERMISSION_DENIED
   USER_NOT_FOUND
   WORKSPACE_NOT_FOUND
@@ -2910,6 +3148,9 @@ enum LoginError {
 
   """Indicates that an OTP (one-time password) is required for login."""
   OTP_REQUIRED
+
+  """Indicates that too many logins failed for this email; retry later."""
+  TOO_MANY_ATTEMPTS
 }
 
 """The LoginInput type represents the input for the login mutation."""
@@ -2939,12 +3180,59 @@ type LogoutResult {
   success: Boolean!
 }
 
+"""
+An authorization request awaiting the user's consent, used to render the same
+permission editor on the consent screen as in the account settings.
+"""
+type MCPAuthorizationRequest {
+  clientName: String!
+  connection: MCPConnection
+  tools: [MCPTool!]!
+}
+
+"""
+What a given MCP client may do on behalf of the current user. Editable at any
+time: narrowing a connection takes effect on its next call, without the client
+having to authorize again.
+"""
+type MCPConnection {
+  createdAt: DateTime!
+  id: UUID!
+  lastUsedAt: DateTime
+  name: String!
+  organizations: [Organization!]!
+  tools: [String!]!
+  workspaces: [Workspace!]!
+}
+
+"""
+A family of OpenHEXA resources an MCP connection can be granted access to.
+"""
+enum MCPResource {
+  CONNECTIONS
+  DATABASES
+  DATASETS
+  FILES
+  PIPELINES
+  SAVED_QUERIES
+  TEMPLATES
+  WEBAPPS
+  WORKSPACES
+}
+
+type MCPTool {
+  description: String!
+  name: String!
+  resource: MCPResource
+
+  """
+  True when calling it changes something. Display only — grants name tools.
+  """
+  write: Boolean!
+}
+
 """The Me type represents the currently authenticated user."""
 type Me {
-  assistantMonthlyCost: Int!
-  assistantMonthlyLimitExceeded: Boolean!
-  assistantTotalCost: Int!
-
   """The feature flags assigned to the currently authenticated user."""
   features: [FeatureFlag!]!
   hasTwoFactorEnabled: Boolean!
@@ -3071,6 +3359,7 @@ type Mutation {
   addWebappToShortcuts(input: AddWebappToShortcutsInput!): AddWebappToShortcutsResult!
   approveAccessmodAccessRequest(input: ApproveAccessmodAccessRequestInput!): ApproveAccessmodAccessRequestResult!
   archiveWorkspace(input: ArchiveWorkspaceInput!): ArchiveWorkspaceResult!
+  authorizeMCPConnection(input: AuthorizeMCPConnectionInput!): AuthorizeMCPConnectionResult!
   convertExternalCollaboratorToMember(input: ConvertExternalCollaboratorToMemberInput!): ConvertExternalCollaboratorToMemberResult!
   createAccessmodAccessibilityAnalysis(input: CreateAccessmodAccessibilityAnalysisInput): CreateAccessmodAccessibilityAnalysisResult!
   createAccessmodFile(input: CreateAccessmodFileInput!): CreateAccessmodFileResult!
@@ -3235,6 +3524,7 @@ type Mutation {
   """Sends a password reset email to the user."""
   resetPassword(input: ResetPasswordInput!): ResetPasswordResult!
   resolveAssistantProposal(toolInvocationId: UUID!): ResolveAssistantProposalResult!
+  revokeMCPConnection(input: RevokeMCPConnectionInput!): RevokeMCPConnectionResult!
   runDAG(input: RunDAGInput!): RunDAGResult!
 
   """Runs a pipeline."""
@@ -3265,6 +3555,7 @@ type Mutation {
   """Update a dataset version."""
   updateDatasetVersion(input: UpdateDatasetVersionInput!): UpdateDatasetVersionResult!
   updateExternalCollaborator(input: UpdateExternalCollaboratorInput!): UpdateExternalCollaboratorResult!
+  updateMCPConnection(input: UpdateMCPConnectionInput!): UpdateMCPConnectionResult!
   updateMembership(input: UpdateMembershipInput!): UpdateMembershipResult!
   updateOrganization(input: UpdateOrganizationInput!): UpdateOrganizationResult!
 
@@ -3312,6 +3603,12 @@ type Mutation {
 
   """Uploads a pipeline."""
   uploadPipeline(input: UploadPipelineInput!): UploadPipelineResult!
+
+  """
+  Saves the py-spy profile of the current pipeline run.
+  Must be called by an authenticated pipeline run that has profiling enabled.
+  """
+  uploadPipelineRunProfile(input: UploadPipelineRunProfileInput!): UploadPipelineRunProfileResult!
 
   """Verifies a device for two-factor authentication."""
   verifyDevice(input: VerifyDeviceInput!): VerifyDeviceResult!
@@ -3405,6 +3702,11 @@ type Organization {
 
   """Current resource usage counts."""
   usage: ResourceCounts!
+
+  """
+  The tags assigned to the workspaces of the organization, used to filter them.
+  """
+  workspaceTags: [String!]!
 
   """The workspaces associated with the organization."""
   workspaces(page: Int, perPage: Int): WorkspacePage!
@@ -3625,11 +3927,38 @@ type Pipeline {
   workspace: Workspace!
 }
 
+"""
+The task graph of a pipeline version, extracted statically from its code.
+
+OpenHEXA does not persist the graph the SDK builds at runtime, so this is derived by parsing
+the version's `pipeline.py`. It is a lower bound on the real graph: it never invents a
+dependency, but it cannot see through loops, conditionals, or undecorated helper functions.
+Notebook versions, and code that cannot be parsed, yield an empty graph.
+"""
+type PipelineDag {
+  edges: [PipelineDagEdge!]!
+  parameters: [PipelineParameter!]!
+  tasks: [PipelineDagTask!]!
+}
+
+"""A dependency in a pipeline version's task graph."""
+type PipelineDagEdge {
+  source: String!
+  target: String!
+}
+
+"""A single task in a pipeline version's task graph."""
+type PipelineDagTask {
+  id: String!
+  name: String!
+}
+
 enum PipelineError {
   CANNOT_UPDATE_NOTEBOOK_PIPELINE
   DUPLICATE_PIPELINE_VERSION_NAME
   FILE_NOT_FOUND
   INVALID_CONFIG
+  INVALID_PROFILE
   INVALID_TIMEOUT_VALUE
   INVALID_VERSION_FILES
   PERMISSION_DENIED
@@ -3777,6 +4106,7 @@ type PipelineRun {
   datasetVersions: [DatasetVersion!]!
   duration: Int
   enableDebugLogs: Boolean!
+  enableProfiling: Boolean!
   executionDate: DateTime
   hasErrorMessages: Boolean!
   id: UUID!
@@ -3784,6 +4114,7 @@ type PipelineRun {
   messages: [PipelineRunMessage!]!
   outputs: [PipelineRunOutput!]!
   pipeline: Pipeline!
+  profile: JSON
   progress: Int!
   run_id: UUID!
   sendMailNotifications: Boolean!
@@ -3950,11 +4281,13 @@ enum PipelineType {
 type PipelineVersion {
   config: JSON
   createdAt: DateTime!
+  dag: PipelineDag!
   description: String
   externalLink: URL
   files: [FileNode!]!
   id: UUID!
   isLatestVersion: Boolean!
+  missingScheduleParameters: [String!]!
   name: String
   number: Int @deprecated(reason: "Use 'versionNumber' instead")
   parameters: [PipelineParameter!]!
@@ -4076,7 +4409,7 @@ enum PrepareObjectUploadError {
 
 """
 Input for preparing to upload an object to a workspace's bucket.
-The `contentType`
+The `contentType` 
 """
 input PrepareObjectUploadInput {
   contentType: String
@@ -4115,6 +4448,16 @@ type PrepareVersionFileDownloadResult {
   downloadUrl: String
   errors: [PrepareVersionFileDownloadError!]!
   success: Boolean!
+}
+
+"""
+What anyone with its permalink may read of a public saved query: neither its SQL,
+nor who wrote it, nor the workspace it belongs to.
+"""
+type PublicSavedQuery {
+  description: String
+  name: String!
+  slug: String!
 }
 
 type Query {
@@ -4160,8 +4503,40 @@ type Query {
   """Search datasets."""
   datasets(page: Int = 1, perPage: Int = 15, query: String): DatasetPage!
 
+  """
+  Runs a saved query against the workspace database and returns its result, without exposing the SQL. Open to anonymous callers for public queries.
+  """
+  executeSavedQuery(input: ExecuteSavedQueryInput!): ExecuteSQLResult!
+
   """Get a file by its path within a workspace."""
   getFileByPath(path: String!, workspaceSlug: String!): BucketObject
+
+  """
+  Find files in a workspace's bucket by path pattern, e.g. `**/*.csv`: `*` stays within a
+  directory and `**` spans any depth. prefix narrows the listing to one directory.
+  Hidden files are skipped.
+  """
+  globFiles(pattern: String!, prefix: String, workspaceSlug: String!): GlobFilesResult!
+
+  """
+  Search the text files of a workspace's bucket matching `glob` with a Python regular
+  expression. Every file searched is downloaded: a search stops after 50 MB or 20 seconds
+  and returns what it found with a notice. Files over 1 MB are skipped. headLimit and
+  offset page through the entries.
+  """
+  grepFiles(context: Int = 0, glob: String!, headLimit: Int, ignoreCase: Boolean = false, offset: Int = 0, outputMode: GrepOutputMode = FILES_WITH_MATCHES, pattern: String!, prefix: String, workspaceSlug: String!): GrepFilesResult!
+
+  """The consent context for a pending authorization, by OAuth client id."""
+  mcpAuthorizationRequest(clientId: String!): MCPAuthorizationRequest
+
+  """The MCP clients the current user has connected."""
+  mcpConnections: [MCPConnection!]!
+
+  """
+  Every tool the MCP server exposes, with the access each one needs. Lets the
+  permission editor show which tools a resource family actually covers.
+  """
+  mcpTools: [MCPTool!]!
 
   """Retrieves the currently authenticated user."""
   me: Me!
@@ -4203,14 +4578,30 @@ type Query {
   """Retrieves a page of pipelines ordered by relevant name."""
   pipelines(functionalType: PipelineFunctionalType, lastRunStates: [PipelineRunStatus!], name: String, orderBy: PipelineOrderBy, page: Int, perPage: Int, search: String, tags: [String!], workspaceSlug: String): PipelinesPage!
 
-  """Read the text content of a file from a workspace's bucket."""
-  readFileContent(endLine: Int, filePath: String!, startLine: Int, workspaceSlug: String!): ReadFileContentResult!
+  """
+  Retrieves a public saved query by its slug, for anyone, anonymous included.
+  """
+  publicSavedQuery(slug: String!): PublicSavedQuery
+
+  """
+  Read the text content of a file from a workspace's bucket. startLine and endLine
+  (1-indexed, inclusive) select a window. lineNumbers prefixes each line with its number
+  and returns at most 2000 lines, clipping lines over 2000 characters. A full read is
+  limited to 1 MB files; a windowed read (a line range or lineNumbers) to 10 MB files,
+  and without lineNumbers to a 1 MB window.
+  """
+  readFileContent(endLine: Int, filePath: String!, lineNumbers: Boolean = false, startLine: Int, workspaceSlug: String!): ReadFileContentResult!
   readWebappFile(endLine: Int, path: String!, startLine: Int, webappSlug: String!, workspaceSlug: String!): ReadWebappFileResult!
 
   """
   Retrieves a saved query by its id. When a workspace slug is given, the lookup is scoped to that workspace.
   """
   savedQuery(id: ID!, workspaceSlug: String): SavedQuery
+
+  """
+  Retrieves a saved query by its slug, which is unique across workspaces.
+  """
+  savedQueryBySlug(slug: String!): SavedQuery
   searchDatabaseTables(organizationId: UUID, page: Int = 1, perPage: Int = 15, query: String!, workspaceSlugs: [String]): DatabaseTableResultPage!
   searchDatasets(organizationId: UUID, page: Int = 1, perPage: Int = 15, query: String!, workspaceSlugs: [String]): DatasetResultPage!
   searchFiles(organizationId: UUID, page: Int = 1, perPage: Int = 15, prefix: String, query: String!, workspaceSlugs: [String]): FileResultPage!
@@ -4228,7 +4619,32 @@ type Query {
   webapp(slug: String!, workspaceSlug: String!): Webapp
   webapps(favorite: Boolean, page: Int, perPage: Int, workspaceSlug: String): WebappsPage!
   workspace(slug: String!): Workspace
-  workspaces(organizationId: UUID, page: Int, perPage: Int, query: String): WorkspacePage!
+  workspaces(organizationId: UUID, page: Int, perPage: Int, query: String, tags: [String!]): WorkspacePage!
+}
+
+"""One sort key of a query result."""
+input QueryResultOrderBy {
+  """A column of the result, by name."""
+  column: String!
+  direction: OrderByDirection = ASC
+}
+
+"""Describes the page a query result holds."""
+type QueryResultPageInfo {
+  """
+  Pass as `after`, with the same `orderBy`, to get the next page. Null on the last page.
+  """
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  pageNumber: Int
+
+  """
+  Pass as `before`, with the same `orderBy`, to get the previous page. Null on the first page.
+  """
+  startCursor: String
+  totalItems: Int
+  totalPages: Int
 }
 
 enum ReadFileContentError {
@@ -4242,14 +4658,27 @@ enum ReadFileContentError {
 
 type ReadFileContentResult {
   content: String
+
+  """Last line of the returned window (inclusive)."""
+  endLine: Int
   errors: [ReadFileContentError!]!
+
+  """Set when the window is partial or empty, telling how to read on."""
+  notice: String
   size: Int
+
+  """First line of the returned window (1-indexed)."""
+  startLine: Int
   success: Boolean!
+
+  """Number of lines in the whole file."""
+  totalLines: Int
 }
 
 """Represents the error message for reading a web app file."""
 enum ReadWebappFileError {
   BINARY_FILE
+  FILE_TOO_LARGE
   PATH_NOT_FOUND
   WEBAPPS_NOT_CONFIGURED
   WEBAPP_NOT_FOUND
@@ -4481,6 +4910,19 @@ input ResourceCountsInput {
   workspaces: Int!
 }
 
+enum RevokeMCPConnectionError {
+  NOT_FOUND
+}
+
+input RevokeMCPConnectionInput {
+  id: UUID!
+}
+
+type RevokeMCPConnectionResult {
+  errors: [RevokeMCPConnectionError!]!
+  success: Boolean!
+}
+
 enum RunDAGError {
   DAG_NOT_FOUND
   INVALID_CONFIG
@@ -4502,6 +4944,7 @@ type RunDAGResult {
 input RunPipelineInput {
   config: JSON!
   enableDebugLogs: Boolean
+  enableProfiling: Boolean
   id: UUID!
   sendMailNotifications: Boolean
   versionId: UUID
@@ -4559,7 +5002,7 @@ type S3ObjectPage {
 
 """
 A SQL query saved by a user in the Data Studio. Saved queries belong to a
-workspace and are visible to all of its members.
+workspace; their visibility decides which of its members can reach them.
 """
 type SavedQuery {
   content: String!
@@ -4568,8 +5011,15 @@ type SavedQuery {
   description: String
   id: ID!
   name: String!
+  parameters: [SavedQueryParameter!]!
   permissions: SavedQueryPermissions!
+
+  """
+  Stable identifier, unique within the workspace. Generated from the name and left unchanged when the query is renamed.
+  """
+  slug: String!
   updatedAt: DateTime!
+  visibility: SavedQueryVisibility!
   workspace: Workspace!
 }
 
@@ -4589,13 +5039,70 @@ type SavedQueryPage {
   totalPages: Int!
 }
 
+"""
+A parameter declared on a saved query. Parameter values are bound safely at execution time.
+"""
+type SavedQueryParameter {
+  default: Generic
+  help: String
+
+  """Whether this parameter accepts a list of values of the specified type."""
+  multiple: Boolean!
+  name: String!
+  required: Boolean!
+  type: SavedQueryParameterType!
+}
+
+"""Input specification for declaring a saved query parameter."""
+input SavedQueryParameterInput {
+  default: Generic
+  help: String
+  multiple: Boolean
+  name: String!
+  required: Boolean
+  type: SavedQueryParameterType!
+}
+
+"""Supported data types for saved query parameters."""
+enum SavedQueryParameterType {
+  BOOLEAN
+  DATE
+  FLOAT
+  INTEGER
+  STRING
+}
+
 """Permissions of a saved query."""
 type SavedQueryPermissions {
   """Permission to delete the saved query."""
   delete: Boolean!
 
+  """
+  Permission to make the saved query public, and take it back to the workspace. Held by its author if they may share publicly in the workspace, workspace admins and organization admins/owners.
+  """
+  share: Boolean!
+
   """Permission to edit the saved query."""
   update: Boolean!
+
+  """
+  Permission to move the saved query between private and workspace, and to take a public one straight to private. Held by its author only.
+  """
+  updateVisibility: Boolean!
+}
+
+"""Who a saved query is visible to."""
+enum SavedQueryVisibility {
+  """Only the author can see, run and edit the query."""
+  PRIVATE
+
+  """
+  Every member of the workspace, plus anyone with the permalink: they can run the query and export its result without logging in, but not read its SQL.
+  """
+  PUBLIC
+
+  """Every member of the workspace can see and run the query."""
+  WORKSPACE
 }
 
 interface SearchResult {
@@ -5031,6 +5538,10 @@ type UpdateDAGResult {
 enum UpdateDatasetError {
   DATASET_NOT_FOUND
   PERMISSION_DENIED
+  PUBLIC_SLUG_INVALID_FORMAT
+  PUBLIC_SLUG_LOCKED
+  PUBLIC_SLUG_RESERVED
+  PUBLIC_SLUG_TAKEN
 }
 
 """Input for updating a dataset."""
@@ -5038,7 +5549,17 @@ input UpdateDatasetInput {
   datasetId: ID!
   description: String
   name: String
-  sharedWithOrganization: Boolean
+
+  """
+  The slug of the dataset's permalink. Requires the `share` permission and cannot be changed once set; derived from the dataset slug when making the dataset public without one.
+  """
+  publicSlug: String
+  sharedWithOrganization: Boolean @deprecated(reason: "Use `visibility`.")
+
+  """
+  Making the dataset PUBLIC, or taking it back, requires the `share` permission.
+  """
+  visibility: DatasetVisibility
 }
 
 """Result of updating a dataset."""
@@ -5112,6 +5633,26 @@ type UpdateExternalCollaboratorResult {
   """
   Indicates whether the updateExternalCollaborator mutation was successful.
   """
+  success: Boolean!
+}
+
+enum UpdateMCPConnectionError {
+  NOT_FOUND
+  ORGANIZATION_NOT_FOUND
+  TOOL_NOT_FOUND
+  WORKSPACE_NOT_FOUND
+}
+
+input UpdateMCPConnectionInput {
+  id: UUID!
+  organizationIds: [UUID!]
+  tools: [String!]
+  workspaceSlugs: [String!]
+}
+
+type UpdateMCPConnectionResult {
+  errors: [UpdateMCPConnectionError!]!
+  mcpConnection: MCPConnection
   success: Boolean!
 }
 
@@ -5430,6 +5971,7 @@ type UpdatePipelineRecipientResult {
 
 """Represents the result of updating a pipeline."""
 type UpdatePipelineResult {
+  details: String
   errors: [UpdatePipelineError!]!
   pipeline: Pipeline
   success: Boolean!
@@ -5462,8 +6004,15 @@ type UpdatePipelineVersionResult {
 
 """Errors that can occur when updating a saved query."""
 enum UpdateSavedQueryError {
+  INVALID_PARAMETERS
+  INVALID_TEMPLATE
   PERMISSION_DENIED
   SAVED_QUERY_NOT_FOUND
+
+  """
+  The new version could not be recorded, so no change was saved. Retrying is safe.
+  """
+  VERSIONING_UNAVAILABLE
 }
 
 """Input for updating a saved query."""
@@ -5472,6 +6021,16 @@ input UpdateSavedQueryInput {
   description: String
   id: ID!
   name: String
+
+  """
+  Parameter definitions for the query. Omit or pass null to keep current parameters, or pass [] to remove all parameters.
+  """
+  parameters: [SavedQueryParameterInput!]
+
+  """
+  Only the author may change this, except that the author, workspace admins and organization admins may make a query PUBLIC or take a public one back to WORKSPACE; PERMISSION_DENIED otherwise.
+  """
+  visibility: SavedQueryVisibility
 }
 
 """Result of updating a saved query."""
@@ -5633,6 +6192,7 @@ enum UpdateWebappError {
 """Represents the input for updating a web app."""
 input UpdateWebappInput {
   allowedOperations: [WebappOperationScope!]
+  commitMessage: String
   description: String
   files: [WebappFileInput!]
   filesToDelete: [String!]
@@ -5662,6 +6222,7 @@ input UpdateWebappSourceInput @oneOf {
 Enum representing the possible errors that can occur when updating a workspace.
 """
 enum UpdateWorkspaceError {
+  INVALID_TAG
   NOT_FOUND
   PERMISSION_DENIED
 }
@@ -5673,7 +6234,9 @@ input UpdateWorkspaceInput {
   description: String
   dockerImage: String
   name: String
+  publicFilesEnabled: Boolean
   slug: String!
+  tags: [String!]
 }
 
 """
@@ -5751,6 +6314,16 @@ type UploadPipelineResult {
   details: String
   errors: [PipelineError!]!
   pipelineVersion: PipelineVersion
+  success: Boolean!
+}
+
+input UploadPipelineRunProfileInput {
+  profile: String!
+}
+
+"""Represents the result of uploading the profile of a pipeline run."""
+type UploadPipelineRunProfileResult {
+  errors: [PipelineError!]!
   success: Boolean!
 }
 
@@ -5845,6 +6418,7 @@ type Webapp {
   isShortcut: Boolean!
   name: String!
   permissions: WebappPermissions!
+  pointsToOpenhexaWebapp: Boolean!
   previewUrl: String!
   serveUrl: String!
   showPoweredBy: Boolean!
@@ -5880,6 +6454,7 @@ input WebappFileInput {
 }
 
 enum WebappOperationScope {
+  DATABASE_READ
   DATASETS_READ
   DATASETS_WRITE
   FILES_READ
@@ -5947,6 +6522,7 @@ type Workspace {
   countries: [Country!]!
   createdAt: DateTime!
   createdBy: User!
+  currentMembership: WorkspaceMembership
   database: Database!
 
   """Linked datasets of the workspace"""
@@ -5961,11 +6537,13 @@ type Workspace {
   pipelineLastRunStatuses: [PipelineRunStatus!]!
   pipelineTags: [String!]!
   pipelineTemplateTags: [String!]!
+  publicFiles: WorkspacePublicFiles
 
   """The saved queries of the workspace."""
   savedQueries(orderBy: SavedQueryOrderBy! = UPDATED_AT_DESC, page: Int = 1, perPage: Int = 15, query: String): SavedQueryPage!
   shortcuts: [ShortcutItem!]!
   slug: String!
+  tags: [Tag!]!
   updatedAt: DateTime
   webappsEnabled: Boolean!
 }
@@ -6080,9 +6658,23 @@ type WorkspacePermissions {
 
   """User can download objects from the workspace's bucket."""
   downloadObject: Boolean!
+  generateToken: Boolean!
   launchNotebookServer: Boolean!
   manageMembers: Boolean!
+  managePublicFiles: Boolean!
+  manageTags: Boolean!
+
+  """Permission to make one's own saved queries of the workspace public."""
+  shareSavedQuery: Boolean!
   update: Boolean!
+}
+
+"""
+The files of the "public" folder at the root of a workspace filesystem, which anyone with their link can download.
+"""
+type WorkspacePublicFiles {
+  folderExists: Boolean!
+  url: String
 }
 
 """Represents a minimal workspace reference in the token payload."""

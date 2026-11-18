@@ -9,16 +9,20 @@ from .base_model import BaseModel
 from .enums import (
     AccessmodAccessibilityAnalysisAlgorithm,
     ConnectionType,
+    DatasetVisibility,
     FileEncoding,
     LinkedObjectType,
     MembershipRole,
     MessagePriority,
+    OrderByDirection,
     OrganizationMembershipRole,
     ParameterWidget,
     PermissionMode,
     PipelineFunctionalType,
     PipelineNotificationLevel,
     PipelineParameterChoicesFileFormat,
+    SavedQueryParameterType,
+    SavedQueryVisibility,
     WebappOperationScope,
     WorkspaceMembershipRole,
 )
@@ -50,6 +54,13 @@ class ApproveAccessmodAccessRequestInput(BaseModel):
 
 class ArchiveWorkspaceInput(BaseModel):
     slug: str
+
+
+class AuthorizeMCPConnectionInput(BaseModel):
+    client_id: str = Field(alias="clientId")
+    organization_ids: Optional[List[Any]] = Field(alias="organizationIds", default=None)
+    tools: Optional[List[str]] = None
+    workspace_slugs: Optional[List[str]] = Field(alias="workspaceSlugs", default=None)
 
 
 class ConnectionFieldInput(BaseModel):
@@ -165,6 +176,9 @@ class CreateOrganizationInput(BaseModel):
     name: str
     owner_email: str = Field(alias="ownerEmail")
     plan_code: str = Field(alias="planCode")
+    send_invitation_email: Optional[bool] = Field(
+        alias="sendInvitationEmail", default=None
+    )
     short_name: Optional[str] = Field(alias="shortName", default=None)
     subscription_end_date: Any = Field(alias="subscriptionEndDate")
     subscription_id: Any = Field(alias="subscriptionId")
@@ -226,6 +240,8 @@ class CreateSavedQueryInput(BaseModel):
     content: str
     description: Optional[str] = None
     name: str
+    parameters: Optional[List["SavedQueryParameterInput"]] = None
+    visibility: Optional[SavedQueryVisibility] = None
     workspace_slug: str = Field(alias="workspaceSlug")
 
 
@@ -402,6 +418,20 @@ class EnableTwoFactorInput(BaseModel):
     email: Optional[str] = None
 
 
+class ExecuteSavedQueryInput(BaseModel):
+    after: Optional[str] = None
+    before: Optional[str] = None
+    include_total_items: Optional[bool] = Field(alias="includeTotalItems", default=None)
+    max_rows: Optional[int] = Field(alias="maxRows", default=None)
+    order_by: Optional[List["QueryResultOrderBy"]] = Field(
+        alias="orderBy", default=None
+    )
+    page: Optional[int] = None
+    parameters: Optional[Any] = None
+    per_page: Optional[int] = Field(alias="perPage", default=None)
+    slug: str
+
+
 class GenerateDatasetUploadUrlInput(BaseModel):
     content_type: str = Field(alias="contentType")
     uri: str
@@ -430,6 +460,7 @@ class IframeSourceInput(BaseModel):
 
 
 class InviteOrganizationMemberInput(BaseModel):
+    language: Optional[str] = None
     organization_id: Any = Field(alias="organizationId")
     organization_role: OrganizationMembershipRole = Field(alias="organizationRole")
     user_email: str = Field(alias="userEmail")
@@ -439,6 +470,7 @@ class InviteOrganizationMemberInput(BaseModel):
 
 
 class InviteWorkspaceMemberInput(BaseModel):
+    language: Optional[str] = None
     role: WorkspaceMembershipRole
     user_email: str = Field(alias="userEmail")
     workspace_slug: str = Field(alias="workspaceSlug")
@@ -559,6 +591,11 @@ class PrepareVersionFileDownloadInput(BaseModel):
     file_id: str = Field(alias="fileId")
 
 
+class QueryResultOrderBy(BaseModel):
+    column: str
+    direction: Optional[OrderByDirection] = OrderByDirection.ASC
+
+
 class RegisterInput(BaseModel):
     first_name: str = Field(alias="firstName")
     invitation_token: str = Field(alias="invitationToken")
@@ -609,6 +646,10 @@ class ResourceCountsInput(BaseModel):
     workspaces: int
 
 
+class RevokeMCPConnectionInput(BaseModel):
+    id: Any
+
+
 class RunDAGInput(BaseModel):
     config: Any
     dag_id: Any = Field(alias="dagId")
@@ -617,11 +658,21 @@ class RunDAGInput(BaseModel):
 class RunPipelineInput(BaseModel):
     config: Any
     enable_debug_logs: Optional[bool] = Field(alias="enableDebugLogs", default=None)
+    enable_profiling: Optional[bool] = Field(alias="enableProfiling", default=None)
     id: Any
     send_mail_notifications: Optional[bool] = Field(
         alias="sendMailNotifications", default=None
     )
     version_id: Optional[Any] = Field(alias="versionId", default=None)
+
+
+class SavedQueryParameterInput(BaseModel):
+    default: Optional[Any] = None
+    help: Optional[str] = None
+    multiple: Optional[bool] = None
+    name: str
+    required: Optional[bool] = None
+    type: SavedQueryParameterType
 
 
 class SetDAGRunFavoriteInput(BaseModel):
@@ -732,9 +783,11 @@ class UpdateDatasetInput(BaseModel):
     dataset_id: str = Field(alias="datasetId")
     description: Optional[str] = None
     name: Optional[str] = None
+    public_slug: Optional[str] = Field(alias="publicSlug", default=None)
     shared_with_organization: Optional[bool] = Field(
         alias="sharedWithOrganization", default=None
     )
+    visibility: Optional[DatasetVisibility] = None
 
 
 class UpdateDatasetVersionInput(BaseModel):
@@ -749,6 +802,13 @@ class UpdateExternalCollaboratorInput(BaseModel):
     workspace_permissions: Optional[List["WorkspacePermissionInput"]] = Field(
         alias="workspacePermissions", default=None
     )
+
+
+class UpdateMCPConnectionInput(BaseModel):
+    id: Any
+    organization_ids: Optional[List[Any]] = Field(alias="organizationIds", default=None)
+    tools: Optional[List[str]] = None
+    workspace_slugs: Optional[List[str]] = Field(alias="workspaceSlugs", default=None)
 
 
 class UpdateMembershipInput(BaseModel):
@@ -829,6 +889,8 @@ class UpdateSavedQueryInput(BaseModel):
     description: Optional[str] = None
     id: str
     name: Optional[str] = None
+    parameters: Optional[List["SavedQueryParameterInput"]] = None
+    visibility: Optional[SavedQueryVisibility] = None
 
 
 class UpdateTeamInput(BaseModel):
@@ -864,6 +926,7 @@ class UpdateWebappInput(BaseModel):
     allowed_operations: Optional[List[WebappOperationScope]] = Field(
         alias="allowedOperations", default=None
     )
+    commit_message: Optional[str] = Field(alias="commitMessage", default=None)
     description: Optional[str] = None
     files: Optional[List["WebappFileInput"]] = None
     files_to_delete: Optional[List[str]] = Field(alias="filesToDelete", default=None)
@@ -889,7 +952,11 @@ class UpdateWorkspaceInput(BaseModel):
     description: Optional[str] = None
     docker_image: Optional[str] = Field(alias="dockerImage", default=None)
     name: Optional[str] = None
+    public_files_enabled: Optional[bool] = Field(
+        alias="publicFilesEnabled", default=None
+    )
     slug: str
+    tags: Optional[List[str]] = None
 
 
 class UpdateWorkspaceMemberInput(BaseModel):
@@ -917,6 +984,10 @@ class UploadPipelineInput(BaseModel):
     timeout: Optional[int] = None
     workspace_slug: str = Field(alias="workspaceSlug")
     zipfile: Optional[str] = None
+
+
+class UploadPipelineRunProfileInput(BaseModel):
+    profile: str
 
 
 class VerifyDeviceInput(BaseModel):
@@ -960,8 +1031,10 @@ CreateDatasetVersionInput.model_rebuild()
 CreateOrganizationInput.model_rebuild()
 CreatePipelineInput.model_rebuild()
 CreatePipelineVersionInput.model_rebuild()
+CreateSavedQueryInput.model_rebuild()
 CreateWebappInput.model_rebuild()
 CreateWorkspaceInput.model_rebuild()
+ExecuteSavedQueryInput.model_rebuild()
 InviteOrganizationMemberInput.model_rebuild()
 ParameterInput.model_rebuild()
 TestConnectionInput.model_rebuild()
@@ -970,6 +1043,7 @@ UpdateDAGInput.model_rebuild()
 UpdateExternalCollaboratorInput.model_rebuild()
 UpdateOrganizationMemberInput.model_rebuild()
 UpdateOrganizationSubscriptionInput.model_rebuild()
+UpdateSavedQueryInput.model_rebuild()
 UpdateWebappInput.model_rebuild()
 UpdateWebappSourceInput.model_rebuild()
 UpdateWorkspaceInput.model_rebuild()
